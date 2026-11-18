@@ -1290,33 +1290,16 @@
     },
     "metaMaintenance": {
       "badge": "En mantenimiento",
-      "title": "Meta Ads llega a AdsHolistic",
-      "body": "Estamos terminando la integración con Meta. Muy pronto vas a poder ver tus cuentas de Facebook e Instagram Ads y recargarlas desde tu cartera Holistic, igual que con TikTok.",
-      "features": {
-        "accounts": {
-          "title": "Tus cuentas en un solo lugar",
-          "body": "Mira tus cuentas de Meta con su saldo y estado al día."
-        },
-        "recharge": {
-          "title": "Recarga desde tu cartera",
-          "body": "Pasa saldo de tu cartera Holistic a tus cuentas de Meta."
-        },
-        "tracking": {
-          "title": "Seguimiento de cada recarga",
-          "body": "Ve cuándo se aprueba cada recarga. Si no pasa, el saldo vuelve a tu cartera."
-        }
-      },
       "cta": "Recargar cuenta Meta",
       "ctaHint": "Disponible apenas termine el mantenimiento.",
-      "tableTitle": "Cuentas Meta de {name}",
-      "tableTitleGeneric": "Cuentas Meta",
+      "tableTitle": "Cuentas publicitarias Meta de {name}",
+      "tableTitleGeneric": "Cuentas publicitarias Meta",
       "tableEmpty": "Tus cuentas de Meta aparecerán aquí cuando activemos la integración.",
-      "columns": {
-        "account": "Cuenta",
-        "id": "ID de cuenta",
-        "balance": "Saldo",
-        "status": "Estado"
-      }
+      "allStatuses": "Todos los estados",
+      "bannerTitle": "Meta en mantenimiento",
+      "bannerBody": "estamos terminando la integración. Pronto verás aquí tus cuentas de Meta con su saldo en vivo y podrás recargarlas desde tu cartera.",
+      "badgeShort": "Pronto",
+      "rechargeShort": "Recargar"
     }
   },
   "membership": {
