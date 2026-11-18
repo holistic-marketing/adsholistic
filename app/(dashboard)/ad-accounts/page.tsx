@@ -23,7 +23,7 @@ import { StaffCreateTikTokAccountsPanel } from "@/features/ad-accounts/component
 import { isStaffUser } from "@/lib/auth/staff.server";
 import { isPaymentsSuperAdminEmail } from "@/lib/payments/funding-roles.server";
 import { TikTokConnectionPanel } from "@/features/ad-accounts/components/TikTokConnectionPanel.client";
-import { AdAccountsPlatformTabs } from "@/features/ad-accounts/components/AdAccountsPlatformTabs";
+import { AdAccountsPlatformSwitch } from "@/features/ad-accounts/components/AdAccountsPlatformSwitch.client";
 import { MetaMaintenancePanel } from "@/features/ad-accounts/components/MetaMaintenancePanel";
 import {
   META_ADS_MAINTENANCE,
@@ -47,6 +47,14 @@ function resolveAccountStatusFilter(raw: string): string {
   return "all";
 }
 
+const EMPTY_SUMMARY = {
+  totalAccounts: 0,
+  activeAccounts: 0,
+  assignedBalance: 0,
+  pendingSetup: 0,
+  disabledAccounts: 0,
+};
+
 export default async function AdAccountsPage({ searchParams }: AdAccountsPageProps) {
   const t = await getTranslations("adAccounts");
   const session = await requirePermission("adAccounts:read");
@@ -55,33 +63,23 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
   const status = resolveAccountStatusFilter(getSearchParam(params, "status", "all"));
   const includeArchived = getSearchParam(params, "archived") === "1";
   void includeArchived;
+  // Pestaña inicial; después el cambio TikTok/Meta es 100% en el cliente.
   const platform = resolveAdAccountsPlatform(getSearchParam(params, "platform"));
 
   const selected = await getSelectedHecomCliente(session.id);
+  const pageClass = `${dashboardClasses.page} pb-[env(safe-area-inset-bottom)] md:pb-0`;
 
   // Meta (BlueFocus) en mantenimiento: visible para todos, sin acciones.
-  if (platform === "meta") {
-    const clienteName = selected?.name;
-    return (
-      <div className={`${dashboardClasses.page} pb-[env(safe-area-inset-bottom)] md:pb-0`}>
-        <AdAccountsPageHeader
-          summary={{
-            totalAccounts: 0,
-            activeAccounts: 0,
-            assignedBalance: 0,
-            pendingSetup: 0,
-            disabledAccounts: 0,
-          }}
-          hecomScoped={Boolean(selected)}
-          clienteName={clienteName}
-          clienteId={selected?.id}
-          platform="meta"
-        />
-        <AdAccountsPlatformTabs active="meta" metaMaintenance={META_ADS_MAINTENANCE} />
-        <MetaMaintenancePanel clienteName={clienteName} />
-      </div>
-    );
-  }
+  const metaHeader = (
+    <AdAccountsPageHeader
+      summary={EMPTY_SUMMARY}
+      hecomScoped={Boolean(selected)}
+      clienteName={selected?.name}
+      clienteId={selected?.id}
+      platform="meta"
+    />
+  );
+  const metaBody = <MetaMaintenancePanel clienteName={selected?.name} />;
 
   if (!selected) {
     // Un cliente sin ficha elegida (ej. con dos negocios) debe ver su propio selector,
@@ -93,22 +91,19 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
     );
     const canChangeCliente = funding.isStaff || funding.isSuperAdmin || actingAsCliente;
     return (
-      <div className={`${dashboardClasses.page} pb-[env(safe-area-inset-bottom)] md:pb-0`}>
-        <AdAccountsPageHeader
-          summary={{
-            totalAccounts: 0,
-            activeAccounts: 0,
-            assignedBalance: 0,
-            pendingSetup: 0,
-            disabledAccounts: 0,
-          }}
-          hecomScoped={false}
-          hideCreate
-        />
-        <AdAccountsPlatformTabs active="tiktok" metaMaintenance={META_ADS_MAINTENANCE} />
-        <PickClienteEmpty
-          section="las cuentas publicitarias"
-          mode={canChangeCliente ? "staff" : "cliente"}
+      <div className={pageClass}>
+        <AdAccountsPlatformSwitch
+          initial={platform}
+          metaMaintenance={META_ADS_MAINTENANCE}
+          tiktokHeader={<AdAccountsPageHeader summary={EMPTY_SUMMARY} hecomScoped={false} hideCreate />}
+          tiktokBody={
+            <PickClienteEmpty
+              section="las cuentas publicitarias"
+              mode={canChangeCliente ? "staff" : "cliente"}
+            />
+          }
+          metaHeader={metaHeader}
+          metaBody={metaBody}
         />
       </div>
     );
@@ -130,58 +125,67 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
     (await isStaffUser(session.email ?? "")) || isPaymentsSuperAdminEmail(session.email ?? "");
 
   return (
-    <div className={`${dashboardClasses.page} pb-[env(safe-area-inset-bottom)] md:pb-0`}>
-      <AdAccountsPageHeader
-        summary={data.summary}
-        hecomScoped
-        clienteName={clienteName}
-        clienteId={selected.id}
-        avatarUrl={data.cliente?.avatarUrl}
-        enableTikTokCreate
-      />
-
-      <AdAccountsPlatformTabs active="tiktok" metaMaintenance={META_ADS_MAINTENANCE} />
-
-      {isStaff ? <StaffCreateTikTokAccountsPanel clienteName={clienteName} /> : null}
-
-      <TikTokConnectionPanel key={selected.id} />
-
-      <CrmPanel
-        title={t("panel.title", { name: clienteName })}
-        subtitle={data.accounts.length ? t("panel.subtitle") : undefined}
-        className="overflow-hidden"
-      >
-        {data.accounts.length ? <Suspense fallback={null}>
-          <AdAccountsToolbar
-            initialSearch={search}
-            initialStatus={status}
-            initialIncludeArchived={false}
-            enableTikTokCreate
+    <div className={pageClass}>
+      <AdAccountsPlatformSwitch
+        initial={platform}
+        metaMaintenance={META_ADS_MAINTENANCE}
+        metaHeader={metaHeader}
+        metaBody={metaBody}
+        tiktokHeader={
+          <AdAccountsPageHeader
+            summary={data.summary}
+            hecomScoped
             clienteName={clienteName}
-            currentAccountCount={accountCount}
-            accountLimit={accountLimit}
+            clienteId={selected.id}
+            avatarUrl={data.cliente?.avatarUrl}
+            enableTikTokCreate
           />
-        </Suspense> : null}
-        {filteredAccounts.length === 0 && data.accounts.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#16161a] text-[9px] font-bold tracking-wide">
-              <span className="text-[#25f4ee]">T</span>
-              <span className="text-[#fe2c55]">T</span>
-            </div>
-            <p className="mt-4 text-[14px] font-medium tracking-[-0.01em] text-[var(--auth-text)]">
-              {t("panel.emptyTitle", { name: clienteName })}
-            </p>
-            <p className="mx-auto mt-2 max-w-lg text-[13px] leading-5 text-[var(--auth-text-muted)]">
-              {t("panel.emptyBodyCreate", { name: clienteName })}
-            </p>
-            <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-[var(--auth-accent)] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05]">
-              {t("panel.emptyCtaCreate")}
-            </AdAccountsOpenCreateModalButton>
-          </div>
-        ) : (
-          <AdAccountsTable accounts={filteredAccounts} readOnly />
-        )}
-      </CrmPanel>
+        }
+        tiktokBody={
+          <>
+            {isStaff ? <StaffCreateTikTokAccountsPanel clienteName={clienteName} /> : null}
+
+            <TikTokConnectionPanel key={selected.id} />
+
+            <CrmPanel
+              title={t("panel.title", { name: clienteName })}
+              subtitle={data.accounts.length ? t("panel.subtitle") : undefined}
+              className="overflow-hidden"
+            >
+              {data.accounts.length ? <Suspense fallback={null}>
+                <AdAccountsToolbar
+                  initialSearch={search}
+                  initialStatus={status}
+                  initialIncludeArchived={false}
+                  enableTikTokCreate
+                  clienteName={clienteName}
+                  currentAccountCount={accountCount}
+                  accountLimit={accountLimit}
+                />
+              </Suspense> : null}
+              {filteredAccounts.length === 0 && data.accounts.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#16161a] text-[9px] font-bold tracking-wide">
+                    <span className="text-[#25f4ee]">T</span>
+                    <span className="text-[#fe2c55]">T</span>
+                  </div>
+                  <p className="mt-4 text-[14px] font-medium tracking-[-0.01em] text-[var(--auth-text)]">
+                    {t("panel.emptyTitle", { name: clienteName })}
+                  </p>
+                  <p className="mx-auto mt-2 max-w-lg text-[13px] leading-5 text-[var(--auth-text-muted)]">
+                    {t("panel.emptyBodyCreate", { name: clienteName })}
+                  </p>
+                  <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-[var(--auth-accent)] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05]">
+                    {t("panel.emptyCtaCreate")}
+                  </AdAccountsOpenCreateModalButton>
+                </div>
+              ) : (
+                <AdAccountsTable accounts={filteredAccounts} readOnly />
+              )}
+            </CrmPanel>
+          </>
+        }
+      />
     </div>
   );
 }

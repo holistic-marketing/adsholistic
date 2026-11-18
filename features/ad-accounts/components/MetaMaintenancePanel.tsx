@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { CrmPanel } from "@/components/dashboard/crm-ui";
-import { MetaMark } from "./AdAccountsPlatformTabs";
+import { MetaMark } from "./platform-marks";
 
 function FeatureIcon({ path }: { path: string }) {
   return (
