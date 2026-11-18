@@ -2,8 +2,6 @@ import { getTranslations } from "next-intl/server";
 import { CrmPanel } from "@/components/dashboard/crm-ui";
 import {
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -16,8 +14,6 @@ import { MetaMark } from "./platform-marks";
  * informativa, columnas) para que al activarse el cliente ya lo reconozca.
  */
 
-const SKELETON_ROWS = 3;
-const bar = "rounded bg-[#efe9e2]";
 
 function Head({ children }: { children: React.ReactNode }) {
   return (
@@ -33,18 +29,6 @@ function LockIcon() {
       <rect x="5" y="11" width="14" height="9" rx="2" />
       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
     </svg>
-  );
-}
-
-function SkeletonAccount() {
-  return (
-    <div className="flex min-w-0 items-center gap-2.5">
-      <MetaMark size={24} />
-      <div className="min-w-0 space-y-1.5">
-        <span className={`block h-3 w-28 ${bar}`} />
-        <span className={`block h-2.5 w-16 ${bar}`} />
-      </div>
-    </div>
   );
 }
 
@@ -111,44 +95,8 @@ export async function MetaMaintenancePanel({ clienteName }: { clienteName?: stri
         </div>
       </div>
 
-      {/* Franja informativa (mismo lugar y estilo que "Saldo en vivo TikTok"). */}
-      <div className="mx-3 mb-2 mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-[12px] leading-5 text-[#5c564e] md:mx-4 md:mb-3 md:px-4 md:py-3">
-        <p>
-          <span className="font-semibold text-[#1a1612]">{tm("bannerTitle")}</span>
-          {" · "}
-          {tm("bannerBody")}
-        </p>
-        <MaintenancePill label={tm("badge")} />
-      </div>
-
-      {/* Celular: tarjetas como TikTok. */}
-      <div aria-hidden className="space-y-2.5 px-3 pb-4 pt-1 md:hidden">
-        {Array.from({ length: SKELETON_ROWS }, (_, i) => (
-          <article key={i} className="rounded-xl border border-[rgb(20_18_16_/_0.08)] bg-white p-3.5">
-            <div className="flex items-start justify-between gap-3">
-              <SkeletonAccount />
-              <MaintenancePill label={tm("badgeShort")} />
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className={`h-4 w-24 ${bar}`} />
-              <span className="h-4 w-12 rounded bg-[#fff1e8]" />
-            </div>
-            <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-[#faf7f3] px-3 py-2.5">
-              <div className="min-w-0 space-y-1.5">
-                <p className="text-[11px] text-[#9a9187]">{t("live.column")}</p>
-                <span className={`block h-3.5 w-16 ${bar}`} />
-              </div>
-              <span className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#f0d9c8] px-3 text-[12px] font-semibold text-[#c45a18] opacity-50">
-                <LockIcon />
-                {tm("rechargeShort")}
-              </span>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      {/* Escritorio: tabla con las mismas columnas que TikTok. */}
-      <div aria-hidden className="hidden overflow-x-auto md:block">
+      {/* Cabecera de columnas igual que TikTok (solo escritorio). */}
+      <div className="hidden overflow-x-auto md:block">
         <Table embedded className="rounded-none">
           <TableHeader>
             <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-[#faf7f3] hover:bg-[#faf7f3]">
@@ -160,40 +108,24 @@ export async function MetaMaintenancePanel({ clienteName }: { clienteName?: stri
               <Head>{t("table.actions")}</Head>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {Array.from({ length: SKELETON_ROWS }, (_, i) => (
-              <TableRow key={i} className="border-b border-[rgb(20_18_16_/_0.05)] hover:bg-transparent">
-                <TableCell className="max-w-[280px]">
-                  <SkeletonAccount />
-                </TableCell>
-                <TableCell>
-                  <span className={`block h-4 w-24 ${bar}`} />
-                </TableCell>
-                <TableCell>
-                  <MaintenancePill label={tm("badgeShort")} />
-                </TableCell>
-                <TableCell>
-                  <span className={`block h-3.5 w-16 ${bar}`} />
-                  <span className={`mt-1.5 block h-2.5 w-20 ${bar}`} />
-                </TableCell>
-                <TableCell>
-                  <span className="block h-4 w-12 rounded bg-[#fff1e8]" />
-                </TableCell>
-                <TableCell>
-                  <span className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#f0d9c8] px-3 text-[12px] font-semibold text-[#c45a18] opacity-50">
-                    <LockIcon />
-                    {tm("rechargeShort")}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
         </Table>
       </div>
 
-      <p className="border-t border-[rgb(20_18_16_/_0.06)] px-4 py-3 text-center text-[12px] text-[#9a9187]">
-        {tm("tableEmpty")}
-      </p>
+      {/* Estado vacío (mismo estilo que TikTok sin cuentas): nada que parezca "cargando". */}
+      <div className="px-6 py-12 text-center">
+        <div className="mx-auto flex w-fit">
+          <MetaMark size={48} />
+        </div>
+        <div className="mt-4 flex justify-center">
+          <MaintenancePill label={tm("badge")} />
+        </div>
+        <p className="mt-3 text-[14px] font-medium tracking-[-0.01em] text-[var(--auth-text)]">
+          {tm("emptyTitle")}
+        </p>
+        <p className="mx-auto mt-2 max-w-lg text-[13px] leading-5 text-[var(--auth-text-muted)]">
+          {tm("emptyBody")}
+        </p>
+      </div>
     </CrmPanel>
   );
 }

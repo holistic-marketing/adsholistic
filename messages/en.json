@@ -1077,8 +1077,8 @@
       "pendingOne": "{count} pending",
       "pendingMany": "{count} pending",
       "metaAccounts": "Meta ad accounts",
-      "metaMaintenanceHint": "Meta under maintenance",
-      "metaScopedMeta": "Meta · under maintenance"
+      "metaScopedMeta": "Meta · under maintenance",
+      "metaNoAccounts": "No Meta accounts yet"
     },
     "summary": {
       "aria": "Accounts summary",
@@ -1294,12 +1294,9 @@
       "ctaHint": "Available as soon as maintenance ends.",
       "tableTitle": "{name}'s Meta ad accounts",
       "tableTitleGeneric": "Meta ad accounts",
-      "tableEmpty": "Your Meta accounts will show up here once we enable the integration.",
       "allStatuses": "All statuses",
-      "bannerTitle": "Meta under maintenance",
-      "bannerBody": "we're finishing the integration. Soon you'll see your Meta accounts here with live balance and top them up from your wallet.",
-      "badgeShort": "Soon",
-      "rechargeShort": "Top up"
+      "emptyTitle": "Your Meta accounts will show up here soon",
+      "emptyBody": "We're finishing the integration. Once it's ready you'll see your Facebook and Instagram ad accounts with live balance and top them up from your wallet, just like TikTok."
     }
   },
   "membership": {

@@ -1077,8 +1077,8 @@
       "pendingOne": "{count} pendiente",
       "pendingMany": "{count} pendientes",
       "metaAccounts": "Cuentas publicitarias Meta",
-      "metaMaintenanceHint": "Meta en mantenimiento",
-      "metaScopedMeta": "Meta · en mantenimiento"
+      "metaScopedMeta": "Meta · en mantenimiento",
+      "metaNoAccounts": "Aún sin cuentas Meta"
     },
     "summary": {
       "aria": "Resumen de cuentas",
@@ -1294,12 +1294,9 @@
       "ctaHint": "Disponible apenas termine el mantenimiento.",
       "tableTitle": "Cuentas publicitarias Meta de {name}",
       "tableTitleGeneric": "Cuentas publicitarias Meta",
-      "tableEmpty": "Tus cuentas de Meta aparecerán aquí cuando activemos la integración.",
       "allStatuses": "Todos los estados",
-      "bannerTitle": "Meta en mantenimiento",
-      "bannerBody": "estamos terminando la integración. Pronto verás aquí tus cuentas de Meta con su saldo en vivo y podrás recargarlas desde tu cartera.",
-      "badgeShort": "Pronto",
-      "rechargeShort": "Recargar"
+      "emptyTitle": "Muy pronto vas a ver aquí tus cuentas de Meta",
+      "emptyBody": "Estamos terminando la integración. Cuando esté lista vas a ver tus cuentas de Facebook e Instagram Ads con su saldo en vivo y podrás recargarlas desde tu cartera, igual que en TikTok."
     }
   },
   "membership": {

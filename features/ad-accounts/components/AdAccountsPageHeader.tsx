@@ -80,7 +80,7 @@ export async function AdAccountsPageHeader({
     {
       label: isMeta ? t("header.metaAccounts") : t("header.tiktokAccounts"),
       value: formatNumber(isMeta ? 0 : summary.totalAccounts),
-      hint: isMeta ? t("header.metaMaintenanceHint") : statusHint,
+      hint: isMeta ? t("header.metaNoAccounts") : statusHint,
       emphasis: "primary",
     },
   ];
@@ -134,7 +134,7 @@ export async function AdAccountsPageHeader({
           <CrmAsideStat
             label={t("header.assignedBalance")}
             value={formatMoney(isMeta ? 0 : summary.assignedBalance)}
-            detail={isMeta ? t("header.metaMaintenanceHint") : statusHint}
+            detail={isMeta ? t("header.metaNoAccounts") : statusHint}
           />
         }
       />
