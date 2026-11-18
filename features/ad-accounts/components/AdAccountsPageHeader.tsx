@@ -18,6 +18,8 @@ interface AdAccountsPageHeaderProps {
   avatarUrl?: string | null;
   hideCreate?: boolean;
   enableTikTokCreate?: boolean;
+  /** Pestaña activa: en "meta" cambia el rótulo y oculta crear (mantenimiento). */
+  platform?: "tiktok" | "meta";
 }
 
 function accountStatusHint(
@@ -57,9 +59,13 @@ export async function AdAccountsPageHeader({
   hecomScoped = false,
   clienteName,
   avatarUrl,
-  hideCreate = false,
-  enableTikTokCreate = false,
+  hideCreate: hideCreateProp = false,
+  enableTikTokCreate: enableTikTokCreateProp = false,
+  platform = "tiktok",
 }: AdAccountsPageHeaderProps) {
+  const isMeta = platform === "meta";
+  const enableTikTokCreate = enableTikTokCreateProp && !isMeta;
+  const hideCreate = hideCreateProp || isMeta;
   const t = await getTranslations("adAccounts");
   const { formatMoney, formatNumber } = await getAppFormatter();
   const pending = summary.pendingSetup ?? 0;
@@ -72,14 +78,14 @@ export async function AdAccountsPageHeader({
     emphasis?: "primary" | "default" | "muted";
   }> = [
     {
-      label: t("header.tiktokAccounts"),
-      value: formatNumber(summary.totalAccounts),
-      hint: statusHint,
+      label: isMeta ? t("header.metaAccounts") : t("header.tiktokAccounts"),
+      value: formatNumber(isMeta ? 0 : summary.totalAccounts),
+      hint: isMeta ? t("header.metaMaintenanceHint") : statusHint,
       emphasis: "primary",
     },
   ];
 
-  if (pending > 0) {
+  if (pending > 0 && !isMeta) {
     metricItems.push({
       label: t("header.pending"),
       value: formatNumber(pending),
@@ -99,7 +105,9 @@ export async function AdAccountsPageHeader({
             : undefined
         }
         meta={
-          hecomScoped
+          isMeta
+            ? t("header.metaScopedMeta")
+            : hecomScoped
             ? enableTikTokCreate
               ? t("header.metaScopedCreate")
               : t("header.metaScoped")
@@ -125,8 +133,8 @@ export async function AdAccountsPageHeader({
         aside={
           <CrmAsideStat
             label={t("header.assignedBalance")}
-            value={formatMoney(summary.assignedBalance)}
-            detail={statusHint}
+            value={formatMoney(isMeta ? 0 : summary.assignedBalance)}
+            detail={isMeta ? t("header.metaMaintenanceHint") : statusHint}
           />
         }
       />

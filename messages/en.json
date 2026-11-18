@@ -1075,7 +1075,10 @@
       "suspendedOne": "{count} suspended",
       "suspendedMany": "{count} suspended",
       "pendingOne": "{count} pending",
-      "pendingMany": "{count} pending"
+      "pendingMany": "{count} pending",
+      "metaAccounts": "Meta ad accounts",
+      "metaMaintenanceHint": "Meta under maintenance",
+      "metaScopedMeta": "Meta · under maintenance"
     },
     "summary": {
       "aria": "Accounts summary",
@@ -1280,6 +1283,40 @@
       "failedFallback": "Check authorization and try again.",
       "retry": "Retry",
       "close": "Close"
+    },
+    "platformTabs": {
+      "aria": "Ad platform",
+      "maintenance": "Maintenance"
+    },
+    "metaMaintenance": {
+      "badge": "Under maintenance",
+      "title": "Meta Ads is coming to AdsHolistic",
+      "body": "We're finishing the Meta integration. Soon you'll be able to see your Facebook and Instagram ad accounts and top them up from your Holistic wallet, just like TikTok.",
+      "features": {
+        "accounts": {
+          "title": "All your accounts in one place",
+          "body": "See your Meta accounts with up-to-date balance and status."
+        },
+        "recharge": {
+          "title": "Top up from your wallet",
+          "body": "Move balance from your Holistic wallet to your Meta accounts."
+        },
+        "tracking": {
+          "title": "Track every top-up",
+          "body": "See when each top-up is approved. If it fails, the balance returns to your wallet."
+        }
+      },
+      "cta": "Top up Meta account",
+      "ctaHint": "Available as soon as maintenance ends.",
+      "tableTitle": "{name}'s Meta accounts",
+      "tableTitleGeneric": "Meta accounts",
+      "tableEmpty": "Your Meta accounts will show up here once we enable the integration.",
+      "columns": {
+        "account": "Account",
+        "id": "Account ID",
+        "balance": "Balance",
+        "status": "Status"
+      }
     }
   },
   "membership": {

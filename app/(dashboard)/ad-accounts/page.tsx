@@ -23,6 +23,12 @@ import { StaffCreateTikTokAccountsPanel } from "@/features/ad-accounts/component
 import { isStaffUser } from "@/lib/auth/staff.server";
 import { isPaymentsSuperAdminEmail } from "@/lib/payments/funding-roles.server";
 import { TikTokConnectionPanel } from "@/features/ad-accounts/components/TikTokConnectionPanel.client";
+import { AdAccountsPlatformTabs } from "@/features/ad-accounts/components/AdAccountsPlatformTabs";
+import { MetaMaintenancePanel } from "@/features/ad-accounts/components/MetaMaintenancePanel";
+import {
+  META_ADS_MAINTENANCE,
+  resolveAdAccountsPlatform,
+} from "@/lib/integrations/bluefocus/meta-availability";
 
 interface AdAccountsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -49,8 +55,33 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
   const status = resolveAccountStatusFilter(getSearchParam(params, "status", "all"));
   const includeArchived = getSearchParam(params, "archived") === "1";
   void includeArchived;
+  const platform = resolveAdAccountsPlatform(getSearchParam(params, "platform"));
 
   const selected = await getSelectedHecomCliente(session.id);
+
+  // Meta (BlueFocus) en mantenimiento: visible para todos, sin acciones.
+  if (platform === "meta") {
+    const clienteName = selected?.name;
+    return (
+      <div className={`${dashboardClasses.page} pb-[env(safe-area-inset-bottom)] md:pb-0`}>
+        <AdAccountsPageHeader
+          summary={{
+            totalAccounts: 0,
+            activeAccounts: 0,
+            assignedBalance: 0,
+            pendingSetup: 0,
+            disabledAccounts: 0,
+          }}
+          hecomScoped={Boolean(selected)}
+          clienteName={clienteName}
+          clienteId={selected?.id}
+          platform="meta"
+        />
+        <AdAccountsPlatformTabs active="meta" metaMaintenance={META_ADS_MAINTENANCE} />
+        <MetaMaintenancePanel clienteName={clienteName} />
+      </div>
+    );
+  }
 
   if (!selected) {
     // Un cliente sin ficha elegida (ej. con dos negocios) debe ver su propio selector,
@@ -74,6 +105,7 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
           hecomScoped={false}
           hideCreate
         />
+        <AdAccountsPlatformTabs active="tiktok" metaMaintenance={META_ADS_MAINTENANCE} />
         <PickClienteEmpty
           section="las cuentas publicitarias"
           mode={canChangeCliente ? "staff" : "cliente"}
@@ -107,6 +139,8 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
         avatarUrl={data.cliente?.avatarUrl}
         enableTikTokCreate
       />
+
+      <AdAccountsPlatformTabs active="tiktok" metaMaintenance={META_ADS_MAINTENANCE} />
 
       {isStaff ? <StaffCreateTikTokAccountsPanel clienteName={clienteName} /> : null}
 

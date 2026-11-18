@@ -1,0 +1,30 @@
+[Unit]
+Description=BlueFocus Meta relay worker (AdsHolistic)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=relay
+Group=relay
+WorkingDirectory=/opt/bluefocus-relay
+EnvironmentFile=/etc/bluefocus-relay.env
+ExecStart=/usr/bin/node /opt/bluefocus-relay/worker.mjs
+Restart=always
+RestartSec=10
+
+# Endurecimiento: el worker solo necesita red saliente.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

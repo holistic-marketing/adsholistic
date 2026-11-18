@@ -1075,7 +1075,10 @@
       "suspendedOne": "{count} suspendida",
       "suspendedMany": "{count} suspendidas",
       "pendingOne": "{count} pendiente",
-      "pendingMany": "{count} pendientes"
+      "pendingMany": "{count} pendientes",
+      "metaAccounts": "Cuentas publicitarias Meta",
+      "metaMaintenanceHint": "Meta en mantenimiento",
+      "metaScopedMeta": "Meta · en mantenimiento"
     },
     "summary": {
       "aria": "Resumen de cuentas",
@@ -1280,6 +1283,40 @@
       "failedFallback": "Revisa la autorización e inténtalo de nuevo.",
       "retry": "Reintentar",
       "close": "Cerrar"
+    },
+    "platformTabs": {
+      "aria": "Plataforma de anuncios",
+      "maintenance": "Mantenimiento"
+    },
+    "metaMaintenance": {
+      "badge": "En mantenimiento",
+      "title": "Meta Ads llega a AdsHolistic",
+      "body": "Estamos terminando la integración con Meta. Muy pronto vas a poder ver tus cuentas de Facebook e Instagram Ads y recargarlas desde tu cartera Holistic, igual que con TikTok.",
+      "features": {
+        "accounts": {
+          "title": "Tus cuentas en un solo lugar",
+          "body": "Mira tus cuentas de Meta con su saldo y estado al día."
+        },
+        "recharge": {
+          "title": "Recarga desde tu cartera",
+          "body": "Pasa saldo de tu cartera Holistic a tus cuentas de Meta."
+        },
+        "tracking": {
+          "title": "Seguimiento de cada recarga",
+          "body": "Ve cuándo se aprueba cada recarga. Si no pasa, el saldo vuelve a tu cartera."
+        }
+      },
+      "cta": "Recargar cuenta Meta",
+      "ctaHint": "Disponible apenas termine el mantenimiento.",
+      "tableTitle": "Cuentas Meta de {name}",
+      "tableTitleGeneric": "Cuentas Meta",
+      "tableEmpty": "Tus cuentas de Meta aparecerán aquí cuando activemos la integración.",
+      "columns": {
+        "account": "Cuenta",
+        "id": "ID de cuenta",
+        "balance": "Saldo",
+        "status": "Estado"
+      }
     }
   },
   "membership": {
