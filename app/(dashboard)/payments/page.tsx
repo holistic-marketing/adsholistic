@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { Suspense } from "react";
 import { after } from "next/server";
 import { getTranslations } from "next-intl/server";
@@ -61,7 +62,7 @@ async function StripeReturnBanner({ status }: { status?: string }) {
   );
 }
 
-export default async function PaymentsPage({
+async function PaymentsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -248,3 +249,5 @@ export default async function PaymentsPage({
     </div>
   );
 }
+
+export default timedPage("/payments", PaymentsPage);

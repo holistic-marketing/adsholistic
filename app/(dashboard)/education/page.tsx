@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { EducationCenter } from "@/features/education/components/EducationCenter.client";
 import type { EducationAudience } from "@/features/education/lib/catalog";
 import { listEducationLessons } from "@/features/education/lib/lessons.server";
@@ -7,7 +8,7 @@ import { resolvePaymentsFundingCapabilities } from "@/lib/payments/funding-roles
 
 export const dynamic = "force-dynamic";
 
-export default async function EducationPage({
+async function EducationPage({
   searchParams,
 }: {
   searchParams: Promise<{ ver?: string | string[] }>;
@@ -30,3 +31,5 @@ export default async function EducationPage({
 
   return <EducationCenter lessons={lessons} canManage={canManage} audience={audience} />;
 }
+
+export default timedPage("/education", EducationPage);

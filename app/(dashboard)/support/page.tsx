@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/lib/auth/guards.server";
@@ -8,7 +9,7 @@ import { GerenteSupportInbox } from "@/features/support/components/GerenteSuppor
 
 export const dynamic = "force-dynamic";
 
-export default async function SupportPage() {
+async function SupportPage() {
   const session = await requireSession();
   const t = await getTranslations("support");
   const funding = await resolvePaymentsFundingCapabilities({
@@ -38,3 +39,5 @@ export default async function SupportPage() {
     </Suspense>
   );
 }
+
+export default timedPage("/support", SupportPage);

@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { Suspense } from "react";
 import { WalletAgreementMovements } from "@/features/payments/components/WalletAgreementMovements";
@@ -17,7 +18,7 @@ import {
 } from "@/lib/payments/funding-roles.server";
 import { requirePermission } from "@/lib/auth/guards.server";
 
-export default async function CobrosPage() {
+async function CobrosPage() {
   const session = await requirePermission("payments:read");
   const selected = await getSelectedHecomCliente(session.id);
   const actingAsCliente = await getActingAsCliente(session.id);
@@ -75,3 +76,5 @@ export default async function CobrosPage() {
     </div>
   );
 }
+
+export default timedPage("/cobros", CobrosPage);

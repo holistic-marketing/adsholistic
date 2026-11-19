@@ -23,6 +23,7 @@ import { PanelContext, type PanelCliente, type PanelContextValue } from "./panel
 import { PanelRail as Rail } from "./PanelRail.client";
 import { PanelTopbar } from "./PanelTopbar.client";
 import { PanelCommandPalette } from "./PanelCommandPalette.client";
+import { PerfReporter } from "./PerfReporter.client";
 import { PanelClientPicker } from "./PanelClientPicker.client";
 
 const FloatingSupportStack = dynamic(
@@ -300,6 +301,7 @@ export function PanelShell({
         onClose={() => setPicker((current) => ({ ...current, open: false }))}
       />
       <FloatingSupportStack persona={persona} />
+      <PerfReporter />
       <HomeScreenAppBanner />
       <InAppPushToasts />
     </PanelContext.Provider>

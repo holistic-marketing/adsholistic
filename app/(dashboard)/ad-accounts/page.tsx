@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 ﻿import { getTranslations } from "next-intl/server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { buttonClass } from "@/components/ui/Button";
@@ -58,7 +59,7 @@ const EMPTY_SUMMARY = {
   disabledAccounts: 0,
 };
 
-export default async function AdAccountsPage({ searchParams }: AdAccountsPageProps) {
+async function AdAccountsPage({ searchParams }: AdAccountsPageProps) {
   const t = await getTranslations("adAccounts");
   const session = await requirePermission("adAccounts:read");
   const params = await searchParams;
@@ -185,3 +186,5 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
     </div>
   );
 }
+
+export default timedPage("/ad-accounts", AdAccountsPage);

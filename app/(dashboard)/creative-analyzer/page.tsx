@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { after } from "next/server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { CreativeHub } from "@/features/creative-analyzer/components/CreativeHub";
@@ -26,7 +27,7 @@ const RECENT_REJECT_LIMIT = 8;
 // Fuera del componente para no leer el reloj directamente en el render.
 const readTimestamp = () => Date.now();
 
-export default async function CreativeAnalyzerPage() {
+async function CreativeAnalyzerPage() {
   const t0 = readTimestamp();
   const session = await requirePermission("creativeAnalyzer:read");
   const funding = await resolvePaymentsFundingCapabilities({
@@ -289,3 +290,5 @@ export default async function CreativeAnalyzerPage() {
     </div>
   );
 }
+
+export default timedPage("/creative-analyzer", CreativeAnalyzerPage);

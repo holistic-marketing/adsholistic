@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { Suspense } from "react";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import {
@@ -22,7 +23,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function OverviewPage() {
+async function OverviewPage() {
   const session = await requireSession();
   const rawFunding = await resolvePaymentsFundingCapabilities({
     email: session.email,
@@ -108,3 +109,5 @@ export default async function OverviewPage() {
     </div>
   );
 }
+
+export default timedPage("/overview", OverviewPage);

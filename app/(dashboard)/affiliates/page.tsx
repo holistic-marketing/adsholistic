@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { ClientAffiliateDashboard } from "@/features/affiliates/components/ClientAffiliateDashboard.client";
 import { PickClienteEmpty } from "@/features/clientes/components/PickClienteEmpty";
 import { getClientAffiliateProgram } from "@/lib/affiliates/client-program.server";
@@ -7,7 +8,7 @@ import { requirePermission } from "@/lib/auth/guards.server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { resolvePaymentsFundingCapabilities } from "@/lib/payments/funding-roles.server";
 
-export default async function AffiliatesPage() {
+async function AffiliatesPage() {
   const session = await requirePermission("affiliates:read");
   const funding = await resolvePaymentsFundingCapabilities({
     email: session.email,
@@ -42,3 +43,5 @@ export default async function AffiliatesPage() {
     </div>
   );
 }
+
+export default timedPage("/affiliates", AffiliatesPage);

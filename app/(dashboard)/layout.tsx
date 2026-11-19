@@ -16,6 +16,7 @@ import { getTesterDashboardMode } from "@/lib/auth/tester-dashboard-mode.server"
 import type { DashboardPersona } from "@/types/dashboard-persona";
 import { getSignedPartnerForCliente } from "@/lib/partners/partners.server";
 import { readPanelPreferences } from "@/lib/ui/panel-preferences.server";
+import { logPerf, perfSteps } from "@/lib/perf/perf-log.server";
 
 // Instrumentación del log [dashboard-layout]; fuera del componente para no leer el reloj en el render.
 const readTimestamp = () => Date.now();
@@ -26,7 +27,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const started = readTimestamp();
+  const perf = perfSteps();
   const session = await requireSession();
+  perf.mark("session");
 
   // No bloquea: el listado de BM se usa después en Cuentas ads y Pagos.
   warmHolisticBcAdvertisers({
@@ -40,6 +43,7 @@ export default async function DashboardLayout({
     }),
     getTesterDashboardMode(session.email),
   ]);
+  perf.mark("roles");
   const canSwitchMode = canSwitchTesterDashboardMode(session.email);
 
   const persona: DashboardPersona = funding.isSuperAdmin
@@ -52,12 +56,14 @@ export default async function DashboardLayout({
     const next = await registrationNextPath(session.email);
     if (next === "/contrato") redirect(routes.serviceContract);
     if (next === "/pago") redirect(routes.membershipCheckout);
+    perf.mark("contract");
   }
 
   let [selected, actingAsCliente] = await Promise.all([
     getSelectedHecomCliente(session.id),
     getActingAsCliente(session.id),
   ]);
+  perf.mark("cliente");
 
   if (
     selected &&
@@ -84,6 +90,8 @@ export default async function DashboardLayout({
       : Promise.resolve(false),
     readPanelPreferences(),
   ]);
+  perf.mark("alliances_prefs");
+  logPerf({ kind: "server_layout", path: null, ms: perf.total(), userId: session.id, meta: { ...perf.steps, persona } });
 
   const ms = readTimestamp() - started;
   if (process.env.NODE_ENV !== "production" || ms > 400) {

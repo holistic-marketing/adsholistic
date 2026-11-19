@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { PickClienteEmpty } from "@/features/clientes/components/PickClienteEmpty";
 import { ProfitPageClient } from "@/features/profit/components/ProfitPageClient.client";
@@ -16,7 +17,7 @@ import {
 } from "@/lib/realprofit/db.server";
 import { getRadarProfile } from "@/lib/radar/profiles.server";
 
-export default async function ProfitPage({
+async function ProfitPage({
   searchParams,
 }: {
   searchParams?: Promise<{ from?: string; to?: string }>;
@@ -68,3 +69,5 @@ export default async function ProfitPage({
     </div>
   );
 }
+
+export default timedPage("/profit", ProfitPage);

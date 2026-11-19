@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/guards.server";
@@ -7,7 +8,7 @@ import { ClientesPageClient } from "@/features/clientes/components/ClientesPageC
 
 export const dynamic = "force-dynamic";
 
-export default async function ClientesPage() {
+async function ClientesPage() {
   const session = await requireSession();
   const funding = await resolvePaymentsFundingCapabilities({
     email: session.email,
@@ -31,3 +32,5 @@ export default async function ClientesPage() {
     </Suspense>
   );
 }
+
+export default timedPage("/clientes", ClientesPage);

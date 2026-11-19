@@ -1,3 +1,4 @@
+import { timedPage } from "@/lib/perf/perf-log.server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { PickClienteEmpty } from "@/features/clientes/components/PickClienteEmpty";
 import { PixelsPageClient } from "@/features/pixels/components/PixelsPageClient.client";
@@ -5,7 +6,7 @@ import { requirePermission } from "@/lib/auth/guards.server";
 import { getSelectedHecomCliente } from "@/lib/hecom/selected-cliente.server";
 import { resolvePaymentsFundingCapabilities } from "@/lib/payments/funding-roles.server";
 
-export default async function PixelsPage() {
+async function PixelsPage() {
   const session = await requirePermission("adAccounts:read");
   const funding = await resolvePaymentsFundingCapabilities({
     email: session.email,
@@ -29,3 +30,5 @@ export default async function PixelsPage() {
     </div>
   );
 }
+
+export default timedPage("/pixels", PixelsPage);
