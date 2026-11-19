@@ -55,12 +55,6 @@ export const staffNavigation: NavGroup[] = [
       item("assistant", routes.assistant, "sparkle"),
       item("broadcasts", routes.avisos, "megaphone"),
       item("registrationContracts", routes.registrationContracts, "contract"),
-    ],
-  },
-  {
-    key: "support",
-    items: [
-      item("support", routes.support, "inbox", { labelKey: "supportStaff" }),
       item("education", routes.education, "cap"),
     ],
   },
@@ -90,7 +84,6 @@ export const clienteNavigation: NavGroup[] = [
     key: "help",
     items: [
       item("education", routes.education, "cap"),
-      item("support", routes.support, "inbox"),
     ],
   },
 ];

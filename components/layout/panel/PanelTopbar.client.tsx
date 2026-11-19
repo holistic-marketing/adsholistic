@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
-import { routes } from "@/config/routes";
 import { findActiveNavItem } from "@/config/navigation";
 import { PanelIcon } from "@/components/ui/PanelIcon";
 import { PanelPopover, usePopover } from "@/components/ui/PanelPopover.client";
@@ -62,16 +61,6 @@ export function PanelTopbar({
       <ClienteContext />
       <QuickCreate />
       <span className="panel-vsep" aria-hidden />
-      {panel.isStaff && !panel.actingAsCliente ? (
-        <Link
-          href={routes.support}
-          className="panel-icon-btn panel-icon-btn--bordered max-sm:hidden"
-          aria-label={ts("supportInbox")}
-          title={ts("supportInbox")}
-        >
-          <PanelIcon name="chat" />
-        </Link>
-      ) : null}
       <PanelNotifications />
       <button
         type="button"

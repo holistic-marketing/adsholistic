@@ -2,13 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { routes } from "@/config/routes";
 import type { DashboardPersona } from "@/types/dashboard-persona";
-import { SupportChatWidget } from "./SupportChatWidget.client";
 import { StaffCalendarFab } from "./StaffCalendarFab.client";
-import { StaffSupportNotifier } from "./StaffSupportNotifier.client";
 
 const OnboardingWidgetLoader = dynamic(
   () =>
@@ -23,7 +20,6 @@ export function FloatingSupportStack({
 }: {
   persona?: DashboardPersona;
 }) {
-  const [chatOpen, setChatOpen] = useState(false);
   const pathname = usePathname();
   const onSupportPage =
     pathname === routes.support || pathname.startsWith(`${routes.support}/`);
@@ -34,15 +30,10 @@ export function FloatingSupportStack({
     pathname.startsWith(`${routes.adAccounts}/`);
   const isStaff = persona === "gerente" || persona === "super_admin";
 
-  // Staff: avisos de chat a la izquierda y la agenda personal a la derecha,
-  // en todos los módulos, para ver fecha y hora de las citas a su nombre.
+  // Soporte (burbuja de chat y avisos de chat) se quitó del panel (2026-11-19).
+  // Staff: solo la agenda personal a la derecha.
   if (isStaff) {
-    return (
-      <>
-        <StaffSupportNotifier />
-        <StaffCalendarFab />
-      </>
-    );
+    return <StaffCalendarFab />;
   }
 
   // En /support la página completa es el canal; sin WhatsApp ni burbuja duplicada.
@@ -60,13 +51,7 @@ export function FloatingSupportStack({
       )}
     >
       <div className="pointer-events-auto flex w-full max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 sm:max-w-none sm:gap-3">
-        <OnboardingWidgetLoader chatOpen={chatOpen} />
-        <SupportChatWidget
-          isOpen={chatOpen}
-          onToggle={() => setChatOpen(true)}
-          onOpenChange={setChatOpen}
-          persona={persona}
-        />
+        <OnboardingWidgetLoader chatOpen={false} />
       </div>
     </div>
   );
