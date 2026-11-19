@@ -27,10 +27,28 @@ export function PerfReporter() {
     const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
     if (!nav) return;
     const report = () => {
+      const r = (v: number) => Math.round(v);
+      // Desglose: redirecciones, red (DNS/conexión/TLS), espera del servidor,
+      // descarga del HTML y lo que tarda el navegador en armar la página.
       const meta = {
-        ttfb: Math.round(nav.responseStart),
-        dcl: Math.round(nav.domContentLoadedEventEnd),
-        load: Math.round(nav.loadEventEnd),
+        ttfb: r(nav.responseStart),
+        dcl: r(nav.domContentLoadedEventEnd),
+        load: r(nav.loadEventEnd),
+        redirects: nav.redirectCount,
+        redirect_ms: r(nav.redirectEnd - nav.redirectStart),
+        dns_ms: r(nav.domainLookupEnd - nav.domainLookupStart),
+        connect_ms: r(nav.connectEnd - nav.connectStart),
+        tls_ms: nav.secureConnectionStart > 0 ? r(nav.connectEnd - nav.secureConnectionStart) : 0,
+        server_wait_ms: r(nav.responseStart - nav.requestStart),
+        download_ms: r(nav.responseEnd - nav.responseStart),
+        browser_ms: r(nav.domContentLoadedEventEnd - nav.responseEnd),
+        transfer_kb: r((nav.transferSize || 0) / 1024),
+        js_kb: r(
+          performance
+            .getEntriesByType("resource")
+            .filter((e) => (e as PerformanceResourceTiming).initiatorType === "script")
+            .reduce((t, e) => t + ((e as PerformanceResourceTiming).transferSize || 0), 0) / 1024,
+        ),
       };
       console.info("[perf] carga", firstPath.current, meta);
       send({ kind: "client_load", path: firstPath.current, ms: meta.load || meta.dcl, meta });

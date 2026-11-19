@@ -200,10 +200,26 @@ const clerkHandler = clerkMiddleware(async (_auth, request) => {
 });
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  if (clerkLoginEnabled()) {
-    return clerkHandler(request, event);
+  // TEMPORAL: mide cuánto tarda el proxy en cada entrada de página.
+  const started = performance.now();
+  const isDocument = request.headers.get("sec-fetch-dest") === "document";
+  try {
+    if (clerkLoginEnabled()) {
+      return await clerkHandler(request, event);
+    }
+    return await runHolisticProxy(request);
+  } finally {
+    if (isDocument) {
+      const ms = performance.now() - started;
+      event.waitUntil(
+        import("@/lib/perf/perf-log.server")
+          .then(({ logPerf }) =>
+            logPerf({ kind: "server_proxy", path: request.nextUrl.pathname, ms, meta: { clerk: clerkLoginEnabled() } }),
+          )
+          .catch(() => undefined),
+      );
+    }
   }
-  return runHolisticProxy(request);
 }
 
 // Toda página que lea la sesión en el servidor debe pasar por aquí: el proxy

@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
  */
 
 export type PerfEvent = {
-  kind: "server_layout" | "server_page" | "client_nav" | "client_load";
+  kind: "server_proxy" | "server_layout" | "server_page" | "client_nav" | "client_load";
   path: string | null;
   label?: string | null;
   ms: number;
