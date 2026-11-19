@@ -111,7 +111,8 @@ export type HecomClienteDashboard = {
 };
 
 const DAILY_SPEND_TZ = "America/Lima";
-const DAILY_SERIES_DAYS = 14;
+/** Días de gasto diario del resumen: 30 de periodo + 30 anteriores para comparar. */
+const DAILY_SERIES_DAYS = 60;
 
 function resolveAccounts(cliente: HecomCliente): HecomTiktokAccount[] {
   if (cliente.tiktokAccounts.length > 0) return cliente.tiktokAccounts;

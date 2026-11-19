@@ -279,25 +279,11 @@
     "feeMeta": "Fee Holistic {percent}%",
     "ctaReload": "Recargar",
     "ctaReloadAssign": "Recargar / asignar",
-    "ctaAccounts": "Ver cuentas",
-    "changeClient": "Cambiar cliente",
     "spendToday": "Gasto de hoy",
-    "spend7dAside": "Últimos 7 días · {amount} · Fee {percent}%",
-    "spend7d": "Últimos 7 días",
     "cobros": "Cobros",
     "adSpend": "Gastos ads",
     "feeHolistic": "Fee Holistic",
     "tiktokAccounts": "Cuentas TikTok",
-    "accountsHint": "{active} activas · {paused} pausadas",
-    "noDaySync": "Sin sync del día",
-    "noActivityToday": "Sin actividad hoy",
-    "timezoneLima": "America/Lima",
-    "quickAdAccounts": "Cuentas ads",
-    "quickPayments": "Pagos",
-    "quickProfit": "Profit",
-    "quickAssign": "Asignar saldo",
-    "live": "En vivo",
-    "backup": "Backup",
     "pickEmpty": {
       "clienteTitle": "Tu panel de cliente",
       "clienteBody": "Desde acá recargas con los métodos disponibles y asignas a tus cuentas ads. No necesitas elegir entre clientes del CRM.",
@@ -309,37 +295,8 @@
       "staffBody": "Para ver {section}, elige a quién vas a atender. El panel queda filtrado a ese cliente hasta que lo quites.",
       "defaultSection": "esta sección"
     },
-    "dailySpend": {
-      "title": "Gasto diario",
-      "subtitle": "Últimos {days} días · America/Lima",
-      "today": "Hoy",
-      "source": "Fuente:",
-      "sourceTiktok": "TikTok sync",
-      "sourceGastos": "Hecom gastos",
-      "sourceNone": "Sin datos",
-      "empty": "Aún no hay gasto diario registrado para este cliente."
-    },
-    "accountsPanel": {
-      "hecomReadonly": "Hecom · solo lectura",
-      "viewAll": "Ver todas ({count})",
-      "empty": "Sin advertiser mapeado en Hecom.",
-      "paused": "Pausada",
-      "inCampaign": "En campaña"
-    },
-    "gastosPanel": {
-      "title": "Últimos gastos",
-      "subtitle": "Consumo reciente de campañas",
-      "viewProfit": "Ver Profit",
-      "empty": "Sin gastos registrados para este cliente."
-    },
     "hero": {
-      "badge": "Gasto en ads",
-      "caption": "Últimos 30 días · todas tus cuentas",
-      "cobrosHint": "Total pagado registrado",
-      "adSpendHint": "Total gastado en TikTok Ads",
-      "quickLinks": "Accesos",
-      "last30": "Últimos 30 días",
-      "peakDay": "Día con más gasto: {date} · {amount}"
+      "cobrosHint": "Total pagado registrado"
     },
     "byAccount": {
       "title": "Gasto por cuenta",
@@ -368,7 +325,54 @@
     },
     "title": "Resumen",
     "ledeCliente": "Tu gasto, tu saldo y el estado de tus cuentas de TikTok.",
-    "ledeStaff": "Gasto, saldo y cuentas de {name}."
+    "ledeStaff": "Gasto, saldo y cuentas de {name}.",
+    "activity": {
+      "period": "Periodo",
+      "lastDays": "Últimos {days} días",
+      "spendPeriod": "Gasto del periodo",
+      "spendUp": "Subió frente al periodo anterior",
+      "spendDown": "Bajó frente al periodo anterior",
+      "spendNoPrevious": "Sin periodo anterior para comparar",
+      "spendPrevious": "{amount} en los {days} días anteriores",
+      "title": "Actividad diaria",
+      "subtitle": "Últimos {days} días · hora de Lima",
+      "show": "Qué mostrar",
+      "spend": "Gasto",
+      "payments": "Pagos",
+      "legendSpend": "Gasto en TikTok",
+      "legendPayments": "Pagos recibidos",
+      "chartSpend": "Gasto diario en TikTok",
+      "chartPayments": "Pagos recibidos por día",
+      "emptySpend": "Sin gasto en este periodo.",
+      "emptyPayments": "Sin pagos en este periodo.",
+      "day": "Día"
+    },
+    "activeAccounts": "Cuentas activas",
+    "activeOf": "de {count, plural, one {# cuenta} other {# cuentas}}",
+    "status": {
+      "title": "Estado de las cuentas",
+      "subtitleCliente": "Tus cuentas de TikTok",
+      "subtitleStaff": "Sus cuentas de TikTok",
+      "total": "{count} en total",
+      "active": "Activas",
+      "paused": "Pausadas",
+      "rate": "Cuentas activas",
+      "viewAll": "Ver las cuentas"
+    },
+    "walletCard": {
+      "title": "Cartera",
+      "subtitle": "Saldo en dólares, disponible para asignar",
+      "recharge": "Recargar",
+      "assign": "Asignar a una cuenta",
+      "goPayments": "Ir a recargas y saldo"
+    },
+    "recent": {
+      "title": "Últimos pagos",
+      "subtitle": "Pagos registrados a la cuenta",
+      "empty": "Todavía no hay pagos registrados.",
+      "viewAll": "Ver lo pagado",
+      "defaultMethod": "Pago"
+    }
   },
   "payments": {
     "guide": {

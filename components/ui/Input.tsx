@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { overrideClasses } from "@/lib/ui/override-classes";
 import type { ComponentPropsWithoutRef, InputHTMLAttributes } from "react";
 
 /* Campos (sistema visual v3): 36 px, radio de 8 px, fondo de campo y anillo
@@ -10,15 +11,17 @@ const FIELD =
 type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export function Input({ className, ...props }: InputProps) {
-  return <input className={cn(FIELD, "flex h-9 px-3", className)} {...props} />;
+  return <input className={overrideClasses(cn(FIELD, "flex h-9 px-3"), className)} {...props} />;
 }
 
 export function Select({ className, ...props }: ComponentPropsWithoutRef<"select">) {
   return (
     <select
-      className={cn(
-        FIELD,
-        "h-9 cursor-pointer appearance-none bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A8593' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")] bg-[length:12px] bg-[position:right_10px_center] bg-no-repeat pl-3 pr-8 font-medium",
+      className={overrideClasses(
+        cn(
+          FIELD,
+          "h-9 cursor-pointer appearance-none bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A8593' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")] bg-[length:12px] bg-[position:right_10px_center] bg-no-repeat pl-3 pr-8 font-medium",
+        ),
         className,
       )}
       {...props}
@@ -27,5 +30,5 @@ export function Select({ className, ...props }: ComponentPropsWithoutRef<"select
 }
 
 export function Textarea({ className, ...props }: ComponentPropsWithoutRef<"textarea">) {
-  return <textarea className={cn(FIELD, "min-h-28 px-3 py-2 leading-relaxed", className)} {...props} />;
+  return <textarea className={overrideClasses(cn(FIELD, "min-h-28 px-3 py-2 leading-relaxed"), className)} {...props} />;
 }

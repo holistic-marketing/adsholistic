@@ -279,25 +279,11 @@
     "feeMeta": "Holistic fee {percent}%",
     "ctaReload": "Top up",
     "ctaReloadAssign": "Top up / assign",
-    "ctaAccounts": "View accounts",
-    "changeClient": "Change client",
     "spendToday": "Spend today",
-    "spend7dAside": "Last 7 days · {amount} · Fee {percent}%",
-    "spend7d": "Last 7 days",
     "cobros": "Collections",
     "adSpend": "Ad spend",
     "feeHolistic": "Holistic fee",
     "tiktokAccounts": "TikTok accounts",
-    "accountsHint": "{active} active · {paused} paused",
-    "noDaySync": "No sync today",
-    "noActivityToday": "No activity today",
-    "timezoneLima": "America/Lima",
-    "quickAdAccounts": "Ad accounts",
-    "quickPayments": "Payments",
-    "quickProfit": "Profit",
-    "quickAssign": "Assign balance",
-    "live": "Live",
-    "backup": "Backup",
     "pickEmpty": {
       "clienteTitle": "Your client dashboard",
       "clienteBody": "From here you top up with available payment methods and assign to your ad accounts. You don’t need to pick CRM clients.",
@@ -309,37 +295,8 @@
       "staffBody": "To see {section}, choose who you are serving. The panel stays filtered to that client until you remove it.",
       "defaultSection": "this section"
     },
-    "dailySpend": {
-      "title": "Daily spend",
-      "subtitle": "Last {days} days · America/Lima",
-      "today": "Today",
-      "source": "Source:",
-      "sourceTiktok": "TikTok sync",
-      "sourceGastos": "Hecom spend",
-      "sourceNone": "No data",
-      "empty": "No daily spend recorded for this client yet."
-    },
-    "accountsPanel": {
-      "hecomReadonly": "Hecom · read only",
-      "viewAll": "View all ({count})",
-      "empty": "No advertiser mapped in Hecom.",
-      "paused": "Paused",
-      "inCampaign": "In campaign"
-    },
-    "gastosPanel": {
-      "title": "Recent spend",
-      "subtitle": "Recent campaign consumption",
-      "viewProfit": "View Profit",
-      "empty": "No spend recorded for this client."
-    },
     "hero": {
-      "badge": "Ad spend",
-      "caption": "Last 30 days · all your accounts",
-      "cobrosHint": "Total payments recorded",
-      "adSpendHint": "Total spent on TikTok Ads",
-      "quickLinks": "Shortcuts",
-      "last30": "Last 30 days",
-      "peakDay": "Highest spend day: {date} · {amount}"
+      "cobrosHint": "Total payments recorded"
     },
     "byAccount": {
       "title": "Spend by account",
@@ -368,7 +325,54 @@
     },
     "title": "Overview",
     "ledeCliente": "Your spend, your balance and the status of your TikTok accounts.",
-    "ledeStaff": "Spend, balance and accounts for {name}."
+    "ledeStaff": "Spend, balance and accounts for {name}.",
+    "activity": {
+      "period": "Period",
+      "lastDays": "Last {days} days",
+      "spendPeriod": "Spend in the period",
+      "spendUp": "Up from the previous period",
+      "spendDown": "Down from the previous period",
+      "spendNoPrevious": "No previous period to compare",
+      "spendPrevious": "{amount} in the previous {days} days",
+      "title": "Daily activity",
+      "subtitle": "Last {days} days · Lima time",
+      "show": "What to show",
+      "spend": "Spend",
+      "payments": "Payments",
+      "legendSpend": "TikTok spend",
+      "legendPayments": "Payments received",
+      "chartSpend": "Daily TikTok spend",
+      "chartPayments": "Payments received per day",
+      "emptySpend": "No spend in this period.",
+      "emptyPayments": "No payments in this period.",
+      "day": "Day"
+    },
+    "activeAccounts": "Active accounts",
+    "activeOf": "of {count, plural, one {# account} other {# accounts}}",
+    "status": {
+      "title": "Account status",
+      "subtitleCliente": "Your TikTok accounts",
+      "subtitleStaff": "Their TikTok accounts",
+      "total": "{count} in total",
+      "active": "Active",
+      "paused": "Paused",
+      "rate": "Active accounts",
+      "viewAll": "See the accounts"
+    },
+    "walletCard": {
+      "title": "Wallet",
+      "subtitle": "Balance in US dollars, ready to assign",
+      "recharge": "Top up",
+      "assign": "Assign to an account",
+      "goPayments": "Go to top-ups and balance"
+    },
+    "recent": {
+      "title": "Latest payments",
+      "subtitle": "Payments recorded on the account",
+      "empty": "No payments recorded yet.",
+      "viewAll": "See what was paid",
+      "defaultMethod": "Payment"
+    }
   },
   "payments": {
     "guide": {

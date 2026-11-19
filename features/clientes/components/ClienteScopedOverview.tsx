@@ -2,35 +2,26 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { routes } from "@/config/routes";
-import {
-  formatHecomFecha,
-  formatHecomGastoDisplay,
-  resolveBmForGasto,
-} from "@/lib/hecom/gasto-label";
-import { formatBmBucketLabel } from "@/lib/hecom/bm-bucket.shared";
+import { formatHecomFecha } from "@/lib/hecom/gasto-label";
 import {
   getHecomCampaignSpendRows,
   type HecomClienteDashboard,
-  type HecomGastoRow,
 } from "@/lib/hecom/cliente-dashboard.server";
 import { getAppFormatter } from "@/lib/i18n/get-app-formatter";
 import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
 import { PanelIcon } from "@/components/ui/PanelIcon";
 import { buttonClass } from "@/components/ui/Button";
-import { KpiCard } from "@/components/ui/PanelKit";
+import { EmptyState, KpiCard, Meter, SquareIcon, ToneBadge, type Tone } from "@/components/ui/PanelKit";
 import type { HecomTiktokAccount } from "@/lib/hecom/clientes.server";
+import type { PanelIconName } from "@/components/ui/PanelIcon";
+import { OverviewActivity, type DailyPoint } from "./OverviewActivity.client";
 
 /*
- * Resumen del cliente (sistema visual v3): encabezado, cuatro indicadores,
- * primeros pasos, gasto diario, gasto por cuenta, cuentas y últimos gastos.
- * No mostramos «Deuda neta» Hecom aquí: suele estar incompleta (cobros
- * faltantes) y asusta al cliente.
+ * Resumen del cliente (sistema visual v3): periodo, indicadores, primeros
+ * pasos, actividad diaria con estado de las cuentas y cartera al costado, y
+ * abajo el gasto por cuenta y los últimos pagos. No mostramos «Deuda neta»
+ * Hecom aquí: suele estar incompleta (cobros faltantes) y asusta al cliente.
  */
-
-const CARD = "rounded-card bg-surface ring-1 ring-line";
-const INK = "text-ink";
-const SOFT = "text-ink-2";
-const MUTED = "text-ink-3";
 
 /** «Jesus Fuentes 201.0 USD - Agencia» → nombre + número de cuenta (no es saldo). */
 function parseAdvertiserLabel(raw: string | null) {
@@ -44,18 +35,23 @@ function shortId(id: string) {
   return id.length <= 10 ? id : `…${id.slice(-6)}`;
 }
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "HC";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+/** Fecha de Hecom (YYYY-MM-DD… o DD/MM/YYYY) a YYYY-MM-DD. */
+function isoDay(value: string | null): string | null {
+  if (!value) return null;
+  const raw = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+  const dmy = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  return dmy ? `${dmy[3]}-${dmy[2]}-${dmy[1]}` : null;
 }
 
-function shortDayLabel(dateYmd: string) {
-  const iso = dateYmd.slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return dateYmd;
-  const [, m, d] = iso.split("-");
-  return `${d}/${m}`;
+/** Pagos por día, en los mismos días que la serie de gasto. */
+function dailyPayments(cobros: HecomClienteDashboard["cobros"], days: string[]): DailyPoint[] {
+  const byDay = new Map<string, number>();
+  for (const row of cobros) {
+    const day = isoDay(row.fecha);
+    if (day) byDay.set(day, (byDay.get(day) ?? 0) + row.monto);
+  }
+  return days.map((date) => ({ date, value: Math.round((byDay.get(date) ?? 0) * 100) / 100 }));
 }
 
 /**
@@ -119,6 +115,7 @@ export async function ClienteScopedOverview({
   canChangeCliente = false,
   accountSpend,
   wallet,
+  walletCard,
 }: {
   data: HecomClienteDashboard;
   canChangeCliente?: boolean;
@@ -126,20 +123,20 @@ export async function ClienteScopedOverview({
   accountSpend?: ReactNode;
   /** «Saldo en cartera»: llega aparte, con su propio Suspense. */
   wallet?: ReactNode;
+  /** Tarjeta «Cartera» de la columna derecha, también con su Suspense. */
+  walletCard?: ReactNode;
 }) {
   const t = await getTranslations("overview");
   const { formatMoney } = await getAppFormatter();
   const moneyUsd = (value: number) => formatMoney(value, "USD");
-  const { cliente, summary, accounts, gastos } = data;
-  const recentGastos = gastos.slice(0, 8);
+  const { cliente, summary, accounts } = data;
   const activeAccounts = accounts.filter((a) => a.syncEnabled !== false).length;
-  const pausedAccounts = Math.max(0, accounts.length - activeAccounts);
-  const todayHint =
-    summary.dailySource === "none"
-      ? t("noDaySync")
-      : summary.gastoHoy > 0
-        ? t("timezoneLima")
-        : t("noActivityToday");
+
+  const spend: DailyPoint[] = summary.dailySeries.map((p) => ({ date: p.date, value: p.spend }));
+  const payments = dailyPayments(
+    data.cobros,
+    spend.map((p) => p.date),
+  );
 
   return (
     <div>
@@ -147,62 +144,60 @@ export async function ClienteScopedOverview({
         title={t("title")}
         lede={canChangeCliente ? t("ledeStaff", { name: cliente.name }) : t("ledeCliente")}
         actions={
+          <Link href={routes.payments} className={buttonClass("primary", "md", "shadow-glow")}>
+            <PanelIcon name="plus" />
+            {canChangeCliente ? t("ctaReloadAssign") : t("ctaReload")}
+          </Link>
+        }
+      />
+
+      <OverviewActivity
+        spend={spend}
+        payments={payments}
+        walletKpi={
+          wallet ?? (
+            <KpiCard
+              label={t("feeHolistic")}
+              value={`${summary.depositFeePercent}%`}
+              lead={t("feeMeta", { percent: summary.depositFeePercent })}
+            />
+          )
+        }
+        secondaryKpis={
           <>
-            <Link href={routes.adAccounts} className={buttonClass("outline")}>
-              <PanelIcon name="layers" />
-              {t("ctaAccounts")}
-            </Link>
-            <Link href={routes.payments} className={buttonClass("primary")}>
-              <PanelIcon name="plus" />
-              {canChangeCliente ? t("ctaReloadAssign") : t("ctaReload")}
-            </Link>
+            <KpiCard
+              label={t("cobros")}
+              value={moneyUsd(summary.cobroTotal)}
+              lead={t("hero.cobrosHint")}
+              detail={`${t("adSpend")}: ${moneyUsd(summary.gastoTotal)}`}
+            />
+            <KpiCard
+              label={t("activeAccounts")}
+              value={String(activeAccounts)}
+              lead={t("activeOf", { count: accounts.length })}
+              detail={t("feeMeta", { percent: summary.depositFeePercent })}
+            />
+          </>
+        }
+        steps={
+          <OnboardingSteps
+            t={t}
+            steps={[
+              { key: "s1", done: data.cobros.length > 0, href: routes.payments },
+              { key: "s2", done: accounts.length > 0, href: routes.adAccounts },
+              { key: "s3", done: summary.gastoTotal > 0, href: routes.payments },
+            ]}
+          />
+        }
+        aside={
+          <>
+            <AccountStatusCard accounts={accounts} staff={canChangeCliente} />
+            {walletCard}
           </>
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          label={t("hero.badge")}
-          value={moneyUsd(summary.gasto30d)}
-          lead={t("hero.caption")}
-          detail={`${t("spend7d")}: ${moneyUsd(summary.gasto7d)} · ${t("spendToday")}: ${moneyUsd(summary.gastoHoy)}`}
-        />
-        {wallet ?? (
-          <KpiCard label={t("feeHolistic")} value={`${summary.depositFeePercent}%`} lead={t("feeMeta", { percent: summary.depositFeePercent })} />
-        )}
-        <KpiCard
-          label={t("cobros")}
-          value={moneyUsd(summary.cobroTotal)}
-          lead={t("hero.cobrosHint")}
-          detail={`${t("adSpend")}: ${moneyUsd(summary.gastoTotal)}`}
-        />
-        <KpiCard
-          label={t("tiktokAccounts")}
-          value={String(summary.accountCount)}
-          lead={summary.accountCount > 0 ? t("accountsHint", { active: activeAccounts, paused: pausedAccounts }) : undefined}
-          detail={todayHint}
-        />
-      </div>
-
-      <div className="mt-4 space-y-4">
-        <OnboardingSteps
-          t={t}
-          steps={[
-            { key: "s1", done: data.cobros.length > 0, href: routes.payments },
-            { key: "s2", done: accounts.length > 0, href: routes.adAccounts },
-            { key: "s3", done: summary.gastoTotal > 0, href: routes.payments },
-          ]}
-        />
-
-        <DailySpendPanel
-          series={summary.dailySeries}
-          gastoHoy={summary.gastoHoy}
-          gasto7d={summary.gasto7d}
-          gasto30d={summary.gasto30d}
-          source={summary.dailySource}
-          moneyUsd={moneyUsd}
-        />
-
+      <div className="mt-4 grid items-start gap-4 xl:grid-cols-2">
         {accountSpend ?? (
           <AccountSpendPanel
             rows={data.campaignSpendRows}
@@ -211,157 +206,106 @@ export async function ClienteScopedOverview({
             moneyUsd={moneyUsd}
           />
         )}
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          <AccountsPanel accounts={accounts} />
-          <GastosPanel gastos={recentGastos} accounts={accounts} source={data.source} moneyUsd={moneyUsd} />
-        </div>
+        <RecentPaymentsCard cobros={data.cobros} moneyUsd={moneyUsd} />
       </div>
     </div>
   );
 }
 
-function Panel({
-  title,
-  subtitle,
-  count,
-  action,
-  children,
-  className = "",
-}: {
-  title: string;
-  subtitle?: string;
-  count?: number;
-  action?: ReactNode;
-  children: ReactNode;
-  className?: string;
-}) {
+/* --- Estado de las cuentas (v3 «sttiles» + «meter») ----------------------- */
+
+async function AccountStatusCard({ accounts, staff }: { accounts: HecomTiktokAccount[]; staff: boolean }) {
+  const t = await getTranslations("overview.status");
+  const active = accounts.filter((a) => a.syncEnabled !== false).length;
+  const paused = accounts.length - active;
+  const tiles: Array<{ label: string; count: number; tone: Tone; icon: PanelIconName }> = [
+    { label: t("active"), count: active, tone: "ok", icon: "check-circle" },
+    { label: t("paused"), count: paused, tone: "neutral", icon: "pause-circle" },
+  ];
   return (
-    <section className={`${CARD} flex flex-col overflow-hidden ${className}`}>
-      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
-        <div className="min-w-0">
-          <h2 className={`text-[15px] font-semibold tracking-[-0.02em] ${INK}`}>{title}</h2>
-          {subtitle ? <p className={`mt-0.5 text-[12px] ${SOFT}`}>{subtitle}</p> : null}
-        </div>
-        <div className="flex items-center gap-2">
-          {count != null ? (
-            <span className={`rounded-full bg-subtle px-2 py-0.5 text-[11px] font-semibold tabular-nums ${SOFT}`}>{count}</span>
-          ) : null}
-          {action}
-        </div>
-      </div>
-      {children}
-    </section>
+    <PanelCard
+      aria-labelledby="ov-status"
+      title={<span id="ov-status">{t("title")}</span>}
+      description={staff ? t("subtitleStaff") : t("subtitleCliente")}
+      action={<ToneBadge className="num">{t("total", { count: accounts.length })}</ToneBadge>}
+    >
+      <ul className="grid grid-cols-2 gap-2">
+        {tiles.map((tile) => (
+          <li key={tile.label} className="grid justify-items-center gap-1 rounded-box border border-line px-1 py-3 text-center">
+            <span className="[&>.panel-sqi]:rounded-full">
+              <SquareIcon icon={tile.icon} tone={tile.tone} />
+            </span>
+            <b className="num text-lg font-semibold">{tile.count}</b>
+            <small className="text-[11px] text-ink-3">{tile.label}</small>
+          </li>
+        ))}
+      </ul>
+      <Meter label={t("rate")} value={accounts.length ? active / accounts.length : 0} />
+      <Link href={routes.adAccounts} className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-accent-text hover:underline">
+        {t("viewAll")}
+        <PanelIcon name="arrow-right" className="size-3.5" />
+      </Link>
+    </PanelCard>
   );
 }
 
-async function DailySpendPanel({
-  series,
-  gastoHoy,
-  gasto7d,
-  gasto30d,
-  source,
+/* --- Últimos pagos (v3 «Últimos movimientos») ----------------------------- */
+
+async function RecentPaymentsCard({
+  cobros,
   moneyUsd,
 }: {
-  series: HecomClienteDashboard["summary"]["dailySeries"];
-  gastoHoy: number;
-  gasto7d: number;
-  gasto30d: number;
-  source: HecomClienteDashboard["summary"]["dailySource"];
+  cobros: HecomClienteDashboard["cobros"];
   moneyUsd: (value: number) => string;
 }) {
-  const t = await getTranslations("overview");
-  const max = Math.max(...series.map((p) => p.spend), 0);
-  const peak = max > 0 ? max : 1;
-  const hasAny = series.some((p) => p.spend > 0);
-  const peakPoint = hasAny ? series.reduce((best, p) => (p.spend > best.spend ? p : best), series[0]) : null;
-  const sourceLabel =
-    source === "snapshots"
-      ? t("dailySpend.sourceTiktok")
-      : source === "gastos"
-        ? t("dailySpend.sourceGastos")
-        : t("dailySpend.sourceNone");
-  const mobileSeries = series.slice(-7);
-
-  const bars = (points: typeof series, height: number) => (
-    <div className="flex items-end gap-1.5 sm:gap-2" style={{ height: height + 34 }}>
-      {points.map((point, index) => {
-        const isToday = index === points.length - 1;
-        const isPeak = peakPoint?.date === point.date;
-        const barPx = point.spend > 0 ? Math.max(6, Math.round((point.spend / peak) * height)) : 3;
-        return (
-          <div
-            key={point.date}
-            className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-1"
-            title={`${shortDayLabel(point.date)}: ${moneyUsd(point.spend)}`}
-          >
-            <span
-              className={`max-w-full truncate text-[9.5px] font-semibold tabular-nums transition-opacity ${
-                isPeak || isToday ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              } ${isPeak ? "text-accent-text" : MUTED}`}
-            >
-              {point.spend > 0 ? moneyUsd(point.spend) : " "}
-            </span>
-            <div
-              className={`w-full max-w-[1.6rem] rounded-t-[5px] transition-colors ${
-                isToday || isPeak ? "bg-accent" : point.spend > 0 ? "bg-accent group-hover:bg-accent-btn-hover" : "bg-subtle"
-              }`}
-              style={{ height: barPx }}
-            />
-            <span className={`text-[9.5px] font-semibold tabular-nums ${isToday ? "text-accent-text" : MUTED}`}>
-              {shortDayLabel(point.date)}
-            </span>
-            {isToday ? <span className="h-0.5 w-3 rounded-full bg-accent" aria-hidden /> : <span className="h-0.5" aria-hidden />}
-          </div>
-        );
-      })}
-    </div>
-  );
-
+  const t = await getTranslations("overview.recent");
+  const recent = cobros.slice(0, 5);
   return (
-    <Panel
-      title={t("dailySpend.title")}
-      subtitle={t("dailySpend.subtitle", { days: series.length })}
+    <PanelCard
+      aria-labelledby="ov-recent"
+      title={<span id="ov-recent">{t("title")}</span>}
+      description={t("subtitle")}
       action={
-        <span className={`rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium ${SOFT}`}>
-          {t("dailySpend.source")} <span className={INK}>{sourceLabel}</span>
-        </span>
+        <Link href={routes.cobros} className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-text hover:underline">
+          {t("viewAll")}
+          <PanelIcon name="arrow-right" className="size-3.5" />
+        </Link>
       }
+      bodyClassName="px-4 pb-2 pt-1 sm:px-6"
     >
-      <div className="grid grid-cols-3 gap-2 px-4 sm:px-5">
-        <DayMetric label={t("dailySpend.today")} value={moneyUsd(gastoHoy)} accent />
-        <DayMetric label={t("spend7d")} value={moneyUsd(gasto7d)} />
-        <DayMetric label={t("hero.last30")} value={moneyUsd(gasto30d)} />
-      </div>
-      {!hasAny ? (
-        <p className={`px-4 py-10 text-center text-[13px] font-medium sm:px-5 ${SOFT}`}>{t("dailySpend.empty")}</p>
+      {recent.length === 0 ? (
+        <EmptyState icon="ledger" title={t("empty")} className="py-8" />
       ) : (
-        <>
-          <div className="px-3 pb-2 pt-5 sm:hidden">{bars(mobileSeries, 110)}</div>
-          <div className="hidden px-5 pb-2 pt-5 sm:block">{bars(series, 130)}</div>
-          {peakPoint ? (
-            <p className={`border-t border-line px-4 py-3 text-[11.5px] sm:px-5 ${MUTED}`}>
-              {t("hero.peakDay", { date: shortDayLabel(peakPoint.date), amount: moneyUsd(peakPoint.spend) })}
-            </p>
-          ) : null}
-        </>
+        <ul>
+          {recent.map((row) => (
+            <li key={row.id} className="flex items-center justify-between gap-3 border-b border-line py-2.5 last:border-b-0">
+              <span className="grid min-w-0 leading-snug">
+                <b className="truncate font-medium text-ink">{row.metodo ?? t("defaultMethod")}</b>
+                <small className="num text-xs text-ink-3">{formatHecomFecha(row.fecha) ?? "—"}</small>
+              </span>
+              <b className="num shrink-0 font-semibold text-ok-fg">+{moneyUsd(row.monto)}</b>
+            </li>
+          ))}
+        </ul>
       )}
-    </Panel>
+    </PanelCard>
   );
 }
+
+/* --- Gasto por cuenta (v3 «bars») ----------------------------------------- */
 
 export function OverviewAccountSpendFallback() {
   return (
     <section
-      className={`${CARD} animate-pulse motion-reduce:animate-none px-4 py-4 sm:px-5`}
+      className="animate-pulse rounded-card border border-line bg-surface px-4 py-4 shadow-card motion-reduce:animate-none sm:px-6"
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="h-4 w-40 rounded-full bg-subtle" />
-      <div className="mt-1.5 h-3 w-64 max-w-full rounded-full bg-subtle" />
+      <div className="h-4 w-40 rounded-ctl bg-subtle" />
+      <div className="mt-1.5 h-3 w-64 max-w-full rounded-ctl bg-subtle" />
       <div className="mt-4 space-y-3 pb-2">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-12 rounded-box bg-field" />
+          <div key={index} className="h-8 rounded-box bg-field" />
         ))}
       </div>
     </section>
@@ -392,14 +336,7 @@ export async function OverviewAccountSpend({
     });
   }
 
-  return (
-    <AccountSpendPanel
-      rows={rows}
-      accounts={accounts}
-      anchorDate={anchorDate}
-      moneyUsd={moneyUsd}
-    />
-  );
+  return <AccountSpendPanel rows={rows} accounts={accounts} anchorDate={anchorDate} moneyUsd={moneyUsd} />;
 }
 
 /** Gasto de cada cuenta en los últimos 30 días (snapshots TikTok o gastos Hecom). */
@@ -432,8 +369,11 @@ async function AccountSpendPanel({
       return {
         id,
         spend: Math.round(spend * 100) / 100,
-        name: account ? `${label.title}${label.code ? ` · ${label.code}` : ""}` : id === "otros" ? t("byAccount.unknown") : `${t("byAccount.account")} ${shortId(id)}`,
-        meta: [account?.bmBucket ? `BM ${account.bmBucket}` : null, id !== "otros" ? `ID ${shortId(id)}` : null].filter(Boolean).join(" · "),
+        name: account
+          ? `${label.title}${label.code ? ` · ${label.code}` : ""}`
+          : id === "otros"
+            ? t("byAccount.unknown")
+            : `${t("byAccount.account")} ${shortId(id)}`,
       };
     })
     .filter((item) => item.spend > 0.004)
@@ -448,201 +388,42 @@ async function AccountSpendPanel({
           {
             id: "resto",
             name: t("byAccount.others", { count: rest.length }),
-            meta: "",
             spend: Math.round(rest.reduce((sum, item) => sum + item.spend, 0) * 100) / 100,
           },
         ]
       : items;
+  const top = shown[0]?.spend || 1;
 
   return (
-    <Panel
-      title={t("byAccount.title")}
-      subtitle={t("byAccount.subtitle")}
-      action={
-        <span className={`rounded-full bg-subtle px-2.5 py-1 text-[11px] font-semibold ${SOFT}`}>
-          {t("byAccount.count", { count: items.length })}
-        </span>
-      }
+    <PanelCard
+      aria-labelledby="ov-by-account"
+      title={<span id="ov-by-account">{t("byAccount.title")}</span>}
+      description={t("byAccount.subtitle")}
+      action={<ToneBadge>{t("byAccount.count", { count: items.length })}</ToneBadge>}
     >
       {items.length === 0 ? (
-        <p className={`px-4 pb-8 pt-2 text-[13px] font-medium sm:px-5 ${SOFT}`}>{t("byAccount.empty")}</p>
+        <EmptyState icon="chart" title={t("byAccount.empty")} className="py-8" />
       ) : (
-        <div className="px-4 pb-4 sm:px-5">
+        <>
           <ul>
-            {shown.map((item) => {
-              const share = total > 0 ? item.spend / total : 0;
-              return (
-                <li key={item.id} className="border-t border-line py-3 first:border-t-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className={`truncate text-[13.5px] font-semibold ${INK}`}>{item.name}</p>
-                      {item.meta ? <p className={`mt-0.5 truncate text-[11.5px] ${MUTED}`}>{item.meta}</p> : null}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className={`text-[13.5px] font-semibold tabular-nums ${INK}`}>{moneyUsd(item.spend)}</p>
-                      <p className={`text-[11px] tabular-nums ${MUTED}`}>{Math.round(share * 100)}%</p>
-                    </div>
-                  </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-subtle">
-                    <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(2, share * 100)}%` }} />
-                  </div>
-                </li>
-              );
-            })}
+            {shown.map((item) => (
+              <li key={item.id} className="grid grid-cols-[minmax(0,1.5fr)_minmax(56px,1.5fr)_7em] items-center gap-3 py-2 text-[13px]">
+                <span className="truncate" title={item.name}>
+                  {item.name}
+                </span>
+                <span aria-hidden className="h-1.5 rounded-full bg-accent-soft">
+                  <i className="block h-full rounded-full bg-accent" style={{ width: `${Math.max(2, (item.spend / top) * 100)}%` }} />
+                </span>
+                <b className="num text-right font-semibold">{moneyUsd(item.spend)}</b>
+              </li>
+            ))}
           </ul>
-          <div className="mt-1 flex items-center justify-between border-t border-line pt-3">
-            <span className={`text-[12.5px] font-semibold ${SOFT}`}>{t("byAccount.total")}</span>
-            <span className={`text-[14px] font-semibold tabular-nums ${INK}`}>{moneyUsd(total)}</span>
+          <div className="mt-1 flex items-center justify-between border-t border-line pt-3 text-[13px]">
+            <span className="font-medium text-ink-2">{t("byAccount.total")}</span>
+            <b className="num font-semibold">{moneyUsd(total)}</b>
           </div>
-        </div>
+        </>
       )}
-    </Panel>
-  );
-}
-
-function DayMetric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="min-w-0 rounded-box bg-field px-3 py-2.5">
-      <p className={`flex items-center gap-1.5 text-[11px] font-medium ${SOFT}`}>
-        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent ? "bg-accent" : "bg-active"}`} aria-hidden />
-        {label}
-      </p>
-      <p className={`mt-0.5 text-[15px] font-semibold tabular-nums tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-[17px] ${INK}`}>{value}</p>
-    </div>
-  );
-}
-
-async function AccountsPanel({ accounts }: { accounts: HecomTiktokAccount[] }) {
-  const t = await getTranslations("overview");
-
-  return (
-    <Panel
-      title={t("tiktokAccounts")}
-      subtitle={t("accountsPanel.hecomReadonly")}
-      action={
-        <Link href={routes.adAccounts} className={`text-[12px] font-semibold underline-offset-4 hover:underline ${INK}`}>
-          {t("accountsPanel.viewAll", { count: accounts.length })}
-        </Link>
-      }
-      className="h-full"
-    >
-      {accounts.length === 0 ? (
-        <p className={`px-4 pb-8 pt-4 text-[13px] font-medium sm:px-5 ${SOFT}`}>{t("accountsPanel.empty")}</p>
-      ) : (
-        <ul className="max-h-[26rem] flex-1 overflow-y-auto px-4 pb-3 sm:px-5">
-          {accounts.map((account) => {
-            const label = parseAdvertiserLabel(account.advertiserName);
-            const active = account.syncEnabled !== false;
-            return (
-              <li key={account.advertiserId} className="flex items-center gap-3 border-t border-line py-3 first:border-t-0">
-                <span
-                  className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-[11px] font-bold ${
-                    active ? "bg-subtle text-ok-fg" : "bg-subtle text-ink-3"
-                  }`}
-                  aria-hidden
-                >
-                  {label.code ?? initials(label.title)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className={`truncate text-[13.5px] font-semibold ${INK}`}>
-                    {label.title}
-                    {label.code ? <span className={`font-medium ${MUTED}`}> · {label.code}</span> : null}
-                  </p>
-                  <p className={`mt-0.5 truncate text-[11.5px] ${MUTED}`}>
-                    {[account.bmBucket ? `BM ${account.bmBucket}` : null, `ID ${shortId(account.advertiserId)}`, account.fee != null ? `Fee ${account.fee}%` : null]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                </div>
-                <span
-                  className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
-                    active ? "bg-subtle text-ok-fg" : "bg-subtle text-ink-3"
-                  }`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-ok-solid" : "bg-line-strong"}`} aria-hidden />
-                  {active ? t("accountsPanel.inCampaign") : t("accountsPanel.paused")}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </Panel>
-  );
-}
-
-function bmMapFromAccounts(accounts: HecomTiktokAccount[]) {
-  const map = new Map<string, string | null>();
-  for (const account of accounts) map.set(account.advertiserId, formatBmBucketLabel(account.bmBucket));
-  return map;
-}
-
-async function GastosPanel({
-  gastos,
-  accounts,
-  source,
-  moneyUsd,
-}: {
-  gastos: HecomGastoRow[];
-  accounts: HecomTiktokAccount[];
-  source: HecomClienteDashboard["source"];
-  moneyUsd: (value: number) => string;
-}) {
-  const t = await getTranslations("overview");
-  const bmByAdvertiser = bmMapFromAccounts(accounts);
-  const live = source === "hecom_live";
-
-  return (
-    <Panel
-      title={t("gastosPanel.title")}
-      subtitle={t("gastosPanel.subtitle")}
-      action={
-        <div className="flex items-center gap-3">
-          <span className={`inline-flex items-center gap-1 text-[11px] font-medium ${SOFT}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-ok-solid" : "bg-line-strong"}`} aria-hidden />
-            {live ? t("live") : t("backup")}
-          </span>
-          <Link href={routes.profit} className={`text-[12px] font-semibold underline-offset-4 hover:underline ${INK}`}>
-            {t("gastosPanel.viewProfit")}
-          </Link>
-        </div>
-      }
-      className="h-full"
-    >
-      {gastos.length === 0 ? (
-        <p className={`px-4 pb-8 pt-4 text-[13px] font-medium sm:px-5 ${SOFT}`}>{t("gastosPanel.empty")}</p>
-      ) : (
-        <ul className="max-h-[26rem] flex-1 overflow-y-auto px-4 pb-3 sm:px-5">
-          {gastos.map((row) => {
-            const fecha = formatHecomFecha(row.fecha ?? row.mes);
-            const bm = resolveBmForGasto(row, bmByAdvertiser);
-            const label = formatHecomGastoDisplay(row.camp, { notas: row.notas, fee: row.fee, fecha: null });
-            return (
-              <li key={row.id} className="flex items-center gap-3 border-t border-line py-3 first:border-t-0">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-box bg-accent-soft text-accent-text" aria-hidden>
-                  <TrendIcon />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className={`truncate text-[13.5px] font-semibold ${INK}`}>{label.title}</p>
-                  <p className={`mt-0.5 truncate text-[11.5px] ${MUTED}`}>
-                    {[fecha, bm, row.fee != null ? `Fee ${row.fee}%` : null].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-                <p className={`shrink-0 text-[13.5px] font-semibold tabular-nums ${INK}`}>{moneyUsd(row.gasto)}</p>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </Panel>
-  );
-}
-
-function TrendIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="m4 16 5-5 4 4 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15 8h5v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    </PanelCard>
   );
 }
