@@ -217,6 +217,9 @@ export const serverEnv = {
   openAiApiKey: process.env.OPENAI_API_KEY ?? "",
   openAiVisionModel: process.env.OPENAI_VISION_MODEL ?? "gpt-4o-mini",
   manualVoucherVisionModel: process.env.MANUAL_VOUCHER_VISION_MODEL?.trim() || "gpt-4.1",
+  /** Respaldo de OpenAI para leer comprobantes (Claude). Vacío = sin respaldo. */
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  anthropicVisionModel: process.env.ANTHROPIC_VISION_MODEL?.trim() || "claude-sonnet-5-5",
   /** Sin IA: auto-acredita al subir voucher (solo staging / demo; nunca en producción). */
   manualVoucherTrustUpload:
     isProduction ? false : parseBoolean(process.env.MANUAL_VOUCHER_TRUST_UPLOAD),

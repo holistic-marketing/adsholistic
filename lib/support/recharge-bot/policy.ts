@@ -19,7 +19,7 @@ export function paymentInstructions(total: number): string {
 }
 
 export function verifiedProof(analysis: Record<string, unknown>, expectedCents: number): boolean {
-  return analysis.analysisMode === "openai_vision" && analysis.confirmed === true && analysis.needsReview === false
+  return (analysis.analysisMode === "openai_vision" || analysis.analysisMode === "claude_vision") && analysis.confirmed === true && analysis.needsReview === false
     && analysis.beneficiaryMatch === true && analysis.detectedCurrency === "PEN"
     && typeof analysis.confidence === "number" && analysis.confidence >= 0.9
     && typeof analysis.detectedAmount === "number" && Math.round(analysis.detectedAmount*100) === expectedCents;

@@ -1,4 +1,5 @@
 import "server-only";
+import { claudeVisionJson } from "./claude-vision.server";
 import { reviewVoucherFormat, type VoucherFormatReview } from "./voucher-format-review.server";
 import { matchesVoucherDestination, type VoucherDestination } from "./voucher-destination";
 import { createHash } from "node:crypto";
@@ -40,7 +41,7 @@ export type VoucherAnalysisResult = {
   originBank?: string | null;
   payerName?: string | null;
   reason: string;
-  analysisMode: "openai_vision" | "trust_upload" | "pending_no_ai";
+  analysisMode: "openai_vision" | "claude_vision" | "trust_upload" | "pending_no_ai";
 };
 
 export function hashVoucherBuffer(buffer: Buffer): string {
@@ -57,7 +58,57 @@ function amountsMatch(
   return Math.abs(detectedCents - expectedCents) <= toleranceCents;
 }
 
-async function analyzeWithOpenAi(input: {
+async function openAiVoucherJson(prompt: string, input: { buffer: Buffer; mimeType: string; manual: boolean }): Promise<string | null> {
+  const apiKey = serverEnv.openAiApiKey?.trim();
+  if (!apiKey) return null;
+  const dataUrl = `data:${input.mimeType};base64,${input.buffer.toString("base64")}`;
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal: AbortSignal.timeout(25000),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: input.manual
+          ? serverEnv.manualVoucherVisionModel ?? "gpt-4.1"
+          : serverEnv.openAiVisionModel,
+        temperature: 0,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+            ],
+          },
+        ],
+      }),
+    });
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+      error?: { message?: string };
+    };
+
+    if (!response.ok) {
+      console.error("[voucher-analysis] openai error", data.error?.message);
+      return null;
+    }
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) return null;
+    JSON.parse(content);
+    return content;
+  } catch (error) {
+    console.error("[voucher-analysis] openai failed", error);
+    return null;
+  }
+}
+
+/** Lee el comprobante con OpenAI; si no hay clave, falla o responde mal, usa Claude como respaldo. */
+async function analyzeWithVision(input: {
   buffer: Buffer;
   mimeType: string;
   expectedAmount: number;
@@ -66,12 +117,6 @@ async function analyzeWithOpenAi(input: {
   strictCurrency?: boolean;
   destinationAccounts?: VoucherDestination[];
 }): Promise<VoucherAnalysisResult | null> {
-  const apiKey = serverEnv.openAiApiKey?.trim();
-  if (!apiKey) return null;
-
-  const base64 = input.buffer.toString("base64");
-  const dataUrl = `data:${input.mimeType};base64,${base64}`;
-
   const prompt = `Analiza este comprobante de pago (transferencia/Yape/Plin/banco Perú).
 Devuelve SOLO JSON válido con estas claves:
 {
@@ -125,45 +170,13 @@ Devuelve SOLO JSON válido con estas claves:
 - "payer_name": nombre del titular que paga, tal como aparece.
 ${input.destinationAccounts !== undefined ? "Extrae únicamente los datos visibles. Si falta un dato o está ilegible, devuelve null; no lo inventes." : `Monto esperado: ${input.expectedAmount} ${input.expectedCurrency}. Beneficiarios válidos (parcial): ${input.holderNames.join(", ")}.`}`;
 
+  const manual = input.destinationAccounts !== undefined;
+  const fromOpenAi = await openAiVoucherJson(prompt, { buffer: input.buffer, mimeType: input.mimeType, manual });
+  const content = fromOpenAi ?? await claudeVisionJson({ prompt, buffer: input.buffer, mimeType: input.mimeType, tag: "voucher-analysis" });
+  if (!content) return null;
+  const analysisMode = fromOpenAi ? "openai_vision" as const : "claude_vision" as const;
+
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      signal: AbortSignal.timeout(25000),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: input.destinationAccounts !== undefined
-          ? serverEnv.manualVoucherVisionModel ?? "gpt-4.1"
-          : serverEnv.openAiVisionModel,
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
-            ],
-          },
-        ],
-      }),
-    });
-
-    const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-      error?: { message?: string };
-    };
-
-    if (!response.ok) {
-      console.error("[voucher-analysis] openai error", data.error?.message);
-      return null;
-    }
-
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) return null;
-
     const parsed = JSON.parse(content) as {
       amount?: number | null;
       currency?: string | null;
@@ -306,10 +319,10 @@ ${input.destinationAccounts !== undefined ? "Extrae únicamente los datos visibl
                       ? "No pudimos leer la referencia de la operación. Nuestro equipo revisará el comprobante."
                       : "No pudimos completar la validación automática con los datos leídos. Nuestro equipo revisará el comprobante."
           : (parsed.notes ?? "No pudimos confirmar el monto o beneficiario con certeza."),
-      analysisMode: "openai_vision",
+      analysisMode,
     };
   } catch (error) {
-    console.error("[voucher-analysis] openai failed", error);
+    console.error(`[voucher-analysis] ${analysisMode} parse failed`, error);
     return null;
   }
 }
@@ -330,7 +343,7 @@ export async function analyzePaymentVoucher(input: {
       input.holderNames
     : ["Holistic", "HOLISTIC MARKETING"];
 
-  const fromAi = await analyzeWithOpenAi({
+  const fromAi = await analyzeWithVision({
     buffer: input.buffer,
     mimeType: input.mimeType,
     expectedAmount: input.expectedAmount,

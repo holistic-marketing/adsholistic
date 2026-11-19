@@ -129,7 +129,7 @@ async function completeDeposit(input: {
     const operation = getString(intent.metadata.voucher_operation_code);
     if (intent.provider !== "manual" || intent.metadata.voucher_approval_policy !== "destination_v1" ||
       !isRecord(analysis) || analysis.confirmed !== true || analysis.destinationVerified !== true || analysis.receiptScreeningPassed !== true ||
-      analysis.accountMatch !== true || analysis.beneficiaryMatch !== true || analysis.analysisMode !== "openai_vision" ||
+      analysis.accountMatch !== true || analysis.beneficiaryMatch !== true || (analysis.analysisMode !== "openai_vision" && analysis.analysisMode !== "claude_vision") ||
       !isRecord(security) || security.duplicateContentHash !== false || security.duplicateOperationCode !== false ||
       security.duplicateCheckFailed !== false || security.rateLimitBlocksAutoApprove !== false || !hash || !operation) {
       return { completed: false, reason: "El comprobante requiere revisión." };

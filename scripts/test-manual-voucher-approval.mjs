@@ -27,6 +27,7 @@ const valid = { amount: 100, currency: "PEN", operation_code: "123456", confiden
 async function analyze(overrides = {}, env = {}, formatPassed = true) {
   const service = load("lib/payments/voucher-analysis.server.ts", {
     "./voucher-destination": destination,
+    "./claude-vision.server": { claudeVisionJson: async () => null },
     "./voucher-format-review.server": { reviewVoucherFormat: async () => ({ passed: formatPassed, profile: "bcp_app", outcome: formatPassed ? "compatible" : "unsupported", observedLabels: [], findings: [] }) },
     "@/lib/env/env.server": { serverEnv: { openAiApiKey: "test", ...env } },
     "@/lib/payments/voucher-channel": { normalizeVoucherBank: () => null, normalizeVoucherChannel: () => "transferencia" },
@@ -104,7 +105,7 @@ test("independent format review blocks an otherwise clear receipt", async () => 
   assert.equal(result.receiptScreeningPassed, false);
 });
 test("supported format requires literal labels and a consistent assessment", () => {
-  const { evaluateVoucherFormat } = load("lib/payments/voucher-format-review.server.ts", { "@/lib/env/env.server": { serverEnv: {} } });
+  const { evaluateVoucherFormat } = load("lib/payments/voucher-format-review.server.ts", { "@/lib/env/env.server": { serverEnv: {} }, "./claude-vision.server": { claudeVisionJson: async () => null } });
   const good = { profile: "bcp_app", outcome: "compatible", observed_labels: ["Enviado a", "Desde", "Número de operación"], findings: [] };
   assert.equal(evaluateVoucherFormat(good).passed, true);
   assert.equal(evaluateVoucherFormat({ ...good, profile: "interbank_receipt" }).profile, "bcp_app");
@@ -130,7 +131,7 @@ test("recipient row wins over an OCR copy of the sender row; no missing recipien
   }
 });
 test("approved business receipt variant preserves request identifier and requires final success", async () => {
-  const { evaluateVoucherFormat } = load("lib/payments/voucher-format-review.server.ts", { "@/lib/env/env.server": { serverEnv: {} } });
+  const { evaluateVoucherFormat } = load("lib/payments/voucher-format-review.server.ts", { "@/lib/env/env.server": { serverEnv: {} }, "./claude-vision.server": { claudeVisionJson: async () => null } });
   const observed_labels = ["Cuenta de cargo", "Cuenta de destino", "Número de solicitud", "Fecha y hora de operación", "Transferencia exitosa"];
   assert.equal(evaluateVoucherFormat({ profile: "interbank_receipt", outcome: "compatible", observed_labels, findings: [] }).passed, true);
   assert.equal(evaluateVoucherFormat({ profile: "interbank_receipt", outcome: "compatible", observed_labels: observed_labels.slice(0, -1), findings: [] }).passed, false);
