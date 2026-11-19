@@ -137,7 +137,7 @@ export function VoucherReviewCard({ notice }: { notice: VoucherReviewNotice }) {
       {notice.tip ? (
         <p className="px-1 text-[12px] leading-5 text-[#78716c]">
           <span className="font-semibold text-[#57534e]">Para la próxima: </span>
-          {notice.tip.replace(/^Para la próxima,\s*/i, "")}
+          {notice.tip.replace(/^Para la próxima,\s*/i, "").replace(/^./, (c) => c.toUpperCase())}
         </p>
       ) : null}
     </div>
