@@ -26,7 +26,8 @@ const MAX_GENERIC_ATTEMPTS = 3;
 const RETRY_AFTER_MS = 60 * 60 * 1000;
 
 type AutoReclaimState = {
-  status: "recovered" | "hold" | "retained" | "retrying";
+  /** legacy_skip: ya estaba baneada antes de activar esto (2026-11-19); no se toca. */
+  status: "recovered" | "hold" | "retained" | "retrying" | "legacy_skip";
   attempts: number;
   last_attempt_at: string;
   last_error?: string | null;
@@ -153,8 +154,8 @@ async function processAccount(
   const prev = readState(account.metadata);
   const now = Date.now();
 
-  // Ya retenida y avisada: soporte la atiende. No martillar TikTok cada hora.
-  if (prev?.status === "retained") {
+  // Ya retenida y avisada (soporte la atiende) o baneada antes de activar esto.
+  if (prev?.status === "retained" || prev?.status === "legacy_skip") {
     result.skipped += 1;
     return;
   }
@@ -274,8 +275,26 @@ async function processAccount(
   }
 }
 
+/** Cuenta que volvió a estar activa: se limpia la marca para que un baneo futuro sí se procese. */
+async function clearReactivated(): Promise<void> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("ad_accounts")
+    .select("id, metadata")
+    .neq("status", "disabled")
+    .not("metadata->auto_reclaim", "is", null)
+    .limit(200);
+  for (const row of data ?? []) {
+    if (!isRecord(row.metadata)) continue;
+    const { auto_reclaim: _drop, ...rest } = row.metadata;
+    void _drop;
+    await admin.from("ad_accounts").update({ metadata: rest }).eq("id", row.id);
+  }
+}
+
 export async function runAutoReclaimBanned(): Promise<AutoReclaimRunResult> {
   const result: AutoReclaimRunResult = { scanned: 0, recovered: [], held: [], retained: [], skipped: 0 };
+  await clearReactivated().catch((error) => console.warn("[auto-reclaim] clear failed", error));
   const candidates = (await loadCandidates()).slice(0, MAX_PER_RUN);
   result.scanned = candidates.length;
   for (const account of candidates) {
