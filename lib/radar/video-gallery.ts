@@ -45,6 +45,9 @@ export type VideoGalleryItem = {
   /** Costo por resultado del video ÷ el del cliente (menos es mejor). */
   vsAverage: number | null;
   verdict: VideoVerdict;
+  clicks: number;
+  /** Primer y último día con gasto dentro del rango. */
+  firstDate: string;
   lastDate: string;
 };
 
@@ -86,6 +89,7 @@ type Acc = {
   held6: number;
   recentImp: number;
   recentClicks: number;
+  firstDate: string;
   lastDate: string;
 };
 
@@ -121,6 +125,7 @@ export function summarizeVideoGallery(rows: VideoDayRow[], opts: { limit?: numbe
         held6: 0,
         recentImp: 0,
         recentClicks: 0,
+        firstDate: row.statDate,
         lastDate: row.statDate,
       };
     const spend = row.spend || 0;
@@ -139,6 +144,7 @@ export function summarizeVideoGallery(rows: VideoDayRow[], opts: { limit?: numbe
       acc.recentClicks += row.clicks ?? 0;
     }
     if (row.statDate > acc.lastDate) acc.lastDate = row.statDate;
+    if (row.statDate < acc.firstDate) acc.firstDate = row.statDate;
     // El nombre más reciente gana (el anuncio pudo renombrarse).
     if (row.adName && row.statDate >= acc.nameDate) {
       acc.name = row.adName;
@@ -195,6 +201,8 @@ export function summarizeVideoGallery(rows: VideoDayRow[], opts: { limit?: numbe
         hold6s: a.plays > 0 ? round(a.held6 / a.plays, 3) : null,
         vsAverage,
         verdict,
+        clicks: a.clicks,
+        firstDate: a.firstDate,
         lastDate: a.lastDate,
       };
     })

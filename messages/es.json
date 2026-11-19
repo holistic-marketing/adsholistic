@@ -3341,6 +3341,55 @@
       "lede": "Sube un video, recibe un puntaje con recomendaciones y envíalo como campaña pausada a TikTok.",
       "uploads": "Videos subidos",
       "scoreAvg": "Puntaje promedio"
+    },
+    "videos": {
+      "title": "Creativos",
+      "lede": "Los videos de {cliente} en TikTok con su gasto y rendimiento.",
+      "listRecent": "Videos más recientes",
+      "listSpend": "Videos con más gasto",
+      "listMeta": "{shown} de {total} videos · del {from} al {to}",
+      "play": "Ver video",
+      "close": "Cerrar",
+      "openPost": "Ver en TikTok",
+      "activeOn": "Activo el {date}",
+      "activeRange": "Activo del {from} al {to}",
+      "adsCount": "{count, plural, one {# anuncio} other {# anuncios}}",
+      "spend": "Gasto",
+      "results": "Resultados",
+      "cpr": "Costo/resultado",
+      "ctr": "CTR",
+      "impressions": "Impresiones",
+      "clicks": "Clics",
+      "hold6s": "Ven 6 s",
+      "verdict": {
+        "winner": "Ganador",
+        "noResults": "Gasta sin resultados",
+        "tired": "Se está cansando",
+        "expensive": "Caro",
+        "steady": "Estable"
+      },
+      "kpi": {
+        "videos": "Videos",
+        "videosDetail": "Con gasto en el periodo",
+        "spend": "Gasto",
+        "spendDetail": "Suma de todos los videos",
+        "results": "Resultados",
+        "resultsDetail": "Conversiones que reporta TikTok",
+        "cpr": "Costo por resultado",
+        "cprDetail": "Promedio del periodo"
+      },
+      "filters": {
+        "range": "Periodo",
+        "lastDays": "{days} días",
+        "sortBy": "Ordenar",
+        "recent": "Más recientes",
+        "spend": "Más gasto"
+      },
+      "footnote": "Datos de TikTok hasta el {through}. Ganador = cuesta 20% menos que tu promedio. Se está cansando = cada vez menos gente le hace clic.",
+      "emptyTitle": "No hay videos con gasto en estas fechas",
+      "emptyBody": "Prueba con otro periodo. Los videos aparecen cuando sus anuncios gastan en TikTok.",
+      "errorTitle": "No se pudieron cargar tus videos",
+      "errorBody": "Vuelve a intentar en unos minutos."
     }
   },
   "onboarding": {

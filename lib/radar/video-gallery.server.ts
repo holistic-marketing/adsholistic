@@ -33,12 +33,8 @@ export type GalleryPreview = TikTokMediaPreview & {
  * de radar_ad_daily (job de cada madrugada) y solo consulta TikTok para las
  * portadas de los videos que se muestran.
  */
-export async function loadClienteVideoGallery(input: {
-  hecomClienteId: string;
-  organizationId?: string;
-  limit?: number;
-}): Promise<VideoGalleryData> {
-  const cacheKey = `${input.hecomClienteId}:${input.limit ?? 12}`;
+export async function loadClienteVideoGallery(input: GalleryInput): Promise<VideoGalleryData> {
+  const cacheKey = `${input.hecomClienteId}:${input.limit ?? 12}:${input.from ?? ""}:${input.to ?? ""}:${input.sort ?? "spend"}`;
   const hit = galleryCache.get(cacheKey);
   if (hit && hit.expires > Date.now()) return hit.data;
   const data = await buildClienteVideoGallery(input);
@@ -53,13 +49,20 @@ export async function loadClienteVideoGallery(input: {
 const CACHE_TTL_MS = 15 * 60_000;
 const galleryCache = new Map<string, { data: VideoGalleryData; expires: number }>();
 
-async function buildClienteVideoGallery(input: {
+type GalleryInput = {
   hecomClienteId: string;
   organizationId?: string;
   limit?: number;
-}): Promise<VideoGalleryData> {
-  const to = shiftYmd(todayYmdInTz(), -1);
-  const from = shiftYmd(to, -(VIDEO_GALLERY_DAYS - 1));
+  /** Rango propio (YYYY-MM-DD). Sin él: los últimos VIDEO_GALLERY_DAYS días hasta ayer. */
+  from?: string;
+  to?: string;
+  /** "recent": videos que empezaron a gastar más tarde primero. Por defecto, más gasto. */
+  sort?: "spend" | "recent";
+};
+
+async function buildClienteVideoGallery(input: GalleryInput): Promise<VideoGalleryData> {
+  const to = input.to ?? shiftYmd(todayYmdInTz(), -1);
+  const from = input.from ?? shiftYmd(to, -(VIDEO_GALLERY_DAYS - 1));
   const admin = createAdminClient();
   const rows: VideoDayRow[] = [];
 
@@ -96,7 +99,12 @@ async function buildClienteVideoGallery(input: {
   }
 
   await fillMissingVideoIds(rows, input.organizationId);
-  const summary = summarizeVideoGallery(rows, { limit: input.limit ?? 12 });
+  const full = summarizeVideoGallery(rows);
+  const ordered =
+    input.sort === "recent"
+      ? [...full.videos].sort((a, b) => b.firstDate.localeCompare(a.firstDate) || b.spend - a.spend)
+      : full.videos;
+  const summary = { ...full, videos: ordered.slice(0, input.limit ?? 12) };
 
   // Portadas: una consulta por anunciante; si falla, la tarjeta sale sin imagen.
   const byAdvertiser = new Map<string, string[]>();

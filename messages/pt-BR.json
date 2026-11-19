@@ -3341,6 +3341,55 @@
       "lede": "Envie um vídeo, receba uma pontuação com recomendações e mande-o ao TikTok como campanha pausada.",
       "uploads": "Vídeos enviados",
       "scoreAvg": "Pontuação média"
+    },
+    "videos": {
+      "title": "Criativos",
+      "lede": "Os vídeos de {cliente} no TikTok com gasto e desempenho.",
+      "listRecent": "Vídeos mais recentes",
+      "listSpend": "Vídeos com mais gasto",
+      "listMeta": "{shown} de {total} vídeos · de {from} a {to}",
+      "play": "Ver vídeo",
+      "close": "Fechar",
+      "openPost": "Ver no TikTok",
+      "activeOn": "Ativo em {date}",
+      "activeRange": "Ativo de {from} a {to}",
+      "adsCount": "{count, plural, one {# anúncio} other {# anúncios}}",
+      "spend": "Gasto",
+      "results": "Resultados",
+      "cpr": "Custo/resultado",
+      "ctr": "CTR",
+      "impressions": "Impressões",
+      "clicks": "Cliques",
+      "hold6s": "Veem 6 s",
+      "verdict": {
+        "winner": "Vencedor",
+        "noResults": "Gasta sem resultados",
+        "tired": "Está cansando",
+        "expensive": "Caro",
+        "steady": "Estável"
+      },
+      "kpi": {
+        "videos": "Vídeos",
+        "videosDetail": "Com gasto no período",
+        "spend": "Gasto",
+        "spendDetail": "Soma de todos os vídeos",
+        "results": "Resultados",
+        "resultsDetail": "Conversões informadas pelo TikTok",
+        "cpr": "Custo por resultado",
+        "cprDetail": "Média do período"
+      },
+      "filters": {
+        "range": "Período",
+        "lastDays": "{days} dias",
+        "sortBy": "Ordenar",
+        "recent": "Mais recentes",
+        "spend": "Mais gasto"
+      },
+      "footnote": "Dados do TikTok até {through}. Vencedor = custa 20% menos que sua média. Está cansando = cada vez menos gente clica.",
+      "emptyTitle": "Não há vídeos com gasto nessas datas",
+      "emptyBody": "Tente outro período. Os vídeos aparecem quando os anúncios gastam no TikTok.",
+      "errorTitle": "Não foi possível carregar seus vídeos",
+      "errorBody": "Tente novamente em alguns minutos."
     }
   },
   "onboarding": {

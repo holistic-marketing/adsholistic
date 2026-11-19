@@ -3341,6 +3341,55 @@
       "lede": "Upload a video, get a score with recommendations and send it to TikTok as a paused campaign.",
       "uploads": "Uploaded videos",
       "scoreAvg": "Average score"
+    },
+    "videos": {
+      "title": "Creatives",
+      "lede": "{cliente}'s TikTok videos with their spend and performance.",
+      "listRecent": "Most recent videos",
+      "listSpend": "Top spending videos",
+      "listMeta": "{shown} of {total} videos · {from} to {to}",
+      "play": "Play video",
+      "close": "Close",
+      "openPost": "View on TikTok",
+      "activeOn": "Active on {date}",
+      "activeRange": "Active {from} to {to}",
+      "adsCount": "{count, plural, one {# ad} other {# ads}}",
+      "spend": "Spend",
+      "results": "Results",
+      "cpr": "Cost/result",
+      "ctr": "CTR",
+      "impressions": "Impressions",
+      "clicks": "Clicks",
+      "hold6s": "Watch 6 s",
+      "verdict": {
+        "winner": "Winner",
+        "noResults": "Spending without results",
+        "tired": "Getting tired",
+        "expensive": "Expensive",
+        "steady": "Steady"
+      },
+      "kpi": {
+        "videos": "Videos",
+        "videosDetail": "With spend in the period",
+        "spend": "Spend",
+        "spendDetail": "Total across all videos",
+        "results": "Results",
+        "resultsDetail": "Conversions reported by TikTok",
+        "cpr": "Cost per result",
+        "cprDetail": "Period average"
+      },
+      "filters": {
+        "range": "Period",
+        "lastDays": "{days} days",
+        "sortBy": "Sort",
+        "recent": "Most recent",
+        "spend": "Top spend"
+      },
+      "footnote": "TikTok data through {through}. Winner = costs 20% less than your average. Getting tired = fewer and fewer people click it.",
+      "emptyTitle": "No videos with spend in these dates",
+      "emptyBody": "Try another period. Videos show up once their ads spend on TikTok.",
+      "errorTitle": "Couldn't load your videos",
+      "errorBody": "Try again in a few minutes."
     }
   },
   "onboarding": {
