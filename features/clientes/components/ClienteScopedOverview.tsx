@@ -17,7 +17,7 @@ import { getAppFormatter } from "@/lib/i18n/get-app-formatter";
 import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
 import { PanelIcon } from "@/components/ui/PanelIcon";
 import { buttonClass } from "@/components/ui/Button";
-import { OverviewKpi } from "./OverviewKpi";
+import { KpiCard } from "@/components/ui/PanelKit";
 import type { HecomTiktokAccount } from "@/lib/hecom/clientes.server";
 
 /*
@@ -161,22 +161,22 @@ export async function ClienteScopedOverview({
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <OverviewKpi
+        <KpiCard
           label={t("hero.badge")}
           value={moneyUsd(summary.gasto30d)}
           lead={t("hero.caption")}
           detail={`${t("spend7d")}: ${moneyUsd(summary.gasto7d)} · ${t("spendToday")}: ${moneyUsd(summary.gastoHoy)}`}
         />
         {wallet ?? (
-          <OverviewKpi label={t("feeHolistic")} value={`${summary.depositFeePercent}%`} lead={t("feeMeta", { percent: summary.depositFeePercent })} />
+          <KpiCard label={t("feeHolistic")} value={`${summary.depositFeePercent}%`} lead={t("feeMeta", { percent: summary.depositFeePercent })} />
         )}
-        <OverviewKpi
+        <KpiCard
           label={t("cobros")}
           value={moneyUsd(summary.cobroTotal)}
           lead={t("hero.cobrosHint")}
           detail={`${t("adSpend")}: ${moneyUsd(summary.gastoTotal)}`}
         />
-        <OverviewKpi
+        <KpiCard
           label={t("tiktokAccounts")}
           value={String(summary.accountCount)}
           lead={summary.accountCount > 0 ? t("accountsHint", { active: activeAccounts, paused: pausedAccounts }) : undefined}

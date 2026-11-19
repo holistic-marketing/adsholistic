@@ -8,7 +8,7 @@ import {
   pickClienteWalletOrganizationId,
   walletBalanceIsUnknown,
 } from "@/features/clientes/lib/cliente-wallet";
-import { OverviewKpi } from "./OverviewKpi";
+import { KpiCard } from "@/components/ui/PanelKit";
 
 type OverviewWalletProps = {
   clienteId: string;
@@ -38,7 +38,7 @@ async function WalletKpi({ clienteId, sessionOrganizationId = null, feePercent }
     cents = null;
   }
   return (
-    <OverviewKpi
+    <KpiCard
       label={t("balance")}
       value={walletBalanceIsUnknown(cents) ? "—" : formatMoney(cents / 100, currency)}
       lead={t("availableHint")}
@@ -51,7 +51,7 @@ async function WalletKpi({ clienteId, sessionOrganizationId = null, feePercent }
 export async function OverviewWallet(props: OverviewWalletProps) {
   const t = await getTranslations("wallet");
   return (
-    <Suspense fallback={<OverviewKpi label={t("balance")} value="…" busy />}>
+    <Suspense fallback={<KpiCard label={t("balance")} value="…" busy />}>
       <WalletKpi {...props} />
     </Suspense>
   );

@@ -90,5 +90,5 @@ test("el saldo en cartera del resumen no bloquea la página y no pinta un cero m
   assert.match(wallet, /walletBalanceIsUnknown/);
   assert.match(wallet, /<Suspense/);
   // El reemplazo mientras carga marca la espera y muestra «…», no un monto.
-  assert.match(wallet, /fallback=\{<OverviewKpi[^>]*value="…"[^>]*busy/);
+  assert.match(wallet, /fallback=\{<KpiCard[^>]*value="…"[^>]*busy/);
 });
