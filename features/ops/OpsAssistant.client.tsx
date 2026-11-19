@@ -196,7 +196,7 @@ export function OpsAssistant() {
       </article>)}</div>
       <div className={styles.composerDock}>
         <div className={styles.followups} aria-label="Otras consultas">{QUERIES.filter((item) => !turns.some((turn) => turn.question === item.question)).slice(0, 3).map((item) => <button key={item.title} type="button" disabled={busy} onClick={() => void ask(item.question)}><AssistantIcon name={item.icon} />{item.title}</button>)}</div>
-        {composer}<p className={styles.sessionNote}>Cada consulta es independiente. La conversación se conserva mientras esta página esté abierta.</p>
+        {composer}<p className={styles.sessionNote}>El asistente tiene en cuenta tus últimas 4 preguntas. La conversación se borra al salir de esta página o recargarla.</p>
       </div>
     </div>}
     <span className={styles.srOnly} role="status">{!busy && turns.at(-1)?.answer ? "Respuesta disponible." : ""}</span>
