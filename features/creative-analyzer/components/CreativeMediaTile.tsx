@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIsClient } from "@/hooks/useIsClient";
 import { buttonClass } from "@/components/ui/Button";
@@ -40,7 +40,23 @@ export function CreativeMediaTile({
   const [videoFailed, setVideoFailed] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [zoomOpen, setZoomOpen] = useState(false);
+  // El video se empieza a descargar al pasar el mouse (o tocar) la portada,
+  // así al abrirlo ya tiene algo cargado. Es el mismo <video>: no se baja dos veces.
+  const [warm, setWarm] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const mounted = useIsClient();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (zoomOpen) {
+      void video.play().catch(() => undefined);
+    } else {
+      video.pause();
+      if (video.currentTime > 0) video.currentTime = 0;
+    }
+  }, [zoomOpen]);
 
   useEffect(() => {
     if (!zoomOpen) return;
@@ -95,8 +111,13 @@ export function CreativeMediaTile({
             type="button"
             className="group relative h-full w-full"
             aria-label={canPlay ? playLabel : label}
+            onPointerEnter={() => setWarm(true)}
+            onFocus={() => setWarm(true)}
+            onTouchStart={() => setWarm(true)}
             onClick={() => {
-              if (canOpen) setZoomOpen(true);
+              if (!canOpen) return;
+              setWarm(true);
+              setZoomOpen(true);
             }}
           >
             {still ? (
@@ -131,12 +152,16 @@ export function CreativeMediaTile({
       </div>
 
       {mounted &&
-        zoomOpen &&
+        (zoomOpen || (warm && playable)) &&
         createPortal(
           <div
-            className="fixed inset-0 z-[80] flex items-center justify-center bg-[var(--ui-scrim)] p-4"
+            className={cn(
+              "fixed inset-0 z-[80] flex items-center justify-center bg-[var(--ui-scrim)] p-4",
+              !zoomOpen && "pointer-events-none invisible",
+            )}
             role="dialog"
-            aria-modal="true"
+            aria-modal={zoomOpen ? "true" : undefined}
+            aria-hidden={zoomOpen ? undefined : true}
             aria-label={label}
             onClick={() => setZoomOpen(false)}
           >
@@ -153,17 +178,25 @@ export function CreativeMediaTile({
                 {closeLabel}
               </button>
               {playable ? (
-                <video
-                  key={playable}
-                  src={playable}
-                  poster={still ?? undefined}
-                  className="max-h-[80vh] w-full bg-subtle object-contain"
-                  controls
-                  autoPlay
-                  playsInline
-                  preload="auto"
-                  onError={() => setVideoFailed(true)}
-                />
+                <div className="relative">
+                  <video
+                    ref={videoRef}
+                    key={playable}
+                    src={playable}
+                    poster={still ?? undefined}
+                    className="max-h-[80vh] w-full bg-subtle object-contain"
+                    controls
+                    playsInline
+                    preload="auto"
+                    onCanPlay={() => setVideoReady(true)}
+                    onError={() => setVideoFailed(true)}
+                  />
+                  {zoomOpen && !videoReady ? (
+                    <span className="pointer-events-none absolute inset-0 grid place-items-center" aria-hidden>
+                      <span className="size-9 animate-spin rounded-full border-[3px] border-white/40 border-t-white" />
+                    </span>
+                  ) : null}
+                </div>
               ) : still ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
