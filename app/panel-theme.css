@@ -1,0 +1,869 @@
+/* ==========================================================================
+   Panel Ads Holistic · sistema visual v3
+   Fondo neutro frío, tarjetas blancas con borde fino, radios de 8 / 10 / 14 px,
+   un único naranja de marca y números en monoespaciada.
+
+   1. Tokens (claro, oscuro y contraste alto)
+   2. Utilidades de Tailwind (bg-surface, text-ink-2, border-line…)
+   3. Compatibilidad: los tokens --auth-* y --admin-* del panel apuntan a v3
+   4. Base del panel
+   ========================================================================== */
+
+/* 1. TOKENS ---------------------------------------------------------------- */
+:root {
+  --ui-brand-logo: #fc761e;
+
+  --ui-rail: #f1f4f8; /* fondo exterior y menú */
+  --ui-bg: #f6f8fb; /* lienzo del contenido */
+  --ui-surface: #ffffff; /* tarjetas */
+  --ui-field: #f7f9fc; /* campos y botones secundarios */
+  --ui-muted: #edf1f5; /* rellenos suaves */
+  --ui-hover: #e8edf3;
+  --ui-active: #e0e7ef; /* opción activa del menú */
+  --ui-line: #e2e7ed;
+  --ui-line-strong: #cbd3dc;
+  --ui-text: #10151d;
+  --ui-text-2: #55606e;
+  --ui-text-3: #626c79;
+
+  --ui-accent: #d47840; /* naranja de acción */
+  --ui-accent-btn: #d47840;
+  --ui-accent-btn-hover: #bf6630;
+  --ui-on-accent: #ffffff;
+  --ui-accent-text: #a84c1a;
+  --ui-accent-soft: #fcf2eb;
+  --ui-accent-line: #f0cfb8;
+  --ui-focus: #c2601f;
+
+  --ui-ok-fg: #17753f;
+  --ui-ok-bg: #eef8f2;
+  --ui-ok-line: #bfe4ce;
+  --ui-ok-solid: #22a05a;
+  --ui-info-fg: #1b5fb4;
+  --ui-info-bg: #eef4fc;
+  --ui-info-line: #c4d9f4;
+  --ui-info-solid: #3d82db;
+  --ui-warn-fg: #8f5600;
+  --ui-warn-bg: #fff7e6;
+  --ui-warn-line: #f0d9a8;
+  --ui-warn-solid: #dc9a1b;
+  --ui-danger-fg: #be2424;
+  --ui-danger-bg: #fdf1f1;
+  --ui-danger-line: #f3c4c4;
+  --ui-danger-solid: #db3a3a;
+  --ui-neutral-fg: #4d5866;
+  --ui-neutral-bg: #f1f4f7;
+  --ui-neutral-line: #dbe1e8;
+  --ui-neutral-solid: #8a95a3;
+  --ui-danger-btn: #c62b2b;
+  --ui-danger-btn-hover: #a82222;
+
+  --ui-shadow-xs: 0 1px 2px rgb(16 21 29 / 0.05);
+  --ui-shadow-sm: 0 1px 3px rgb(16 21 29 / 0.09), 0 1px 2px -1px rgb(16 21 29 / 0.09);
+  --ui-shadow-pop: 0 10px 24px -6px rgb(16 21 29 / 0.16), 0 4px 8px -4px rgb(16 21 29 / 0.08);
+  --ui-shadow-dlg: 0 24px 48px -12px rgb(16 21 29 / 0.28);
+  --ui-glow: 0 0 0 1px rgb(212 120 64 / 0.16), 0 8px 22px rgb(212 120 64 / 0.34);
+  --ui-scrim: rgb(8 12 18 / 0.62);
+  --ui-ink: #10151d;
+  --ui-ring: color-mix(in srgb, var(--ui-accent) 28%, transparent);
+}
+
+html[data-ui-theme="dark"] {
+  --ui-rail: #0b0e13;
+  --ui-bg: #10141a;
+  --ui-surface: #161b23;
+  --ui-field: #1b212b;
+  --ui-muted: #1f2631;
+  --ui-hover: #252d39;
+  --ui-active: #29323f;
+  --ui-line: #262e3a;
+  --ui-line-strong: #3a4553;
+  --ui-text: #f1f4f8;
+  --ui-text-2: #a7b1be;
+  --ui-text-3: #98a2af;
+  --ui-accent-btn-hover: #e08a54;
+  --ui-accent-text: #efa677;
+  --ui-accent-soft: #2a1d14;
+  --ui-accent-line: #5c3c25;
+  --ui-focus: #efa677;
+  --ui-ok-fg: #7ad3a2;
+  --ui-ok-bg: #11261b;
+  --ui-ok-line: #1e4732;
+  --ui-ok-solid: #34a56b;
+  --ui-info-fg: #8ebdf3;
+  --ui-info-bg: #111f31;
+  --ui-info-line: #213e61;
+  --ui-info-solid: #4a89d8;
+  --ui-warn-fg: #efc566;
+  --ui-warn-bg: #2a210c;
+  --ui-warn-line: #53411a;
+  --ui-warn-solid: #d9a227;
+  --ui-danger-fg: #f49b93;
+  --ui-danger-bg: #2e1414;
+  --ui-danger-line: #5c2424;
+  --ui-danger-solid: #dc4a4a;
+  --ui-neutral-fg: #c5cdd7;
+  --ui-neutral-bg: #1d2430;
+  --ui-neutral-line: #303a48;
+  --ui-neutral-solid: #7f8a98;
+  --ui-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+  --ui-shadow-sm: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --ui-shadow-pop: 0 12px 28px -6px rgb(0 0 0 / 0.6);
+  --ui-shadow-dlg: 0 24px 48px -12px rgb(0 0 0 / 0.7);
+  --ui-scrim: rgb(0 0 0 / 0.68);
+  --ui-ink: #f1f4f8;
+}
+
+/* Contraste alto: oscurece el naranja para que el texto blanco de los botones cumpla 4.5:1. */
+html[data-ui-contrast="alto"] {
+  --ui-accent-btn: #a94a12;
+  --ui-accent-btn-hover: #8c3d0e;
+  --ui-accent: #a94a12;
+  --ui-text-3: #4d5866;
+  --ui-line-strong: #9aa5b2;
+  --ui-glow: 0 0 0 1px rgb(169 74 18 / 0.2), 0 8px 22px rgb(169 74 18 / 0.3);
+}
+html[data-ui-theme="dark"][data-ui-contrast="alto"] {
+  --ui-accent-btn: #f0a070;
+  --ui-accent: #f0a070;
+  --ui-on-accent: #10151d;
+  --ui-accent-btn-hover: #f5b48c;
+  --ui-text-3: #c5cdd7;
+}
+
+/* 2. UTILIDADES DE TAILWIND ------------------------------------------------ */
+@theme inline {
+  --color-rail: var(--ui-rail);
+  --color-canvas: var(--ui-bg);
+  --color-surface: var(--ui-surface);
+  --color-field: var(--ui-field);
+  --color-subtle: var(--ui-muted);
+  --color-hover: var(--ui-hover);
+  --color-active: var(--ui-active);
+  --color-line: var(--ui-line);
+  --color-line-strong: var(--ui-line-strong);
+  --color-ink: var(--ui-text);
+  --color-ink-2: var(--ui-text-2);
+  --color-ink-3: var(--ui-text-3);
+  --color-brand-logo: var(--ui-brand-logo);
+
+  --color-accent: var(--ui-accent);
+  --color-accent-btn: var(--ui-accent-btn);
+  --color-accent-btn-hover: var(--ui-accent-btn-hover);
+  --color-on-accent: var(--ui-on-accent);
+  --color-accent-text: var(--ui-accent-text);
+  --color-accent-soft: var(--ui-accent-soft);
+  --color-accent-line: var(--ui-accent-line);
+  --color-focus: var(--ui-focus);
+
+  --color-ok-fg: var(--ui-ok-fg);
+  --color-ok-bg: var(--ui-ok-bg);
+  --color-ok-line: var(--ui-ok-line);
+  --color-ok-solid: var(--ui-ok-solid);
+  --color-info-fg: var(--ui-info-fg);
+  --color-info-bg: var(--ui-info-bg);
+  --color-info-line: var(--ui-info-line);
+  --color-info-solid: var(--ui-info-solid);
+  --color-warn-fg: var(--ui-warn-fg);
+  --color-warn-bg: var(--ui-warn-bg);
+  --color-warn-line: var(--ui-warn-line);
+  --color-warn-solid: var(--ui-warn-solid);
+  --color-danger-fg: var(--ui-danger-fg);
+  --color-danger-bg: var(--ui-danger-bg);
+  --color-danger-line: var(--ui-danger-line);
+  --color-danger-solid: var(--ui-danger-solid);
+  --color-danger-btn: var(--ui-danger-btn);
+  --color-danger-btn-hover: var(--ui-danger-btn-hover);
+  --color-neutral-fg: var(--ui-neutral-fg);
+  --color-neutral-bg: var(--ui-neutral-bg);
+  --color-neutral-line: var(--ui-neutral-line);
+  --color-neutral-solid: var(--ui-neutral-solid);
+
+  --radius-ctl: 8px;
+  --radius-box: 10px;
+  --radius-card: 14px;
+
+  --shadow-ctl: var(--ui-shadow-xs);
+  --shadow-card: var(--ui-shadow-sm);
+  --shadow-pop: var(--ui-shadow-pop);
+  --shadow-dlg: var(--ui-shadow-dlg);
+  --shadow-glow: var(--ui-glow);
+
+  --font-panel: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 3. COMPATIBILIDAD -------------------------------------------------------- */
+/* Las pantallas que todavía usan --auth-* o --admin-* toman los colores v3.
+   `body:has(...)` cubre también los diálogos que se abren fuera del lienzo. */
+.dashboard-canvas,
+body:has(.dashboard-canvas) {
+  --auth-bg: var(--ui-field);
+  --auth-bg-elevated: var(--ui-surface);
+  --auth-surface: var(--ui-surface);
+  --auth-surface-muted: var(--ui-muted);
+  --auth-border: var(--ui-line);
+  --auth-text: var(--ui-text);
+  --auth-text-muted: var(--ui-text-2);
+  --auth-text-soft: var(--ui-text-3);
+  --auth-accent: var(--ui-accent);
+  --auth-accent-hover: var(--ui-accent-btn-hover);
+  --auth-accent-soft: var(--ui-accent-soft);
+  --auth-accent-ring: var(--ui-ring);
+  --auth-control-bg: var(--ui-field);
+  --auth-control-border: var(--ui-line);
+  --auth-control-hover: var(--ui-hover);
+  --auth-divider: var(--ui-line);
+  --auth-input-border: var(--ui-line);
+  --auth-input-border-hover: var(--ui-line-strong);
+  --auth-skeleton: var(--ui-muted);
+  --auth-success: var(--ui-ok-solid);
+  --auth-danger: var(--ui-danger-solid);
+
+  --border-subtle: var(--ui-line);
+  --border-strong: var(--ui-line-strong);
+  --surface: var(--ui-surface);
+  --surface-soft: var(--ui-field);
+
+  --panel-ink: var(--ui-text);
+  --panel-ink-soft: var(--ui-text-2);
+  --panel-ink-mute: var(--ui-text-3);
+  --panel-line: var(--ui-line);
+  --panel-card: var(--ui-surface);
+
+  --admin-bg: var(--ui-bg);
+  --admin-sidebar: var(--ui-rail);
+  --admin-surface: var(--ui-surface);
+  --admin-surface-soft: var(--ui-field);
+  --admin-surface-hover: var(--ui-hover);
+  --admin-border: var(--ui-line);
+  --admin-border-strong: var(--ui-line-strong);
+  --admin-divider: var(--ui-line);
+  --admin-content-border: var(--ui-line);
+  --admin-accent: var(--ui-accent-btn);
+  --admin-accent-hover: var(--ui-accent-btn-hover);
+  --admin-accent-soft: var(--ui-accent-soft);
+  --admin-accent-line: var(--ui-accent-line);
+  --admin-accent-text: var(--ui-accent-text);
+  --admin-on-accent: var(--ui-on-accent);
+  --admin-focus: var(--ui-focus);
+  --admin-success: var(--ui-ok-solid);
+  --admin-warning: var(--ui-warn-solid);
+  --admin-danger: var(--ui-danger-solid);
+  --admin-info: var(--ui-info-solid);
+  --admin-text: var(--ui-text);
+  --admin-text-muted: var(--ui-text-2);
+  --admin-text-soft: var(--ui-text-3);
+  --admin-shadow-1: var(--ui-shadow-xs);
+  --admin-shadow-2: var(--ui-shadow-sm);
+  --admin-shadow-3: var(--ui-shadow-pop);
+  --admin-control-bg: var(--ui-field);
+  --admin-control-border: var(--ui-line);
+  --admin-control-text: var(--ui-text);
+  --admin-control-muted: var(--ui-text-2);
+  --admin-control-hover-bg: var(--ui-hover);
+  --admin-table-head-bg: transparent;
+  --admin-table-row-hover: var(--ui-field);
+  --admin-table-divider: var(--ui-line);
+  --admin-badge-neutral-bg: var(--ui-neutral-bg);
+  --admin-badge-neutral-text: var(--ui-neutral-fg);
+  --admin-badge-info-bg: var(--ui-info-bg);
+  --admin-badge-info-text: var(--ui-info-fg);
+  --admin-badge-success-bg: var(--ui-ok-bg);
+  --admin-badge-success-text: var(--ui-ok-fg);
+  --admin-badge-warning-bg: var(--ui-warn-bg);
+  --admin-badge-warning-text: var(--ui-warn-fg);
+  --admin-badge-danger-bg: var(--ui-danger-bg);
+  --admin-badge-danger-text: var(--ui-danger-fg);
+  --admin-badge-purple-bg: var(--ui-accent-soft);
+  --admin-badge-purple-text: var(--ui-accent-text);
+  --admin-scrollbar: var(--ui-line-strong);
+  --admin-overlay: var(--ui-scrim);
+}
+
+/* 4. BASE DEL PANEL -------------------------------------------------------- */
+/* El body también, para que menús y diálogos (que se abren fuera del lienzo)
+   usen la misma letra y colores. */
+body:has(.dashboard-canvas) {
+  background: var(--ui-rail);
+  color: var(--ui-text);
+  font-family: var(--font-panel);
+}
+
+.dashboard-canvas {
+  font-family: var(--font-panel);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  font-feature-settings: normal;
+  color: var(--ui-text);
+  background: var(--ui-rail);
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+html[data-ui-theme="dark"] .dashboard-canvas {
+  color-scheme: dark;
+}
+
+.dashboard-canvas :where(h1, h2, h3, .font-display) {
+  font-family: var(--font-panel);
+}
+
+@layer base {
+  :where(body:has(.dashboard-canvas)) :focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+
+  :where(body:has(.dashboard-canvas)) ::selection {
+    background: color-mix(in srgb, var(--ui-accent) 26%, transparent);
+    color: var(--ui-text);
+  }
+
+  /* Números: cifras tabulares en monoespaciada. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Rótulo pequeño en mayúsculas. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ui-text-3);
+  }
+
+  :where(body:has(.dashboard-canvas)) kbd {
+    font: 500 0.6875rem/1 var(--font-mono);
+    padding: 3px 5px;
+    border-radius: 5px;
+    color: var(--ui-text-3);
+    background: var(--ui-muted);
+  }
+
+}
+
+/* Tonos para insignias, puntos y avisos: .tone-ok, .tone-warn… */
+.tone-ok { --t-fg: var(--ui-ok-fg); --t-bg: var(--ui-ok-bg); --t-line: var(--ui-ok-line); --t-solid: var(--ui-ok-solid); }
+.tone-info { --t-fg: var(--ui-info-fg); --t-bg: var(--ui-info-bg); --t-line: var(--ui-info-line); --t-solid: var(--ui-info-solid); }
+.tone-warn { --t-fg: var(--ui-warn-fg); --t-bg: var(--ui-warn-bg); --t-line: var(--ui-warn-line); --t-solid: var(--ui-warn-solid); }
+.tone-danger { --t-fg: var(--ui-danger-fg); --t-bg: var(--ui-danger-bg); --t-line: var(--ui-danger-line); --t-solid: var(--ui-danger-solid); }
+.tone-neutral { --t-fg: var(--ui-neutral-fg); --t-bg: var(--ui-neutral-bg); --t-line: var(--ui-neutral-line); --t-solid: var(--ui-neutral-solid); }
+.tone-accent { --t-fg: var(--ui-accent-text); --t-bg: var(--ui-accent-soft); --t-line: var(--ui-accent-line); --t-solid: var(--ui-accent); }
+
+.ui-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-canvas *,
+  .dashboard-canvas *::before,
+  .dashboard-canvas *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .dashboard-canvas [aria-current="page"] {
+    outline: 2px solid;
+  }
+}
+
+/* 5. ARMAZÓN: menú lateral, marco y barra superior ------------------------- */
+@layer components {
+  .panel-skip {
+    position: fixed;
+    left: 12px;
+    top: -60px;
+    z-index: 100;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--ui-ink);
+    color: var(--ui-bg);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .panel-skip:focus {
+    top: 12px;
+  }
+
+  .panel-app {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+    min-height: 100dvh;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  .panel-app[data-rail="mini"] {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .panel-rail {
+    position: sticky;
+    top: 8px;
+    height: calc(100dvh - 16px);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .panel-rail-head {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    flex: none;
+    padding: 0 12px;
+  }
+  .panel-mark {
+    display: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--ui-accent-btn);
+    color: var(--ui-on-accent);
+    font-weight: 800;
+    font-size: 1.125rem;
+    letter-spacing: -0.04em;
+  }
+
+  .panel-viewsw {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: calc(100% - 16px);
+    margin: 4px 8px 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--ui-line);
+    border-radius: 10px;
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-xs);
+    text-align: left;
+  }
+  button.panel-viewsw:hover {
+    border-color: var(--ui-line-strong);
+  }
+  button.panel-viewsw:disabled {
+    opacity: 0.6;
+  }
+
+  .panel-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px 12px;
+  }
+  .panel-nav-group + .panel-nav-group {
+    margin-top: 10px;
+  }
+  .panel-nav-label {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ui-text-3);
+  }
+  .panel-nav li + li {
+    margin-top: 2px;
+  }
+  .panel-navlink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--ui-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .panel-navlink:hover {
+    background: var(--ui-hover);
+  }
+  .panel-navlink[aria-current="page"] {
+    background: var(--ui-active);
+  }
+  .panel-navlink[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 3px;
+    height: 20px;
+    border-radius: 0 3px 3px 0;
+    background: var(--ui-accent);
+  }
+  .panel-nav-sub {
+    margin: 2px 0 4px 20px;
+    padding-left: 8px;
+    border-left: 1px solid var(--ui-line-strong);
+  }
+  .panel-navlink--sub {
+    height: 32px;
+    font-size: 0.8125rem;
+    border-radius: 8px;
+  }
+  .panel-navlink--sub[aria-current="page"]::before {
+    display: none;
+  }
+
+  .panel-rail-foot {
+    flex: none;
+    padding: 8px;
+    border-top: 1px solid var(--ui-line);
+    display: grid;
+    gap: 4px;
+  }
+  .panel-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+  }
+  .panel-user:hover {
+    background: var(--ui-hover);
+  }
+
+  .panel-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--ui-muted);
+    color: var(--ui-text-2);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .panel-avatar--sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.625rem;
+  }
+  .panel-sqi {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 8px;
+    background: var(--t-bg, var(--ui-muted));
+    color: var(--t-fg, var(--ui-text));
+    font: 600 0.6875rem/1 var(--font-mono);
+  }
+
+  .panel-frame {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: calc(100dvh - 16px);
+    border-radius: 14px;
+    background: var(--ui-bg);
+    box-shadow: var(--ui-shadow-sm);
+  }
+  .panel-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    flex: none;
+    padding: 0 16px 0 12px;
+    background: var(--ui-bg);
+    border-bottom: 1px solid var(--ui-line);
+    border-radius: 14px 14px 0 0;
+  }
+  .panel-vsep {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    flex: none;
+    background: var(--ui-line-strong);
+  }
+  .panel-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .panel-crumbs > span,
+  .panel-crumbs > a {
+    font-weight: 400;
+  }
+  .panel-main {
+    width: 100%;
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 24px 24px 56px;
+    flex: 1;
+  }
+  .panel-scrim {
+    display: none;
+  }
+
+  /* Controles del armazón. */
+  .panel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--ui-line);
+    border-radius: 8px;
+    background: var(--ui-field);
+    color: var(--ui-text);
+    box-shadow: var(--ui-shadow-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .panel-btn:hover {
+    background: var(--ui-hover);
+    border-color: var(--ui-line-strong);
+  }
+  .panel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .panel-btn--sm {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.8125rem;
+  }
+  .panel-btn--primary {
+    background: var(--ui-accent-btn);
+    border-color: var(--ui-accent-btn);
+    color: var(--ui-on-accent);
+  }
+  .panel-btn--primary:hover {
+    background: var(--ui-accent-btn-hover);
+    border-color: var(--ui-accent-btn-hover);
+  }
+  .panel-btn--ghost {
+    border-color: transparent;
+    background: none;
+    box-shadow: none;
+  }
+  .panel-btn--ghost:hover {
+    border-color: transparent;
+  }
+  .panel-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    color: var(--ui-text);
+  }
+  .panel-icon-btn:hover {
+    background: var(--ui-hover);
+  }
+  .panel-icon-btn--bordered {
+    border-color: var(--ui-line);
+    background: var(--ui-field);
+    box-shadow: var(--ui-shadow-xs);
+  }
+  .panel-icon-btn--bordered:hover {
+    border-color: var(--ui-line-strong);
+  }
+  .panel-dot-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: #d92d2d;
+    color: #fff;
+    font: 600 0.625rem/16px var(--font-panel);
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--ui-bg);
+  }
+  .panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--t-line, var(--ui-line));
+    border-radius: 999px;
+    background: var(--t-bg, var(--ui-muted));
+    color: var(--t-fg, var(--ui-text));
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .panel-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 6px 0 10px;
+    border: 1px solid var(--ui-line);
+    border-radius: 8px;
+    background: var(--ui-field);
+    box-shadow: var(--ui-shadow-xs);
+    color: var(--ui-text-3);
+  }
+  .panel-search:hover {
+    border-color: var(--ui-line-strong);
+  }
+  .panel-search:focus-within {
+    border-color: var(--ui-accent);
+    box-shadow: 0 0 0 3px var(--ui-ring);
+  }
+  .panel-search input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: var(--ui-text);
+    font-size: 0.875rem;
+  }
+  .panel-search input::placeholder {
+    color: var(--ui-text-3);
+    opacity: 1;
+  }
+  .panel-search input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  /* Menú plegado (solo en pantallas anchas). */
+  @media (min-width: 960px) {
+    .panel-app[data-rail="mini"] [data-rail-label],
+    .panel-app[data-rail="mini"] .panel-nav-sub {
+      display: none !important;
+    }
+    .panel-app[data-rail="mini"] [data-rail-mini] {
+      display: grid;
+    }
+    .panel-app[data-rail="mini"] .panel-rail-head {
+      padding: 0;
+      justify-content: center;
+    }
+    .panel-app[data-rail="mini"] .panel-navlink {
+      justify-content: center;
+      padding: 0;
+    }
+    .panel-app[data-rail="mini"] .panel-nav-group + .panel-nav-group {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--ui-line);
+    }
+    .panel-app[data-rail="mini"] .panel-viewsw {
+      width: 40px;
+      padding: 3px;
+      justify-content: center;
+    }
+    .panel-app[data-rail="mini"] .panel-user {
+      padding: 4px;
+      justify-content: center;
+    }
+  }
+
+  /* Celular y tableta: el menú se abre encima, como un cajón. */
+  @media (max-width: 959px) {
+    .panel-app,
+    .panel-app[data-rail="mini"] {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 0;
+      gap: 0;
+    }
+    .panel-frame {
+      border-radius: 0;
+      min-height: 100dvh;
+      box-shadow: none;
+    }
+    .panel-topbar {
+      border-radius: 0;
+      gap: 6px;
+      padding: 0 12px 0 8px;
+    }
+    .panel-rail {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 60;
+      width: min(86vw, 280px);
+      height: 100dvh;
+      background: var(--ui-rail);
+      box-shadow: var(--ui-shadow-dlg);
+      transform: translateX(-102%);
+      transition: transform 0.2s ease;
+      visibility: hidden;
+    }
+    .panel-app[data-rail-open] .panel-rail {
+      transform: none;
+      visibility: visible;
+    }
+    .panel-app[data-rail-open] .panel-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      background: var(--ui-scrim);
+    }
+    .panel-main {
+      padding: 20px 16px 56px;
+    }
+  }
+  @media (max-width: 719px) {
+    .panel-topbar .panel-vsep {
+      display: none;
+    }
+  }
+  @media (pointer: coarse) {
+    .panel-navlink {
+      height: 40px;
+    }
+  }
+  @media print {
+    .panel-rail,
+    .panel-topbar {
+      display: none !important;
+    }
+    .panel-app {
+      display: block;
+      padding: 0;
+    }
+    .panel-frame {
+      box-shadow: none;
+    }
+  }
+}

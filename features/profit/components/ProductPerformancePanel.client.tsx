@@ -11,12 +11,12 @@ import {
 } from "@/lib/realprofit/product-performance";
 
 const VERDICT_TONE: Record<ProductVerdict, { pill: string; dot: string; bar: string }> = {
-  scale: { pill: "bg-[#eaf5ee] text-[#2f6b47]", dot: "bg-[#3f9a62]", bar: "bg-[#8fc7a3]" },
-  keep: { pill: "bg-[#fff4e5] text-[#9a5a12]", dot: "bg-[#e0a24a]", bar: "bg-[#efc98f]" },
-  review: { pill: "bg-[#fdf0f0] text-[#a23b3b]", dot: "bg-[#d46a6a]", bar: "bg-[#eab0b0]" },
-  stop: { pill: "bg-[#fdf0f0] text-[#a23b3b]", dot: "bg-[#c24c4c]", bar: "bg-[#e29a9a]" },
-  low_data: { pill: "bg-[#f3eee8] text-[#8a8177]", dot: "bg-[#b5aaa0]", bar: "bg-[#e3dbd2]" },
-  no_data: { pill: "bg-[#f3eee8] text-[#8a8177]", dot: "bg-[#b5aaa0]", bar: "bg-[#e3dbd2]" },
+  scale: { pill: "bg-subtle text-ok-fg", dot: "bg-ok-solid", bar: "bg-ok-solid" },
+  keep: { pill: "bg-accent-soft text-accent-text", dot: "bg-accent", bar: "bg-warn-solid" },
+  review: { pill: "bg-field text-danger-fg", dot: "bg-danger-btn", bar: "bg-danger-btn" },
+  stop: { pill: "bg-field text-danger-fg", dot: "bg-danger-btn", bar: "bg-danger-btn" },
+  low_data: { pill: "bg-subtle text-ink-3", dot: "bg-line-strong", bar: "bg-active" },
+  no_data: { pill: "bg-subtle text-ink-3", dot: "bg-line-strong", bar: "bg-active" },
 };
 
 const TOP = 8;
@@ -47,14 +47,14 @@ export function ProductPerformancePanel({ campaigns }: { campaigns: ProductCampa
   };
 
   return (
-    <section className="overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4]">
+    <section className="overflow-hidden rounded-card bg-surface ring-1 ring-line">
       <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
         <div className="min-w-0">
-          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#1a1714]">{t("title")}</h2>
-          <p className="mt-0.5 text-[12px] text-[#5c564e]">{t("subtitle")}</p>
+          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">{t("title")}</h2>
+          <p className="mt-0.5 text-[12px] text-ink-2">{t("subtitle")}</p>
         </div>
         {hasConversions && averageCostPerResult != null ? (
-          <span className="rounded-full bg-[#f3eee8] px-2.5 py-1 text-[11px] font-medium text-[#5c564e]">
+          <span className="rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium text-ink-2">
             {t("average", { amount: moneyUsd(averageCostPerResult) })}
           </span>
         ) : null}
@@ -72,18 +72,18 @@ export function ProductPerformancePanel({ campaigns }: { campaigns: ProductCampa
           )}
         </div>
       ) : (
-        <p className="mx-4 mb-3 rounded-[12px] bg-[#faf8f5] px-3 py-2 text-[12px] text-[#5c564e] sm:mx-5">{t("noConversions")}</p>
+        <p className="mx-4 mb-3 rounded-box bg-field px-3 py-2 text-[12px] text-ink-2 sm:mx-5">{t("noConversions")}</p>
       )}
 
       <ul className="px-4 pb-2 sm:px-5">
         {visible.map((r) => {
           const tone = VERDICT_TONE[r.verdict];
           return (
-            <li key={r.product} className="border-t border-[#f1ebe4] py-3">
+            <li key={r.product} className="border-t border-line py-3">
               <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="min-w-0 max-w-full truncate text-[13.5px] font-semibold text-[#1a1714]" title={r.campaigns.join("\n")}>
+                    <p className="min-w-0 max-w-full truncate text-[13.5px] font-semibold text-ink" title={r.campaigns.join("\n")}>
                       {r.product}
                     </p>
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${tone.pill}`}>
@@ -91,28 +91,28 @@ export function ProductPerformancePanel({ campaigns }: { campaigns: ProductCampa
                       {t(`verdict.${r.verdict}`)}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[11.5px] text-[#8a8177]">
+                  <p className="mt-0.5 text-[11.5px] text-ink-3">
                     {t("campaignsCount", { count: r.campaigns.length })} · {reason(r)}
                   </p>
                 </div>
                 <dl className="grid shrink-0 grid-cols-3 gap-x-5 text-right">
                   <div>
-                    <dt className="text-[10.5px] text-[#8a8177]">{t("spend")}</dt>
-                    <dd className="text-[13px] font-semibold tabular-nums text-[#1a1714]">{moneyUsd(r.spend)}</dd>
+                    <dt className="text-[10.5px] text-ink-3">{t("spend")}</dt>
+                    <dd className="text-[13px] font-semibold tabular-nums text-ink">{moneyUsd(r.spend)}</dd>
                   </div>
                   <div>
-                    <dt className="text-[10.5px] text-[#8a8177]">{t("results")}</dt>
-                    <dd className="text-[13px] font-semibold tabular-nums text-[#1a1714]">{r.conversions ?? "—"}</dd>
+                    <dt className="text-[10.5px] text-ink-3">{t("results")}</dt>
+                    <dd className="text-[13px] font-semibold tabular-nums text-ink">{r.conversions ?? "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-[10.5px] text-[#8a8177]">{t("costPerResult")}</dt>
-                    <dd className="text-[13px] font-semibold tabular-nums text-[#1a1714]">
+                    <dt className="text-[10.5px] text-ink-3">{t("costPerResult")}</dt>
+                    <dd className="text-[13px] font-semibold tabular-nums text-ink">
                       {r.costPerResult != null ? moneyUsd(r.costPerResult) : "—"}
                     </dd>
                   </div>
                 </dl>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#f3ece5]">
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-subtle">
                 <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${Math.max(2, r.spendShare * 100)}%` }} />
               </div>
             </li>
@@ -120,13 +120,13 @@ export function ProductPerformancePanel({ campaigns }: { campaigns: ProductCampa
         })}
       </ul>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#efe8e0] px-4 py-3 sm:px-5">
-        <p className="text-[11.5px] text-[#8a8177]">{t("footnote")}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3 sm:px-5">
+        <p className="text-[11.5px] text-ink-3">{t("footnote")}</p>
         {rows.length > TOP ? (
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
-            className="text-[12px] font-semibold text-[#1a1714] underline-offset-4 hover:underline"
+            className="text-[12px] font-semibold text-ink underline-offset-4 hover:underline"
           >
             {showAll ? t("showLess") : t("showAll", { count: rows.length })}
           </button>

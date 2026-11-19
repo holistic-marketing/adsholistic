@@ -109,7 +109,7 @@ export function AdAccountsToolbar({
                   setSearch(value);
                   updateParams({ q: value || null });
                 }}
-                className="h-9 w-full border-[var(--auth-border)] bg-white pl-9 text-[13px] font-normal"
+                className="h-9 w-full border-[var(--auth-border)] bg-surface pl-9 text-[13px] font-normal"
               />
             </div>
             <select
@@ -120,7 +120,7 @@ export function AdAccountsToolbar({
                 setStatus(value);
                 updateParams({ status: value === "all" ? null : value });
               }}
-              className="h-9 w-full rounded-lg border border-[var(--auth-border)] bg-white px-3 text-[13px] font-normal text-[var(--auth-text)] focus:border-[var(--auth-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15 sm:w-auto"
+              className="h-9 w-full rounded-lg border border-[var(--auth-border)] bg-surface px-3 text-[13px] font-normal text-[var(--auth-text)] focus:border-[var(--auth-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15 sm:w-auto"
             >
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -134,14 +134,14 @@ export function AdAccountsToolbar({
               asChild
               href={routes.creativeAnalyzer}
               variant="outline"
-              className="h-9 shrink-0 rounded-lg border-[var(--auth-border)] bg-white px-3 text-[12px] font-semibold text-[var(--auth-text)] hover:bg-[var(--auth-bg)]"
+              className="h-9 shrink-0 rounded-lg border-[var(--auth-border)] bg-surface px-3 text-[12px] font-semibold text-[var(--auth-text)] hover:bg-[var(--auth-bg)]"
             >
               {t("toolbar.creativeAnalyzer")}
             </Button>
             {enableTikTokCreate ? (
               <Button
                 onClick={() => setModalOpen(true)}
-                className="hidden h-9 rounded-lg bg-[var(--auth-accent)] px-3.5 text-[12px] font-semibold text-white hover:brightness-[1.05] md:inline-flex"
+                className="hidden h-9 rounded-lg bg-accent-btn px-3.5 text-[12px] font-semibold text-on-accent hover:brightness-[1.05] md:inline-flex"
               >
                 {t("toolbar.createTikTok")}
               </Button>

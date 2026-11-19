@@ -201,7 +201,7 @@ export async function ClienteScopedCreatives({
       {/* Videos que ya corren en TikTok: se carga aparte para no frenar la página */}
       <Suspense
         fallback={
-          <div className="h-64 animate-pulse motion-reduce:animate-none rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white" />
+          <div className="h-64 animate-pulse motion-reduce:animate-none rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface" />
         }
       >
         <TikTokVideoGallery clienteId={cliente.id} organizationId={organizationId} />
@@ -211,7 +211,7 @@ export async function ClienteScopedCreatives({
         fallback={
           <div
             id="creative-upload"
-            className="h-48 animate-pulse motion-reduce:animate-none rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white"
+            className="h-48 animate-pulse motion-reduce:animate-none rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface"
           />
         }
       >

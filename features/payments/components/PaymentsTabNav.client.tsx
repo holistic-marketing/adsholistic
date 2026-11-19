@@ -54,7 +54,7 @@ export function PaymentsTabNav({ activeTab }: PaymentsTabNavProps) {
   }
 
   return (
-    <div className="scrollbar-thin overflow-x-auto border-b border-[var(--border-subtle)] bg-white/60 backdrop-blur-sm">
+    <div className="scrollbar-thin overflow-x-auto border-b border-[var(--border-subtle)] bg-surface/60 backdrop-blur-sm">
       <div className="flex min-w-max gap-1 px-2 pt-2 sm:px-4">
         {TAB_ITEMS.map((tab) => (
           <button
@@ -65,8 +65,8 @@ export function PaymentsTabNav({ activeTab }: PaymentsTabNavProps) {
             className={cn(
               "shrink-0 whitespace-nowrap rounded-t-xl px-3 py-3 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/40 sm:px-4",
               activeTab === tab.id
-                ? "bg-white text-[var(--brand-primary)] shadow-sm ring-1 ring-[#e5e7eb]"
-                : "text-[#64748b] hover:bg-slate-50 hover:text-[#0f172a]",
+                ? "bg-surface text-[var(--brand-primary)] shadow-sm ring-1 ring-line"
+                : "text-ink-2 hover:bg-field hover:text-ink",
             )}
           >
             <span className="md:hidden">{tab.shortLabel}</span>

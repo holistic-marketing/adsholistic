@@ -39,9 +39,9 @@ type Loaded = { id: string; name: string; url: string; media: StudioMedia };
 const TEMPLATES: StudioTemplate[] = ["auto", "orange", "dark", "fresh"];
 const TEMPLATE_SWATCH: Record<StudioTemplate, string> = {
   auto: "bg-[conic-gradient(#ff781f,#19c2b3,#6366f1,#ff781f)]",
-  orange: "bg-[#ff781f]",
+  orange: "bg-accent",
   dark: "bg-[#141416]",
-  fresh: "bg-[#19c2b3]",
+  fresh: "bg-ok-solid",
 };
 const CURRENCIES: StudioCurrency[] = ["PEN", "USD", "COP"];
 const VOICES: StudioVoice[] = ["female", "male", "none"];
@@ -304,10 +304,10 @@ export function VideoStudioPanel({
   return (
     <section
       id="video-studio"
-      className="overflow-hidden rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
     >
       <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-accent)]">{t("kicker")}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
         <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
           {t("title")}
         </h2>
@@ -315,7 +315,7 @@ export function VideoStudioPanel({
       </div>
 
       {!supported ? (
-        <p className="mx-5 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950 sm:mx-6">
+        <p className="mx-5 mt-4 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg sm:mx-6">
           {t("errors.unsupported")}
         </p>
       ) : null}
@@ -351,7 +351,7 @@ export function VideoStudioPanel({
                     {index + 1}
                   </span>
                   {isLowResolution(item.media) ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-amber-500/90 py-0.5 text-center text-[9px] font-bold text-white">
+                    <span className="absolute inset-x-0 bottom-0 bg-warn-solid/90 py-0.5 text-center text-[9px] font-bold text-white">
                       {t("lowResBadge")}
                     </span>
                   ) : null}
@@ -371,7 +371,7 @@ export function VideoStudioPanel({
                   type="button"
                   disabled={busy}
                   onClick={() => fileInputRef.current?.click()}
-                  className="grid h-24 w-[3.4rem] place-items-center rounded-lg border border-dashed border-[rgb(20_18_16_/_0.18)] bg-[rgb(255_248_243_/_0.6)] text-[22px] font-semibold text-[var(--auth-accent)] hover:border-[var(--auth-accent)]"
+                  className="grid h-24 w-[3.4rem] place-items-center rounded-lg border border-dashed border-[rgb(20_18_16_/_0.18)] bg-[rgb(255_248_243_/_0.6)] text-[22px] font-semibold text-accent-text hover:border-[var(--auth-accent)]"
                   aria-label={t("addMedia")}
                 >
                   +
@@ -380,7 +380,7 @@ export function VideoStudioPanel({
             </div>
             <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("mediaHint")}</p>
             {items.some((i) => isLowResolution(i.media)) ? (
-              <p className="mt-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+              <p className="mt-1.5 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
                 {t("lowRes")}
               </p>
             ) : null}
@@ -433,7 +433,7 @@ export function VideoStudioPanel({
                   value={studio.currency}
                   disabled={busy}
                   onChange={(e) => update("currency", e.target.value as StudioCurrency)}
-                  className="h-10 rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white px-2 text-[13px] text-[var(--auth-text)]"
+                  className="h-10 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-2 text-[13px] text-[var(--auth-text)]"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -503,7 +503,7 @@ export function VideoStudioPanel({
                     disabled={busy}
                     onClick={() => update("template", tpl)}
                     className={cn(
-                      "flex h-9 items-center gap-1.5 rounded-xl border px-2.5 text-[12px] font-semibold",
+                      "flex h-9 items-center gap-1.5 rounded-box border px-2.5 text-[12px] font-semibold",
                       studio.template === tpl
                         ? "border-[var(--auth-accent)] bg-[rgb(255_248_243)] text-[var(--auth-text)]"
                         : "border-[rgb(20_18_16_/_0.1)] text-[var(--auth-text-muted)]",
@@ -529,7 +529,7 @@ export function VideoStudioPanel({
                       if (phase === "ready") setPhase("edit");
                     }}
                     className={cn(
-                      "flex h-9 items-center rounded-xl border px-3 text-[12px] font-semibold",
+                      "flex h-9 items-center rounded-box border px-3 text-[12px] font-semibold",
                       voice === v
                         ? "border-[var(--auth-accent)] bg-[rgb(255_248_243)] text-[var(--auth-text)]"
                         : "border-[rgb(20_18_16_/_0.1)] text-[var(--auth-text-muted)]",
@@ -546,7 +546,7 @@ export function VideoStudioPanel({
           <div>
             <label className={labelClass}>{t("account")}</label>
             {accountChoices.length === 0 ? (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+              <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
                 {t("errors.noAccount")}
               </p>
             ) : (
@@ -554,7 +554,7 @@ export function VideoStudioPanel({
                 value={adAccountId}
                 disabled={busy}
                 onChange={(e) => setAdAccountId(e.target.value)}
-                className="h-10 w-full rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white px-3 text-[13px] text-[var(--auth-text)]"
+                className="h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]"
               >
                 {accountChoices.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -568,12 +568,12 @@ export function VideoStudioPanel({
           </div>
 
           {error ? (
-            <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]" role="alert">
+            <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg" role="alert">
               {error}
             </p>
           ) : null}
           {success ? (
-            <p className="rounded-lg bg-[#ecf7f0] px-3 py-2 text-[13px] text-[#1f5c40]">{success}</p>
+            <p className="rounded-lg bg-subtle px-3 py-2 text-[13px] text-ok-fg">{success}</p>
           ) : null}
 
           <div className="flex flex-wrap gap-2">
@@ -582,7 +582,7 @@ export function VideoStudioPanel({
                 <Button
                   onClick={handleSend}
                   disabled={busy}
-                  className="h-11 rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
+                  className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
                 >
                   {phase === "uploading" ? t("sending") : t("send")}
                 </Button>
@@ -590,7 +590,7 @@ export function VideoStudioPanel({
                   <a
                     href={result.url}
                     download={studioFileName(studio.productName)}
-                    className="inline-flex h-11 items-center rounded-xl border border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
+                    className="inline-flex h-11 items-center rounded-box border border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
                   >
                     {t("download")}
                   </a>
@@ -602,7 +602,7 @@ export function VideoStudioPanel({
                     setPhase("edit");
                   }}
                   disabled={busy}
-                  className="h-11 rounded-xl border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)]"
+                  className="h-11 rounded-box border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)]"
                 >
                   {t("edit")}
                 </Button>
@@ -611,7 +611,7 @@ export function VideoStudioPanel({
               <Button
                 onClick={handleRecord}
                 disabled={busy || !supported}
-                className="h-11 rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
+                className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
               >
                 {phase === "voice"
                   ? t("voicing")
@@ -641,8 +641,8 @@ export function VideoStudioPanel({
               className={cn("aspect-[9/16] w-full", result && phase !== "recording" ? "hidden" : "block")}
             />
             {phase === "recording" ? (
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
-                <div className="h-full bg-[var(--auth-accent)]" style={{ width: `${progress * 100}%` }} />
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-surface/20">
+                <div className="h-full bg-accent-btn" style={{ width: `${progress * 100}%` }} />
               </div>
             ) : null}
           </div>

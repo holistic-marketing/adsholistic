@@ -87,7 +87,7 @@ export function CobroComprobantePreview({
       <button
         type="button"
         onClick={retry}
-        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-[9px] font-medium text-red-700"
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-danger-line bg-danger-bg text-[9px] font-medium text-danger-fg"
         title={error ?? t("retry")}
       >
         {t("retry")}
@@ -106,7 +106,7 @@ export function CobroComprobantePreview({
         title={t("enlargeProof", { label: resolvedLabel })}
       >
         {isPdf ? (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-[#faf8f5] text-[var(--auth-text-muted)]">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-field text-[var(--auth-text-muted)]">
             <svg
               className="h-6 w-6"
               fill="none"

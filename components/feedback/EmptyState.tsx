@@ -22,9 +22,9 @@ export function EmptyState({
       )}
       {...props}
     >
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 ring-1 ring-[#e5e7eb]">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-card bg-gradient-to-br from-slate-100 to-slate-50 ring-1 ring-line">
         <svg
-          className="h-7 w-7 text-slate-400"
+          className="h-7 w-7 text-ink-3"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -37,9 +37,9 @@ export function EmptyState({
           />
         </svg>
       </div>
-      <p className="text-sm font-semibold text-[#0f172a]">{title}</p>
+      <p className="text-sm font-semibold text-ink">{title}</p>
       {description && (
-        <p className="mt-1.5 max-w-sm text-sm text-[#64748b]">{description}</p>
+        <p className="mt-1.5 max-w-sm text-sm text-ink-2">{description}</p>
       )}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>

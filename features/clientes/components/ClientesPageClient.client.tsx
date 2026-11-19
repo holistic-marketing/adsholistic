@@ -293,7 +293,7 @@ export function ClientesPageClient({
 
       {selectError ? (
         <div
-          className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-medium text-red-800"
+          className="rounded-card border border-danger-line bg-danger-bg px-4 py-3 text-[14px] font-medium text-danger-fg"
           role="alert"
         >
           {selectError}
@@ -302,17 +302,17 @@ export function ClientesPageClient({
 
       {!loading && payload && !payload.ok ? (
         <div
-          className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-4 text-[14px] text-red-900"
+          className="rounded-card border border-danger-line bg-danger-bg px-4 py-4 text-[14px] text-danger-fg"
           role="alert"
         >
           <p className="font-semibold">No se pudieron cargar los clientes</p>
-          <p className="mt-1 font-medium text-red-800/90">
+          <p className="mt-1 font-medium text-danger-fg/90">
             {payload.error ?? "Error desconocido. Reintenta en unos segundos."}
           </p>
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[var(--auth-border)] bg-white p-4 sm:p-5">
+      <div className="rounded-lg border border-[var(--auth-border)] bg-surface p-4 sm:p-5">
         <label className="sr-only" htmlFor="clientes-search">
           Buscar cliente
         </label>
@@ -321,7 +321,7 @@ export function ClientesPageClient({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Buscar por nombre, mail o advertiser…"
-          className="h-11 w-full rounded-lg border border-[var(--auth-input-border)] bg-white px-3.5 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
+          className="h-11 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3.5 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
         />
 
         <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -339,7 +339,7 @@ export function ClientesPageClient({
                 onClick={() => changeView(option)}
                 className={`rounded-md px-3 text-[12px] font-semibold transition-colors ${
                   view === option
-                    ? "bg-white text-[var(--auth-text)] shadow-sm"
+                    ? "bg-surface text-[var(--auth-text)] shadow-sm"
                     : "text-[var(--auth-text-muted)] hover:text-[var(--auth-text)]"
                 }`}
               >
@@ -382,7 +382,7 @@ export function ClientesPageClient({
                 setModality("all");
                 setTikTok("all");
               }}
-              className="h-9 px-1.5 text-[12px] font-semibold text-[var(--auth-accent)] hover:underline"
+              className="h-9 px-1.5 text-[12px] font-semibold text-accent-text hover:underline"
             >
               Quitar filtros
             </button>
@@ -391,13 +391,13 @@ export function ClientesPageClient({
       </div>
 
       {loading ? (
-        <div className="dashboard-surface-card rounded-[1rem] p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+        <div className="dashboard-surface-card rounded-card p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
           Cargando clientes…
         </div>
       ) : null}
 
       {!loading && payload?.ok && filtered.length === 0 ? (
-        <div className="dashboard-surface-card rounded-[1rem] p-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+        <div className="dashboard-surface-card rounded-card p-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
           {q.trim() || filtersActive
             ? "Ningún cliente coincide con la búsqueda o los filtros."
             : "No hay clientes Hecom para mostrar."}
@@ -405,7 +405,7 @@ export function ClientesPageClient({
       ) : null}
 
       {filtered.length > 0 && view === "list" ? (
-        <ul className="divide-y divide-[var(--auth-divider)] overflow-hidden rounded-lg border border-[var(--auth-border)] bg-white">
+        <ul className="divide-y divide-[var(--auth-divider)] overflow-hidden rounded-lg border border-[var(--auth-border)] bg-surface">
           {filtered.map((client) => (
             <li
               key={client.id}
@@ -458,7 +458,7 @@ export function ClientesPageClient({
           {filtered.map((client) => (
             <article
               key={client.id}
-              className="flex flex-col rounded-lg border border-[var(--auth-border)] bg-white p-4 transition-colors hover:border-[var(--auth-text-soft)] sm:p-5"
+              className="flex flex-col rounded-lg border border-[var(--auth-border)] bg-surface p-4 transition-colors hover:border-[var(--auth-text-soft)] sm:p-5"
             >
               <div className="flex items-start gap-3">
                 <HecomClienteAvatar name={displayName(client)} avatarUrl={client.avatarUrl} size="md" />
@@ -529,7 +529,7 @@ function ToolbarSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-white px-2.5 text-[13px] font-medium text-[var(--auth-text)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
+        className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-surface px-2.5 text-[13px] font-medium text-[var(--auth-text)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
       >
         {options.map(([optionValue, optionLabel]) => (
           <option key={optionValue} value={optionValue}>
@@ -545,16 +545,16 @@ function ClientBadges({ client }: { client: ClientRow }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {client.billingModality === "credito" ? (
-        <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-amber-900">
+        <span className="rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-warn-fg">
           Crédito
         </span>
       ) : client.billingModality === "prepago" ? (
-        <span className="rounded-full border border-[var(--auth-border)] bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--auth-text-muted)]">
+        <span className="rounded-full border border-[var(--auth-border)] bg-surface px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--auth-text-muted)]">
           Prepago
         </span>
       ) : null}
       {hasTikTokAccounts(client) ? (
-        <span className="rounded-full border border-[var(--auth-accent)]/25 bg-[var(--auth-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--auth-accent)]">
+        <span className="rounded-full border border-[var(--auth-accent)]/25 bg-[var(--auth-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-accent-text">
           TikTok
         </span>
       ) : null}
@@ -579,8 +579,8 @@ function ClientActions({
   compact?: boolean;
 }) {
   const size = compact ? "h-9 px-3.5 text-[12px]" : "h-10 w-full text-[13px]";
-  const primary = `inline-flex ${size} items-center justify-center rounded-lg bg-[var(--auth-accent)] font-semibold text-white transition-[filter,opacity] hover:brightness-[1.05] disabled:opacity-55`;
-  const secondary = `inline-flex ${size} items-center justify-center rounded-lg border border-[var(--auth-control-border)] bg-white font-semibold text-[var(--auth-text)] transition-colors hover:border-[var(--auth-accent)] hover:text-[var(--auth-accent)] disabled:opacity-55`;
+  const primary = `inline-flex ${size} items-center justify-center rounded-lg bg-accent-btn font-semibold text-on-accent transition-[filter,opacity] hover:brightness-[1.05] disabled:opacity-55`;
+  const secondary = `inline-flex ${size} items-center justify-center rounded-lg border border-[var(--auth-control-border)] bg-surface font-semibold text-[var(--auth-text)] transition-colors hover:border-[var(--auth-accent)] hover:text-accent-text disabled:opacity-55`;
   return (
     <div className={compact ? "flex flex-wrap items-center gap-2 lg:flex-none" : "flex flex-col gap-2"}>
       {staffPicker ? (
@@ -601,7 +601,7 @@ function ClientActions({
         <Link
           href={`/clientes/${client.id}#comision`}
           title="Cambiar la comisión de este cliente"
-          className={`${compact ? "" : "w-full"} inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[var(--auth-accent)]/30 bg-[var(--auth-accent-soft)] px-3 text-[12px] font-semibold text-[var(--auth-accent)] transition-colors hover:border-[var(--auth-accent)]`}
+          className={`${compact ? "" : "w-full"} inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[var(--auth-accent)]/30 bg-[var(--auth-accent-soft)] px-3 text-[12px] font-semibold text-accent-text transition-colors hover:border-[var(--auth-accent)]`}
         >
           Comisión {client.defaultFee != null ? `${client.defaultFee} %` : "—"}
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -611,7 +611,7 @@ function ClientActions({
       ) : null}
       <Link
         href={`/clientes/${client.id}`}
-        className={`${compact ? "px-1.5" : "text-center"} text-[12px] font-semibold text-[var(--auth-text-muted)] transition-colors hover:text-[var(--auth-accent)]`}
+        className={`${compact ? "px-1.5" : "text-center"} text-[12px] font-semibold text-[var(--auth-text-muted)] transition-colors hover:text-accent-text`}
       >
         Ver ficha
       </Link>

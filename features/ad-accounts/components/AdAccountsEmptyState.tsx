@@ -10,7 +10,7 @@ export function AdAccountsEmptyState() {
 
   return (
     <div className="flex min-h-[240px] flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--auth-bg)] text-[var(--auth-text-muted)] ring-1 ring-[var(--auth-border)]">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-box bg-[var(--auth-bg)] text-[var(--auth-text-muted)] ring-1 ring-[var(--auth-border)]">
         <svg
           className="h-7 w-7"
           fill="none"
@@ -31,12 +31,12 @@ export function AdAccountsEmptyState() {
       <p className="mt-2 max-w-md text-[14px] leading-6 text-[var(--auth-text-muted)]">
 {t("empty.body")}
       </p>
-      <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-[var(--auth-accent)] px-5 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05]">
+      <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05]">
         {t("empty.ctaCreate")}
       </AdAccountsOpenCreateModalButton>
       <Link
         href={routes.payments}
-        className="mt-3 text-[13px] font-semibold text-[var(--auth-accent)] underline-offset-2 hover:underline"
+        className="mt-3 text-[13px] font-semibold text-accent-text underline-offset-2 hover:underline"
       >
         {t("empty.ctaWallet")}
       </Link>

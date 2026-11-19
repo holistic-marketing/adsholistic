@@ -13,10 +13,10 @@ const usd = new Intl.NumberFormat("en-US", {
 const int = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 const VERDICT_TONE: Record<VideoVerdict, string> = {
-  winner: "bg-[#ecf7f0] text-[#1f5c40]",
-  noResults: "bg-[#fef2f2] text-[#991b1b]",
-  tired: "bg-amber-50 text-amber-900",
-  expensive: "bg-[rgb(255_120_31_/_0.12)] text-[var(--auth-accent)]",
+  winner: "bg-subtle text-ok-fg",
+  noResults: "bg-field text-danger-fg",
+  tired: "bg-warn-bg text-warn-fg",
+  expensive: "bg-[rgb(255_120_31_/_0.12)] text-accent-text",
   steady: "bg-[rgb(20_18_16_/_0.05)] text-[var(--auth-text-muted)]",
 };
 
@@ -80,7 +80,7 @@ export async function TikTokVideoGallery({
               return (
                 <li
                   key={video.key}
-                  className="flex gap-3 rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-white p-3 shadow-[0_8px_20px_rgb(20_18_16_/_0.03)]"
+                  className="flex gap-3 rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-surface p-3 shadow-[0_8px_20px_rgb(20_18_16_/_0.03)]"
                 >
                   <CreativeMediaTile
                     previewUrl={preview?.previewUrl ?? null}

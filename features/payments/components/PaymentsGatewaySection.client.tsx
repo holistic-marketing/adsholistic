@@ -59,7 +59,7 @@ export function PaymentsGatewaySection({
       {showClientDeposit ? (
         <section
           id="recargar-saldo"
-          className="scroll-mt-20 overflow-hidden rounded-2xl border border-[var(--auth-border)] bg-white"
+          className="scroll-mt-20 overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface"
         >
           <div className="border-b border-[var(--auth-divider)] px-5 py-5 sm:px-6">
             {/*
@@ -95,7 +95,7 @@ export function PaymentsGatewaySection({
                 type="button"
                 onClick={onContinue}
                 disabled={selectedInMaintenance || !selectedGateway}
-                className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-semibold text-white shadow-[0_8px_20px_rgb(212_120_64_/_0.2)] transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded-box bg-accent-btn px-5 text-[14px] font-semibold text-on-accent shadow-[0_8px_20px_rgb(212_120_64_/_0.2)] transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 {selectedInMaintenance
                   ? t("reloadSection.unavailable")
@@ -148,7 +148,7 @@ export function PaymentsGatewaySection({
           </div>
         </section>
       ) : (
-        <section className="rounded-2xl border border-[var(--auth-border)] bg-white px-5 py-5 sm:px-6 sm:py-6">
+        <section className="rounded-card border border-[var(--auth-border)] bg-surface px-5 py-5 sm:px-6 sm:py-6">
           <h2 className="text-[1.25rem] font-semibold tracking-[-0.025em] text-[var(--auth-text)]">
             {t("reloadSection.bmTitle")}
           </h2>
@@ -157,7 +157,7 @@ export function PaymentsGatewaySection({
           </p>
           <a
             href="#asignar-saldo"
-            className="mt-4 inline-flex h-11 items-center rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-semibold text-white transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
+            className="mt-4 inline-flex h-11 items-center rounded-box bg-accent-btn px-5 text-[14px] font-semibold text-on-accent transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
           >
             {t("reloadSection.pickAccount")}
           </a>

@@ -253,9 +253,9 @@ export function AgentProDraftsPanel({
   return (
     <CrmPanel title={panelTitle} subtitle={panelSubtitle}>
       {!publishEnabled ? (
-        <p className="mx-4 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950 sm:mx-5">
+        <p className="mx-4 mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg sm:mx-5">
           {t("publishHintBefore")}
-          <code className="rounded bg-white px-1">
+          <code className="rounded bg-surface px-1">
             TIKTOK_CREATIVE_PUBLISH_ENABLED=true
           </code>
           {t("publishHintAfter")}
@@ -264,14 +264,14 @@ export function AgentProDraftsPanel({
 
       {error ? (
         <p
-          className="mx-4 mt-3 rounded-lg bg-[#fef2f2] px-3 py-2 text-[12px] text-[#991b1b] sm:mx-5"
+          className="mx-4 mt-3 rounded-lg bg-field px-3 py-2 text-[12px] text-danger-fg sm:mx-5"
           role="alert"
         >
           {error}
         </p>
       ) : null}
       {message ? (
-        <p className="mx-4 mt-3 rounded-lg bg-[#ecf7f0] px-3 py-2 text-[12px] text-[#1f5c40] sm:mx-5">
+        <p className="mx-4 mt-3 rounded-lg bg-subtle px-3 py-2 text-[12px] text-ok-fg sm:mx-5">
           {message}
         </p>
       ) : null}
@@ -287,7 +287,7 @@ export function AgentProDraftsPanel({
                 "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition",
                 activeFilter === f.id
                   ? f.id === "action" && f.count > 0
-                    ? "bg-[#9b2c2c] text-white"
+                    ? "bg-danger-btn text-white"
                     : "bg-[var(--auth-text)] text-white"
                   : "bg-[rgb(20_18_16_/_0.05)] text-[var(--auth-text-muted)] hover:bg-[rgb(20_18_16_/_0.08)]",
               )}
@@ -309,7 +309,7 @@ export function AgentProDraftsPanel({
           </p>
           <Link
             href="#creative-upload"
-            className="mt-4 inline-flex h-10 items-center rounded-xl bg-[var(--auth-accent)] px-4 text-[13px] font-bold text-white transition hover:brightness-[1.05]"
+            className="mt-4 inline-flex h-10 items-center rounded-box bg-accent-btn px-4 text-[13px] font-bold text-on-accent transition hover:brightness-[1.05]"
           >
             {t("emptyCta")}
           </Link>
@@ -322,7 +322,7 @@ export function AgentProDraftsPanel({
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className="mt-2 text-[12px] font-semibold text-[var(--auth-accent)] hover:underline"
+            className="mt-2 text-[12px] font-semibold text-accent-text hover:underline"
           >
             {t("filterShowAll")}
           </button>
@@ -389,7 +389,7 @@ export function AgentProDraftsPanel({
               return (
                 <li
                   key={draft.id}
-                  className="flex flex-col overflow-hidden rounded-[20px] bg-white ring-1 ring-[#efe4da]"
+                  className="flex flex-col overflow-hidden rounded-card bg-surface ring-1 ring-line"
                 >
                   <div className="flex gap-3.5 p-4">
                     <CreativeMediaTile
@@ -416,15 +416,15 @@ export function AgentProDraftsPanel({
                       size="poster"
                     />
                     <div className="min-w-0 flex-1">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fdf0f0] px-2 py-0.5 text-[11px] font-semibold text-[#a23b3b]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#d46a6a]" aria-hidden />
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-field px-2 py-0.5 text-[11px] font-semibold text-danger-fg">
+                        <span className="h-1.5 w-1.5 rounded-full bg-danger-btn" aria-hidden />
                         {t("tiktokRejected")}
                       </span>
-                      <p className="mt-1.5 line-clamp-2 text-[15px] font-semibold tracking-[-0.02em] text-[#1a1714]">
+                      <p className="mt-1.5 line-clamp-2 text-[15px] font-semibold tracking-[-0.02em] text-ink">
                         {title}
                       </p>
                       {draft.accountName || draft.publishedAt || draft.createdAt ? (
-                        <p className="mt-0.5 line-clamp-2 text-[11.5px] text-[#8a8177]">
+                        <p className="mt-0.5 line-clamp-2 text-[11.5px] text-ink-3">
                           {[
                             draft.accountName,
                             formatDraftWhen(
@@ -439,31 +439,31 @@ export function AgentProDraftsPanel({
 
                     </div>
                   </div>
-                  <div className="mx-4 mb-4 rounded-[14px] bg-[#fff8f2] px-3 py-2.5 ring-1 ring-[#f6e3d3]">
-                    <p className="text-[11px] font-semibold text-[#9a5a32]">
+                  <div className="mx-4 mb-4 rounded-box bg-field px-3 py-2.5 ring-1 ring-accent-line">
+                    <p className="text-[11px] font-semibold text-accent-text">
                       {t("howtoLabel")}
                     </p>
-                    <p className="mt-0.5 text-[13px] leading-5 text-[#1a1714]">
+                    <p className="mt-0.5 text-[13px] leading-5 text-ink">
                       {howto}
                     </p>
                     {recommended?.videoFix ? (
-                      <p className="mt-1.5 text-[12.5px] leading-5 text-[#5c564e]">
-                        <span className="font-semibold text-[#1a1714]">
+                      <p className="mt-1.5 text-[12.5px] leading-5 text-ink-2">
+                        <span className="font-semibold text-ink">
                           {t("videoFixLabel")}:
                         </span>{" "}
                         {recommended.videoFix}
                       </p>
                     ) : null}
                     {recommended?.editFocus ? (
-                      <span className="mt-2 inline-flex rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-[#9a5a32] ring-1 ring-[#f0dccb]">
+                      <span className="mt-2 inline-flex rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold text-accent-text ring-1 ring-accent-line">
                         {t(`editFocus_${recommended.editFocus}`)}
                       </span>
                     ) : null}
                   </div>
 
-                  <div className="mt-auto space-y-3 border-t border-[#f3ece5] px-4 py-3">
+                  <div className="mt-auto space-y-3 border-t border-line px-4 py-3">
                     {draft.hasActiveFix ? (
-                      <p className="rounded-[12px] bg-[#eef7f1] px-3 py-2 text-[12px] font-semibold text-[#2f6b47]">
+                      <p className="rounded-box bg-subtle px-3 py-2 text-[12px] font-semibold text-ok-fg">
                         {t("fixInProgress")}
                       </p>
                     ) : (
@@ -475,17 +475,17 @@ export function AgentProDraftsPanel({
                                 ? `&fixAccount=${encodeURIComponent(draft.adAccountId)}`
                                 : ""
                             }&fixLabel=${encodeURIComponent(title)}&fixKind=${encodeURIComponent(actionKind)}#creative-upload`}
-                            className="inline-flex h-10 items-center justify-center rounded-full bg-[#c46d3c] px-4 text-[13px] font-semibold text-white transition hover:bg-[#b0602f]"
+                            className="inline-flex h-10 items-center justify-center rounded-full bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
                           >
                             {t("uploadFixed")}
                           </Link>
                         ) : (
-                          <p className="text-[12px] font-semibold leading-4 text-[#1a1714]">
+                          <p className="text-[12px] font-semibold leading-4 text-ink">
                             {t("ctaPage")}
                           </p>
                         )}
                         {appealing ? (
-                          <span className="text-[12px] font-medium text-[#5c564e]">
+                          <span className="text-[12px] font-medium text-ink-2">
                             {t("appealPending")}
                           </span>
                         ) : canAppeal && appealCopy ? (
@@ -498,7 +498,7 @@ export function AgentProDraftsPanel({
                               );
                               if (ok) void onAppeal(draft.id, appealCopy);
                             }}
-                            className="text-[12px] font-semibold text-[#5c564e] underline-offset-2 hover:underline disabled:opacity-60"
+                            className="text-[12px] font-semibold text-ink-2 underline-offset-2 hover:underline disabled:opacity-60"
                           >
                             {t("ctaAppeal")}
                           </button>
@@ -506,12 +506,12 @@ export function AgentProDraftsPanel({
                       </div>
                     )}
 
-                    <details className="group rounded-[12px] bg-[#faf8f5] px-3 py-2">
-                      <summary className="flex cursor-pointer list-none items-center justify-between text-[12px] font-semibold text-[#5c564e] [&::-webkit-details-marker]:hidden">
+                    <details className="group rounded-box bg-field px-3 py-2">
+                      <summary className="flex cursor-pointer list-none items-center justify-between text-[12px] font-semibold text-ink-2 [&::-webkit-details-marker]:hidden">
                         {t("tiktokRejectReasonsLabel")}
-                        <span aria-hidden className="text-[#a89c90] transition group-open:rotate-180">⌄</span>
+                        <span aria-hidden className="text-accent-text transition group-open:rotate-180">⌄</span>
                       </summary>
-                      <div className="mt-2 space-y-2 text-[12.5px] leading-5 text-[#5c564e]">
+                      <div className="mt-2 space-y-2 text-[12.5px] leading-5 text-ink-2">
                         {whyUnique.length > 0 ? (
                           whyUnique.map((line) => (
                             <p key={line.slice(0, 64)}>
@@ -523,22 +523,22 @@ export function AgentProDraftsPanel({
                         )}
                         {recommended?.quote ? (
                           <p>
-                            <span className="font-semibold text-[#1a1714]">{t("videoSaysLabel")}:</span>{" "}
+                            <span className="font-semibold text-ink">{t("videoSaysLabel")}:</span>{" "}
                             “{recommended.quote}”
                           </p>
                         ) : null}
                         {suggestedAd ? (
                           <p>
-                            <span className="font-semibold text-[#1a1714]">{t("aiAdTextLabel")}:</span>{" "}
+                            <span className="font-semibold text-ink">{t("aiAdTextLabel")}:</span>{" "}
                             “{suggestedAd}”
                           </p>
                         ) : null}
                         <p>
-                          <span className="font-semibold text-[#1a1714]">{t("descLabel")}:</span>{" "}
+                          <span className="font-semibold text-ink">{t("descLabel")}:</span>{" "}
                           {description || t("noAdText")}
                         </p>
                         {weightBan || actionKind === "claims" || actionKind === "policy" ? (
-                          <p className="text-[11.5px] text-[#8a8177]">{t("appealHintWeak")}</p>
+                          <p className="text-[11.5px] text-ink-3">{t("appealHintWeak")}</p>
                         ) : null}
                       </div>
                     </details>
@@ -551,8 +551,8 @@ export function AgentProDraftsPanel({
               <li
                 key={draft.id}
                 className={cn(
-                  "overflow-hidden rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_8px_20px_rgb(20_18_16_/_0.03)]",
-                  failed ? "bg-[#fdf8f7]" : null,
+                  "overflow-hidden rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_8px_20px_rgb(20_18_16_/_0.03)]",
+                  failed ? "bg-field" : null,
                 )}
               >
                 <div className="px-4 py-3 sm:px-5">
@@ -584,7 +584,7 @@ export function AgentProDraftsPanel({
                     </span>
                   </div>
                   {draft.parentDraftId ? (
-                    <p className="mt-1 text-[11px] font-medium text-[var(--auth-accent)]">
+                    <p className="mt-1 text-[11px] font-medium text-accent-text">
                       {t("fixOf", {
                         name: cleanCreativeDisplayName(
                           draft.parentLabel || t("briefFallback"),
@@ -593,12 +593,12 @@ export function AgentProDraftsPanel({
                     </p>
                   ) : null}
                   {failed && draft.errorMessage ? (
-                    <p className="mt-2 text-[12px] text-[#991b1b]">
+                    <p className="mt-2 text-[12px] text-danger-fg">
                       {draft.errorMessage}
                     </p>
                   ) : null}
                   {draft.brief.notes.find((n) => n.startsWith("SAME_FAIL:")) ? (
-                    <p className="mt-2 rounded-lg bg-[#fdf6f5] px-3 py-2 text-[12px] font-medium leading-4 text-[#9b2c2c]">
+                    <p className="mt-2 rounded-lg bg-field px-3 py-2 text-[12px] font-medium leading-4 text-danger-fg">
                       {draft.brief.notes
                         .find((n) => n.startsWith("SAME_FAIL:"))
                         ?.replace(/^SAME_FAIL:\s*/, "")}
@@ -625,7 +625,7 @@ export function AgentProDraftsPanel({
                           void runAction(draft.id, "approve", true);
                         }
                       }}
-                      className="h-10 flex-1 rounded-xl bg-[var(--auth-accent)] text-[13px] font-bold text-white disabled:opacity-50"
+                      className="h-10 flex-1 rounded-box bg-accent-btn text-[13px] font-bold text-on-accent disabled:opacity-50"
                     >
                       {busyId === draft.id ? t("sending") : t("sendToTikTok")}
                     </Button>
@@ -637,7 +637,7 @@ export function AgentProDraftsPanel({
                         onClick={() =>
                           void runAction(draft.id, "approve", false)
                         }
-                        className="h-10 flex-1 rounded-xl border-[rgb(20_18_16_/_0.12)] text-[13px] font-semibold"
+                        className="h-10 flex-1 rounded-box border-[rgb(20_18_16_/_0.12)] text-[13px] font-semibold"
                       >
                         {t("approveOnly")}
                       </Button>
@@ -648,7 +648,7 @@ export function AgentProDraftsPanel({
                         variant="outline"
                         disabled={busyId === draft.id}
                         onClick={() => void runAction(draft.id, "reject")}
-                        className="h-10 rounded-xl border-[rgb(20_18_16_/_0.12)] text-[13px] font-semibold text-[var(--auth-text-muted)] sm:px-4"
+                        className="h-10 rounded-box border-[rgb(20_18_16_/_0.12)] text-[13px] font-semibold text-[var(--auth-text-muted)] sm:px-4"
                       >
                         {t("reject")}
                       </Button>

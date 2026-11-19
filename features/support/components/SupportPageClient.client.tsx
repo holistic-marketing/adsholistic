@@ -380,7 +380,7 @@ export function SupportPageClient({
     switch (panel) {
       case "faqCategories":
         return (
-          <div className="dashboard-surface-card overflow-hidden rounded-[1rem]">
+          <div className="dashboard-surface-card overflow-hidden rounded-card">
             <div className="border-b border-[var(--auth-divider)] bg-[linear-gradient(135deg,#1a1008_0%,#2a1810_55%,#e8451a_160%)] px-4 py-3">
               <button
                 type="button"
@@ -401,7 +401,7 @@ export function SupportPageClient({
                 value={faqQuery}
                 onChange={(e) => setFaqQuery(e.target.value)}
                 placeholder={t("searchFaq")}
-                className="mb-3 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-white px-3 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
+                className="mb-3 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
               />
               <ul className="space-y-1">
                 {filteredFaqCategories.map((category) => (
@@ -430,7 +430,7 @@ export function SupportPageClient({
         );
       case "faqCategoryDetail":
         return selectedCategory ? (
-          <div className="overflow-hidden rounded-[1rem] ring-1 ring-[var(--border-subtle)]">
+          <div className="overflow-hidden rounded-card ring-1 ring-[var(--border-subtle)]">
             <ChatFaqCategoryDetail
               categoryTitle={selectedCategory.title}
               articles={categoryArticles}
@@ -444,7 +444,7 @@ export function SupportPageClient({
         ) : null;
       case "faqArticleDetail":
         return selectedArticle ? (
-          <div className="overflow-hidden rounded-[1rem] ring-1 ring-[var(--border-subtle)]">
+          <div className="overflow-hidden rounded-card ring-1 ring-[var(--border-subtle)]">
             <ChatFaqArticleDetail
               article={selectedArticle}
               onBack={() => setPanel("faqCategoryDetail")}
@@ -464,8 +464,8 @@ export function SupportPageClient({
 
   const leftColumn = (
     <div className="space-y-4">
-      <div className="dashboard-surface-card rounded-[1rem] p-4 sm:p-5">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[var(--auth-accent)]">
+      <div className="dashboard-surface-card rounded-card p-4 sm:p-5">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-text">
           {t("chats")}
         </p>
         <h2 className="mt-1 text-[1.05rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
@@ -474,7 +474,7 @@ export function SupportPageClient({
 
         {bootError ? (
           <p
-            className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800"
+            className="mt-4 rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg"
             role="alert"
           >
             {bootError}
@@ -491,7 +491,7 @@ export function SupportPageClient({
             "mt-4 flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors",
             panel === "chat"
               ? "border-[var(--auth-accent)]/50 bg-[rgb(255_120_31_/_0.06)]"
-              : "border-[var(--auth-input-border)] bg-white hover:border-[var(--auth-accent)]/35",
+              : "border-[var(--auth-input-border)] bg-surface hover:border-[var(--auth-accent)]/35",
           )}
         >
           <span
@@ -520,12 +520,12 @@ export function SupportPageClient({
             "mt-2 flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors",
             panel === "meetings"
               ? "border-[var(--auth-accent)]/50 bg-[rgb(255_120_31_/_0.06)]"
-              : "border-[var(--auth-input-border)] bg-white hover:border-[var(--auth-accent)]/35",
+              : "border-[var(--auth-input-border)] bg-surface hover:border-[var(--auth-accent)]/35",
           )}
         >
           <span
             aria-hidden
-            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-soft)] text-[var(--auth-accent)]"
+            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-soft)] text-accent-text"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -544,7 +544,7 @@ export function SupportPageClient({
             setPanel("faqCategories");
             setMobileShowChat(false);
           }}
-          className="mt-2 flex w-full items-center justify-between rounded-lg border border-[var(--auth-input-border)] bg-white px-3.5 py-3 text-left transition-colors hover:border-[var(--auth-accent)]/40"
+          className="mt-2 flex w-full items-center justify-between rounded-lg border border-[var(--auth-input-border)] bg-surface px-3.5 py-3 text-left transition-colors hover:border-[var(--auth-accent)]/40"
         >
           <div>
             <p className="text-[14px] font-semibold text-[var(--auth-text)]">
@@ -571,7 +571,7 @@ export function SupportPageClient({
   );
 
   const chatColumn = (
-    <div className="dashboard-surface-card h-full min-h-[560px] overflow-hidden rounded-[1.25rem] shadow-[0_16px_40px_rgb(15_23_42_/_0.06)]">
+    <div className="dashboard-surface-card h-full min-h-[560px] overflow-hidden rounded-card shadow-[0_16px_40px_rgb(15_23_42_/_0.06)]">
       <ChatConversation
         messages={displayMessages}
         inputValue={inputValue}

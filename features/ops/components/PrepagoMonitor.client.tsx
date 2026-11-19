@@ -39,31 +39,31 @@ const SEVERITY_META: Record<
 > = {
   critical: {
     label: "Crítico",
-    dot: "bg-[#c2410c]",
-    chip: "bg-[#fdecea] text-[#9f1d12]",
-    ring: "ring-[#f5c6bf]",
-    text: "text-[#9f1d12]",
+    dot: "bg-accent",
+    chip: "bg-subtle text-danger-fg",
+    ring: "ring-danger-line",
+    text: "text-danger-fg",
   },
   high: {
     label: "Alto",
-    dot: "bg-[#d47840]",
-    chip: "bg-[#fff1e6] text-[#9a4a17]",
-    ring: "ring-[#f3d6bf]",
-    text: "text-[#9a4a17]",
+    dot: "bg-accent",
+    chip: "bg-accent-soft text-accent-text",
+    ring: "ring-accent-line",
+    text: "text-accent-text",
   },
   medium: {
     label: "Atención",
-    dot: "bg-[#c9a227]",
-    chip: "bg-[#fbf5df] text-[#7a5f0e]",
-    ring: "ring-[#efe2b3]",
-    text: "text-[#7a5f0e]",
+    dot: "bg-warn-solid",
+    chip: "bg-warn-bg text-warn-fg",
+    ring: "ring-warn-line",
+    text: "text-warn-fg",
   },
   info: {
     label: "Info",
-    dot: "bg-[#a39b92]",
-    chip: "bg-[#f5f0ea] text-[#5c564e]",
-    ring: "ring-[#ece5dc]",
-    text: "text-[#5c564e]",
+    dot: "bg-line-strong",
+    chip: "bg-subtle text-ink-2",
+    ring: "ring-line",
+    text: "text-ink-2",
   },
 };
 
@@ -125,11 +125,11 @@ function VerdictChip({ verdict, compact = false }: { verdict: VerdictKey; compac
 
 function ModalidadBadge({ modalidad }: { modalidad: ClienteModalidad }) {
   return modalidad === "acuerdo" ? (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-[#ebf0fa] px-1.5 py-0.5 text-[10.5px] font-semibold text-[#2f4a86]">
+    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold text-info-fg">
       Paga después
     </span>
   ) : (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-[#f5f0ea] px-1.5 py-0.5 text-[10.5px] font-semibold text-[#5c564e]">
+    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold text-ink-2">
       Prepago
     </span>
   );
@@ -137,7 +137,7 @@ function ModalidadBadge({ modalidad }: { modalidad: ClienteModalidad }) {
 
 function BmBadge({ bm }: { bm: string }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-[#f5f0ea] px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-[#5c564e]">
+    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-ink-2">
       BM{bm}
     </span>
   );
@@ -303,13 +303,13 @@ export function PrepagoMonitor({
 
   if (!snapshot) {
     return (
-      <div className="rounded-[22px] bg-white px-5 py-10 text-center ring-1 ring-[#e8dfd4]">
-        <p className="text-[14px] font-semibold text-[#1a1714]">No se pudo cargar el monitoreo</p>
-        <p className="mt-1 text-[13px] text-[#9a3412]">{error}</p>
+      <div className="rounded-card bg-surface px-5 py-10 text-center ring-1 ring-line">
+        <p className="text-[14px] font-semibold text-ink">No se pudo cargar el monitoreo</p>
+        <p className="mt-1 text-[13px] text-accent-text">{error}</p>
         <button
           type="button"
           onClick={() => void load(true)}
-          className="mt-4 rounded-full bg-[#1a1714] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#2c2723]"
+          className="mt-4 rounded-full bg-accent-btn px-4 py-2 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
         >
           Reintentar
         </button>
@@ -332,20 +332,20 @@ export function PrepagoMonitor({
 
       {/* Barra de estado */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-[#6b645c]">
+        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-2">
           <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
             {auto ? (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3f8f5b] opacity-50" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok-solid opacity-50" />
             ) : null}
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${auto ? "bg-[#3f8f5b]" : "bg-[#a39b92]"}`} />
+            <span className={`relative inline-flex h-2 w-2 rounded-full ${auto ? "bg-ok-solid" : "bg-line-strong"}`} />
           </span>
           Actualizado {relativeTime(snapshot.generatedAt, now)} · {limaDateTime(snapshot.generatedAt)}
-          <span className="text-[#a39b92]">
+          <span className="text-ink-3">
             · {t.clientes} clientes · {t.accounts} cuentas
           </span>
         </p>
         <div className="flex items-center gap-2">
-          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#3f3a34] ring-1 ring-[#e8dfd4]">
+          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-[12px] font-medium text-ink ring-1 ring-line">
             <input
               type="checkbox"
               checked={auto}
@@ -358,7 +358,7 @@ export function PrepagoMonitor({
             type="button"
             onClick={() => void load(true)}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#1a1714] px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:bg-[#2c2723] disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent-btn px-3.5 py-1.5 text-[12px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-60"
           >
             <svg viewBox="0 0 20 20" className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} fill="none" aria-hidden>
               <path
@@ -375,12 +375,12 @@ export function PrepagoMonitor({
       </div>
 
       {error ? (
-        <p className="rounded-2xl bg-[#fdecea] px-4 py-2.5 text-[12.5px] text-[#9f1d12] ring-1 ring-[#f5c6bf]">
+        <p className="rounded-card bg-subtle px-4 py-2.5 text-[12.5px] text-danger-fg ring-1 ring-danger-line">
           No se pudo actualizar: {error}. Se muestran los datos anteriores.
         </p>
       ) : null}
       {snapshot.warnings.length ? (
-        <p className="rounded-2xl bg-[#fbf5df] px-4 py-2.5 text-[12.5px] text-[#7a5f0e] ring-1 ring-[#efe2b3]">
+        <p className="rounded-card bg-warn-bg px-4 py-2.5 text-[12.5px] text-warn-fg ring-1 ring-warn-line">
           Datos incompletos: {snapshot.warnings.join(" · ")}
         </p>
       ) : null}
@@ -389,15 +389,15 @@ export function PrepagoMonitor({
 
       {/* Resumen: qué hay que hacer hoy */}
       <section className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-        <div className="relative min-w-0 overflow-hidden rounded-[22px] bg-[#1a1714] p-5 text-white sm:p-6">
+        <div className="relative min-w-0 overflow-hidden rounded-card bg-[#1a1714] p-5 text-white sm:p-6">
           <div
             className={`pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full blur-2xl ${
-              actionable ? "bg-[#d47840]/30" : "bg-[#3f8f5b]/30"
+              actionable ? "bg-accent/30" : "bg-ok-solid/30"
             }`}
             aria-hidden
           />
           <div className="relative">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f0b889]">Hoy hay que</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Hoy hay que</p>
             <p className="mt-2 text-[2.1rem] font-semibold leading-none tracking-[-0.03em] tabular-nums">
               {actionable} cliente{actionable === 1 ? "" : "s"}
             </p>
@@ -418,7 +418,7 @@ export function PrepagoMonitor({
                       setTab("clientes");
                     }}
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
-                      active ? "bg-white text-[#1a1714]" : "bg-white/10 text-white hover:bg-white/15"
+                      active ? "bg-surface text-ink" : "bg-surface/10 text-white hover:bg-surface/15"
                     }`}
                   >
                     <span className={`h-2 w-2 shrink-0 rounded-full ${VERDICT_META[key].dot}`} aria-hidden />
@@ -460,9 +460,9 @@ export function PrepagoMonitor({
       </section>
 
       {/* Pestañas y búsqueda */}
-      <section className="min-w-0 overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4]">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe8df] px-4 py-3">
-          <div className="flex rounded-full bg-[#f5f0ea] p-1" role="tablist">
+      <section className="min-w-0 overflow-hidden rounded-card bg-surface ring-1 ring-line">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+          <div className="flex rounded-full bg-subtle p-1" role="tablist">
             {(
               [
                 ["clientes", "Clientes", visibleRows.length],
@@ -476,10 +476,10 @@ export function PrepagoMonitor({
                 aria-selected={tab === key}
                 onClick={() => setTab(key)}
                 className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition ${
-                  tab === key ? "bg-white text-[#1a1714] shadow-sm" : "text-[#6b645c] hover:text-[#1a1714]"
+                  tab === key ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink"
                 }`}
               >
-                {label} <span className="tabular-nums text-[#a39b92]">{n}</span>
+                {label} <span className="tabular-nums text-ink-3">{n}</span>
               </button>
             ))}
           </div>
@@ -488,7 +488,7 @@ export function PrepagoMonitor({
               <button
                 type="button"
                 onClick={() => setFilter("all")}
-                className="inline-flex items-center gap-1 rounded-full bg-[#f5f0ea] px-2.5 py-1 text-[11.5px] font-semibold text-[#5c564e] hover:bg-[#ece5dc]"
+                className="inline-flex items-center gap-1 rounded-full bg-subtle px-2.5 py-1 text-[11.5px] font-semibold text-ink-2 hover:bg-hover"
               >
                 {VERDICT_META[filter].short} ✕
               </button>
@@ -496,7 +496,7 @@ export function PrepagoMonitor({
             <div className="relative w-full max-w-[16rem]">
               <svg
                 viewBox="0 0 20 20"
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a39b92]"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3"
                 fill="none"
                 aria-hidden
               >
@@ -508,7 +508,7 @@ export function PrepagoMonitor({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar cliente"
                 aria-label="Buscar cliente"
-                className="h-9 w-full rounded-full border border-[#ece7e0] bg-[#faf8f5] pl-9 pr-4 text-[13px] text-[#1a1714] outline-none transition placeholder:text-[#a39b92] focus:border-[#d47840] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#d47840]/30"
+                className="h-9 w-full rounded-full border border-line bg-field pl-9 pr-4 text-[13px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-accent/30"
               />
             </div>
           </div>
@@ -527,7 +527,7 @@ export function PrepagoMonitor({
         )}
       </section>
 
-      <p className="px-1 text-[11.5px] leading-5 text-[#a39b92]">
+      <p className="px-1 text-[11.5px] leading-5 text-ink-3">
         Para quitar saldo o congelar a un cliente, ábrelo y usa «Frenar gasto». Todo queda registrado con
         motivo y quién lo hizo.
       </p>
@@ -538,7 +538,7 @@ export function PrepagoMonitor({
 function HowToRead() {
   const [open, setOpen] = useState(false);
   return (
-    <section className="rounded-[22px] bg-white ring-1 ring-[#e8dfd4]">
+    <section className="rounded-card bg-surface ring-1 ring-line">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -546,19 +546,19 @@ function HowToRead() {
         className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left"
       >
         <span className="flex items-center gap-2.5">
-          <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#fff1e6] text-[13px] font-bold text-[#b85f2e]" aria-hidden>
+          <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[13px] font-bold text-accent-text" aria-hidden>
             ?
           </span>
           <span>
-            <span className="block text-[13.5px] font-semibold text-[#1a1714]">Cómo leer esta pantalla</span>
-            <span className="block text-[12px] text-[#6b645c]">
+            <span className="block text-[13.5px] font-semibold text-ink">Cómo leer esta pantalla</span>
+            <span className="block text-[12px] text-ink-2">
               Cada cliente tiene un color que dice qué hacer. Toca un cliente para ver los pasos.
             </span>
           </span>
         </span>
         <svg
           viewBox="0 0 20 20"
-          className={`h-4 w-4 shrink-0 text-[#a39b92] transition ${open ? "rotate-90" : ""}`}
+          className={`h-4 w-4 shrink-0 text-ink-3 transition ${open ? "rotate-90" : ""}`}
           fill="none"
           aria-hidden
         >
@@ -566,16 +566,16 @@ function HowToRead() {
         </svg>
       </button>
       {open ? (
-        <div className="grid gap-4 border-t border-[#efe8df] px-5 py-4 lg:grid-cols-2">
+        <div className="grid gap-4 border-t border-line px-5 py-4 lg:grid-cols-2">
           <div className="space-y-2.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">La regla</p>
-            <p className="text-[13px] leading-5 text-[#3f3a34]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">La regla</p>
+            <p className="text-[13px] leading-5 text-ink">
               Un cliente <b>prepago</b> primero paga (recarga) y después gasta. Nunca debería gastar más de
               lo que pagó. Algunos clientes tienen un <b>acuerdo con gerencia</b> y pagan después: a ellos
               es normal verles deuda.
             </p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">Palabras</p>
-            <ul className="space-y-1.5 text-[12.5px] leading-5 text-[#3f3a34]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Palabras</p>
+            <ul className="space-y-1.5 text-[12.5px] leading-5 text-ink">
               <li>
                 <b>Cartera:</b> plata que el cliente pagó y todavía no gastó.
               </li>
@@ -592,7 +592,7 @@ function HowToRead() {
             </ul>
           </div>
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">Los colores</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Los colores</p>
             {(
               [
                 ["quitar_saldo", "Puede gastar plata que no pagó. Es un error. Avisar al gerente para quitar ese saldo."],
@@ -602,9 +602,9 @@ function HowToRead() {
                 ["ok", "Solo gasta lo que pagó. No hacer nada."],
               ] as const
             ).map(([key, text]) => (
-              <div key={key} className={`flex items-start gap-3 rounded-2xl px-3 py-2.5 ring-1 ${VERDICT_META[key].ring} ${VERDICT_META[key].soft}`}>
+              <div key={key} className={`flex items-start gap-3 rounded-card px-3 py-2.5 ring-1 ${VERDICT_META[key].ring} ${VERDICT_META[key].soft}`}>
                 <VerdictChip verdict={key} />
-                <p className="text-[12.5px] leading-5 text-[#3f3a34]">{text}</p>
+                <p className="text-[12.5px] leading-5 text-ink">{text}</p>
               </div>
             ))}
           </div>
@@ -625,12 +625,12 @@ function Kpi({
   hint: string;
   tone: "ok" | "warn" | "bad";
 }) {
-  const color = tone === "bad" ? "text-[#9f1d12]" : tone === "warn" ? "text-[#9a4a17]" : "text-[#1a1714]";
+  const color = tone === "bad" ? "text-danger-fg" : tone === "warn" ? "text-accent-text" : "text-ink";
   return (
-    <div className="flex min-w-0 flex-col justify-between rounded-[18px] bg-white p-4 ring-1 ring-[#e8dfd4]">
-      <p className="text-[11.5px] font-semibold leading-4 text-[#6b645c]">{label}</p>
+    <div className="flex min-w-0 flex-col justify-between rounded-card bg-surface p-4 ring-1 ring-line">
+      <p className="text-[11.5px] font-semibold leading-4 text-ink-2">{label}</p>
       <p className={`mt-3 text-[1.45rem] font-semibold leading-none tracking-[-0.02em] tabular-nums ${color}`}>{value}</p>
-      <p className="mt-2 text-[11px] leading-4 text-[#a39b92]">{hint}</p>
+      <p className="mt-2 text-[11px] leading-4 text-ink-3">{hint}</p>
     </div>
   );
 }
@@ -651,7 +651,7 @@ function ClientesList({
   if (rows.length === 0) return <EmptyState text="Ningún cliente con ese filtro." />;
   return (
     <div>
-      <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] gap-3 border-b border-[#f3eee8] bg-[#fcfaf7] px-4 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#a39b92] lg:grid">
+      <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] gap-3 border-b border-line bg-field px-4 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3 lg:grid">
         <span>Cliente</span>
         <span>Qué pasa</span>
         <span className="text-right">Puede gastar sin pagar</span>
@@ -695,12 +695,12 @@ function ClienteRow({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="grid w-full grid-cols-1 gap-2 px-4 py-3 text-left transition hover:bg-[#fcfaf7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d47840]/40 lg:grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] lg:items-center lg:gap-3"
+        className="grid w-full grid-cols-1 gap-2 px-4 py-3 text-left transition hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40 lg:grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] lg:items-center lg:gap-3"
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="relative shrink-0">
             <span
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f0e9] text-[11px] font-bold text-[#b85f2e]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-subtle text-[11px] font-bold text-accent-text"
               aria-hidden
             >
               {initialsOf(cliente.name)}
@@ -708,8 +708,8 @@ function ClienteRow({
             <span className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ring-2 ring-white ${meta.dot}`} aria-hidden />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[14px] font-semibold text-[#1a1714]">{cliente.name}</span>
-            <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-[#a39b92]">
+            <span className="block truncate text-[14px] font-semibold text-ink">{cliente.name}</span>
+            <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-ink-3">
               <ModalidadBadge modalidad={modalidad} />
               {cliente.accounts.length} cuenta{cliente.accounts.length === 1 ? "" : "s"}
             </span>
@@ -718,11 +718,11 @@ function ClienteRow({
         <span className="flex min-w-0 items-start gap-2">
           <span className="min-w-0 flex-1">
             <VerdictChip verdict={verdict.key} />
-            <span className="mt-1 block text-[12.5px] leading-5 text-[#3f3a34] lg:line-clamp-2">{verdict.headline}</span>
+            <span className="mt-1 block text-[12.5px] leading-5 text-ink lg:line-clamp-2">{verdict.headline}</span>
           </span>
           <svg
             viewBox="0 0 20 20"
-            className={`mt-1 h-4 w-4 shrink-0 text-[#a39b92] transition lg:hidden ${open ? "rotate-90" : ""}`}
+            className={`mt-1 h-4 w-4 shrink-0 text-ink-3 transition lg:hidden ${open ? "rotate-90" : ""}`}
             fill="none"
             aria-hidden
           >
@@ -749,8 +749,8 @@ function ClienteRow({
 function MetricCell({ label, value, strong = false }: { label: string; value: number; strong?: boolean }) {
   return (
     <span className="flex items-baseline justify-between gap-2 lg:block lg:text-right">
-      <span className="text-[11.5px] text-[#a39b92] lg:hidden">{label}</span>
-      <span className={`text-[13px] tabular-nums ${strong ? "font-semibold text-[#9f1d12]" : "text-[#3f3a34]"}`}>
+      <span className="text-[11.5px] text-ink-3 lg:hidden">{label}</span>
+      <span className={`text-[13px] tabular-nums ${strong ? "font-semibold text-danger-fg" : "text-ink"}`}>
         {usd(value)}
       </span>
     </span>
@@ -772,15 +772,15 @@ function ClienteDetail({
   return (
     <div className="space-y-4 px-4 pb-5 pt-1">
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <div className={`rounded-2xl bg-white p-4 ring-1 ${meta.ring}`}>
+        <div className={`rounded-card bg-surface p-4 ring-1 ${meta.ring}`}>
           <VerdictChip verdict={verdict.key} />
-          <p className="mt-2 text-[14px] font-semibold leading-6 text-[#1a1714]">{verdict.headline}</p>
+          <p className="mt-2 text-[14px] font-semibold leading-6 text-ink">{verdict.headline}</p>
           {verdict.steps.length ? (
             <>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">Qué hacer</p>
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Qué hacer</p>
               <ol className="mt-1.5 space-y-2">
                 {verdict.steps.map((step, i) => (
-                  <li key={step} className="flex gap-2.5 text-[13px] leading-5 text-[#3f3a34]">
+                  <li key={step} className="flex gap-2.5 text-[13px] leading-5 text-ink">
                     <span
                       className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${meta.dot}`}
                       aria-hidden
@@ -799,7 +799,7 @@ function ClienteDetail({
 
       <FrenarGasto cliente={cliente} onDone={onChanged} />
 
-      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white p-3 ring-1 ring-[#efe8df] sm:max-w-md">
+      <div className="grid grid-cols-3 gap-2 rounded-card bg-surface p-3 ring-1 ring-line sm:max-w-md">
         <MiniStat label="Gastó este mes (con fee)" value={cliente.month.chargeUsd} />
         <MiniStat label="Pagó este mes" value={cliente.month.paidUsd} />
         <MiniStat label="Diferencia" value={cliente.month.debtUsd} danger={cliente.month.debtUsd > 1} />
@@ -810,7 +810,7 @@ function ClienteDetail({
           type="button"
           onClick={() => setShowTech((v) => !v)}
           aria-expanded={showTech}
-          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-[#9a6b4a] hover:text-[#b85f2e]"
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-accent-text hover:text-accent-text"
         >
           <svg viewBox="0 0 20 20" className={`h-3.5 w-3.5 transition ${showTech ? "rotate-90" : ""}`} fill="none" aria-hidden>
             <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -821,7 +821,7 @@ function ClienteDetail({
           <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
             <div className="space-y-2">
               {cliente.signals.length === 0 ? (
-                <p className="rounded-2xl bg-[#eaf5ee] px-3.5 py-3 text-[12.5px] text-[#276043]">Sin alertas.</p>
+                <p className="rounded-card bg-subtle px-3.5 py-3 text-[12.5px] text-ok-fg">Sin alertas.</p>
               ) : (
                 cliente.signals.map((s, i) => <SignalCard key={`${s.kind}-${s.advertiserId ?? i}-${i}`} signal={s} />)
               )}
@@ -861,10 +861,10 @@ function ModalidadEditor({
   }
 
   return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-[#efe8df]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">Tipo de cliente</p>
-      <p className="mt-1 text-[12px] leading-5 text-[#6b645c]">Lo decide gerencia. Cambia lo que esta pantalla recomienda.</p>
-      <div className="mt-2.5 grid grid-cols-2 gap-1 rounded-xl bg-[#f5f0ea] p-1" role="radiogroup" aria-label="Tipo de cliente">
+    <div className="rounded-card bg-surface p-4 ring-1 ring-line">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Tipo de cliente</p>
+      <p className="mt-1 text-[12px] leading-5 text-ink-2">Lo decide gerencia. Cambia lo que esta pantalla recomienda.</p>
+      <div className="mt-2.5 grid grid-cols-2 gap-1 rounded-box bg-subtle p-1" role="radiogroup" aria-label="Tipo de cliente">
         {(
           [
             ["prepago", "Prepago", "Paga antes de gastar"],
@@ -878,16 +878,16 @@ function ModalidadEditor({
             aria-checked={modalidad === key}
             onClick={() => setModalidad(key)}
             className={`rounded-lg px-2.5 py-2 text-left transition ${
-              modalidad === key ? "bg-white shadow-sm ring-1 ring-[#e8dfd4]" : "hover:bg-white/60"
+              modalidad === key ? "bg-surface shadow-sm ring-1 ring-line" : "hover:bg-surface/60"
             }`}
           >
-            <span className="block text-[12.5px] font-semibold text-[#1a1714]">{label}</span>
-            <span className="block text-[11px] text-[#6b645c]">{hint}</span>
+            <span className="block text-[12.5px] font-semibold text-ink">{label}</span>
+            <span className="block text-[11px] text-ink-2">{hint}</span>
           </button>
         ))}
       </div>
       <label className="mt-2.5 block">
-        <span className="text-[11.5px] font-medium text-[#6b645c]">
+        <span className="text-[11.5px] font-medium text-ink-2">
           Nota {modalidad === "acuerdo" ? "(obligatoria: quién lo autorizó y cuándo paga)" : "(opcional)"}
         </span>
         <textarea
@@ -896,11 +896,11 @@ function ModalidadEditor({
           rows={2}
           maxLength={300}
           placeholder={modalidad === "acuerdo" ? "Ej: Autorizado por gerencia, paga a fin de mes." : ""}
-          className="mt-1 w-full resize-none rounded-xl border border-[#ece7e0] bg-[#faf8f5] px-3 py-2 text-[12.5px] text-[#1a1714] outline-none transition placeholder:text-[#a39b92] focus:border-[#d47840] focus:bg-white"
+          className="mt-1 w-full resize-none rounded-box border border-line bg-field px-3 py-2 text-[12.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface"
         />
       </label>
       <div className="mt-2 flex items-center justify-between gap-2">
-        <p className="min-w-0 text-[11px] leading-4 text-[#a39b92]">
+        <p className="min-w-0 text-[11px] leading-4 text-ink-3">
           {row.modalidadEntry
             ? `Marcado por ${row.modalidadEntry.updatedBy} · ${limaDateTime(row.modalidadEntry.updatedAt)}`
             : "Sin marcar: se trata como prepago."}
@@ -909,13 +909,13 @@ function ModalidadEditor({
           type="button"
           onClick={() => void save()}
           disabled={!dirty || saving}
-          className="shrink-0 rounded-full bg-[#1a1714] px-3.5 py-1.5 text-[12px] font-semibold text-white transition hover:bg-[#2c2723] disabled:opacity-40"
+          className="shrink-0 rounded-full bg-accent-btn px-3.5 py-1.5 text-[12px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-40"
         >
           {saving ? "Guardando…" : "Guardar"}
         </button>
       </div>
       {message ? (
-        <p className={`mt-1.5 text-[12px] ${message.ok ? "text-[#276043]" : "text-[#9f1d12]"}`}>{message.text}</p>
+        <p className={`mt-1.5 text-[12px] ${message.ok ? "text-ok-fg" : "text-danger-fg"}`}>{message.text}</p>
       ) : null}
     </div>
   );
@@ -924,11 +924,11 @@ function ModalidadEditor({
 function SignalCard({ signal }: { signal: MonitorSignal }) {
   const meta = SEVERITY_META[signal.severity];
   return (
-    <div className={`rounded-2xl bg-white px-3.5 py-3 ring-1 ${meta.ring}`}>
+    <div className={`rounded-card bg-surface px-3.5 py-3 ring-1 ${meta.ring}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className={`text-[13px] font-semibold ${meta.text}`}>{signal.title}</p>
-          <p className="mt-0.5 text-[12.5px] leading-5 text-[#3f3a34]">{signal.detail}</p>
+          <p className="mt-0.5 text-[12.5px] leading-5 text-ink">{signal.detail}</p>
         </div>
         {signal.amountUsd != null ? (
           <span className={`shrink-0 text-[13px] font-semibold tabular-nums ${meta.text}`}>{usd(signal.amountUsd)}</span>
@@ -941,8 +941,8 @@ function SignalCard({ signal }: { signal: MonitorSignal }) {
 function MiniStat({ label, value, danger = false }: { label: string; value: number; danger?: boolean }) {
   return (
     <div>
-      <p className="text-[10.5px] leading-4 text-[#a39b92]">{label}</p>
-      <p className={`mt-0.5 text-[13px] font-semibold tabular-nums ${danger ? "text-[#9f1d12]" : "text-[#1a1714]"}`}>
+      <p className="text-[10.5px] leading-4 text-ink-3">{label}</p>
+      <p className={`mt-0.5 text-[13px] font-semibold tabular-nums ${danger ? "text-danger-fg" : "text-ink"}`}>
         {usd(value)}
       </p>
     </div>
@@ -951,13 +951,13 @@ function MiniStat({ label, value, danger = false }: { label: string; value: numb
 
 function AccountsTable({ accounts }: { accounts: MonitorAccount[] }) {
   if (accounts.length === 0) {
-    return <p className="text-[12.5px] text-[#6b645c]">Sin cuentas vinculadas en TikTok.</p>;
+    return <p className="text-[12.5px] text-ink-2">Sin cuentas vinculadas en TikTok.</p>;
   }
   return (
-    <div className="overflow-hidden rounded-2xl ring-1 ring-[#efe8df]">
+    <div className="overflow-hidden rounded-card ring-1 ring-line">
       <div className="max-h-[22rem] overflow-auto">
         <table className="w-full text-[12.5px]">
-          <thead className="sticky top-0 bg-[#fcfaf7] text-[10.5px] uppercase tracking-[0.06em] text-[#a39b92]">
+          <thead className="sticky top-0 bg-field text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
             <tr>
               <th className="px-3 py-2 text-left font-semibold">Cuenta</th>
               <th className="px-3 py-2 text-right font-semibold">Puede gastar</th>
@@ -965,7 +965,7 @@ function AccountsTable({ accounts }: { accounts: MonitorAccount[] }) {
               <th className="px-3 py-2 text-right font-semibold">Sin pago</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#f3eee8] bg-white">
+          <tbody className="divide-y divide-line bg-surface">
             {accounts.map((a) => {
               const risky = a.unlimited || (a.excessUsd ?? 0) > 1;
               return (
@@ -973,22 +973,22 @@ function AccountsTable({ accounts }: { accounts: MonitorAccount[] }) {
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-1.5">
                       <BmBadge bm={a.bm} />
-                      <span className="min-w-0 max-w-[14rem] truncate font-medium text-[#1a1714]" title={a.name}>
+                      <span className="min-w-0 max-w-[14rem] truncate font-medium text-ink" title={a.name}>
                         {a.name}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[10.5px] text-[#a39b92]">
+                    <p className="mt-0.5 text-[10.5px] text-ink-3">
                       {a.status === "banned" ? "Baneada · " : ""}
                       {a.kind === "cash" ? "Cash" : "Cupo compartido"} · adv {a.advertiserId}
                     </p>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-[#3f3a34]">
-                    {a.unlimited ? <span className="font-semibold text-[#9f1d12]">Sin tope</span> : usd(a.spendableUsd)}
+                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-ink">
+                    {a.unlimited ? <span className="font-semibold text-danger-fg">Sin tope</span> : usd(a.spendableUsd)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-[#3f3a34]">{usd(a.walletUsd)}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-ink">{usd(a.walletUsd)}</td>
                   <td
                     className={`whitespace-nowrap px-3 py-2 text-right tabular-nums ${
-                      risky && a.status !== "banned" ? "font-semibold text-[#9f1d12]" : "text-[#a39b92]"
+                      risky && a.status !== "banned" ? "font-semibold text-danger-fg" : "text-ink-3"
                     }`}
                   >
                     {a.unlimited ? "∞" : usd(a.excessUsd)}
@@ -1015,31 +1015,31 @@ function EventsList({
   if (events.length === 0) return <EmptyState text="Sin movimientos raros en la ventana revisada." />;
   return (
     <ol className="relative px-4 py-4">
-      <span className="absolute bottom-6 left-[1.9rem] top-6 w-px bg-[#efe8df]" aria-hidden />
+      <span className="absolute bottom-6 left-[1.9rem] top-6 w-px bg-subtle" aria-hidden />
       {events.map((e) => {
         const acuerdo = modalidadById.get(e.clienteId) === "acuerdo";
         const meta = acuerdo ? VERDICT_META.acuerdo : SEVERITY_META[e.severity];
         return (
           <li key={e.id} className="relative flex gap-4 py-2.5">
             <span
-              className={`relative z-10 mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white ring-1 ${meta.ring}`}
+              className={`relative z-10 mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface ring-1 ${meta.ring}`}
               aria-hidden
             >
               <span className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
             </span>
-            <div className="min-w-0 flex-1 rounded-2xl bg-[#fcfaf7] px-3.5 py-2.5 ring-1 ring-[#f3eee8]">
+            <div className="min-w-0 flex-1 rounded-card bg-field px-3.5 py-2.5 ring-1 ring-line">
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-semibold text-[#1a1714]">
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-semibold text-ink">
                   {e.clienteName}
                   <ModalidadBadge modalidad={acuerdo ? "acuerdo" : "prepago"} />
                   <span className={`font-medium ${meta.text}`}>{e.title}</span>
                 </p>
-                <span className="text-[11.5px] tabular-nums text-[#a39b92]" title={limaDateTime(e.at)}>
+                <span className="text-[11.5px] tabular-nums text-ink-3" title={limaDateTime(e.at)}>
                   {relativeTime(e.at, now)}
                 </span>
               </div>
-              <p className="mt-1 text-[12.5px] leading-5 text-[#3f3a34]">{e.detail}</p>
-              <p className="mt-1 text-[11.5px] text-[#6b645c]">
+              <p className="mt-1 text-[12.5px] leading-5 text-ink">{e.detail}</p>
+              <p className="mt-1 text-[11.5px] text-ink-2">
                 {e.actor ? `Hecho por ${e.actor}. ` : ""}
                 {acuerdo
                   ? "Cliente con acuerdo: es normal, solo vigilar."
@@ -1054,7 +1054,7 @@ function EventsList({
 }
 
 function EmptyState({ text }: { text: string }) {
-  return <p className="px-4 py-10 text-center text-[13px] text-[#6b645c]">{text}</p>;
+  return <p className="px-4 py-10 text-center text-[13px] text-ink-2">{text}</p>;
 }
 
 /** Pasos que sigue el servidor, en el orden en que suelen terminar (~15 s en total). */
@@ -1091,7 +1091,7 @@ function RefreshBar({ active }: { active: boolean }) {
   if (!active) return null;
   return (
     <div
-      className="h-1 w-full overflow-hidden rounded-full bg-[#efe8df]"
+      className="h-1 w-full overflow-hidden rounded-full bg-subtle"
       role="progressbar"
       aria-label="Actualizando monitoreo"
       aria-valuenow={percent}
@@ -1099,7 +1099,7 @@ function RefreshBar({ active }: { active: boolean }) {
       aria-valuemax={100}
     >
       <div
-        className="h-full rounded-full bg-gradient-to-r from-[#d47840] to-[#f0b889] transition-[width] duration-300 ease-out"
+        className="h-full rounded-full bg-gradient-to-r from-accent to-accent transition-[width] duration-300 ease-out"
         style={{ width: `${Math.max(6, percent)}%` }}
       />
     </div>
@@ -1110,13 +1110,13 @@ function MonitorSkeleton() {
   const { percent, step, stepIndex, slow } = useLoadingProgress(true);
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Cargando monitoreo">
-      <div className="rounded-[22px] bg-white p-5 ring-1 ring-[#e8dfd4] sm:p-6">
+      <div className="rounded-card bg-surface p-5 ring-1 ring-line sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-[13px] font-semibold text-[#1a1714]">Revisando el sistema</p>
-          <span className="text-[12px] font-semibold tabular-nums text-[#9a6b4a]">{percent}%</span>
+          <p className="text-[13px] font-semibold text-ink">Revisando el sistema</p>
+          <span className="text-[12px] font-semibold tabular-nums text-accent-text">{percent}%</span>
         </div>
         <div
-          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f5f0ea]"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-subtle"
           role="progressbar"
           aria-valuenow={percent}
           aria-valuemin={0}
@@ -1124,13 +1124,13 @@ function MonitorSkeleton() {
           aria-label="Progreso de la revisión"
         >
           <div
-            className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-[#d47840] to-[#f0b889] transition-[width] duration-300 ease-out"
+            className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-accent to-accent transition-[width] duration-300 ease-out"
             style={{ width: `${Math.max(4, percent)}%` }}
           >
-            <span className="absolute inset-0 animate-pulse bg-white/25" aria-hidden />
+            <span className="absolute inset-0 animate-pulse bg-surface/25" aria-hidden />
           </div>
         </div>
-        <p className="mt-2.5 text-[12.5px] text-[#6b645c]" aria-live="polite">
+        <p className="mt-2.5 text-[12.5px] text-ink-2" aria-live="polite">
           {slow ? "Está tardando más de lo normal, TikTok responde lento. Sigue revisando…" : step}
         </p>
         <ol className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
@@ -1139,30 +1139,30 @@ function MonitorSkeleton() {
               <span
                 className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
                   i < stepIndex
-                    ? "bg-[#3f8f5b] text-white"
+                    ? "bg-ok-solid text-white"
                     : i === stepIndex
-                      ? "bg-[#d47840] text-white"
-                      : "bg-[#f5f0ea] text-[#a39b92]"
+                      ? "bg-accent-btn text-on-accent"
+                      : "bg-subtle text-ink-3"
                 }`}
                 aria-hidden
               >
                 {i < stepIndex ? "✓" : i + 1}
               </span>
-              <span className={i <= stepIndex ? "text-[#3f3a34]" : "text-[#a39b92]"}>{s.short}</span>
+              <span className={i <= stepIndex ? "text-ink" : "text-ink-3"}>{s.short}</span>
             </li>
           ))}
         </ol>
       </div>
       <div className="flex animate-pulse flex-col gap-4">
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-          <div className="h-44 rounded-[22px] bg-[#e8e1d8]" />
+          <div className="h-44 rounded-card bg-active" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-28 rounded-[18px] bg-white ring-1 ring-[#e8dfd4]" />
+              <div key={i} className="h-28 rounded-card bg-surface ring-1 ring-line" />
             ))}
           </div>
         </div>
-        <div className="h-80 rounded-[22px] bg-white ring-1 ring-[#e8dfd4]" />
+        <div className="h-80 rounded-card bg-surface ring-1 ring-line" />
       </div>
     </div>
   );

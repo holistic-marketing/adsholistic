@@ -48,14 +48,14 @@ export function DashboardModalShell({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--ui-scrim)]"
         aria-label="Cerrar modal"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative max-h-[min(90vh,calc(100dvh-2rem))] w-full overflow-y-auto rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-2xl sm:p-6 ${maxWidthClassName}`}
+        className={`relative max-h-[min(90vh,calc(100dvh-2rem))] w-full overflow-y-auto rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-bg)] p-6 text-[var(--admin-text)] shadow-[var(--ui-shadow-dlg)] ${maxWidthClassName}`}
       >
         {children}
       </div>

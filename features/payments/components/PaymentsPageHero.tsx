@@ -52,14 +52,14 @@ export async function PaymentsPageHero({
         {capabilities.canClientStripeFund ? (
           <a
             href="#recargar-saldo"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-semibold text-white shadow-[0_8px_20px_rgb(212_120_64_/_0.2)] transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
+            className="inline-flex h-11 items-center justify-center rounded-box bg-accent-btn px-5 text-[14px] font-semibold text-on-accent shadow-[0_8px_20px_rgb(212_120_64_/_0.2)] transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
           >
             {t("hero.ctaReload")}
           </a>
         ) : null}
         <a
           href="#asignar-saldo"
-          className="inline-flex h-11 items-center justify-center rounded-xl border border-[var(--auth-border)] bg-white px-5 text-[14px] font-semibold text-[var(--auth-text)] transition-[background-color,transform] hover:bg-[var(--auth-bg)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
+          className="inline-flex h-11 items-center justify-center rounded-box border border-[var(--auth-border)] bg-surface px-5 text-[14px] font-semibold text-[var(--auth-text)] transition-[background-color,transform] hover:bg-[var(--auth-bg)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
         >
           {managerOnly ? t("hero.ctaPickAccount") : t("hero.ctaAssign")}
         </a>

@@ -49,11 +49,11 @@ const TEMPLATES: Array<{ name: string; title: string; body: string; url: string 
 ];
 
 const field =
-  "w-full rounded-xl bg-white px-3 text-[14px] text-[#1c1917] ring-1 ring-[#e8e1d8] placeholder:text-[#a8a097] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]";
+  "w-full rounded-box bg-surface px-3 text-[14px] text-ink ring-1 ring-line placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]";
 const primary =
-  "inline-flex h-10 items-center justify-center rounded-xl bg-[var(--brand-primary)] px-4 text-[13px] font-semibold text-white transition hover:bg-[var(--brand-primary-deep)] disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-box bg-[var(--brand-primary)] px-4 text-[13px] font-semibold text-white transition hover:bg-[var(--brand-primary-deep)] disabled:opacity-50";
 const ghost =
-  "inline-flex h-10 items-center justify-center rounded-xl bg-white px-4 text-[13px] font-semibold text-[#5c564e] ring-1 ring-[#e8e1d8] transition hover:bg-[#faf8f5] disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-box bg-surface px-4 text-[13px] font-semibold text-ink-2 ring-1 ring-line transition hover:bg-field disabled:opacity-50";
 
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
@@ -63,19 +63,19 @@ function plural(n: number, one: string, many: string) {
 function PhonePreview({ title, body }: { title: string; body: string }) {
   return (
     <div className="mx-auto w-full max-w-[300px] rounded-[2.2rem] bg-[#1c1917] p-2.5 shadow-[0_24px_50px_-24px_rgb(28_25_23_/_0.6)]">
-      <div className="relative overflow-hidden rounded-[1.8rem] bg-gradient-to-b from-[#3b2a20] via-[#5a3a28] to-[#2a1f19] px-3 pb-10 pt-3">
+      <div className="relative overflow-hidden rounded-[1.8rem] bg-gradient-to-b from-[#3b2a20] via-accent to-[#2a1f19] px-3 pb-10 pt-3">
         <div className="mx-auto h-5 w-20 rounded-full bg-black/80" />
         <p className="mt-6 text-center text-[44px] font-semibold leading-none tracking-tight text-white/90">9:41</p>
-        <div className="mt-6 rounded-2xl bg-white/80 p-2.5 backdrop-blur">
+        <div className="mt-6 rounded-card bg-surface/80 p-2.5 backdrop-blur">
           <div className="flex items-start gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon-192.png" alt="" className="h-8 w-8 shrink-0 rounded-lg" />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="truncate text-[12.5px] font-semibold text-[#1c1917]">{title || "Título del aviso"}</p>
-                <span className="shrink-0 text-[10.5px] text-[#6b645c]">ahora</span>
+                <p className="truncate text-[12.5px] font-semibold text-ink">{title || "Título del aviso"}</p>
+                <span className="shrink-0 text-[10.5px] text-ink-2">ahora</span>
               </div>
-              <p className="line-clamp-4 text-[12px] leading-snug text-[#3f3a35]">{body || "Aquí va el mensaje."}</p>
+              <p className="line-clamp-4 text-[12px] leading-snug text-ink">{body || "Aquí va el mensaje."}</p>
             </div>
           </div>
         </div>
@@ -182,8 +182,8 @@ export function BroadcastComposer({
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-4">
-        <section className="rounded-2xl border border-[#e8e1d8] bg-white p-4 sm:p-5">
-          <p className="text-[12px] font-semibold text-[#5c564e]">Plantillas</p>
+        <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
+          <p className="text-[12px] font-semibold text-ink-2">Plantillas</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {TEMPLATES.map((tpl) => (
               <button
@@ -194,7 +194,7 @@ export function BroadcastComposer({
                   setBody(tpl.body);
                   setUrl(tpl.url);
                 }}
-                className="rounded-full bg-[#faf6f1] px-3 py-1.5 text-[12.5px] font-semibold text-[#5c4a3c] ring-1 ring-[#efe5da] transition hover:bg-[#f6ede3] hover:ring-[var(--brand-primary)]/40"
+                className="rounded-full bg-field px-3 py-1.5 text-[12.5px] font-semibold text-ink-2 ring-1 ring-line transition hover:bg-hover hover:ring-[var(--brand-primary)]/40"
               >
                 {tpl.name}
               </button>
@@ -203,9 +203,9 @@ export function BroadcastComposer({
 
           <div className="mt-4 space-y-3">
             <label className="block">
-              <span className="flex items-baseline justify-between text-[12px] font-semibold text-[#5c564e]">
+              <span className="flex items-baseline justify-between text-[12px] font-semibold text-ink-2">
                 Título
-                <span className={title.length > titleMax ? "text-red-600" : "font-normal text-[#a8a097]"}>
+                <span className={title.length > titleMax ? "text-danger-fg" : "font-normal text-ink-3"}>
                   {title.length}/{titleMax}
                 </span>
               </span>
@@ -218,9 +218,9 @@ export function BroadcastComposer({
               />
             </label>
             <label className="block">
-              <span className="flex items-baseline justify-between text-[12px] font-semibold text-[#5c564e]">
+              <span className="flex items-baseline justify-between text-[12px] font-semibold text-ink-2">
                 Mensaje
-                <span className={body.length > bodyMax ? "text-red-600" : "font-normal text-[#a8a097]"}>
+                <span className={body.length > bodyMax ? "text-danger-fg" : "font-normal text-ink-3"}>
                   {body.length}/{bodyMax}
                 </span>
               </span>
@@ -236,7 +236,7 @@ export function BroadcastComposer({
 
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block">
-                <span className="text-[12px] font-semibold text-[#5c564e]">Al tocarlo abre</span>
+                <span className="text-[12px] font-semibold text-ink-2">Al tocarlo abre</span>
                 <select
                   value={url}
                   onChange={(e) => edit(setUrl)(e.target.value)}
@@ -250,8 +250,8 @@ export function BroadcastComposer({
                 </select>
               </label>
               <div>
-                <span className="text-[12px] font-semibold text-[#5c564e]">Para</span>
-                <div className="mt-1 grid grid-cols-2 gap-1 rounded-xl bg-[#f6f3ef] p-1" role="radiogroup" aria-label="Para">
+                <span className="text-[12px] font-semibold text-ink-2">Para</span>
+                <div className="mt-1 grid grid-cols-2 gap-1 rounded-box bg-subtle p-1" role="radiogroup" aria-label="Para">
                   {(
                     [
                       ["clientes", "Clientes"],
@@ -265,7 +265,7 @@ export function BroadcastComposer({
                       aria-checked={audience === value}
                       onClick={() => edit(setAudience)(value)}
                       className={`h-8 rounded-lg text-[12.5px] font-semibold transition ${
-                        audience === value ? "bg-white text-[#1c1917] shadow-sm" : "text-[#6b645c] hover:text-[#1c1917]"
+                        audience === value ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink"
                       }`}
                     >
                       {label}
@@ -276,11 +276,11 @@ export function BroadcastComposer({
             </div>
           </div>
 
-          <p className="mt-4 rounded-xl bg-[#faf8f5] px-3 py-2 text-[12.5px] text-[#5c564e] ring-1 ring-[#efe8df]">
+          <p className="mt-4 rounded-box bg-field px-3 py-2 text-[12.5px] text-ink-2 ring-1 ring-line">
             {count ? (
               <>
-                Queda en la campanita de <strong className="text-[#1c1917]">{plural(count.recipients, "persona", "personas")}</strong>{" "}
-                y llega al instante a <strong className="text-[#1c1917]">{plural(count.devices, "celular o PC", "celulares o PCs")}</strong>{" "}
+                Queda en la campanita de <strong className="text-ink">{plural(count.recipients, "persona", "personas")}</strong>{" "}
+                y llega al instante a <strong className="text-ink">{plural(count.devices, "celular o PC", "celulares o PCs")}</strong>{" "}
                 con avisos activos.
               </>
             ) : (
@@ -288,9 +288,9 @@ export function BroadcastComposer({
             )}
           </p>
 
-          {error ? <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-950 ring-1 ring-amber-200">{error}</p> : null}
+          {error ? <p className="mt-3 rounded-box bg-warn-bg px-3 py-2 text-[13px] text-warn-fg ring-1 ring-warn-line">{error}</p> : null}
           {notice ? (
-            <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-[13px] text-emerald-900 ring-1 ring-emerald-200">{notice}</p>
+            <p className="mt-3 rounded-box bg-ok-bg px-3 py-2 text-[13px] text-ok-fg ring-1 ring-ok-line">{notice}</p>
           ) : null}
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -302,7 +302,7 @@ export function BroadcastComposer({
                 <button type="button" className={ghost} disabled={busy !== null} onClick={() => setConfirming(false)}>
                   Cancelar
                 </button>
-                <span className="text-[12px] text-[#8a8278]">Se manda una sola vez y no se puede deshacer.</span>
+                <span className="text-[12px] text-ink-3">Se manda una sola vez y no se puede deshacer.</span>
               </>
             ) : (
               <>
@@ -317,19 +317,19 @@ export function BroadcastComposer({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#e8e1d8] bg-white p-4 sm:p-5">
-          <p className="text-[12px] font-semibold text-[#5c564e]">Enviados</p>
+        <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
+          <p className="text-[12px] font-semibold text-ink-2">Enviados</p>
           {history === null ? (
-            <p className="mt-2 text-[13px] text-[#8a8278]">Cargando…</p>
+            <p className="mt-2 text-[13px] text-ink-3">Cargando…</p>
           ) : history.length === 0 ? (
-            <p className="mt-2 text-[13px] text-[#8a8278]">Todavía no se mandó ningún aviso.</p>
+            <p className="mt-2 text-[13px] text-ink-3">Todavía no se mandó ningún aviso.</p>
           ) : (
             <ul className="mt-2 divide-y divide-[#f1ebe3]">
               {history.map((h) => (
                 <li key={h.id} className="py-2.5">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <p className="text-[13.5px] font-semibold text-[#1c1917]">{h.title}</p>
-                    <span className="text-[11.5px] text-[#8a8278]">
+                    <p className="text-[13.5px] font-semibold text-ink">{h.title}</p>
+                    <span className="text-[11.5px] text-ink-3">
                       {new Date(h.createdAt).toLocaleString("es-PE", {
                         timeZone: "America/Lima",
                         dateStyle: "medium",
@@ -337,8 +337,8 @@ export function BroadcastComposer({
                       })}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[12.5px] text-[#5c564e]">{h.body}</p>
-                  <p className="mt-1 text-[11.5px] text-[#8a8278]">
+                  <p className="mt-0.5 text-[12.5px] text-ink-2">{h.body}</p>
+                  <p className="mt-1 text-[11.5px] text-ink-3">
                     {h.audience === "todos" ? "Todos + equipo" : "Clientes"} · {plural(h.recipients, "persona", "personas")} ·{" "}
                     {plural(h.delivered, "dispositivo", "dispositivos")} al instante
                     {h.sentByEmail ? ` · ${h.sentByEmail}` : ""}
@@ -351,9 +351,9 @@ export function BroadcastComposer({
       </div>
 
       <aside className="lg:sticky lg:top-20 lg:self-start">
-        <p className="mb-2 text-center text-[12px] font-semibold text-[#5c564e]">Así se ve en el celular</p>
+        <p className="mb-2 text-center text-[12px] font-semibold text-ink-2">Así se ve en el celular</p>
         <PhonePreview title={title.trim()} body={body.trim()} />
-        <p className="mt-2 text-center text-[11.5px] text-[#8a8278]">Al tocarlo abre: {destinationLabel}</p>
+        <p className="mt-2 text-center text-[11.5px] text-ink-3">Al tocarlo abre: {destinationLabel}</p>
       </aside>
     </div>
   );

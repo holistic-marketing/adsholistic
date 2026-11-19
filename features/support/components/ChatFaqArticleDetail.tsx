@@ -28,12 +28,12 @@ export function ChatFaqArticleDetail({ article, onBack }: ChatFaqArticleDetailPr
         <p className="text-sm font-semibold text-white">{article.title}</p>
       </div>
 
-      <div className="max-h-[380px] overflow-y-auto bg-white p-4">
-        <p className="text-sm leading-relaxed text-[#6b645c]">{article.content}</p>
+      <div className="max-h-[380px] overflow-y-auto bg-surface p-4">
+        <p className="text-sm leading-relaxed text-ink-2">{article.content}</p>
         {article.bullets.length > 0 && (
           <ul className="mt-4 space-y-2">
             {article.bullets.map((bullet) => (
-              <li key={bullet} className="flex gap-2 text-sm text-[#6b645c]">
+              <li key={bullet} className="flex gap-2 text-sm text-ink-2">
                 <span className="shrink-0 text-[var(--brand-primary)]">•</span>
                 <span>{bullet}</span>
               </li>

@@ -235,10 +235,10 @@ export function CreativeUploadPanel({
   return (
     <section
       id="creative-upload"
-      className="overflow-hidden rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
     >
       <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-accent)]">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">
           {parentDraftId ? t("step1Fix") : t("step1")}
         </p>
         <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
@@ -259,8 +259,8 @@ export function CreativeUploadPanel({
       </div>
 
       {!parentDraftId && repeatRejectKind ? (
-        <div className="mx-5 mt-4 rounded-[1rem] border border-amber-300 bg-amber-50 px-3.5 py-3 sm:mx-6">
-          <p className="text-[13px] font-semibold text-amber-950">
+        <div className="mx-5 mt-4 rounded-card border border-warn-line bg-warn-bg px-3.5 py-3 sm:mx-6">
+          <p className="text-[13px] font-semibold text-warn-fg">
             {t(
               repeatRejectKind === "policy"
                 ? "repeatWarnPolicy"
@@ -271,12 +271,12 @@ export function CreativeUploadPanel({
       ) : null}
 
       {parentDraftId ? (
-        <div className="mx-5 mt-4 flex flex-col gap-2 rounded-[1rem] border border-[#f0c4c4] bg-[#fdf6f5] px-3.5 py-3 sm:mx-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-5 mt-4 flex flex-col gap-2 rounded-card border border-danger-line bg-field px-3.5 py-3 sm:mx-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="text-[12px] font-bold text-[#9b2c2c]">
+            <p className="text-[12px] font-bold text-danger-fg">
               {t("fixBannerTitle")}
             </p>
-            <p className="mt-0.5 truncate text-[12px] text-[#6b3f3f]">
+            <p className="mt-0.5 truncate text-[12px] text-danger-fg">
               {fixKind === "claims" || fixKind === "policy"
                 ? t("fixBannerHook")
                 : t("fixBannerBody", {
@@ -287,7 +287,7 @@ export function CreativeUploadPanel({
           <button
             type="button"
             onClick={clearFixMode}
-            className="shrink-0 text-[11px] font-semibold text-[#9b2c2c] hover:underline"
+            className="shrink-0 text-[11px] font-semibold text-danger-fg hover:underline"
           >
             {t("fixBannerCancel")}
           </button>
@@ -302,14 +302,14 @@ export function CreativeUploadPanel({
                 {t("accountLabel")}
               </label>
               {accountChoices.length === 0 ? (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+                <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
                   {t("noAccounts")}
                 </p>
               ) : (
                 <select
                   value={adAccountId}
                   onChange={(e) => setAdAccountId(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white px-3 text-[13px] text-[var(--auth-text)]"
+                  className="h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]"
                 >
                   <option value="">{t("chooseApprovedAccount")}</option>
                   {accountChoices.map((account) => (
@@ -374,7 +374,7 @@ export function CreativeUploadPanel({
                   dragging
                     ? "border-[var(--auth-accent)] bg-[rgb(255_248_243_/_0.9)]"
                     : file
-                      ? "border-[rgb(20_18_16_/_0.12)] bg-white"
+                      ? "border-[rgb(20_18_16_/_0.12)] bg-surface"
                       : "border-[rgb(20_18_16_/_0.14)] bg-[rgb(255_248_243_/_0.55)] hover:border-[rgb(255_120_31_/_0.35)] hover:bg-[rgb(255_248_243_/_0.85)]",
                 )}
               >
@@ -382,7 +382,7 @@ export function CreativeUploadPanel({
                   <div className="flex items-start gap-3">
                     {previewUrl && (kind === "video" || kind === "image") ? (
                       <div
-                        className="h-28 w-[4.6rem] shrink-0 overflow-hidden rounded-xl bg-black/80"
+                        className="h-28 w-[4.6rem] shrink-0 overflow-hidden rounded-box bg-black/80"
                         onClick={(event) => event.stopPropagation()}
                       >
                         {kind === "video" ? (
@@ -441,7 +441,7 @@ export function CreativeUploadPanel({
                       <p className="mt-1 text-[12px] leading-5 text-[var(--auth-text-muted)]">
                         {t("fileHints", { max: MAX_MB })}
                       </p>
-                      <span className="mt-3 inline-flex h-8 items-center rounded-lg bg-[var(--auth-accent)] px-3 text-[12px] font-bold text-white transition-[filter] group-hover:brightness-[1.05]">
+                      <span className="mt-3 inline-flex h-8 items-center rounded-lg bg-accent-btn px-3 text-[12px] font-bold text-on-accent transition-[filter] group-hover:brightness-[1.05]">
                         {t("chooseFile")}
                       </span>
                     </div>
@@ -453,14 +453,14 @@ export function CreativeUploadPanel({
 
           {error ? (
             <p
-              className="mt-3 rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]"
+              className="mt-3 rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg"
               role="alert"
             >
               {error}
             </p>
           ) : null}
           {success ? (
-            <p className="mt-3 rounded-lg bg-[#ecf7f0] px-3 py-2 text-[13px] text-[#1f5c40]">
+            <p className="mt-3 rounded-lg bg-subtle px-3 py-2 text-[13px] text-ok-fg">
               {success}
             </p>
           ) : null}
@@ -469,7 +469,7 @@ export function CreativeUploadPanel({
             <Button
               onClick={handleUpload}
               disabled={loading}
-              className="h-11 rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
+              className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
             >
               {loading
                 ? t("uploading")
@@ -481,7 +481,7 @@ export function CreativeUploadPanel({
               variant="outline"
               onClick={clearForm}
               disabled={loading}
-              className="h-11 rounded-xl border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
+              className="h-11 rounded-box border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
             >
               {t("clear")}
             </Button>
@@ -513,7 +513,7 @@ export function CreativeUploadPanel({
               >
                 <span
                   aria-hidden
-                  className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--auth-accent)]"
+                  className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-btn"
                 />
                 {item}
               </li>

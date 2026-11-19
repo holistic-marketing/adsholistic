@@ -117,7 +117,7 @@ export function ConfigureAdAccountModal({
             id={`${fieldId}-2`}
             value={platform}
             onChange={(e) => setPlatform(e.target.value as AdAccountPlatform)}
-            className="h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-white/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
+            className="h-10 w-full rounded-box border border-[var(--border-subtle)] bg-surface/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
           >
             {platforms.map((item) => (
               <option key={item.value} value={item.value}>
@@ -136,7 +136,7 @@ export function ConfigureAdAccountModal({
             onChange={(e) =>
               setStatus(e.target.value as Exclude<AdAccountStatus, "archived">)
             }
-            className="h-10 w-full rounded-xl border border-[var(--border-subtle)] bg-white/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
+            className="h-10 w-full rounded-box border border-[var(--border-subtle)] bg-surface/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
           >
             {statuses.map((item) => (
               <option key={item.value} value={item.value}>
@@ -222,7 +222,7 @@ export function ConfigureAdAccountModal({
             onChange={(e) => setRechargeThreshold(e.target.value)}
           />
         </div>
-        <label className="flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-soft)] p-3 text-sm font-medium text-[var(--foreground)] sm:col-span-2">
+        <label className="flex items-center gap-2 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] p-3 text-sm font-medium text-[var(--foreground)] sm:col-span-2">
           <input
             type="checkbox"
             checked={autoRechargeEnabled}
@@ -233,7 +233,7 @@ export function ConfigureAdAccountModal({
       </div>
 
       {error && (
-        <p className="mt-3 text-xs text-red-600" role="alert">
+        <p className="mt-3 text-xs text-danger-fg" role="alert">
           {error}
         </p>
       )}

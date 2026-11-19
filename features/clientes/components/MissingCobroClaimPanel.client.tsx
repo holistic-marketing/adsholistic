@@ -196,8 +196,8 @@ export function MissingCobroClaimPanel({
     <section className="space-y-3">
       <div
         className={[
-          "relative overflow-hidden rounded-[24px] border border-[var(--auth-divider)]",
-          "bg-white",
+          "relative overflow-hidden rounded-card border border-[var(--auth-divider)]",
+          "bg-surface",
           "p-4 sm:p-5",
         ].join(" ")}
       >
@@ -207,7 +207,7 @@ export function MissingCobroClaimPanel({
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-accent)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accent-text">
               {t("missingCobro.eyebrow")}
             </p>
             <h3 className="mt-1 text-[1.05rem] font-bold tracking-[-0.02em] text-[var(--auth-text)] sm:text-[1.125rem]">
@@ -235,20 +235,20 @@ export function MissingCobroClaimPanel({
         </div>
 
         {success ? (
-          <p className="relative mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] text-emerald-900">
+          <p className="relative mt-3 rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[12px] text-ok-fg">
             {success}
           </p>
         ) : null}
 
         {open ? (
-          <div className="relative mt-4 space-y-3 rounded-xl border border-[var(--auth-divider)] bg-white/90 p-3 shadow-sm sm:p-4">
+          <div className="relative mt-4 space-y-3 rounded-box border border-[var(--auth-divider)] bg-surface/90 p-3 shadow-sm sm:p-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block text-[12px]">
                 <span className="font-medium text-[var(--auth-text)]">
                   {t("missingCobro.period")}
                 </span>
                 <select
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.periodoResumen}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, periodoResumen: e.target.value }))
@@ -267,7 +267,7 @@ export function MissingCobroClaimPanel({
                 </span>
                 <input
                   type="date"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.paymentFecha}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, paymentFecha: e.target.value }))
@@ -283,7 +283,7 @@ export function MissingCobroClaimPanel({
                   min="1"
                   step="0.01"
                   inputMode="decimal"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.amountUsd}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, amountUsd: e.target.value }))
@@ -300,7 +300,7 @@ export function MissingCobroClaimPanel({
                   min="0"
                   step="0.01"
                   inputMode="decimal"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.amountPen}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, amountPen: e.target.value }))
@@ -313,7 +313,7 @@ export function MissingCobroClaimPanel({
                   {t("missingCobro.method")}
                 </span>
                 <select
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.metodo}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, metodo: e.target.value }))
@@ -332,7 +332,7 @@ export function MissingCobroClaimPanel({
                 </span>
                 <input
                   type="text"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                   value={form.operationCode}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, operationCode: e.target.value }))
@@ -346,7 +346,7 @@ export function MissingCobroClaimPanel({
                 {t("missingCobro.notes")}
               </span>
               <textarea
-                className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2"
+                className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
                 rows={2}
                 value={form.notes}
                 onChange={(e) =>
@@ -362,18 +362,18 @@ export function MissingCobroClaimPanel({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className={[
-                  "mt-1.5 flex w-full items-center gap-3 rounded-xl border-2 border-dashed px-3 py-3.5 text-left transition",
+                  "mt-1.5 flex w-full items-center gap-3 rounded-box border-2 border-dashed px-3 py-3.5 text-left transition",
                   file
-                    ? "border-emerald-400 bg-emerald-50"
-                    : "border-[#ff781f]/70 bg-[#fff8f1] hover:border-[#ff781f] hover:bg-[#fff1e6]",
+                    ? "border-ok-solid bg-ok-bg"
+                    : "border-accent/70 bg-field hover:border-accent hover:bg-accent-soft",
                 ].join(" ")}
               >
                 <span
                   className={[
                     "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[18px]",
                     file
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-[#ff781f] text-white",
+                      ? "bg-ok-bg text-ok-fg"
+                      : "bg-accent-btn text-on-accent",
                   ].join(" ")}
                   aria-hidden
                 >
@@ -401,7 +401,7 @@ export function MissingCobroClaimPanel({
             </div>
 
             {error ? (
-              <p className="text-[12px] text-red-600" role="alert">
+              <p className="text-[12px] text-danger-fg" role="alert">
                 {error}
               </p>
             ) : null}
@@ -429,11 +429,11 @@ export function MissingCobroClaimPanel({
       </div>
 
       {claims.length > 0 ? (
-        <div className="space-y-2 rounded-[24px] border border-[var(--auth-divider)] bg-white p-4 sm:p-5">
+        <div className="space-y-2 rounded-card border border-[var(--auth-divider)] bg-surface p-4 sm:p-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
             {t("missingCobro.myReports")}
           </p>
-          <ul className="divide-y divide-[var(--auth-divider)] rounded-xl border border-[var(--auth-divider)]">
+          <ul className="divide-y divide-[var(--auth-divider)] rounded-box border border-[var(--auth-divider)]">
             {claims.map((c) => (
               <li
                 key={c.id}

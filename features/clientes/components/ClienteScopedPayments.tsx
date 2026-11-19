@@ -79,13 +79,13 @@ export async function ClienteScopedPayments({
         <div className="flex flex-wrap gap-3 text-[12px] font-semibold">
           <Link
             href={routes.cobros}
-            className="text-[var(--auth-accent)] hover:underline"
+            className="text-accent-text hover:underline"
           >
             {t("clienteScoped.linkCobros")}
           </Link>
           <Link
             href={routes.profit}
-            className="text-[var(--auth-accent)] hover:underline"
+            className="text-accent-text hover:underline"
           >
             {t("clienteScoped.linkProfit")}
           </Link>
@@ -99,7 +99,7 @@ export async function ClienteScopedPayments({
           }`}
         >
           {kpis.map((kpi) => (
-            <div key={kpi.label} className="bg-white">
+            <div key={kpi.label} className="bg-surface">
               <CrmMetricCell
                 label={kpi.label}
                 value={kpi.value}
@@ -149,13 +149,13 @@ export async function ClienteScopedPayments({
                         </span>
                       ) : null}
                       {row.comprobanteUrls.length > 0 ? (
-                        <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800">
+                        <span className="rounded bg-ok-bg px-1.5 py-0.5 text-[10px] font-medium text-ok-fg">
                           {t("clienteScoped.withProof")}
                         </span>
                       ) : null}
                     </div>
                   </div>
-                  <p className="shrink-0 text-[13px] font-semibold tabular-nums text-[#1f5c40]">
+                  <p className="shrink-0 text-[13px] font-semibold tabular-nums text-ok-fg">
                     {moneyUsd(row.monto)}
                   </p>
                 </li>
@@ -167,7 +167,7 @@ export async function ClienteScopedPayments({
           <div className="border-t border-[var(--auth-divider)] px-5 py-3">
             <Link
               href={routes.cobros}
-              className="text-[12px] font-semibold text-[var(--auth-accent)] hover:underline"
+              className="text-[12px] font-semibold text-accent-text hover:underline"
             >
               {t("clienteScoped.viewAll")}
             </Link>
@@ -176,7 +176,7 @@ export async function ClienteScopedPayments({
           <div className="border-t border-[var(--auth-divider)] px-5 py-3">
             <Link
               href={routes.cobros}
-              className="text-[12px] font-semibold text-[var(--auth-accent)] hover:underline"
+              className="text-[12px] font-semibold text-accent-text hover:underline"
             >
               {t("clienteScoped.openProofs")}
             </Link>

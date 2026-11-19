@@ -6,6 +6,7 @@ import {
   OverviewAccountSpendFallback,
 } from "@/features/clientes/components/ClienteScopedOverview";
 import { PickClienteEmpty } from "@/features/clientes/components/PickClienteEmpty";
+import { OverviewWallet } from "@/features/clientes/components/OverviewWallet";
 import { overviewFirstPaintDashboard } from "@/features/clientes/lib/overview-dashboard-query";
 import { getHecomClienteDashboard } from "@/lib/hecom/cliente-dashboard.server";
 import {
@@ -79,6 +80,13 @@ export default async function OverviewPage() {
       <ClienteScopedOverview
         data={data}
         canChangeCliente={canChangeCliente}
+        wallet={
+          <OverviewWallet
+            clienteId={selected.id}
+            sessionOrganizationId={session.organizationId || null}
+            feePercent={data.summary.depositFeePercent}
+          />
+        }
         accountSpend={
           <Suspense fallback={<OverviewAccountSpendFallback />}>
             <OverviewAccountSpend

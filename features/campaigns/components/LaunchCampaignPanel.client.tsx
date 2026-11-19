@@ -23,7 +23,7 @@ const MAX_PICK = 10;
 const labelClass = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]";
 const fieldClass = "h-10 border-[rgb(20_18_16_/_0.1)] text-[13px]";
 const selectClass =
-  "h-10 w-full rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white px-3 text-[13px] text-[var(--auth-text)]";
+  "h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]";
 
 function todayLabel(): string {
   return new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" });
@@ -166,10 +166,10 @@ export function LaunchCampaignPanel({
   return (
     <section
       id="launch-campaign"
-      className="overflow-hidden rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
     >
       <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-accent)]">{t("kicker")}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
         <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
           {t("title")}
         </h2>
@@ -186,7 +186,7 @@ export function LaunchCampaignPanel({
           <div>
             <label className={labelClass}>{t("account")}</label>
             {approved.length === 0 ? (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+              <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
                 {t("errors.noAccount")}
               </p>
             ) : (
@@ -204,13 +204,13 @@ export function LaunchCampaignPanel({
           {loadingOptions ? (
             <p className="text-[13px] text-[var(--auth-text-muted)]">{t("loading")}</p>
           ) : optionsError ? (
-            <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]">{optionsError}</p>
+            <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{optionsError}</p>
           ) : options ? (
             <>
               <div>
                 <label className={labelClass}>{t("videos", { count: videoIds.length, max: MAX_PICK })}</label>
                 {options.videos.length === 0 ? (
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">
+                  <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
                     {t("errors.noVideosInLibrary")}
                   </p>
                 ) : (
@@ -234,7 +234,7 @@ export function LaunchCampaignPanel({
                             <img src={video.coverUrl} alt="" className="h-full w-full object-cover" />
                           ) : null}
                           {on ? (
-                            <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-[var(--auth-accent)] text-[11px] font-bold text-white">
+                            <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-accent-btn text-[11px] font-bold text-on-accent">
                               ✓
                             </span>
                           ) : null}
@@ -279,7 +279,7 @@ export function LaunchCampaignPanel({
                 <div>
                   <label className={labelClass}>{t("pixel")}</label>
                   {options.pixels.length === 0 ? (
-                    <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-950">{t("errors.noPixel")}</p>
+                    <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">{t("errors.noPixel")}</p>
                   ) : (
                     <select value={pixelId} disabled={creating} onChange={(e) => setPixelId(e.target.value)} className={selectClass}>
                       {options.pixels.map((p) => (
@@ -329,7 +329,7 @@ export function LaunchCampaignPanel({
               </div>
 
               {resultError ? (
-                <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]" role="alert">
+                <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg" role="alert">
                   {resultError}
                 </p>
               ) : null}
@@ -338,7 +338,7 @@ export function LaunchCampaignPanel({
                 <Button
                   onClick={handleCreate}
                   disabled={creating || videoIds.length === 0}
-                  className="h-11 rounded-xl bg-[var(--auth-accent)] px-5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
+                  className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
                 >
                   {creating ? t("creating") : t("create")}
                 </Button>
@@ -351,7 +351,7 @@ export function LaunchCampaignPanel({
         <aside className="border-t border-[rgb(20_18_16_/_0.06)] bg-[rgb(255_248_243_/_0.65)] px-5 py-5 sm:px-6 lg:border-l lg:border-t-0">
           {result?.ok ? (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1f7a4d]">{t("done.kicker")}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-ok-fg">{t("done.kicker")}</p>
               <p className="mt-1.5 text-[16px] font-semibold text-[var(--auth-text)]">{t("done.title")}</p>
               <dl className="mt-3 space-y-1.5 text-[12px]">
                 {(
@@ -371,7 +371,7 @@ export function LaunchCampaignPanel({
                 href={`https://ads.tiktok.com/i18n/perf/campaign?aadvid=${result.advertiserId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex h-10 items-center rounded-xl bg-[var(--auth-text)] px-4 text-[13px] font-semibold text-white"
+                className="mt-4 inline-flex h-10 items-center rounded-box bg-[var(--auth-text)] px-4 text-[13px] font-semibold text-white"
               >
                 {t("done.open")}
               </a>
@@ -383,7 +383,7 @@ export function LaunchCampaignPanel({
               <ul className="mt-3 space-y-2.5">
                 {(["recipe1", "recipe2", "recipe3", "recipe4", "recipe5"] as const).map((key) => (
                   <li key={key} className="flex items-start gap-2 text-[12px] font-medium leading-4 text-[var(--auth-text-muted)]">
-                    <span aria-hidden className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--auth-accent)]" />
+                    <span aria-hidden className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-btn" />
                     {t(key)}
                   </li>
                 ))}

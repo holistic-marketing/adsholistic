@@ -118,7 +118,7 @@ function NavButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[var(--auth-border)] bg-white px-2 text-[15px] font-medium text-[var(--auth-text)] transition-colors hover:bg-[var(--auth-bg)]"
+      className="inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-[var(--auth-border)] bg-surface px-2 text-[15px] font-medium text-[var(--auth-text)] transition-colors hover:bg-[var(--auth-bg)]"
     >
       {children}
     </button>
@@ -326,8 +326,8 @@ export function DateRangePicker({
                   disabled && "cursor-not-allowed opacity-35",
                   inRange &&
                     !selected &&
-                    "bg-[var(--auth-accent-soft)] text-[var(--auth-accent)]",
-                  selected && "bg-[var(--auth-accent)] font-semibold text-white",
+                    "bg-[var(--auth-accent-soft)] text-accent-text",
+                  selected && "bg-accent-btn font-semibold text-on-accent",
                   !selected && !inRange && !disabled && "hover:bg-[var(--auth-bg)]",
                 )}
               >
@@ -355,7 +355,7 @@ export function DateRangePicker({
           ref={popoverRef}
           role="dialog"
           aria-label="Seleccionar rango de fechas"
-          className="fixed z-[200] flex flex-col overflow-hidden rounded-xl border border-[var(--auth-border)] bg-white shadow-[0_18px_40px_rgb(28_25_23_/_0.18)]"
+          className="fixed z-[200] flex flex-col overflow-hidden rounded-box border border-[var(--auth-border)] bg-surface shadow-[0_18px_40px_rgb(28_25_23_/_0.18)]"
           style={{
             top: position.top,
             left: position.left,
@@ -446,7 +446,7 @@ export function DateRangePicker({
           ref={triggerRef}
           type="button"
           onClick={toggleOpen}
-          className="inline-flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-[var(--auth-border)] bg-white px-3 text-left text-[12px] font-medium text-[var(--auth-text)] transition-colors hover:border-[var(--auth-accent)]/35 hover:bg-[var(--auth-bg)]"
+          className="inline-flex h-9 w-full items-center justify-between gap-2 rounded-lg border border-[var(--auth-border)] bg-surface px-3 text-left text-[12px] font-medium text-[var(--auth-text)] transition-colors hover:border-[var(--auth-accent)]/35 hover:bg-[var(--auth-bg)]"
           aria-expanded={open}
           aria-haspopup="dialog"
         >

@@ -114,7 +114,7 @@ export function EducationCenter({
             {team ? t("team.taglineAccent") : t("taglineAccent")}
             <span
               aria-hidden
-              className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-[var(--auth-accent)]"
+              className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-accent-btn"
             />
           </span>
         </p>
@@ -130,7 +130,7 @@ export function EducationCenter({
           <button
             type="button"
             onClick={() => setEditing((open) => !open)}
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--auth-border)] bg-white px-4 text-[13px] font-semibold text-[var(--auth-text)]"
+            className="inline-flex h-10 items-center justify-center rounded-box border border-[var(--auth-border)] bg-surface px-4 text-[13px] font-semibold text-[var(--auth-text)]"
           >
             {editing ? t("manageClose") : t("manageToggle")}
           </button>
@@ -155,22 +155,22 @@ export function EducationCenter({
       ) : null}
 
       <form
-        className="flex flex-col gap-2 rounded-[1.25rem] border border-[var(--auth-border)] bg-white p-2 shadow-[0_16px_32px_-24px_rgb(28_25_23_/_0.2)] lg:flex-row lg:items-center"
+        className="flex flex-col gap-2 rounded-card border border-[var(--auth-border)] bg-surface p-2 shadow-[0_16px_32px_-24px_rgb(28_25_23_/_0.2)] lg:flex-row lg:items-center"
         onSubmit={(event) => event.preventDefault()}
       >
-        <label className="relative min-w-0 flex-1 rounded-xl focus-within:ring-2 focus-within:ring-[var(--auth-accent)]/25">
+        <label className="relative min-w-0 flex-1 rounded-box focus-within:ring-2 focus-within:ring-[var(--auth-accent)]/25">
           <span className="sr-only">{t("searchLabel")}</span>
           <SearchIcon />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="h-12 w-full rounded-xl bg-transparent pl-11 pr-3 text-[14px] text-[var(--auth-text)] outline-none placeholder:text-[var(--auth-text-soft)]"
+            className="h-12 w-full rounded-box bg-transparent pl-11 pr-3 text-[14px] text-[var(--auth-text)] outline-none placeholder:text-[var(--auth-text-soft)]"
           />
         </label>
         <button
           type="submit"
-          className="inline-flex h-12 items-center justify-center rounded-xl bg-[var(--auth-accent)] px-6 text-[14px] font-semibold text-white"
+          className="inline-flex h-12 items-center justify-center rounded-box bg-accent-btn px-6 text-[14px] font-semibold text-on-accent"
         >
           {t("search")}
         </button>
@@ -201,7 +201,7 @@ export function EducationCenter({
       </div>
 
       {browsing && visible.length === 0 ? (
-        <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-white px-4 py-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+        <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-surface px-4 py-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
           {team ? t("team.empty") : t("empty")}
         </p>
       ) : browsing ? (
@@ -220,7 +220,7 @@ export function EducationCenter({
             subtitle={team ? t("team.recommendedSubtitle") : t("recommendedSubtitle")}
           >
             {recommended.length === 0 ? (
-              <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-white px-4 py-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+              <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-surface px-4 py-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
                 {t("recommendedEmpty")}
               </p>
             ) : (
@@ -240,7 +240,7 @@ export function EducationCenter({
           onAction={resetFilters}
         >
           {filtered.length === 0 ? (
-            <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-white px-4 py-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+            <p className="rounded-[1.15rem] border border-dashed border-[var(--auth-border)] bg-surface px-4 py-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
               {t("empty")}
             </p>
           ) : (
@@ -400,7 +400,7 @@ function StripButton({
       aria-label={label}
       onClick={onClick}
       className={cn(
-        "absolute z-10 grid h-10 w-10 place-items-center rounded-full border border-[var(--auth-border)] bg-white text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(28_25_23_/_0.45)] transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/40",
+        "absolute z-10 grid h-10 w-10 place-items-center rounded-full border border-[var(--auth-border)] bg-surface text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(28_25_23_/_0.45)] transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/40",
         compact ? "top-[2.6rem] sm:top-[2.95rem]" : "top-[3.3rem] sm:top-[3.65rem]",
         side === "start" ? "left-1" : "right-1",
       )}
@@ -425,7 +425,7 @@ function AudienceTabs({ audience }: { audience: EducationAudience }) {
   return (
     <nav
       aria-label={t("tabs.aria")}
-      className="inline-flex rounded-xl border border-[var(--auth-border)] bg-white p-1"
+      className="inline-flex rounded-box border border-[var(--auth-border)] bg-surface p-1"
     >
       {tabs.map((tab) => {
         const selected = tab.id === audience;
@@ -437,7 +437,7 @@ function AudienceTabs({ audience }: { audience: EducationAudience }) {
             className={cn(
               "inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-semibold transition-colors",
               selected
-                ? "bg-[var(--auth-accent)] text-white"
+                ? "bg-accent-btn text-on-accent"
                 : "text-[var(--auth-text-muted)] hover:text-[var(--auth-text)]",
             )}
           >
@@ -491,7 +491,7 @@ function CategorySelect({
         aria-label={t("categoryLabel")}
         onClick={() => setOpen((currentOpen) => !currentOpen)}
         className={cn(
-          "flex h-12 w-full items-center justify-between gap-2 rounded-xl border bg-white px-3 text-left text-[14px] font-medium text-[var(--auth-text)] outline-none transition-colors",
+          "flex h-12 w-full items-center justify-between gap-2 rounded-box border bg-surface px-3 text-left text-[14px] font-medium text-[var(--auth-text)] outline-none transition-colors",
           "focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35",
           open
             ? "border-[var(--auth-accent)]/50"
@@ -514,7 +514,7 @@ function CategorySelect({
         <div
           role="listbox"
           aria-label={t("categoryLabel")}
-          className="absolute right-0 z-30 mt-2 w-full min-w-[220px] overflow-hidden rounded-2xl border border-[var(--auth-border)] bg-white p-1.5 shadow-[0_18px_40px_rgb(28_25_23_/_0.12)]"
+          className="absolute right-0 z-30 mt-2 w-full min-w-[220px] overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface p-1.5 shadow-[0_18px_40px_rgb(28_25_23_/_0.12)]"
         >
           {options.map((option) => {
             const selected = option.id === value;
@@ -529,9 +529,9 @@ function CategorySelect({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors",
+                  "flex w-full items-center justify-between gap-3 rounded-box px-3 py-2.5 text-left text-[13.5px] font-medium transition-colors",
                   selected
-                    ? "bg-[#fff7f1] text-[var(--auth-accent)]"
+                    ? "bg-field text-accent-text"
                     : "text-[var(--auth-text)] hover:bg-[var(--auth-bg)]",
                 )}
               >
@@ -578,7 +578,7 @@ function Section({
           <button
             type="button"
             onClick={onAction}
-            className="shrink-0 text-[13px] font-semibold text-[var(--auth-accent)]"
+            className="shrink-0 text-[13px] font-semibold text-accent-text"
           >
             {action} →
           </button>
@@ -609,8 +609,8 @@ function CategoryChip({
       aria-pressed={active}
       className={
         active
-          ? "flex min-h-[128px] flex-col items-center justify-center gap-3 rounded-[1.15rem] border border-[var(--auth-accent)] bg-[#fff7f1] px-3 py-4 text-center"
-          : "flex min-h-[128px] flex-col items-center justify-center gap-3 rounded-[1.15rem] border border-[var(--auth-border)] bg-white px-3 py-4 text-center"
+          ? "flex min-h-[128px] flex-col items-center justify-center gap-3 rounded-[1.15rem] border border-[var(--auth-accent)] bg-field px-3 py-4 text-center"
+          : "flex min-h-[128px] flex-col items-center justify-center gap-3 rounded-[1.15rem] border border-[var(--auth-border)] bg-surface px-3 py-4 text-center"
       }
     >
       {icon}
@@ -650,7 +650,7 @@ function LessonCard({
         />
         <span className="absolute inset-0 bg-[linear-gradient(180deg,rgb(28_25_23_/_0.05),rgb(28_25_23_/_0.28))]" />
         <span className="absolute inset-0 grid place-items-center">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(28_25_23_/_0.6)]">
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-surface text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(28_25_23_/_0.6)]">
             <PlayIcon />
           </span>
         </span>
@@ -663,7 +663,7 @@ function LessonCard({
           {lesson.description}
         </span>
       )}
-      <span className="mt-2 block text-[12px] font-semibold text-[var(--auth-accent)]">
+      <span className="mt-2 block text-[12px] font-semibold text-accent-text">
         {category.label}
       </span>
     </button>
@@ -671,17 +671,17 @@ function LessonCard({
 }
 
 const glyphTone: Record<CategoryFilter, string> = {
-  all: "bg-[#d47840] text-white shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)]",
-  empieza: "bg-[#fff1e4] text-[#e85d04]",
-  plataforma: "bg-[#f4efe8] text-[#1c1917]",
-  tiktok: "bg-[#f2f2f2] text-[#111111]",
-  shopify: "bg-[#eaf6df] text-[#7ab55c]",
-  ayuda: "bg-[#fff0ea] text-[#e4572e]",
-  "equipo-inicio": "bg-[#fff1e4] text-[#e85d04]",
-  "equipo-clientes": "bg-[#eef3fb] text-[#2f5aa8]",
-  "equipo-cobranza": "bg-[#eaf6df] text-[#3f8a2a]",
-  "equipo-cuentas": "bg-[#f4efe8] text-[#1c1917]",
-  "equipo-soporte": "bg-[#fff0ea] text-[#e4572e]",
+  all: "bg-accent-btn text-on-accent shadow-[inset_0_-1px_0_rgb(0_0_0_/_0.08)]",
+  empieza: "bg-accent-soft text-accent-text",
+  plataforma: "bg-subtle text-ink",
+  tiktok: "bg-subtle text-ink",
+  shopify: "bg-ok-bg text-ok-fg",
+  ayuda: "bg-field text-accent-text",
+  "equipo-inicio": "bg-accent-soft text-accent-text",
+  "equipo-clientes": "bg-field text-info-fg",
+  "equipo-cobranza": "bg-ok-bg text-ok-fg",
+  "equipo-cuentas": "bg-subtle text-ink",
+  "equipo-soporte": "bg-field text-accent-text",
 };
 
 function CategoryGlyph({ id }: { id: CategoryFilter }) {

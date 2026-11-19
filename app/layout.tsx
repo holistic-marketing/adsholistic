@@ -14,6 +14,7 @@ import { holisticClerkAppearance } from "@/lib/auth/clerk-appearance";
 import { getClerkLocalization } from "@/lib/auth/clerk-localization";
 import { resolveAppLocale } from "@/i18n/config";
 import { routes } from "@/config/routes";
+import { readPanelPreferences } from "@/lib/ui/panel-preferences.server";
 import "./globals.css";
 
 /** Dashboard / auth UI. */
@@ -43,6 +44,27 @@ const sora = localFont({
   weight: "400 700",
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
   adjustFontFallback: "Arial",
+});
+
+/** Panel (sistema visual v3): texto y números. */
+const geist = localFont({
+  src: "./fonts/Geist-variable.woff2",
+  display: "swap",
+  variable: "--font-geist",
+  weight: "100 900",
+  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Arial", "sans-serif"],
+  adjustFontFallback: "Arial",
+});
+
+const geistMono = localFont({
+  src: "./fonts/GeistMono-variable.woff2",
+  display: "swap",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+  // Solo se usa en cifras: no hace falta precargarla.
+  preload: false,
+  fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
+  adjustFontFallback: false,
 });
 
 /** Acento tipográfico auth (mockup script). */
@@ -96,6 +118,7 @@ export default async function RootLayout({
   assertProductionSecrets();
 
   const locale = resolveAppLocale(await getLocale());
+  const panel = await readPanelPreferences();
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const clerkEnabled = clerkConfigured() && clerkLoginEnabled();
 
@@ -109,7 +132,9 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${plusJakarta.variable} ${sora.variable} ${caveat.variable} light h-full antialiased`}
+      className={`${plusJakarta.variable} ${sora.variable} ${caveat.variable} ${geist.variable} ${geistMono.variable} light h-full antialiased`}
+      data-ui-theme={panel.theme}
+      data-ui-contrast={panel.contrast === "alto" ? "alto" : undefined}
       suppressHydrationWarning
     >
       <head>

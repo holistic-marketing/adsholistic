@@ -26,7 +26,7 @@ export async function RealProfitVoucherReviewHost({
     return (
       <section
         id="comprobantes-profit"
-        className="rounded-2xl border border-dashed border-[var(--auth-divider)] px-4 py-10 text-center"
+        className="rounded-card border border-dashed border-[var(--auth-divider)] px-4 py-10 text-center"
         aria-label="Sin boletas Profit"
       >
         <p className="text-sm font-medium text-[var(--auth-text)]">

@@ -351,7 +351,7 @@ export function SupportChatWidget({
         <button
           type="button"
           onClick={openChat}
-          className="max-w-[min(280px,calc(100vw-5rem))] rounded-2xl border border-[var(--border-subtle)] bg-white px-3 py-2.5 text-left shadow-xl shadow-black/15 ring-1 ring-black/5 transition hover:bg-[rgb(212_120_64_/_0.04)]"
+          className="max-w-[min(280px,calc(100vw-5rem))] rounded-card border border-[var(--border-subtle)] bg-surface px-3 py-2.5 text-left shadow-xl shadow-black/15 ring-1 ring-black/5 transition hover:bg-[rgb(212_120_64_/_0.04)]"
         >
           <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--brand-primary)]">
             {t("floatNewMessage")}
@@ -365,7 +365,7 @@ export function SupportChatWidget({
       {isOpen ? (
         <div
           className={cn(
-            "w-[min(360px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/25 ring-1 ring-black/10",
+            "w-[min(360px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card bg-surface shadow-2xl shadow-black/25 ring-1 ring-black/10",
           )}
         >
           <ChatConversation
@@ -386,7 +386,7 @@ export function SupportChatWidget({
               <button
                 type="button"
                 onClick={handleClose}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-surface/10 hover:text-white"
                 aria-label={t("floatClose")}
               >
                 <svg
@@ -415,7 +415,7 @@ export function SupportChatWidget({
         className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-xl shadow-[rgb(212_120_64_/_0.4)] transition-[scale,background-color] duration-200 ease-out hover:scale-105 active:scale-95 hover:bg-[var(--brand-primary-deep)] sm:h-14 sm:w-14"
       >
         {unreadFromStaff > 0 && !isOpen ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-extrabold text-[var(--brand-primary)] shadow">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-surface px-1 text-[10px] font-extrabold text-[var(--brand-primary)] shadow">
             {unreadFromStaff > 9 ? "9+" : unreadFromStaff}
           </span>
         ) : null}

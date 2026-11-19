@@ -114,19 +114,19 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
           ["Clientes que pagan", totals.paying.toLocaleString("es-PE")],
           ["Comisión por pagar", usd(totals.pendingCents)],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-[#ece5dc] bg-white px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8a8177]">{label}</p>
-            <p className="mt-1 text-[1.35rem] font-bold tabular-nums tracking-[-0.02em] text-[#1c1917]">{value}</p>
+          <div key={label} className="rounded-card border border-line bg-surface px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">{label}</p>
+            <p className="mt-1 text-[1.35rem] font-bold tabular-nums tracking-[-0.02em] text-ink">{value}</p>
           </div>
         ))}
       </div>
 
-      {error ? <p className="rounded-xl bg-[#fff1ee] px-4 py-3 text-[13px] text-[#a32e23]">{error}</p> : null}
-      {notice ? <p className="rounded-xl bg-[#ecfdf3] px-4 py-3 text-[13px] text-[#067647]">{notice}</p> : null}
+      {error ? <p className="rounded-box bg-field px-4 py-3 text-[13px] text-danger-fg">{error}</p> : null}
+      {notice ? <p className="rounded-box bg-field px-4 py-3 text-[13px] text-ok-fg">{notice}</p> : null}
 
       {form ? (
         <form
-          className="space-y-4 rounded-2xl border border-[#ece5dc] bg-white p-4 sm:p-5"
+          className="space-y-4 rounded-card border border-line bg-surface p-4 sm:p-5"
           onSubmit={(e) => {
             e.preventDefault();
             run(() => savePartnerAction(form), form.id ? "Aliado actualizado." : "Aliado creado. Ya puedes copiar su link.");
@@ -166,7 +166,7 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
             </Field>
             <Field label="Color de marca">
               <div className="flex items-center gap-2">
-                <input type="color" className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-[#e3dbd1]" value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
+                <input type="color" className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-line" value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
                 <input className={inputCls} value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
               </div>
             </Field>
@@ -210,7 +210,7 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
       )}
 
       {ranked.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-[#e3dbd1] px-4 py-8 text-center text-[13px] text-[#8a8177]">
+        <p className="rounded-card border border-dashed border-line px-4 py-8 text-center text-[13px] text-ink-3">
           Aún no hay aliados. Crea el primero y comparte su link.
         </p>
       ) : (
@@ -218,18 +218,18 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
           {ranked.map((p, i) => {
             const url = `${SITE}/a/${p.slug}`;
             return (
-              <li key={p.id} className="rounded-2xl border border-[#ece5dc] bg-white p-4">
+              <li key={p.id} className="rounded-card border border-line bg-surface p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="flex items-center gap-2 text-[15px] font-bold">
-                      <span className="shrink-0 tabular-nums text-[#b5ada5]">#{i + 1}</span>
+                      <span className="shrink-0 tabular-nums text-ink-3">#{i + 1}</span>
                       <span className="min-w-0 truncate">{p.name}</span>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "active" ? "bg-[#ecfdf3] text-[#067647]" : "bg-[#f1ebe4] text-[#6f675f]"}`}>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "active" ? "bg-field text-ok-fg" : "bg-subtle text-ink-2"}`}>
                         {p.status === "active" ? "Activo" : "Pausado"}
                       </span>
                     </p>
-                    <p className="mt-0.5 break-all text-[12px] text-[#8a8177]">{url}</p>
-                    <p className="mt-0.5 text-[12px] text-[#8a8177]">
+                    <p className="mt-0.5 break-all text-[12px] text-ink-3">{url}</p>
+                    <p className="mt-0.5 text-[12px] text-ink-3">
                       {p.commissionRate > 0
                         ? `Comisión ${Math.round(p.commissionRate * 1000) / 10}% del fee · ${p.commissionDays} días por cliente`
                         : "Sin comisión"}
@@ -301,18 +301,18 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
 }
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-[#e3dbd1] bg-white px-3 text-[14px] outline-none focus:border-[#ff9a52] focus:ring-4 focus:ring-[#ffeadb]";
+  "h-10 w-full rounded-box border border-line bg-surface px-3 text-[14px] outline-none focus:border-accent focus:ring-4 focus:ring-accent-line";
 const btnPrimary =
-  "inline-flex h-10 items-center justify-center rounded-xl bg-[#ff781f] px-5 text-[13px] font-bold text-[#1c1917] transition hover:bg-[#f56a0b] disabled:opacity-60";
+  "inline-flex h-10 items-center justify-center rounded-box bg-accent px-5 text-[13px] font-bold text-ink transition hover:bg-accent-btn-hover disabled:opacity-60";
 const btnGhost =
-  "inline-flex h-10 items-center justify-center rounded-xl border border-[#e3dbd1] bg-white px-5 text-[13px] font-semibold text-[#3a332d] disabled:opacity-60";
+  "inline-flex h-10 items-center justify-center rounded-box border border-line bg-surface px-5 text-[13px] font-semibold text-ink disabled:opacity-60";
 const btnSmall =
-  "inline-flex min-h-9 items-center justify-center rounded-lg border border-[#e3dbd1] bg-white px-3 text-[12px] font-semibold text-[#3a332d] transition hover:bg-[#f7f5f2] disabled:opacity-60";
+  "inline-flex min-h-9 items-center justify-center rounded-lg border border-line bg-surface px-3 text-[12px] font-semibold text-ink transition hover:bg-hover disabled:opacity-60";
 
 function Field({ label, children, wide }: { label: string; children: React.ReactNode; wide?: boolean }) {
   return (
     <label className={`block ${wide ? "sm:col-span-2" : ""}`}>
-      <span className="mb-1 block text-[12px] font-semibold text-[#3a332d]">{label}</span>
+      <span className="mb-1 block text-[12px] font-semibold text-ink">{label}</span>
       {children}
     </label>
   );
@@ -320,10 +320,10 @@ function Field({ label, children, wide }: { label: string; children: React.React
 
 function Stat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="rounded-xl bg-[#faf7f3] px-3 py-2">
-      <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-[#8a8177]">{label}</dt>
-      <dd className="mt-0.5 text-[15px] font-bold tabular-nums text-[#1c1917]">{value}</dd>
-      {hint ? <dd className="text-[11px] text-[#8a8177]">{hint}</dd> : null}
+    <div className="rounded-box bg-field px-3 py-2">
+      <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className="mt-0.5 text-[15px] font-bold tabular-nums text-ink">{value}</dd>
+      {hint ? <dd className="text-[11px] text-ink-3">{hint}</dd> : null}
     </div>
   );
 }

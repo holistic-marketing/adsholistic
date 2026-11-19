@@ -38,11 +38,11 @@ const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", c
 const pcts = (list: number[]) => (list.length ? list.map((p) => `${p}%`).join(" / ") : "sin %");
 
 const field =
-  "h-10 w-full rounded-xl bg-[#faf8f5] px-3 text-[14px] ring-1 ring-[#e8e1d8] focus:outline-none focus:ring-2 focus:ring-[#ff781f]";
+  "h-10 w-full rounded-box bg-field px-3 text-[14px] ring-1 ring-line focus:outline-none focus:ring-2 focus:ring-accent";
 const primary =
-  "inline-flex h-10 items-center justify-center rounded-xl bg-[#ff781f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#e85a1c] disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-box bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50";
 const ghost =
-  "inline-flex h-10 items-center justify-center rounded-xl bg-white px-4 text-[13px] font-semibold text-[#5c564e] ring-1 ring-[#e8e1d8] hover:bg-[#faf8f5] disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-box bg-surface px-4 text-[13px] font-semibold text-ink-2 ring-1 ring-line hover:bg-field disabled:opacity-50";
 
 /** Solo gerencia: cambiar el % del cliente para un mes o desde hoy, con vista previa e historial. */
 export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; currentFee: number | null }) {
@@ -123,12 +123,12 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
   }
 
   return (
-    <div className="rounded-2xl border border-[#e8e1d8] bg-white p-5">
+    <div className="rounded-card border border-line bg-surface p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#1c1917]">Comisión (%)</h2>
-          <p className="text-[13px] text-[#6f675f]">
-            Hoy se le cobra <strong className="text-[#1c1917]">{fee != null ? `${fee}%` : "10% (sin % propio)"}</strong> sobre su gasto.
+          <h2 className="text-lg font-semibold text-ink">Comisión (%)</h2>
+          <p className="text-[13px] text-ink-2">
+            Hoy se le cobra <strong className="text-ink">{fee != null ? `${fee}%` : "10% (sin % propio)"}</strong> sobre su gasto.
           </p>
         </div>
         {open ? null : (
@@ -145,7 +145,7 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
         )}
       </div>
 
-      {done ? <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-[13px] text-emerald-900 ring-1 ring-emerald-200">{done}</p> : null}
+      {done ? <p className="mt-3 rounded-box bg-ok-bg px-3 py-2 text-[13px] text-ok-fg ring-1 ring-ok-line">{done}</p> : null}
 
       {open ? (
         <div className="mt-4 space-y-3">
@@ -166,11 +166,11 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
                   reset();
                 }}
                 className={`rounded-xl px-3 py-2 text-left ring-1 transition ${
-                  scope === value ? "bg-[#fff4ec] ring-2 ring-[#ff781f]" : "bg-white ring-[#e8e1d8] hover:ring-[#d6cbbf]"
+                  scope === value ? "bg-field ring-2 ring-accent" : "bg-surface ring-line hover:ring-accent-line"
                 }`}
               >
-                <span className="block text-[13px] font-semibold text-[#1c1917]">{title}</span>
-                <span className="block text-[11px] text-[#6f675f]">{hint}</span>
+                <span className="block text-[13px] font-semibold text-ink">{title}</span>
+                <span className="block text-[11px] text-ink-2">{hint}</span>
               </button>
             ))}
           </div>
@@ -178,7 +178,7 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
           <div className="grid gap-3 sm:grid-cols-2">
             {scope === "month" ? (
               <label className="block">
-                <span className="text-[12px] font-semibold text-[#5c564e]">Mes</span>
+                <span className="text-[12px] font-semibold text-ink-2">Mes</span>
                 <input
                   type="month"
                   value={month}
@@ -192,7 +192,7 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
               </label>
             ) : null}
             <label className="block">
-              <span className="text-[12px] font-semibold text-[#5c564e]">Nuevo %</span>
+              <span className="text-[12px] font-semibold text-ink-2">Nuevo %</span>
               <input
                 inputMode="decimal"
                 value={pct}
@@ -207,7 +207,7 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
           </div>
 
           {preview ? (
-            <div className="space-y-2 rounded-xl bg-[#faf8f5] px-3 py-3 text-[13px] text-[#1c1917] ring-1 ring-[#e8e1d8]">
+            <div className="space-y-2 rounded-box bg-field px-3 py-3 text-[13px] text-ink ring-1 ring-line">
               {preview.scope === "month" ? (
                 <>
                   <p>
@@ -217,15 +217,15 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
                     Comisión del mes: {usd(preview.feeBefore)} → <strong>{usd(preview.feeAfter)}</strong> ({preview.feePercent}%).{" "}
                     {preview.delta === 0 ? "Sin cambio." : preview.delta > 0 ? `Le suma ${usd(preview.delta)}.` : `Le baja ${usd(-preview.delta)}.`}
                   </p>
-                  {preview.rows === 0 ? <p className="text-amber-800">Ese mes no tiene gasto registrado: no hay nada que cambiar.</p> : null}
+                  {preview.rows === 0 ? <p className="text-warn-fg">Ese mes no tiene gasto registrado: no hay nada que cambiar.</p> : null}
                   {preview.pastMonth && preview.delta !== 0 ? (
-                    <p className="rounded-lg bg-amber-50 px-2 py-1.5 text-amber-900 ring-1 ring-amber-200">
+                    <p className="rounded-lg bg-warn-bg px-2 py-1.5 text-warn-fg ring-1 ring-warn-line">
                       Ojo: si este mes ya se le cobró o ya lo pagó, su deuda cambia en {usd(Math.abs(preview.delta))}
                       {preview.delta > 0 ? " (le quedará debiendo eso)" : " (le quedará saldo a favor)"}.
                     </p>
                   ) : null}
                   {preview.currentMonth ? (
-                    <p className="text-[12px] text-[#6f675f]">
+                    <p className="text-[12px] text-ink-2">
                       Este mes sigue en curso: los días que falten entran con su % actual ({preview.clienteDefaultFee ?? 10}%). Si quieres que siga
                       así, cambia también «Desde hoy».
                     </p>
@@ -240,7 +240,7 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
             </div>
           ) : null}
 
-          {error ? <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-950 ring-1 ring-amber-200">{error}</p> : null}
+          {error ? <p className="rounded-box bg-warn-bg px-3 py-2 text-[13px] text-warn-fg ring-1 ring-warn-line">{error}</p> : null}
 
           <div className="flex flex-wrap gap-2">
             {preview && !(preview.scope === "month" && preview.rows === 0) ? (
@@ -269,13 +269,13 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
       ) : null}
 
       {history && history.length ? (
-        <div className="mt-4 border-t border-[#f1ebe3] pt-3">
-          <p className="text-[12px] font-semibold text-[#5c564e]">Historial</p>
-          <ul className="mt-1 space-y-1 text-[12px] text-[#6f675f]">
+        <div className="mt-4 border-t border-line pt-3">
+          <p className="text-[12px] font-semibold text-ink-2">Historial</p>
+          <ul className="mt-1 space-y-1 text-[12px] text-ink-2">
             {history.map((h) => (
               <li key={h.at}>
                 {new Date(h.at).toLocaleString("es-PE", { timeZone: "America/Lima", dateStyle: "short", timeStyle: "short" })} ·{" "}
-                <strong className="text-[#1c1917]">
+                <strong className="text-ink">
                   {h.scope === "month" && h.month ? monthLabel(h.month) : "Desde hoy"}: {pcts(h.from)} → {h.feePercent}%
                 </strong>
                 {h.delta ? ` (${h.delta > 0 ? "+" : "−"}${usd(Math.abs(h.delta))})` : ""} · {h.by}

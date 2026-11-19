@@ -39,7 +39,7 @@ async function StripeReturnBanner({ status }: { status?: string }) {
   if (status === "pending_crypto") {
     return (
       <div
-        className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-medium text-amber-950"
+        className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
         role="status"
       >
         {t("stripe.cryptoPending")}
@@ -50,7 +50,7 @@ async function StripeReturnBanner({ status }: { status?: string }) {
   if (status === "whop_return") {
     return (
       <div
-        className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-medium text-amber-950"
+        className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
         role="status"
       >
         {t("stripe.whopPending")}
@@ -61,13 +61,13 @@ async function StripeReturnBanner({ status }: { status?: string }) {
   if (status === "success") {
     return (
       <div
-        className="rounded-[1rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-medium text-emerald-950"
+        className="rounded-card border border-ok-line bg-ok-bg px-4 py-3 text-[13px] font-medium text-ok-fg"
         role="status"
       >
         {t("stripe.successBefore")}{" "}
         <a
           href="#asignar-saldo"
-          className="font-bold text-emerald-900 underline underline-offset-2"
+          className="font-bold text-ok-fg underline underline-offset-2"
         >
           {t("stripe.successLink")}
         </a>{" "}
@@ -78,7 +78,7 @@ async function StripeReturnBanner({ status }: { status?: string }) {
 
   return (
     <div
-      className="rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-medium text-amber-950"
+      className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
       role="status"
     >
       {t("stripe.cancelled")}
@@ -254,7 +254,7 @@ export default async function PaymentsPage({
         <WalletAgreementMovements userId={session.id} />
       </Suspense>
 
-      <details className="group overflow-hidden rounded-2xl border border-[var(--auth-border)] bg-white">
+      <details className="group overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 text-[13px] font-semibold text-[var(--auth-text)] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--auth-accent)]/30 sm:px-6">
           <span>Ver movimientos e historial</span>
           <span

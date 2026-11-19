@@ -84,35 +84,35 @@ export function PublicDebtCardPay({
   }
 
   return (
-    <section className="rounded-[24px] bg-white p-5 ring-1 ring-[#e8dfd4] sm:p-6">
+    <section className="rounded-card bg-surface p-5 ring-1 ring-line sm:p-6">
       {returned ? (
-        <p className="mb-4 rounded-2xl bg-[#ecfdf3] px-4 py-3 text-[13px] leading-5 text-[#05603a] ring-1 ring-[#abefc6]">
+        <p className="mb-4 rounded-card bg-field px-4 py-3 text-[13px] leading-5 text-ok-fg ring-1 ring-ok-line">
           Recibimos tu pago con tarjeta. En unos minutos aparece abajo en tus pagos y baja lo que debes del mes.
         </p>
       ) : null}
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">Pagos</p>
-      <h2 className="mt-1 text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-[#1a1714] sm:text-[1.5rem]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Pagos</p>
+      <h2 className="mt-1 text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-ink sm:text-[1.5rem]">
         Pagar con tarjeta
       </h2>
-      <p className="mt-2 max-w-xl text-[13px] leading-5 text-[#3f3a34]">
+      <p className="mt-2 max-w-xl text-[13px] leading-5 text-ink">
         Con tarjeta de crédito o débito, sin subir voucher. Se registra al instante en {monthLabel} y no recarga
         cartera. La tarjeta tiene un recargo de {config.surchargePercent}%.
       </p>
 
       {owedCents > 0 ? (
-        <div className="mt-4 rounded-2xl bg-[#faf8f5] px-4 py-3 ring-1 ring-[#e8dfd4]">
-          <p className="text-[12px] font-semibold text-[#5c564e]">Debes en {monthLabel}</p>
-          <p className="text-[1.6rem] font-semibold tracking-[-0.03em] text-[#1a1714]">{usd(owedCents)}</p>
+        <div className="mt-4 rounded-card bg-field px-4 py-3 ring-1 ring-line">
+          <p className="text-[12px] font-semibold text-ink-2">Debes en {monthLabel}</p>
+          <p className="text-[1.6rem] font-semibold tracking-[-0.03em] text-ink">{usd(owedCents)}</p>
         </div>
       ) : (
-        <p className="mt-4 rounded-2xl bg-[#ecfdf3] px-4 py-3 text-[13px] text-[#05603a] ring-1 ring-[#abefc6]">
+        <p className="mt-4 rounded-card bg-field px-4 py-3 text-[13px] text-ok-fg ring-1 ring-ok-line">
           No tienes deuda en {monthLabel}. Si igual quieres abonar, usa “Abonar otro monto”.
         </p>
       )}
 
       {partial ? (
         <label className="mt-4 block w-full sm:max-w-[14rem]">
-          <span className="text-[12px] font-semibold text-[#5c564e]">Monto a abonar (USD)</span>
+          <span className="text-[12px] font-semibold text-ink-2">Monto a abonar (USD)</span>
           <input
             type="number"
             inputMode="decimal"
@@ -122,7 +122,7 @@ export function PublicDebtCardPay({
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
             autoFocus
-            className="mt-1 h-11 w-full rounded-xl bg-white px-3 text-[15px] font-semibold text-[#1a1714] ring-1 ring-[#e8dfd4] outline-none focus:ring-2 focus:ring-[#d47840]"
+            className="mt-1 h-11 w-full rounded-box bg-surface px-3 text-[15px] font-semibold text-ink ring-1 ring-line outline-none focus:ring-2 focus:ring-accent"
           />
         </label>
       ) : null}
@@ -132,7 +132,7 @@ export function PublicDebtCardPay({
           type="button"
           onClick={pay}
           disabled={!valid || busy}
-          className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#1a1714] px-5 text-[13px] font-semibold text-white transition hover:bg-[#3f3a34] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy
             ? "Abriendo pago…"
@@ -151,17 +151,17 @@ export function PublicDebtCardPay({
             setAmount("");
             setError(null);
           }}
-          className="inline-flex h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-[#c2410c] ring-1 ring-[#ffd7b8] transition hover:bg-[#fff8f1]"
+          className="inline-flex h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-accent-text ring-1 ring-accent-line transition hover:bg-field"
         >
           {partial ? (owedCents > 0 ? "Mejor pagar todo" : "Cancelar") : "Abonar otro monto"}
         </button>
       </div>
       {quote ? (
-        <p className="mt-2 text-[12px] text-[#6b645c]">
+        <p className="mt-2 text-[12px] text-ink-2">
           Deuda {usd(quote.creditCents)} + recargo tarjeta {usd(quote.feeCents)} = {usd(quote.grossCents)}
         </p>
       ) : null}
-      {error ? <p className="mt-2 text-[12px] font-medium text-[#b42318]">{error}</p> : null}
+      {error ? <p className="mt-2 text-[12px] font-medium text-danger-fg">{error}</p> : null}
     </section>
   );
 }

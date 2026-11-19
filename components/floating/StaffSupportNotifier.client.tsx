@@ -109,7 +109,7 @@ export function StaffSupportNotifier() {
     >
       <div className="pointer-events-auto flex flex-col items-start gap-2">
         {expanded ? (
-          <div className="w-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-white shadow-2xl shadow-black/15 ring-1 ring-black/5">
+          <div className="w-full overflow-hidden rounded-card border border-[var(--border-subtle)] bg-surface shadow-2xl shadow-black/15 ring-1 ring-black/5">
             <div className="flex items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[rgb(255_120_31_/_0.08)] px-3 py-2">
               <p className="text-[12px] font-bold text-[var(--auth-text)]">
                 {unread.length === 1
@@ -162,7 +162,7 @@ export function StaffSupportNotifier() {
           )}
           aria-label={`${unread.length} mensajes nuevos de clientes`}
         >
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/15">
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-surface/15">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -176,7 +176,7 @@ export function StaffSupportNotifier() {
                 d="M2.25 12c0 4.556 4.03 8.25 9 8.25a9.764 9.764 0 002.555-.337 5.972 5.972 0 003.235 1.057 5.969 5.969 0 00.474-.065 4.48 4.48 0 01-.978-2.025c-.09-.457.133-.901.467-1.226C18.57 16.178 19.5 14.189 19.5 12c0-4.556-4.03-8.25-9-8.25s-9 3.694-9 8.25z"
               />
             </svg>
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-extrabold text-[var(--brand-primary)]">
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-surface px-1 text-[10px] font-extrabold text-[var(--brand-primary)]">
               {unread.length > 9 ? "9+" : unread.length}
             </span>
           </span>

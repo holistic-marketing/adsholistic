@@ -79,7 +79,7 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
   const anyManual = rows.some((r) => state[r.advertiserId] === "manual");
 
   return (
-    <div className="space-y-2 rounded-xl bg-[#fff8eb] px-3 py-2.5 text-[12px] leading-5 text-[#7a4b12] ring-1 ring-[#f5dfb8]">
+    <div className="space-y-2 rounded-box bg-field px-3 py-2.5 text-[12px] leading-5 text-accent-text ring-1 ring-warn-line">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-semibold">
           {allApplied
@@ -93,7 +93,7 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
             type="button"
             onClick={() => void verify()}
             disabled={checking}
-            className="rounded-lg bg-white px-3 py-1 text-[12px] font-semibold text-[#c2410c] ring-1 ring-[#f3d5c0] hover:bg-[#fff4ec] disabled:opacity-50"
+            className="rounded-lg bg-surface px-3 py-1 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-50"
           >
             {checking ? "Leyendo TikTok…" : "Verificar nombre"}
           </button>
@@ -125,7 +125,7 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
                     href={tiktokAccountUrl(r.advertiserId)}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#c2410c] hover:bg-[#fff4ec]"
+                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
                   >
                     Abrir en TikTok ↗
                   </a>
@@ -136,7 +136,7 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
                 <button
                   type="button"
                   onClick={() => void retry(r)}
-                  className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#c2410c] hover:bg-[#fff4ec]"
+                  className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
                 >
                   Reintentar
                 </button>
@@ -145,15 +145,15 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
           );
         })}
       </ul>
-      {note ? <p className="text-amber-900">{note}</p> : null}
+      {note ? <p className="text-warn-fg">{note}</p> : null}
       {anyManual ? (
-        <p className="text-[11px] text-[#8a6a3c]">
+        <p className="text-[11px] text-accent-text">
           Las cuentas del BM 10 son de un Business Center directo y TikTok no deja cambiarles el nombre por API. Copia el nombre, abre la
           cuenta y pégalo en Información de la cuenta. Queda en «Nombres pendientes» (Cuentas libres → BM 10) hasta que coincida.
         </p>
       ) : null}
       {allApplied || !anyAuto ? null : (
-        <p className="text-[11px] text-[#8a6a3c]">
+        <p className="text-[11px] text-accent-text">
           En cuentas recién creadas TikTok a veces no lo aplica. Si tras reintentar sigue igual, usa «Copiar nombre» y cámbialo en TikTok.
         </p>
       )}

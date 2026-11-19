@@ -1,3 +1,5 @@
+import type { PanelIconName } from "@/components/ui/PanelIcon";
+
 export type NavItemKey =
   | "overview"
   | "clients"
@@ -22,31 +24,26 @@ export type NavItemKey =
   | "simulator"
   | "assistant"
   | "education"
-  | "support";
+  | "support"
+  | "finance";
+
+/** Claves de texto bajo `nav` que reemplazan la etiqueta por defecto. */
+export type NavLabelKey = NavItemKey | "supportStaff" | "adAccountsClient" | "paymentsClient";
+
+export type NavGroupKey = "agency" | "growth" | "management" | "support" | "account" | "help";
 
 export interface NavItem {
-  /** Translation key under the `nav` namespace. */
+  /** Clave de traducción bajo `nav`. */
   key: NavItemKey;
   href: string;
-  icon:
-    | "overview"
-    | "clients"
-    | "ad-accounts"
-    | "payments"
-    | "payments-manual"
-    | "payments-profit"
-    | "payments-missing-cobros"
-    | "debt-links"
-    | "monitor"
-    | "broadcasts"
-    | "cobros"
-    | "gastos"
-    | "affiliates"
-    | "contracts"
-    | "creative-analyzer"
-    | "pixels"
-    | "profit"
-    | "assistant"
-    | "education"
-    | "support";
+  icon: PanelIconName;
+  /** Etiqueta alternativa (por ejemplo, la del cliente). */
+  labelKey?: NavLabelKey;
+  /** Subsecciones: la entrada se muestra como grupo plegable. */
+  children?: NavItem[];
+}
+
+export interface NavGroup {
+  key: NavGroupKey;
+  items: NavItem[];
 }

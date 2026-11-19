@@ -185,7 +185,7 @@ function VoucherCard({
   }
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-[var(--auth-divider)] bg-[var(--auth-card,#fff)] shadow-sm">
+    <article className="overflow-hidden rounded-card border border-[var(--auth-divider)] bg-[var(--auth-card,#fff)] shadow-sm">
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div className="relative min-h-[200px] bg-[#0f172a]/[0.04]">
           {intent.proofSignedUrl ? (
@@ -193,7 +193,7 @@ function VoucherCard({
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="group relative flex h-full min-h-[200px] w-full cursor-zoom-in items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/50"
+                className="group relative flex h-full min-h-[200px] w-full cursor-zoom-in items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                 title="Ampliar comprobante"
                 aria-label="Ampliar comprobante"
               >
@@ -203,7 +203,7 @@ function VoucherCard({
                   alt={intent.proofFileName ?? "Comprobante"}
                   className="h-full max-h-[320px] w-full object-contain object-center p-3 transition duration-200 group-hover:scale-[1.02]"
                 />
-                <span className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#1c1917]/78 px-3 py-1.5 text-[11px] font-semibold text-white opacity-90 shadow-lg backdrop-blur-sm transition group-hover:opacity-100 sm:opacity-70">
+                <span className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-accent-btn/78 px-3 py-1.5 text-[11px] font-semibold text-on-accent opacity-90 shadow-lg backdrop-blur-sm transition group-hover:opacity-100 sm:opacity-70">
                   <svg
                     className="h-3.5 w-3.5"
                     viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ function VoucherCard({
                   href={intent.proofSignedUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm font-semibold text-[#d47840] underline underline-offset-2"
+                  className="text-sm font-semibold text-accent-text underline underline-offset-2"
                 >
                   {t("voucherReview.openProof")}
                 </a>
@@ -268,12 +268,12 @@ function VoucherCard({
                 {intent.actorEmail ?? intent.actorName ?? "—"}
               </p>
               {isDebtPayment && intent.periodoResumen ? (
-                <p className="mt-0.5 text-[11px] font-semibold text-[#9a3412]">
+                <p className="mt-0.5 text-[11px] font-semibold text-accent-text">
                   Deuda del mes: {intent.periodoResumen}
                 </p>
               ) : null}
               {isMissingCobro && intent.periodoResumen ? (
-                <p className="mt-0.5 text-[11px] font-semibold text-sky-800">
+                <p className="mt-0.5 text-[11px] font-semibold text-info-fg">
                   Mes pedido: {intent.periodoResumen}
                   {intent.claimedPaymentFecha
                     ? ` · Fecha voucher: ${intent.claimedPaymentFecha}`
@@ -300,14 +300,14 @@ function VoucherCard({
             </Badge>
           </div>
 
-          <div className="rounded-xl bg-[#f8fafc] px-3 py-2.5">
+          <div className="rounded-box bg-field px-3 py-2.5">
             {showActions ? (
               <>
                 <label className="text-xs font-medium text-[var(--auth-text-muted)]">
                   {t("voucherReview.realAmount", { currency: chargeCurrency })}
                 </label>
                 {!aiReadAmount ? (
-                  <p className="mt-1 text-[11px] font-semibold text-[#b45309]">
+                  <p className="mt-1 text-[11px] font-semibold text-accent-text">
                     La IA no leyó este comprobante. Escribe el monto que ves en
                     la imagen, no el del pedido.
                   </p>
@@ -321,11 +321,11 @@ function VoucherCard({
                     value={amountInput}
                     onChange={(e) => setAmountInput(e.target.value)}
                     aria-label={t("voucherReview.realAmount", { currency: chargeCurrency })}
-                    className="w-full max-w-[11rem] rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2 text-lg font-bold tabular-nums text-[var(--auth-text)] outline-none focus:border-[#d47840]"
+                    className="w-full max-w-[11rem] rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2 text-lg font-bold tabular-nums text-[var(--auth-text)] outline-none focus:border-accent"
                   />
                   <button
                     type="button"
-                    className="text-xs font-semibold text-[#d47840] underline-offset-2 hover:underline"
+                    className="text-xs font-semibold text-accent-text underline-offset-2 hover:underline"
                     onClick={() =>
                       setAmountInput(
                         String(Math.round(intent.amount * 100) / 100),
@@ -356,7 +356,7 @@ function VoucherCard({
                   </p>
                 ) : null}
                 {feeAlreadyRemovedFrom != null ? (
-                  <p className="mt-1 text-[11px] font-semibold text-[#b42318]">
+                  <p className="mt-1 text-[11px] font-semibold text-danger-fg">
                     Este monto ya tiene el fee descontado: el fee se cobraría dos veces.
                     Escribe {(feeAlreadyRemovedFrom / 100).toFixed(2)}.
                   </p>
@@ -418,7 +418,7 @@ function VoucherCard({
                       type="month"
                       value={periodoInput}
                       onChange={(e) => setPeriodoInput(e.target.value)}
-                      className="mt-1 w-full max-w-[11rem] rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2 text-sm font-semibold tabular-nums text-[var(--auth-text)] outline-none focus:border-[#d47840]"
+                      className="mt-1 w-full max-w-[11rem] rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2 text-sm font-semibold tabular-nums text-[var(--auth-text)] outline-none focus:border-accent"
                     />
                   </label>
                 ) : null}
@@ -469,17 +469,17 @@ function VoucherCard({
           </p>
 
           {intent.analysisReason ? (
-            <p className="break-words rounded-lg border border-amber-200/80 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+            <p className="break-words rounded-lg border border-warn-line/80 bg-warn-bg px-3 py-2 text-xs text-warn-fg">
               {intent.analysisReason}
             </p>
           ) : null}
 
           {intent.failureReason && intent.reviewStatus === "rejected" ? (
-            <p className="text-xs text-red-700">{intent.failureReason}</p>
+            <p className="text-xs text-danger-fg">{intent.failureReason}</p>
           ) : null}
 
           {error ? (
-            <p className="text-xs text-red-600" role="alert">
+            <p className="text-xs text-danger-fg" role="alert">
               {error}
             </p>
           ) : null}
@@ -520,7 +520,7 @@ function VoucherCard({
                       <button
                         type="button"
                         onClick={() => setLightboxOpen(true)}
-                        className="inline-flex h-8 items-center px-2 text-xs font-semibold text-[#d47840] underline-offset-2 hover:underline"
+                        className="inline-flex h-8 items-center px-2 text-xs font-semibold text-accent-text underline-offset-2 hover:underline"
                       >
                         Ampliar foto
                       </button>
@@ -529,7 +529,7 @@ function VoucherCard({
                         href={intent.proofSignedUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-8 items-center px-2 text-xs font-semibold text-[#d47840] underline-offset-2 hover:underline"
+                        className="inline-flex h-8 items-center px-2 text-xs font-semibold text-accent-text underline-offset-2 hover:underline"
                       >
                         Ver original
                       </a>
@@ -544,7 +544,7 @@ function VoucherCard({
                     rows={2}
                     placeholder="Motivo visible para el cliente…"
                     aria-label="Motivo visible para el cliente"
-                    className="w-full rounded-lg border border-[var(--auth-divider)] bg-white px-3 py-2 text-sm outline-none focus:border-[#d47840]"
+                    className="w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
                   />
                   <div className="flex flex-wrap gap-2">
                     <Button
@@ -671,7 +671,7 @@ export function ManualVoucherReviewSection({
                     : "Pendientes"}
             </h2>
             {pendingCount > 0 ? (
-              <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-500 px-2 text-xs font-bold text-white">
+              <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-warn-solid px-2 text-xs font-bold text-white">
                 {pendingCount}
               </span>
             ) : null}

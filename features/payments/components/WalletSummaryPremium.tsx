@@ -42,7 +42,7 @@ export async function WalletSummaryPremium({
         : t("walletCard.subtitleClient");
 
   return (
-    <section className="overflow-hidden rounded-[1rem] border border-[#ece7e0] bg-white shadow-[0_12px_32px_-20px_rgb(28_25_23_/_0.18)]">
+    <section className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_12px_32px_-20px_rgb(28_25_23_/_0.18)]">
       <div
         aria-hidden
         className="h-1 bg-[linear-gradient(90deg,#d47840,#e0a060,#d47840)]"
@@ -50,27 +50,27 @@ export async function WalletSummaryPremium({
 
       <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
         <div className="min-w-0">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[#d47840]">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-text">
             {t("walletCard.eyebrow")}
           </p>
-          <p className="mt-1 text-[13px] font-medium text-[#5c564e]">
+          <p className="mt-1 text-[13px] font-medium text-ink-2">
             {subtitle}
           </p>
           {clienteName ? (
-            <p className="mt-1 text-[12px] text-[#8a8177]">{clienteName}</p>
+            <p className="mt-1 text-[12px] text-ink-3">{clienteName}</p>
           ) : (
-            <p className="mt-1 truncate text-[12px] text-[#8a8177]">
+            <p className="mt-1 truncate text-[12px] text-ink-3">
               {wallet.name}
             </p>
           )}
-          <p className="mt-3 text-[2rem] font-bold leading-none tracking-[-0.04em] tabular-nums text-[#1c1917] sm:text-[2.35rem]">
+          <p className="mt-3 text-[2rem] font-bold leading-none tracking-[-0.04em] tabular-nums text-ink sm:text-[2.35rem]">
             {formatMoney(wallet.balance, wallet.currency)}
           </p>
-          <p className="mt-1.5 text-[12px] font-medium text-[#5c564e]">
+          <p className="mt-1.5 text-[12px] font-medium text-ink-2">
             {t("walletCard.availableHint")}
           </p>
           {hecomFinance != null && staffMode ? (
-            <p className="mt-2 text-[12px] text-[#8a8177]">
+            <p className="mt-2 text-[12px] text-ink-3">
               {t("walletCard.hecomLine", {
                 label: debt
                   ? t("walletCard.hecomDebt")
@@ -82,14 +82,14 @@ export async function WalletSummaryPremium({
             </p>
           ) : null}
           {hecomFinance != null && canClientStripeFund ? (
-            <div className="mt-3 rounded-xl border border-[#d47840]/35 bg-[#f7f0e9] px-3.5 py-2.5">
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#d47840]">
+            <div className="mt-3 rounded-box border border-accent/35 bg-subtle px-3.5 py-2.5">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-accent-text">
                 {t("walletCard.feeEyebrow")}
               </p>
-              <p className="mt-1 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c1917]">
+              <p className="mt-1 text-[1.35rem] font-bold tracking-[-0.03em] text-ink">
                 {hecomFinance.depositFeePercent}%
               </p>
-              <p className="mt-1 text-[12px] leading-4 text-[#5c564e]">
+              <p className="mt-1 text-[12px] leading-4 text-ink-2">
                 {t("walletCard.feeBody", {
                   percent: hecomFinance.depositFeePercent,
                   gross: (
@@ -100,16 +100,16 @@ export async function WalletSummaryPremium({
               </p>
             </div>
           ) : null}
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[#5c564e]">
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-ink-2">
             <span>
               {t("walletCard.lastTopUp")}{" "}
-              <span className="font-semibold text-[#1c1917]">
+              <span className="font-semibold text-ink">
                 {wallet.lastTopUp ?? t("walletCard.noRecords")}
               </span>
             </span>
             <span>
               {t("walletCard.method")}{" "}
-              <span className="font-semibold text-[#1c1917]">
+              <span className="font-semibold text-ink">
                 {preferredGateway.name}
               </span>
             </span>
@@ -124,7 +124,7 @@ export async function WalletSummaryPremium({
         ) : (
           <a
             href="#asignar-saldo"
-            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#d47840] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05] sm:w-auto"
+            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05] sm:w-auto"
           >
             {t("walletCard.goBm")}
           </a>

@@ -91,13 +91,13 @@ export function PaymentsGerenteAccountsSummary({
   ];
 
   return (
-    <div className="border-b border-[var(--auth-border)] bg-[#faf8f5] px-3 py-3 sm:px-5">
+    <div className="border-b border-[var(--auth-border)] bg-field px-3 py-3 sm:px-5">
       <div className="flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8a8178]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-3">
           {t("gerenteSummary.pulse")}
         </p>
         {lastUpdatedAt ? (
-          <p className="text-[10px] text-[#b5aea6]">
+          <p className="text-[10px] text-ink-3">
             {t("gerenteSummary.updated", {
               time: new Date(lastUpdatedAt).toLocaleTimeString(undefined, {
                 hour: "2-digit",
@@ -111,25 +111,25 @@ export function PaymentsGerenteAccountsSummary({
         {items.map((item) => (
           <div
             key={item.label}
-            className="min-w-0 rounded-lg border border-[rgb(20_18_16_/_0.06)] bg-white px-2.5 py-2 sm:px-3"
+            className="min-w-0 rounded-lg border border-[rgb(20_18_16_/_0.06)] bg-surface px-2.5 py-2 sm:px-3"
           >
-            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-[#9a9187] sm:text-[10px]">
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-ink-3 sm:text-[10px]">
               {item.label}
             </p>
             <p
               className={`mt-0.5 truncate text-[14px] font-semibold tabular-nums tracking-[-0.02em] sm:text-[15px] ${
                 item.warn
-                  ? "text-[#b45309]"
+                  ? "text-accent-text"
                   : item.accent
-                    ? "text-[#1a1612]"
+                    ? "text-ink"
                     : item.muted
-                      ? "text-[#6b645c]"
-                      : "text-[#1a1612]"
+                      ? "text-ink-2"
+                      : "text-ink"
               }`}
             >
               {item.value}
             </p>
-            <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-[#9a9187] sm:line-clamp-none">
+            <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-ink-3 sm:line-clamp-none">
               <span className="sm:hidden">{item.hintMobile}</span>
               <span className="hidden sm:inline">{item.hint}</span>
             </p>

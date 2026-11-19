@@ -24,9 +24,9 @@ export default async function AvisosPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">Gerente</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-[#1a1714]">Avisos</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[#6b645c]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Gerente</p>
+        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Avisos</h1>
+        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
           Manda un aviso a todos los clientes. Le llega al celular o a la PC a quien tenga los avisos activos, y
           queda en la campanita de todos.
         </p>

@@ -198,7 +198,7 @@ export function ChatConversation({
   return (
     <div
       className={cn(
-        "flex flex-col bg-white text-[var(--auth-text)]",
+        "flex flex-col bg-surface text-[var(--auth-text)]",
         className,
       )}
       onDragOver={(e) => {
@@ -213,7 +213,7 @@ export function ChatConversation({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-white/10 hover:text-white lg:hidden"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-surface/10 hover:text-white lg:hidden"
             aria-label={t("back")}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -229,7 +229,7 @@ export function ChatConversation({
         />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-bold tracking-[-0.01em] text-white">{resolvedTitle}</p>
-          <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-white/70"><span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" /><span className="truncate">{resolvedSubtitle}</span></p>
+          <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-white/70"><span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-ok-solid" /><span className="truncate">{resolvedSubtitle}</span></p>
         </div>
         {onClearChat || headerActions ? (
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
@@ -243,7 +243,7 @@ export function ChatConversation({
                   }
                   onClearChat();
                 }}
-                className="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/90 hover:bg-white/15 disabled:opacity-50"
+                className="rounded-md border border-white/20 bg-surface/10 px-2.5 py-1 text-[11px] font-semibold text-white/90 hover:bg-surface/15 disabled:opacity-50"
               >
                 {clearingChat ? t("clearingChat") : t("clearChat")}
               </button>
@@ -255,30 +255,30 @@ export function ChatConversation({
 
       <div
         ref={messagesScrollRef}
-        className="relative min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f3eee8] p-3 sm:p-5"
+        className="relative min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-subtle p-3 sm:p-5"
       >
         {dragOver ? (
-          <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[var(--brand-primary)] bg-white/90 text-sm font-semibold text-[var(--brand-primary-deep)]">
+          <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-card border-2 border-dashed border-[var(--brand-primary)] bg-surface/90 text-sm font-semibold text-[var(--brand-primary-deep)]">
             {t("dropFiles")}
           </div>
         ) : null}
 
         {loading ? (
-          <p className="rounded-2xl bg-white px-4 py-3 text-sm text-[#6b645c] shadow-sm ring-1 ring-[var(--border-subtle)]">
+          <p className="rounded-card bg-surface px-4 py-3 text-sm text-ink-2 shadow-sm ring-1 ring-[var(--border-subtle)]">
             {t("loading")}
           </p>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center rounded-2xl bg-white px-6 py-10 text-center shadow-sm ring-1 ring-[var(--border-subtle)]">
+          <div className="flex flex-col items-center rounded-card bg-surface px-6 py-10 text-center shadow-sm ring-1 ring-[var(--border-subtle)]">
             <span
               aria-hidden
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f7f2ed] text-xl"
+              className="flex h-12 w-12 items-center justify-center rounded-card bg-subtle text-xl"
             >
               💬
             </span>
-            <p className="mt-3 text-sm font-semibold text-[#3f3a34]">
+            <p className="mt-3 text-sm font-semibold text-ink">
               {t("noMessages")}
             </p>
-            <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-[#6b645c]">
+            <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-ink-2">
               {resolvedEmptyHint}
             </p>
           </div>
@@ -287,7 +287,7 @@ export function ChatConversation({
             if (item.kind === "day") {
               return (
                 <div key={item.key} className="flex justify-center py-1">
-                  <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#6b645c] shadow-sm ring-1 ring-black/5">
+                  <span className="rounded-full bg-surface/90 px-3 py-1 text-[11px] font-semibold text-ink-2 shadow-sm ring-1 ring-black/5">
                     {item.label}
                   </span>
                 </div>
@@ -300,15 +300,15 @@ export function ChatConversation({
         )}
         <div ref={messagesEndRef} className="h-px w-full shrink-0" aria-hidden />
         {error ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p className="rounded-card border border-danger-line bg-danger-bg px-3 py-2 text-xs text-danger-fg">
             {error}
           </p>
         ) : null}
       </div>
 
-      <div className="border-t border-[var(--auth-divider)] bg-white p-3 shadow-[0_-8px_24px_rgb(15_23_42_/_0.04)] sm:px-5 sm:py-4">
+      <div className="border-t border-[var(--auth-divider)] bg-surface p-3 shadow-[0_-8px_24px_rgb(15_23_42_/_0.04)] sm:px-5 sm:py-4">
         {composerDisabled ? (
-          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] font-medium text-amber-900">
+          <p className="mb-3 rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[12px] font-medium text-warn-fg">
             {composerDisabledReason ?? t("composerDisabled")}
           </p>
         ) : null}
@@ -317,7 +317,7 @@ export function ChatConversation({
             {pending.map((item) => (
               <div
                 key={item.id}
-                className="relative overflow-hidden rounded-xl border border-[var(--auth-input-border)] bg-[var(--surface-soft)]"
+                className="relative overflow-hidden rounded-box border border-[var(--auth-input-border)] bg-[var(--surface-soft)]"
               >
                 {item.previewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -344,7 +344,7 @@ export function ChatConversation({
           </div>
         ) : null}
 
-        <div className="rounded-[22px] border border-[var(--auth-input-border)] bg-[#f8f5f1] p-2 shadow-sm transition focus-within:border-[var(--auth-accent)]/70 focus-within:bg-white focus-within:ring-4 focus-within:ring-[var(--auth-accent)]/10">
+        <div className="rounded-card border border-[var(--auth-input-border)] bg-field p-2 shadow-sm transition focus-within:border-[var(--auth-accent)]/70 focus-within:bg-surface focus-within:ring-4 focus-within:ring-[var(--auth-accent)]/10">
           <textarea
             ref={textareaRef}
             value={inputValue}
@@ -371,7 +371,7 @@ export function ChatConversation({
                 type="button"
                 disabled={sending || composerDisabled}
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--auth-text-muted)] transition-colors hover:bg-white hover:text-[var(--auth-text)] disabled:opacity-50"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--auth-text-muted)] transition-colors hover:bg-surface hover:text-[var(--auth-text)] disabled:opacity-50"
                 aria-label={t("attachFile")}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
@@ -416,7 +416,7 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
         className={`min-w-0 max-w-[min(88%,32rem)] px-3.5 py-2.5 text-sm shadow-sm ${
           message.role === "user"
             ? "rounded-[18px_18px_5px_18px] bg-[linear-gradient(135deg,var(--brand-primary),#e85a1a)] text-white"
-            : "rounded-[18px_18px_18px_5px] bg-white text-[#3f3a34] ring-1 ring-black/5"
+            : "rounded-[18px_18px_18px_5px] bg-surface text-ink ring-1 ring-black/5"
         }`}
       >
         {message.text ? <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{message.text}</p> : null}
@@ -431,7 +431,7 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
                     href={attachment.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="block overflow-hidden rounded-xl"
+                    className="block overflow-hidden rounded-box"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -450,7 +450,7 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
                   rel="noreferrer"
                   className={`inline-flex max-w-full items-center gap-2 break-all rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
                     message.role === "user"
-                      ? "bg-white/15 text-white"
+                      ? "bg-surface/15 text-white"
                       : "bg-[var(--surface-soft)] text-[var(--auth-text)]"
                   }`}
                 >
@@ -465,7 +465,7 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
             className={`mt-1.5 text-[10px] font-semibold ${
               message.role === "user"
                 ? "text-white/85"
-                : "text-[var(--auth-accent)]"
+                : "text-accent-text"
             }`}
           >
             {message.senderName}
@@ -473,7 +473,7 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
         ) : null}
         <p
           className={`mt-1 text-[10px] ${
-            message.role === "user" ? "text-white/70" : "text-[#9a9187]"
+            message.role === "user" ? "text-white/70" : "text-ink-3"
           }`}
         >
           {message.createdAt

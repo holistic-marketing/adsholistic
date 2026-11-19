@@ -89,10 +89,10 @@ export function EducationPlayerDialog({
       }}
     >
       {lesson ? (
-        <div className="overflow-hidden rounded-[1.25rem] bg-white shadow-[0_24px_80px_-24px_rgb(28_25_23_/_0.45)]">
+        <div className="overflow-hidden rounded-card bg-surface shadow-[0_24px_80px_-24px_rgb(28_25_23_/_0.45)]">
           <div className="flex items-start justify-between gap-3 px-4 py-3 sm:px-5">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-accent)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent-text">
                 {t("lessonNumber", { number: lesson.number })}
               </p>
               <h2 id={titleId} className="truncate text-[1.05rem] font-bold text-[var(--auth-text)]">
@@ -104,7 +104,7 @@ export function EducationPlayerDialog({
                 <button
                   type="button"
                   onClick={() => void toggleFullscreen()}
-                  className="inline-flex h-10 items-center rounded-xl bg-[var(--auth-accent)] px-3 text-[13px] font-semibold text-white"
+                  className="inline-flex h-10 items-center rounded-box bg-accent-btn px-3 text-[13px] font-semibold text-on-accent"
                 >
                   {fullscreen ? t("exitFullscreen") : t("fullscreen")}
                 </button>
@@ -112,7 +112,7 @@ export function EducationPlayerDialog({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-10 items-center rounded-xl px-3 text-[13px] font-semibold text-[var(--auth-text-muted)] hover:bg-[var(--auth-bg)]"
+                className="inline-flex h-10 items-center rounded-box px-3 text-[13px] font-semibold text-[var(--auth-text-muted)] hover:bg-[var(--auth-bg)]"
               >
                 {t("close")}
               </button>
@@ -149,7 +149,7 @@ export function EducationPlayerDialog({
                       className="h-full w-full object-cover"
                     />
                     <span className="absolute inset-0 grid place-items-center bg-black/15">
-                      <span className="grid h-16 w-16 place-items-center rounded-full bg-white text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(0_0_0_/_0.6)] transition-transform group-hover:scale-105">
+                      <span className="grid h-16 w-16 place-items-center rounded-full bg-surface text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(0_0_0_/_0.6)] transition-transform group-hover:scale-105">
                         <svg viewBox="0 0 24 24" className="ml-1 h-7 w-7" fill="currentColor" aria-hidden>
                           <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" />
                         </svg>
@@ -170,7 +170,7 @@ export function EducationPlayerDialog({
               </div>
             </div>
           ) : (
-            <div className="mx-4 mb-4 rounded-2xl border border-[var(--auth-border)] bg-[var(--auth-bg)] px-5 py-8 text-center sm:mx-5">
+            <div className="mx-4 mb-4 rounded-card border border-[var(--auth-border)] bg-[var(--auth-bg)] px-5 py-8 text-center sm:mx-5">
               <p className="text-[1.15rem] font-bold text-[var(--auth-text)]">
                 {t("unavailableTitle")}
               </p>
@@ -178,7 +178,7 @@ export function EducationPlayerDialog({
                 {t("unavailableBody")}
               </p>
               {canManage ? (
-                <p className="mx-auto mt-3 max-w-md text-[13px] font-medium text-[var(--auth-accent)]">
+                <p className="mx-auto mt-3 max-w-md text-[13px] font-medium text-accent-text">
                   {t("unavailableManage")}
                 </p>
               ) : null}

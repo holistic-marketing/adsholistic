@@ -22,16 +22,16 @@ type PilotResponse = {
 };
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff781f]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
-const primaryBtn = `inline-flex h-9 items-center rounded-[10px] bg-[#17150f] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#2b2620] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-const secondaryBtn = `inline-flex h-9 items-center rounded-[10px] border border-[#e0d9d0] bg-white px-3.5 text-[13px] font-semibold text-[#1c1917] transition-colors hover:border-[#cfc6bb] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
+const primaryBtn = `inline-flex h-9 items-center rounded-box bg-accent-btn px-3.5 text-[13px] font-semibold text-on-accent transition-colors hover:bg-accent-btn-hover disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
+const secondaryBtn = `inline-flex h-9 items-center rounded-box border border-line bg-surface px-3.5 text-[13px] font-semibold text-ink transition-colors hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
 
 const TONE: Record<PilotProposal["kind"], string> = {
-  pause_loser_same_group: "bg-[#d97706]",
-  pause_loser: "bg-[#d97706]",
-  scale_winner: "bg-[#3f9a62]",
-  refresh_fatigued: "bg-[#d97706]",
-  all_losing: "bg-[#c24c4c]",
+  pause_loser_same_group: "bg-accent",
+  pause_loser: "bg-accent",
+  scale_winner: "bg-ok-solid",
+  refresh_fatigued: "bg-accent",
+  all_losing: "bg-danger-btn",
 };
 
 function money(value: number | null) {
@@ -93,27 +93,27 @@ export function ProfitPilotPanel() {
   if (!loadFailed && data && data.dataThrough == null) return null;
 
   return (
-    <section className="overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4]" aria-busy={!data && !loadFailed}>
+    <section className="overflow-hidden rounded-card bg-surface ring-1 ring-line" aria-busy={!data && !loadFailed}>
       <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
         <div className="min-w-0 max-w-[62ch]">
-          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#1a1714]">{t("title")}</h2>
-          <p className="mt-0.5 text-[12px] leading-[1.5] text-[#5c564e]">{t("subtitle")}</p>
+          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">{t("title")}</h2>
+          <p className="mt-0.5 text-[12px] leading-[1.5] text-ink-2">{t("subtitle")}</p>
         </div>
         {data?.averageCostPerResult != null ? (
-          <span className="rounded-full bg-[#f3eee8] px-2.5 py-1 text-[11px] font-medium text-[#5c564e]">
+          <span className="rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium text-ink-2">
             {t("average", { amount: moneyUsd(data.averageCostPerResult) })}
           </span>
         ) : null}
       </div>
 
       {notice && notice.tone === "ok" ? (
-        <p role="status" className="mx-4 mb-3 rounded-[10px] bg-[#eaf5ee] px-3 py-2 text-[13px] text-[#2f6b47] sm:mx-5">
+        <p role="status" className="mx-4 mb-3 rounded-box bg-subtle px-3 py-2 text-[13px] text-ok-fg sm:mx-5">
           {notice.text}
         </p>
       ) : null}
 
       {loadFailed ? (
-        <div role="alert" className="flex flex-wrap items-center gap-3 px-4 pb-5 text-[13px] text-[#5c564e] sm:px-5">
+        <div role="alert" className="flex flex-wrap items-center gap-3 px-4 pb-5 text-[13px] text-ink-2 sm:px-5">
           {t("error")}
           <button type="button" onClick={() => setReloadToken((n) => n + 1)} className={secondaryBtn}>
             {t("retry")}
@@ -122,13 +122,13 @@ export function ProfitPilotPanel() {
       ) : !data ? (
         <div className="space-y-2 px-4 pb-5 sm:px-5" aria-hidden>
           {[0, 1].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-lg bg-[#f5f2ed] motion-reduce:animate-none" />
+            <div key={i} className="h-14 animate-pulse rounded-lg bg-subtle motion-reduce:animate-none" />
           ))}
         </div>
       ) : data.proposals.length === 0 ? (
-        <p className="px-4 pb-5 text-[13px] text-[#5c564e] sm:px-5">{t("empty")}</p>
+        <p className="px-4 pb-5 text-[13px] text-ink-2 sm:px-5">{t("empty")}</p>
       ) : (
-        <ul className="border-t border-[#f0ebe4]">
+        <ul className="border-t border-line">
           {data.proposals.map((p) => {
             const avg = money(p.kind === "all_losing" || p.kind === "refresh_fatigued" ? null : p.averageCostPerResult);
             let title = "";
@@ -179,12 +179,12 @@ export function ProfitPilotPanel() {
             const isConfirming = confirming === p.id;
             const isBusy = busy === p.id;
             return (
-              <li key={p.id} className="flex flex-col gap-3 border-b border-[#f3efe9] px-4 py-4 last:border-0 sm:px-5">
+              <li key={p.id} className="flex flex-col gap-3 border-b border-line px-4 py-4 last:border-0 sm:px-5">
                 <div className="flex gap-3">
                   <span aria-hidden className={`mt-[7px] h-2 w-2 shrink-0 rounded-full ${TONE[p.kind]}`} />
                   <div className="min-w-0">
-                    <h3 className="text-[14px] font-semibold text-[#1c1917] [overflow-wrap:anywhere]">{title}</h3>
-                    <p className="mt-0.5 max-w-[68ch] text-[13px] leading-[1.55] text-[#5c564e] [overflow-wrap:anywhere]">{body}</p>
+                    <h3 className="text-[14px] font-semibold text-ink [overflow-wrap:anywhere]">{title}</h3>
+                    <p className="mt-0.5 max-w-[68ch] text-[13px] leading-[1.55] text-ink-2 [overflow-wrap:anywhere]">{body}</p>
                   </div>
                 </div>
 
@@ -192,7 +192,7 @@ export function ProfitPilotPanel() {
                   {pauseName && data.canAct && data.actionsEnabled ? (
                     isConfirming ? (
                       <>
-                        <span className="text-[12.5px] text-[#5c564e]">{t("actions.confirmText")}</span>
+                        <span className="text-[12.5px] text-ink-2">{t("actions.confirmText")}</span>
                         <button type="button" className={primaryBtn} disabled={isBusy} onClick={() => void act(p, "pause", pauseName!)}>
                           {t("actions.confirm")}
                         </button>
@@ -212,17 +212,17 @@ export function ProfitPilotPanel() {
                     </Link>
                   ) : null}
                   {data.canAct && !isConfirming ? (
-                    <button type="button" className={`${secondaryBtn} border-transparent text-[#5c564e]`} disabled={isBusy} onClick={() => void act(p, "dismiss")}>
+                    <button type="button" className={`${secondaryBtn} border-transparent text-ink-2`} disabled={isBusy} onClick={() => void act(p, "dismiss")}>
                       {t("actions.dismiss")}
                     </button>
                   ) : null}
-                  {pauseName && !data.canAct ? <span className="text-[12px] text-[#8a8177]">{t("actions.viewOnly")}</span> : null}
+                  {pauseName && !data.canAct ? <span className="text-[12px] text-ink-3">{t("actions.viewOnly")}</span> : null}
                   {pauseName && data.canAct && !data.actionsEnabled ? (
-                    <span className="text-[12px] text-[#8a8177]">{t("actions.actionsOff")}</span>
+                    <span className="text-[12px] text-ink-3">{t("actions.actionsOff")}</span>
                   ) : null}
                 </div>
                 {notice && notice.id === p.id && notice.tone === "error" ? (
-                  <p role="alert" className="ml-5 rounded-[10px] bg-[#fef2f2] px-3 py-2 text-[12.5px] text-[#991b1b]">
+                  <p role="alert" className="ml-5 rounded-box bg-field px-3 py-2 text-[12.5px] text-danger-fg">
                     {notice.text}
                   </p>
                 ) : null}
@@ -232,7 +232,7 @@ export function ProfitPilotPanel() {
         </ul>
       )}
 
-      <p className="border-t border-[#f0ebe4] px-4 py-2.5 text-[11.5px] text-[#8a8177] sm:px-5">{t("rules")}</p>
+      <p className="border-t border-line px-4 py-2.5 text-[11.5px] text-ink-3 sm:px-5">{t("rules")}</p>
     </section>
   );
 }

@@ -191,7 +191,7 @@ function TransferBalanceModalBody({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-sm"
         aria-label={t("transferModal.closeAria")}
         onClick={resetAndClose}
       />
@@ -199,7 +199,7 @@ function TransferBalanceModalBody({
         role="dialog"
         aria-modal="true"
         aria-labelledby="transfer-balance-title"
-        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-2xl sm:p-6"
+        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-card border border-[var(--border-subtle)] bg-surface p-5 shadow-2xl sm:p-6"
       >
         <h2
           id="transfer-balance-title"
@@ -215,7 +215,7 @@ function TransferBalanceModalBody({
             : t("transferModal.bodyStaff")}
         </p>
 
-        <div className="mt-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
+        <div className="mt-5 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
           <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
             {t("transferModal.from")}
           </p>
@@ -223,7 +223,7 @@ function TransferBalanceModalBody({
             {sourceAccount.name}
           </p>
           {sourceAccount.bmLabel ? (
-            <span className="mt-1.5 inline-flex rounded-md bg-[#eef4ff] px-1.5 py-0.5 text-[10px] font-semibold text-[#1e40af] ring-1 ring-[#c7d7fe]">
+            <span className="mt-1.5 inline-flex rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
               {sourceAccount.bmLabel}
             </span>
           ) : null}
@@ -232,13 +232,13 @@ function TransferBalanceModalBody({
           </p>
           {sourceLiveUsd != null &&
           Math.abs(sourceLiveUsd - Number(sourceAccount.balance)) > 0.5 ? (
-            <p className="mt-0.5 text-[11px] text-[#9a9187]">
+            <p className="mt-0.5 text-[11px] text-ink-3">
               {t("transferModal.holisticAssigned", {
                 amount: formatMoney(sourceAccount.balance),
               })}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-amber-800">
+          <p className="mt-1 text-xs text-warn-fg">
             {t("transferModal.statusPrefix", {
               status:
                 sourceAccount.status === "disabled"
@@ -256,13 +256,13 @@ function TransferBalanceModalBody({
             {t("transferModal.to")}
           </label>
           {destinationOptions.length === 0 ? (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950">
+            <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">
               {t("transferModal.noTarget")}
             </p>
           ) : (
             <select
               id="transfer-dest"
-              className="w-full rounded-lg border border-[var(--border-subtle)] bg-white px-3 py-2.5 text-sm text-[var(--foreground)]"
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-surface px-3 py-2.5 text-sm text-[var(--foreground)]"
               value={toAccountId}
               onChange={(e) => setToAccountId(e.target.value)}
             >
@@ -285,7 +285,7 @@ function TransferBalanceModalBody({
             </select>
           )}
           {destAccount ? (
-            <p className="mt-1.5 break-all font-mono text-[11px] text-[#6b645c]">
+            <p className="mt-1.5 break-all font-mono text-[11px] text-ink-2">
               adv {destAccount.externalAccountId?.trim() || "—"}
             </p>
           ) : null}
@@ -308,7 +308,7 @@ function TransferBalanceModalBody({
             onChange={(e) => setAmount(e.target.value)}
             autoFocus
           />
-          <p className="mt-1.5 text-[12px] text-[#6b645c]">
+          <p className="mt-1.5 text-[12px] text-ink-2">
             {clientSelfService
               ? t("transferModal.maxLiveBalance", {
                   amount: formatMoney(maxAmount),
@@ -320,7 +320,7 @@ function TransferBalanceModalBody({
         </div>
 
         {allowForceLedger ? (
-          <label className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-[#6b645c]">
+          <label className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-ink-2">
             <input
               type="checkbox"
               className="mt-0.5"
@@ -336,14 +336,14 @@ function TransferBalanceModalBody({
 
         {error ? (
           <p
-            className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] leading-5 text-amber-950"
+            className="mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] leading-5 text-warn-fg"
             role="alert"
           >
             {error}
           </p>
         ) : null}
         {success ? (
-          <p className="mt-3 text-xs text-emerald-600" role="status">
+          <p className="mt-3 text-xs text-ok-fg" role="status">
             {success}
           </p>
         ) : null}

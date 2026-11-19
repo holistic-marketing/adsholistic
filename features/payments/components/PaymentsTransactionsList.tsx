@@ -18,7 +18,7 @@ export function PaymentsTransactionsList({
     <div className="overflow-x-auto">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="border-b border-[#e5e7eb] bg-slate-50/80 text-left text-xs uppercase tracking-wide text-[#64748b]">
+          <tr className="border-b border-line bg-field/80 text-left text-xs uppercase tracking-wide text-ink-2">
             <th className="px-4 py-3 font-medium sm:px-6">Fecha</th>
             <th className="px-4 py-3 font-medium sm:px-6">Descripción</th>
             <th className="px-4 py-3 font-medium sm:px-6">Monto</th>
@@ -27,13 +27,13 @@ export function PaymentsTransactionsList({
         </thead>
         <tbody>
           {transactions.map((tx) => (
-            <tr key={tx.id} className="border-b border-[#e5e7eb] last:border-0">
-              <td className="px-4 py-3 text-[#64748b] sm:px-6">{tx.date}</td>
-              <td className="px-4 py-3 text-[#0f172a] sm:px-6">{tx.description}</td>
-              <td className="px-4 py-3 font-medium text-[#0f172a] sm:px-6">
+            <tr key={tx.id} className="border-b border-line last:border-0">
+              <td className="px-4 py-3 text-ink-2 sm:px-6">{tx.date}</td>
+              <td className="px-4 py-3 text-ink sm:px-6">{tx.description}</td>
+              <td className="px-4 py-3 font-medium text-ink sm:px-6">
                 {formatMoney(tx.amount, tx.currency)}
               </td>
-              <td className="px-4 py-3 text-[#64748b] sm:px-6">
+              <td className="px-4 py-3 text-ink-2 sm:px-6">
                 {mapTransactionStatusLabel(tx.status as DbTransactionStatus)}
               </td>
             </tr>

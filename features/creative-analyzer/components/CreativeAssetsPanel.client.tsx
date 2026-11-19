@@ -61,7 +61,7 @@ function MetricBar({ label, value }: { label: string; value: number }) {
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-[rgb(20_18_16_/_0.06)]">
         <div
-          className="h-full rounded-full bg-[var(--auth-accent)] transition-[width]"
+          className="h-full rounded-full bg-accent-btn transition-[width]"
           style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
         />
       </div>
@@ -115,7 +115,7 @@ export function CreativeAssetsPanel({
             return (
               <li
                 key={asset.id}
-                className="rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-white p-3.5 shadow-[0_8px_20px_rgb(20_18_16_/_0.03)] sm:p-4"
+                className="rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5 shadow-[0_8px_20px_rgb(20_18_16_/_0.03)] sm:p-4"
               >
                 <div className="flex gap-3.5">
                   {asset.previewUrl || asset.posterUrl ? (
@@ -155,13 +155,13 @@ export function CreativeAssetsPanel({
                           className={cn(
                             "shrink-0 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-[0.06em]",
                             verdict.tone === "good" &&
-                              "bg-[#ecf7f0] text-[#1f5c40]",
+                              "bg-subtle text-ok-fg",
                             verdict.tone === "mid" &&
-                              "bg-[rgb(255_120_31_/_0.12)] text-[var(--auth-accent)]",
+                              "bg-[rgb(255_120_31_/_0.12)] text-accent-text",
                             verdict.tone === "warn" &&
-                              "bg-amber-50 text-amber-900",
+                              "bg-warn-bg text-warn-fg",
                             verdict.tone === "bad" &&
-                              "bg-[#fef2f2] text-[#991b1b]",
+                              "bg-field text-danger-fg",
                           )}
                         >
                           {verdict.label}
@@ -203,14 +203,14 @@ export function CreativeAssetsPanel({
                           </p>
                         ) : null}
                         {insight.policyRisks.length > 0 ? (
-                          <p className="mt-2 text-[12px] leading-5 text-amber-900">
+                          <p className="mt-2 text-[12px] leading-5 text-warn-fg">
                             <span className="font-semibold">{t("policyRisk")}</span>
                             {insight.policyRisks.join(" · ")}
                           </p>
                         ) : null}
                       </>
                     ) : asset.jobStatus === "failed" ? (
-                      <p className="mt-2 text-[12px] text-[#991b1b]">
+                      <p className="mt-2 text-[12px] text-danger-fg">
                         {t("analysisFailed")}
                       </p>
                     ) : (

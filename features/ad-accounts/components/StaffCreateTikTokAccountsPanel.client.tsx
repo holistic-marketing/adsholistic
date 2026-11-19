@@ -115,7 +115,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
   }
 
   return (
-    <section className="rounded-2xl border border-[#e8e1d8] bg-white">
+    <section className="rounded-card border border-line bg-surface">
       <button
         type="button"
         onClick={toggleOpen}
@@ -123,20 +123,20 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
         aria-expanded={open}
       >
         <span className="min-w-0">
-          <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">Solo gerencia</span>
-          <span className="block text-[15px] font-semibold text-[#1c1917]">Crear o dar cuentas TikTok a {clienteName}</span>
+          <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Solo gerencia</span>
+          <span className="block text-[15px] font-semibold text-ink">Crear o dar cuentas TikTok a {clienteName}</span>
         </span>
-        <span className="shrink-0 text-[13px] font-semibold text-[#c2410c]">{open ? "Cerrar" : "Abrir"}</span>
+        <span className="shrink-0 text-[13px] font-semibold text-accent-text">{open ? "Cerrar" : "Abrir"}</span>
       </button>
 
       {open ? (
-        <div className="space-y-4 border-t border-[#efe9e2] px-4 py-4 sm:px-5">
-          <p className="text-[12px] leading-5 text-[#6f675f]">
+        <div className="space-y-4 border-t border-line px-4 py-4 sm:px-5">
+          <p className="text-[12px] leading-5 text-ink-2">
             Sin límite de cupo. La cuenta queda vinculada a su ficha de Hecom y en su panel al instante, con el nombre
             correlativo del BM (ej. 303.0 USD - Agencia).
           </p>
 
-          <div className="inline-flex rounded-xl bg-[#faf8f5] p-1 ring-1 ring-[#e8e1d8]" role="tablist">
+          <div className="inline-flex rounded-box bg-field p-1 ring-1 ring-line" role="tablist">
             {([
               ["create", "Crear nuevas"],
               ["free", "Dar cuentas libres"],
@@ -148,7 +148,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
                 aria-selected={mode === id}
                 onClick={() => setMode(id)}
                 className={`rounded-lg px-3 py-1.5 text-[13px] font-semibold transition ${
-                  mode === id ? "bg-white text-[#1c1917] shadow-sm ring-1 ring-[#e8e1d8]" : "text-[#6f675f] hover:text-[#1c1917]"
+                  mode === id ? "bg-surface text-ink shadow-sm ring-1 ring-line" : "text-ink-2 hover:text-ink"
                 }`}
               >
                 {label}
@@ -156,14 +156,14 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
             ))}
           </div>
           {mode === "free" ? (
-            <p className="text-[12px] leading-5 text-[#6f675f]">
+            <p className="text-[12px] leading-5 text-ink-2">
               Usa cuentas de reserva existentes. Se entregan con cupo cero y se asignan al cliente en Hecom y en su panel,
               con acceso para sus usuarios y el nombre del cliente en TikTok.
             </p>
           ) : null}
 
           <div>
-            <p className="text-[12px] font-semibold text-[#5c564e]">Business Center</p>
+            <p className="text-[12px] font-semibold text-ink-2">Business Center</p>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {BMS.map((b) => (
                 <button
@@ -172,11 +172,11 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
                   onClick={() => setBm(b.id)}
                   aria-pressed={bm === b.id}
                   className={`rounded-xl px-3 py-2 text-left ring-1 transition ${
-                    bm === b.id ? "bg-[#fff4ec] ring-2 ring-[#ff781f]" : "bg-[#faf8f5] ring-[#e8e1d8] hover:ring-[#d6cbbf]"
+                    bm === b.id ? "bg-field ring-2 ring-accent" : "bg-field ring-line hover:ring-accent-line"
                   }`}
                 >
-                  <span className="block text-[13px] font-semibold text-[#1c1917]">{b.label}</span>
-                  <span className="block text-[11px] leading-4 text-[#6f675f]">
+                  <span className="block text-[13px] font-semibold text-ink">{b.label}</span>
+                  <span className="block text-[11px] leading-4 text-ink-2">
                     {mode === "free"
                       ? freeByBm[b.id] == null
                         ? "Contando libres…"
@@ -189,11 +189,11 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
           </div>
 
           <label className="block">
-            <span className="text-[12px] font-semibold text-[#5c564e]">Cantidad</span>
+            <span className="text-[12px] font-semibold text-ink-2">Cantidad</span>
             <select
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
-              className="mt-1 block h-10 w-28 rounded-xl bg-[#faf8f5] px-3 text-[14px] ring-1 ring-[#e8e1d8]"
+              className="mt-1 block h-10 w-28 rounded-box bg-field px-3 text-[14px] ring-1 ring-line"
             >
               {[1, 2, 3, 4, 5].map((n) => (
                 <option key={n} value={n}>
@@ -204,17 +204,17 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
           </label>
 
           <div>
-            <p className="text-[12px] font-semibold text-[#5c564e]">Dar acceso en TikTok (administrador solo de la cuenta, nunca del BM)</p>
+            <p className="text-[12px] font-semibold text-ink-2">Dar acceso en TikTok (administrador solo de la cuenta, nunca del BM)</p>
             {loadingUsers ? (
-              <p className="mt-2 text-[12px] text-[#6f675f]">Buscando sus usuarios de TikTok…</p>
+              <p className="mt-2 text-[12px] text-ink-2">Buscando sus usuarios de TikTok…</p>
             ) : users && users.length ? (
               <ul className="mt-2 space-y-1.5">
                 {users.map((u) => (
                   <li key={u.userId}>
-                    <label className="flex items-center gap-2 text-[13px] text-[#1c1917]">
+                    <label className="flex items-center gap-2 text-[13px] text-ink">
                       <input type="checkbox" checked={checked.has(u.userId)} onChange={() => toggleUser(u.userId)} />
                       <span className="font-medium">{u.userName}</span>
-                      <span className="text-[11px] text-[#8a8278]">
+                      <span className="text-[11px] text-ink-3">
                         {u.userId} · en {u.accounts} cuenta(s){u.suggested ? " · cliente" : ""}
                       </span>
                     </label>
@@ -222,7 +222,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
                 ))}
               </ul>
             ) : (
-              <p className="mt-2 text-[12px] text-[#6f675f]">No encontré usuarios en sus cuentas actuales.</p>
+              <p className="mt-2 text-[12px] text-ink-2">No encontré usuarios en sus cuentas actuales.</p>
             )}
             <input
               value={manualUser}
@@ -230,16 +230,16 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
               placeholder="Otro user ID de TikTok (opcional)"
               aria-label="Otro user ID de TikTok (opcional)"
               inputMode="numeric"
-              className="mt-2 h-10 w-full max-w-xs rounded-xl bg-[#faf8f5] px-3 text-[13px] ring-1 ring-[#e8e1d8]"
+              className="mt-2 h-10 w-full max-w-xs rounded-box bg-field px-3 text-[13px] ring-1 ring-line"
             />
-            <p className="mt-1 text-[11px] text-[#8a8278]">Desmarca al equipo (Sebas, Atter, etc.): ellos ya ven todo por el BM.</p>
+            <p className="mt-1 text-[11px] text-ink-3">Desmarca al equipo (Sebas, Atter, etc.): ellos ya ven todo por el BM.</p>
           </div>
 
           <button
             type="button"
             onClick={() => void create()}
             disabled={busy || (mode === "free" && (freeHere ?? 0) < count)}
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff781f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#e85a1c] disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center rounded-box bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
           >
             {busy
               ? mode === "free" ? "Entregando…" : "Creando en TikTok…"
@@ -251,7 +251,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
           </button>
 
           {error ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-950">{error}</div>
+            <div className="rounded-box border border-warn-line bg-warn-bg px-4 py-3 text-[13px] text-warn-fg">{error}</div>
           ) : null}
 
           {created && created.length ? <TikTokRenameStatus accounts={created} /> : null}
@@ -259,7 +259,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
           {created && created.length ? (
             <ul className="space-y-2">
               {created.map((c) => (
-                <li key={c.advertiserId} className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-950">
+                <li key={c.advertiserId} className="rounded-box border border-ok-line bg-ok-bg px-4 py-3 text-[13px] text-ok-fg">
                   <p className="font-semibold">{c.advertiserName}</p>
                   <p className="font-mono text-[12px]">{c.advertiserId}</p>
                   <p className="mt-1 text-[12px]">
@@ -270,7 +270,7 @@ export function StaffCreateTikTokAccountsPanel({ clienteName }: { clienteName: s
                       : " · Sin acceso a cliente"}
                   </p>
                   {c.access.filter((a) => !a.ok).map((a) => (
-                    <p key={a.userId} className="text-[12px] text-amber-900">
+                    <p key={a.userId} className="text-[12px] text-warn-fg">
                       Acceso {a.userId}: {a.message}
                     </p>
                   ))}

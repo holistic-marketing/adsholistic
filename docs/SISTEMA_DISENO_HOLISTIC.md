@@ -9,6 +9,21 @@
 
 ---
 
+## Panel: sistema visual v3 (desde 2026-11-19)
+
+El panel (`app/(dashboard)`) usa el **sistema visual v3**. Para el panel, esta sección manda sobre las reglas de abajo; la landing, el login y `/admin` siguen con lo suyo.
+
+- **Tokens:** `app/panel-theme.css`. Variables `--ui-*` para claro, oscuro (`html[data-ui-theme="dark"]`) y contraste alto (`html[data-ui-contrast="alto"]`). Dentro del panel, los tokens viejos `--auth-*` y `--admin-*` apuntan a v3, así que las pantallas que aún los usan ya toman los colores nuevos.
+- **Clases de Tailwind:** `bg-canvas`, `bg-surface`, `bg-field`, `bg-subtle`, `bg-hover`, `bg-active`, `border-line`, `border-line-strong`, `text-ink`, `text-ink-2`, `text-ink-3`, `bg-accent-btn`, `text-on-accent`, `text-accent-text`, `bg-accent-soft`, `border-accent-line`, y los tonos `ok`, `info`, `warn`, `danger` y `neutral` (`-fg`, `-bg`, `-line`, `-solid`). Radios: `rounded-ctl` (8 px), `rounded-box` (10 px), `rounded-card` (14 px). Sombras: `shadow-ctl`, `shadow-card`, `shadow-pop`, `shadow-dlg`, `shadow-glow`.
+- **No uses colores fijos** (`text-[#1c1917]`, `bg-white`): no cambian con el tema oscuro.
+- **Letra:** Geist para texto y Geist Mono para cifras (`.num`).
+- **Botón principal:** naranja `#D47840` con texto blanco. Blanco sobre ese naranja da 3,2:1: pasa para texto grande, no para texto normal. Quien lo necesite activa «contraste alto» en su menú de cuenta, que oscurece el naranja a `#A94A12`.
+- **Armazón:** `components/layout/panel/` (menú lateral con grupos, selector de vista, barra superior con cliente en contexto, «Creación rápida», notificaciones, buscador Ctrl K / ⌘ K). El menú se define en `config/navigation.ts`.
+- **Piezas:** `components/ui/PageHeader.tsx` (`PageHeader`, `PanelCard`), `PanelIcon`, `PanelPopover` / `PanelMenu`, `PanelDialog`, y `Button`, `Input`, `Badge`, `Table` con las formas de v3.
+- **Preferencias:** tema, contraste y menú plegado se guardan en cookies (`ah-ui-theme`, `ah-ui-contrast`, `ah-ui-rail`) y el servidor pinta la página ya con ellos, sin parpadeo.
+
+---
+
 ## 0. Prompt listo para pegar en otro Cursor
 
 Copiá y pegá esto al inicio de la conversación:

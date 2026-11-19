@@ -70,7 +70,7 @@ export default async function RealProfitPaymentsReviewPage({
         <div className="flex flex-wrap items-center gap-2 pt-1">
           {hecomClienteId ? (
             <>
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-900 ring-1 ring-orange-200/80">
+              <span className="rounded-full bg-warn-bg px-3 py-1 text-xs font-semibold text-warn-fg ring-1 ring-warn-line/80">
                 Filtrado
                 {clienteName ? `: ${clienteName}` : ""}
               </span>

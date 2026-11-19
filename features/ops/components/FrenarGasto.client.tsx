@@ -78,51 +78,51 @@ export function FrenarGasto({ cliente, onDone }: { cliente: MonitorCliente; onDo
   }
 
   return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-[#f5c6bf]">
+    <div className="rounded-card bg-surface p-4 ring-1 ring-danger-line">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9f1d12]">Frenar gasto</p>
-          <p className="mt-1 max-w-xl text-[12.5px] leading-5 text-[#6b645c]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-danger-fg">Frenar gasto</p>
+          <p className="mt-1 max-w-xl text-[12.5px] leading-5 text-ink-2">
             Quita saldo de sus cuentas en TikTok. En BM 10/30 baja el cupo; en BM 200/300 devuelve el cash al BM.
             Lo que pagó sigue a su favor en Hecom.
           </p>
         </div>
-        <p className="shrink-0 text-right text-[11px] text-[#a39b92]">
+        <p className="shrink-0 text-right text-[11px] text-ink-3">
           Hoy puede gastar
-          <span className="block text-[15px] font-semibold tabular-nums text-[#1a1714]">
+          <span className="block text-[15px] font-semibold tabular-nums text-ink">
             {cliente.unlimitedAccounts ? "Sin tope" : usd(total)}
           </span>
         </p>
       </div>
 
       <label className="mt-3 block">
-        <span className="text-[11.5px] font-medium text-[#6b645c]">Motivo y quién lo ordenó (obligatorio)</span>
+        <span className="text-[11.5px] font-medium text-ink-2">Motivo y quién lo ordenó (obligatorio)</span>
         <input
           value={motivo}
           onChange={(e) => setMotivo(e.target.value)}
           maxLength={300}
           placeholder="Ej: Debe setiembre, ordenó gerencia"
-          className="mt-1 w-full rounded-xl border border-[#ece7e0] bg-[#faf8f5] px-3 py-2 text-[12.5px] text-[#1a1714] outline-none transition placeholder:text-[#a39b92] focus:border-[#d47840] focus:bg-white"
+          className="mt-1 w-full rounded-box border border-line bg-field px-3 py-2 text-[12.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface"
         />
       </label>
 
-      <ul className="mt-3 divide-y divide-[#f3eee8] rounded-xl ring-1 ring-[#efe8df]">
+      <ul className="mt-3 divide-y divide-line rounded-box ring-1 ring-line">
         {accounts.map((a) => {
           const banned = a.status === "banned";
           const key = a.advertiserId;
           return (
             <li key={key} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5">
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 truncate text-[12.5px] font-semibold text-[#1a1714]">
-                  <span className="rounded-md bg-[#f5f0ea] px-1.5 py-0.5 text-[10.5px] tabular-nums text-[#5c564e]">BM{a.bm}</span>
+                <p className="flex items-center gap-1.5 truncate text-[12.5px] font-semibold text-ink">
+                  <span className="rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] tabular-nums text-ink-2">BM{a.bm}</span>
                   <span className="truncate">{a.name}</span>
                   {banned ? (
-                    <span className="rounded-md bg-[#fdecea] px-1.5 py-0.5 text-[10.5px] text-[#9f1d12]">Castigada</span>
+                    <span className="rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] text-danger-fg">Castigada</span>
                   ) : null}
                 </p>
-                <p className="mt-0.5 text-[11.5px] text-[#6b645c]">
+                <p className="mt-0.5 text-[11.5px] text-ink-2">
                   Puede gastar{" "}
-                  <span className="font-semibold tabular-nums text-[#1a1714]">{a.unlimited ? "sin tope" : usd(a.spendableUsd)}</span>
+                  <span className="font-semibold tabular-nums text-ink">{a.unlimited ? "sin tope" : usd(a.spendableUsd)}</span>
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
@@ -132,13 +132,13 @@ export function FrenarGasto({ cliente, onDone }: { cliente: MonitorCliente; onDo
                   value={amounts[key] ?? ""}
                   onChange={(e) => setAmounts((prev) => ({ ...prev, [key]: e.target.value.replace(/[^\d.]/g, "") }))}
                   placeholder="$"
-                  className="w-20 rounded-lg border border-[#ece7e0] bg-[#faf8f5] px-2 py-1.5 text-right text-[12.5px] tabular-nums outline-none focus:border-[#d47840] focus:bg-white"
+                  className="w-20 rounded-lg border border-line bg-field px-2 py-1.5 text-right text-[12.5px] tabular-nums outline-none focus:border-accent focus:bg-surface"
                 />
                 <button
                   type="button"
                   disabled={busy !== null}
                   onClick={() => void run("bajar", a)}
-                  className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-[#c2410c] ring-1 ring-[#f3d5c0] hover:bg-[#fff4ec] disabled:opacity-40"
+                  className="rounded-lg bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-40"
                 >
                   {busy === `bajar:${key}` ? "Bajando…" : "Bajar"}
                 </button>
@@ -146,7 +146,7 @@ export function FrenarGasto({ cliente, onDone }: { cliente: MonitorCliente; onDo
                   type="button"
                   disabled={busy !== null}
                   onClick={() => void run("cero", a)}
-                  className="rounded-lg bg-white px-2.5 py-1.5 text-[12px] font-semibold text-[#9f1d12] ring-1 ring-[#f5c6bf] hover:bg-[#fdecea] disabled:opacity-40"
+                  className="rounded-lg bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-danger-fg ring-1 ring-danger-line hover:bg-hover disabled:opacity-40"
                 >
                   {busy === `cero:${key}` ? "Aplicando…" : "Dejar en $0"}
                 </button>
@@ -157,24 +157,24 @@ export function FrenarGasto({ cliente, onDone }: { cliente: MonitorCliente; onDo
       </ul>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] leading-4 text-[#a39b92]">
+        <p className="text-[11px] leading-4 text-ink-3">
           Congelar pausa sus campañas y deja todas sus cuentas en $0. Para habilitarlo otra vez, recárgale como siempre.
         </p>
         <button
           type="button"
           disabled={busy !== null || cliente.accounts.length === 0}
           onClick={() => void run("congelar")}
-          className="shrink-0 rounded-full bg-[#9f1d12] px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-[#86180f] disabled:opacity-40"
+          className="shrink-0 rounded-full bg-danger-btn px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-danger-btn-hover disabled:opacity-40"
         >
           {busy === "congelar" ? "Congelando…" : "Congelar: no puede gastar más"}
         </button>
       </div>
 
-      {error ? <p className="mt-2 text-[12px] text-[#9f1d12]">{error}</p> : null}
+      {error ? <p className="mt-2 text-[12px] text-danger-fg">{error}</p> : null}
       {results ? (
-        <ul className="mt-3 space-y-1 rounded-xl bg-[#faf8f5] px-3 py-2.5 text-[12px] leading-5">
+        <ul className="mt-3 space-y-1 rounded-box bg-field px-3 py-2.5 text-[12px] leading-5">
           {results.map((r) => (
-            <li key={r.advertiserId} className={r.ok ? "text-[#276043]" : "text-[#9f1d12]"}>
+            <li key={r.advertiserId} className={r.ok ? "text-ok-fg" : "text-danger-fg"}>
               <span className="font-semibold">{r.ok ? "✓" : "✗"} {nameOf.get(r.advertiserId) ?? r.advertiserId}</span>
               {r.ok && r.removedUsd > 0 ? ` · quitado ${usd(r.removedUsd)}` : ""}
               {r.ok && r.leftUsd != null ? ` · queda ${usd(r.leftUsd)}` : ""} · {r.message}

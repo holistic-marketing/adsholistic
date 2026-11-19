@@ -22,9 +22,9 @@ const STEP_KEYS = ["share", "register", "contact", "close", "reward"] as const;
 const AVATARS = [
   "bg-[#efe4ff] text-[#6d28d9]",
   "bg-[#ffe4ef] text-[#be185d]",
-  "bg-[#e7f0ff] text-[#1d4ed8]",
-  "bg-[#e8f8ef] text-[#047857]",
-  "bg-[#fff1e4] text-[#c2410c]",
+  "bg-info-bg text-info-fg",
+  "bg-subtle text-ok-fg",
+  "bg-accent-soft text-accent-text",
 ];
 
 export function ClientAffiliateDashboard({
@@ -91,76 +91,76 @@ export function ClientAffiliateDashboard({
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[1.5rem] border border-[#f0e6df] bg-white shadow-[0_18px_40px_-32px_rgb(28_25_23_/_0.28)]">
+      <section className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_18px_40px_-32px_rgb(28_25_23_/_0.28)]">
         <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
           <div className="px-6 py-7 sm:px-8 sm:py-8">
             {program.smoke ? (
               <div className="mb-3 max-w-xl">
-                <p className="inline-flex rounded-full bg-[#fff6eb] px-3 py-1 text-xs font-semibold text-[#9a3412]">
+                <p className="inline-flex rounded-full bg-field px-3 py-1 text-xs font-semibold text-accent-text">
                   {t("smoke")}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-[#9a3412]">{t("smokeHint")}</p>
+                <p className="mt-2 text-xs leading-5 text-accent-text">{t("smokeHint")}</p>
               </div>
             ) : null}
-            <h1 className="font-display text-[1.85rem] font-semibold leading-tight tracking-[-0.03em] text-[#1c1917] sm:text-[2.15rem]">
+            <h1 className="font-display text-[1.85rem] font-semibold leading-tight tracking-[-0.03em] text-ink sm:text-[2.15rem]">
               {t("heroTitle")}
             </h1>
-            <p className="mt-3 max-w-xl text-[15px] leading-6 text-[#57534e]">
+            <p className="mt-3 max-w-xl text-[15px] leading-6 text-ink-2">
               {t("heroLead")}
             </p>
-            <p className="mt-3 max-w-xl text-[15px] leading-6 text-[#44403c]">
+            <p className="mt-3 max-w-xl text-[15px] leading-6 text-ink">
               {t.rich("heroOffer", {
                 reward,
                 amount: (chunks) => (
                   <span className="font-semibold text-[var(--brand-primary-deep)]">{chunks}</span>
                 ),
                 entry: (chunks) => (
-                  <span className="font-semibold text-[#1c1917]">{chunks}</span>
+                  <span className="font-semibold text-ink">{chunks}</span>
                 ),
               })}
             </p>
           </div>
           <div className="relative min-h-[210px] overflow-hidden bg-[radial-gradient(circle_at_70%_40%,#fff7f1_0%,#ffd7bf_42%,#f3b892_100%)] px-6 py-6">
             <p
-              className="max-w-[230px] text-[1.85rem] leading-[1.05] text-[#3f342d]"
+              className="max-w-[230px] text-[1.85rem] leading-[1.05] text-ink"
               style={{ ...SCRIPT, transform: "rotate(-4deg)" }}
             >
               {t("script")}
             </p>
-            <div className="absolute bottom-5 right-5 w-[168px] rounded-2xl bg-white px-3.5 py-3 shadow-[0_16px_30px_-18px_rgb(120_53_15_/_0.55)]">
+            <div className="absolute bottom-5 right-5 w-[168px] rounded-card bg-surface px-3.5 py-3 shadow-[0_16px_30px_-18px_rgb(120_53_15_/_0.55)]">
               <div className="flex items-center gap-2">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fff1e6] text-[var(--brand-primary)]">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
                   <GiftIcon />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold leading-none text-[#1c1917]">
+                  <p className="text-lg font-bold leading-none text-ink">
                     +{reward}
                   </p>
-                  <p className="mt-1 text-[11px] leading-4 text-[#78716c]">
+                  <p className="mt-1 text-[11px] leading-4 text-ink-2">
                     {t("rewardCardHint")}
                   </p>
                 </div>
               </div>
             </div>
-            <span className="absolute bottom-6 left-6 grid h-14 w-14 place-items-center rounded-2xl bg-[#1c1917] text-2xl font-bold text-white shadow-lg">
+            <span className="absolute bottom-6 left-6 grid h-14 w-14 place-items-center rounded-card bg-[#1c1917] text-2xl font-bold text-white shadow-lg">
               H
             </span>
           </div>
         </div>
       </section>
 
-      <section className="rounded-[1.25rem] border border-[#f0e6df] bg-white px-4 py-4 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.3)] sm:px-5">
+      <section className="rounded-card border border-line bg-surface px-4 py-4 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.3)] sm:px-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <div className="min-w-0 flex-1">
-            <p className="mb-2 text-sm font-semibold text-[#1c1917]">{t("linkLabel")}</p>
-            <div className="flex items-center gap-2 rounded-xl border border-[#eadfd6] bg-[#fffdfb] px-3 py-2.5">
-              <span className="min-w-0 flex-1 truncate text-sm text-[#44403c]">
+            <p className="mb-2 text-sm font-semibold text-ink">{t("linkLabel")}</p>
+            <div className="flex items-center gap-2 rounded-box border border-line bg-surface px-3 py-2.5">
+              <span className="min-w-0 flex-1 truncate text-sm text-ink">
                 {program.displayPath}
               </span>
               <button
                 type="button"
                 onClick={() => copyValue(program.shareUrl, "link")}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#a8a29e] hover:bg-[#fff1e6] hover:text-[var(--brand-primary)]"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-3 hover:bg-accent-soft hover:text-[var(--brand-primary)]"
                 aria-label={t("copy")}
               >
                 <CopyIcon />
@@ -170,13 +170,13 @@ export function ClientAffiliateDashboard({
           <button
             type="button"
             onClick={() => copyValue(program.shareUrl, "link")}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--brand-primary)] px-5 text-sm font-semibold text-white shadow-[0_10px_20px_-12px_rgb(184_95_46_/_0.9)] transition hover:bg-[var(--brand-primary-deep)]"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-box bg-[var(--brand-primary)] px-5 text-sm font-semibold text-white shadow-[0_10px_20px_-12px_rgb(184_95_46_/_0.9)] transition hover:bg-[var(--brand-primary-deep)]"
           >
             <LinkIcon />
             {copied === "link" ? t("copied") : t("copy")}
           </button>
           <div className="lg:pl-2">
-            <p className="mb-2 text-xs font-medium text-[#78716c]">{t("shareOn")}</p>
+            <p className="mb-2 text-xs font-medium text-ink-2">{t("shareOn")}</p>
             <div className="flex items-center gap-2">
               <ShareButton
                 href={whatsappHref(shareText)}
@@ -202,7 +202,7 @@ export function ClientAffiliateDashboard({
               <ShareButton
                 href={emailHref(t("shareSubject"), shareText)}
                 label={t("shareEmail")}
-                className="bg-[#fff1e6] text-[var(--brand-primary-deep)]"
+                className="bg-accent-soft text-[var(--brand-primary-deep)]"
               >
                 <MailIcon />
               </ShareButton>
@@ -224,8 +224,8 @@ export function ClientAffiliateDashboard({
             />
           </div>
 
-          <section className="overflow-hidden rounded-[1.25rem] border border-[#f0e6df] bg-white shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
-            <div className="flex gap-1 overflow-x-auto border-b border-[#f3ebe4] px-3">
+          <section className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
+            <div className="flex gap-1 overflow-x-auto border-b border-line px-3">
               {TABS.map((key) => {
                 const active = tab === key;
                 return (
@@ -236,7 +236,7 @@ export function ClientAffiliateDashboard({
                     className={`shrink-0 border-b-2 px-3 py-3 text-sm font-semibold transition ${
                       active
                         ? "border-[var(--brand-primary)] text-[var(--brand-primary-deep)]"
-                        : "border-transparent text-[#78716c] hover:text-[#44403c]"
+                        : "border-transparent text-ink-2 hover:text-ink"
                     }`}
                   >
                     {t(`tabs.${key}`)}
@@ -248,7 +248,7 @@ export function ClientAffiliateDashboard({
             {tab === "referrals" ? (
               <div className="p-4 sm:p-5">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="text-base font-semibold text-[#1c1917]">
+                  <h2 className="text-base font-semibold text-ink">
                     {t("listTitle", { count: program.referrals.length })}
                   </h2>
                   <div className="flex flex-col gap-2 sm:flex-row">
@@ -257,7 +257,7 @@ export function ClientAffiliateDashboard({
                       onChange={(event) =>
                         setStage(event.target.value as ClientReferralStage | "all")
                       }
-                      className="h-10 rounded-xl border border-[#eadfd6] bg-white px-3 text-sm text-[#44403c]"
+                      className="h-10 rounded-box border border-line bg-surface px-3 text-sm text-ink"
                       aria-label={t("filterAll")}
                     >
                       <option value="all">{t("filterAll")}</option>
@@ -270,7 +270,7 @@ export function ClientAffiliateDashboard({
                       ))}
                     </select>
                     <label className="relative block">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#a8a29e]">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-3">
                         <SearchIcon />
                       </span>
                       <input
@@ -278,7 +278,7 @@ export function ClientAffiliateDashboard({
                         onChange={(event) => setQuery(event.target.value)}
                         placeholder={t("search")}
                         aria-label={t("searchAria")}
-                        className="h-10 w-full rounded-xl border border-[#eadfd6] bg-white pr-3 pl-9 text-sm text-[#1c1917] outline-none placeholder:text-[#a8a29e] focus:border-[var(--brand-primary)] sm:w-64"
+                        className="h-10 w-full rounded-box border border-line bg-surface pr-3 pl-9 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-[var(--brand-primary)] sm:w-64"
                       />
                     </label>
                   </div>
@@ -307,7 +307,7 @@ export function ClientAffiliateDashboard({
                   <div className={menuIndex >= 0 && filtered.length <= 3 ? "overflow-x-auto pb-24" : "overflow-x-auto"}>
                     <table className="w-full min-w-[760px] text-left text-sm">
                       <thead>
-                        <tr className="text-[11px] font-semibold tracking-wide text-[#a8a29e] uppercase">
+                        <tr className="text-[11px] font-semibold tracking-wide text-ink-3 uppercase">
                           <th className="px-2 py-2 font-semibold">{t("columns.index")}</th>
                           <th className="px-2 py-2 font-semibold">{t("columns.name")}</th>
                           <th className="px-2 py-2 font-semibold">{t("columns.date")}</th>
@@ -318,8 +318,8 @@ export function ClientAffiliateDashboard({
                       </thead>
                       <tbody>
                         {filtered.map((row, index) => (
-                          <tr key={row.id} className="border-t border-[#f6efe9]">
-                            <td className="px-2 py-3 tabular-nums text-[#a8a29e]">{index + 1}</td>
+                          <tr key={row.id} className="border-t border-line">
+                            <td className="px-2 py-3 tabular-nums text-ink-3">{index + 1}</td>
                             <td className="px-2 py-3">
                               <div className="flex items-center gap-3">
                                 <span
@@ -328,24 +328,24 @@ export function ClientAffiliateDashboard({
                                   {referralInitials(row.name)}
                                 </span>
                                 <div className="min-w-0">
-                                  <p className="truncate font-semibold text-[#1c1917]">{row.name}</p>
+                                  <p className="truncate font-semibold text-ink">{row.name}</p>
                                   {row.company && row.company !== row.name ? (
-                                    <p className="truncate text-xs text-[#78716c]">{row.company}</p>
+                                    <p className="truncate text-xs text-ink-2">{row.company}</p>
                                   ) : null}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-2 py-3 whitespace-nowrap text-[#57534e]">
+                            <td className="px-2 py-3 whitespace-nowrap text-ink-2">
                               {formatReferralDate(row.registeredAt, locale)}
                             </td>
                             <td className="px-2 py-3">
                               <StagePill stage={row.stage} label={stageLabel(t, row.stage)} />
                             </td>
-                            <td className="px-2 py-3 font-semibold whitespace-nowrap tabular-nums text-[#1c1917]">
+                            <td className="px-2 py-3 font-semibold whitespace-nowrap tabular-nums text-ink">
                               <span className="inline-flex items-center gap-1">
                                 {formatAffiliateUsd(row.benefitUsd)}
                                 {row.earned ? (
-                                  <span className="text-emerald-600" title={t("earnedMark")}>
+                                  <span className="text-ok-fg" title={t("earnedMark")}>
                                     <CheckIcon />
                                   </span>
                                 ) : null}
@@ -356,7 +356,7 @@ export function ClientAffiliateDashboard({
                                 <button
                                   type="button"
                                   onClick={() => openDetail(row)}
-                                  className="rounded-lg px-2 py-1 text-sm font-medium text-[#57534e] hover:bg-[#fff7f1] hover:text-[#1c1917]"
+                                  className="rounded-lg px-2 py-1 text-sm font-medium text-ink-2 hover:bg-field hover:text-ink"
                                 >
                                   {t("viewDetails")}
                                 </button>
@@ -367,7 +367,7 @@ export function ClientAffiliateDashboard({
                                   onClick={() =>
                                     setMenuId((current) => (current === row.id ? null : row.id))
                                   }
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-[#78716c] hover:bg-[#fff7f1]"
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-2 hover:bg-field"
                                 >
                                   <MoreIcon />
                                 </button>
@@ -381,7 +381,7 @@ export function ClientAffiliateDashboard({
                                   <button
                                     type="button"
                                     onClick={() => openDetail(row)}
-                                    className="block w-full rounded-lg px-3 py-2 text-sm text-[#44403c] hover:bg-[#fff7f1]"
+                                    className="block w-full rounded-lg px-3 py-2 text-sm text-ink hover:bg-field"
                                   >
                                     {t("viewDetails")}
                                   </button>
@@ -392,7 +392,7 @@ export function ClientAffiliateDashboard({
                                         void copyValue(row.email ?? "", "email");
                                         setMenuId(null);
                                       }}
-                                      className="block w-full rounded-lg px-3 py-2 text-sm text-[#44403c] hover:bg-[#fff7f1]"
+                                      className="block w-full rounded-lg px-3 py-2 text-sm text-ink hover:bg-field"
                                     >
                                       {copied === "email" ? t("emailCopied") : t("copyEmail")}
                                     </button>
@@ -411,8 +411,8 @@ export function ClientAffiliateDashboard({
 
             {tab === "discounts" ? (
               <div className="p-5 sm:p-6">
-                <h2 className="text-base font-semibold text-[#1c1917]">{t("discountsTitle")}</h2>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-[#78716c]">
+                <h2 className="text-base font-semibold text-ink">{t("discountsTitle")}</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-2">
                   {t("discountsLead", { reward })}
                 </p>
                 {discounts.length === 0 ? (
@@ -424,8 +424,8 @@ export function ClientAffiliateDashboard({
                     {discounts.map((row) => (
                       <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                         <div className="min-w-0">
-                          <p className="font-semibold text-[#1c1917] [overflow-wrap:anywhere]">{row.name}</p>
-                          <p className="text-xs text-[#78716c]">
+                          <p className="font-semibold text-ink [overflow-wrap:anywhere]">{row.name}</p>
+                          <p className="text-xs text-ink-2">
                             {row.discountStatus === "applied"
                               ? t("discountApplied")
                               : t("discountPending")}
@@ -434,7 +434,7 @@ export function ClientAffiliateDashboard({
                               : ""}
                           </p>
                         </div>
-                        <p className="font-semibold tabular-nums text-[#1c1917]">
+                        <p className="font-semibold tabular-nums text-ink">
                           {formatAffiliateUsd(row.benefitUsd)}
                         </p>
                       </li>
@@ -452,8 +452,8 @@ export function ClientAffiliateDashboard({
                       {index + 1}
                     </span>
                     <div>
-                      <p className="font-semibold text-[#1c1917]">{t(`steps.${key}.title`)}</p>
-                      <p className="text-sm text-[#78716c]">{t(`steps.${key}.body`)}</p>
+                      <p className="font-semibold text-ink">{t(`steps.${key}.title`)}</p>
+                      <p className="text-sm text-ink-2">{t(`steps.${key}.body`)}</p>
                     </div>
                   </div>
                 ))}
@@ -463,8 +463,8 @@ export function ClientAffiliateDashboard({
             {tab === "materials" ? (
               <div className="space-y-4 p-5 sm:p-6">
                 <div>
-                  <h2 className="text-base font-semibold text-[#1c1917]">{t("materialsTitle")}</h2>
-                  <p className="mt-1 text-sm leading-6 text-[#78716c]">{t("materialsLead")}</p>
+                  <h2 className="text-base font-semibold text-ink">{t("materialsTitle")}</h2>
+                  <p className="mt-1 text-sm leading-6 text-ink-2">{t("materialsLead")}</p>
                 </div>
                 <MaterialCard
                   title={t("materialsShort")}
@@ -491,14 +491,14 @@ export function ClientAffiliateDashboard({
         </div>
 
         <aside className="space-y-4">
-          <section className="rounded-[1.25rem] border border-[#f0e6df] bg-white p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
+          <section className="rounded-card border border-line bg-surface p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
             <div className="mb-3 flex items-center gap-2">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fff1e6] text-[var(--brand-primary)]">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
                 <GiftIcon />
               </span>
-              <h2 className="text-sm font-semibold text-[#1c1917]">{t("benefitTitle")}</h2>
+              <h2 className="text-sm font-semibold text-ink">{t("benefitTitle")}</h2>
             </div>
-            <p className="text-sm leading-6 text-[#44403c]">
+            <p className="text-sm leading-6 text-ink">
               {t("benefitLead", { reward })}
             </p>
             <ul className="mt-4 space-y-3">
@@ -507,8 +507,8 @@ export function ClientAffiliateDashboard({
             </ul>
           </section>
 
-          <section className="rounded-[1.25rem] border border-[#f0e6df] bg-white p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
-            <h2 className="mb-4 text-sm font-semibold text-[#1c1917]">{t("howTitle")}</h2>
+          <section className="rounded-card border border-line bg-surface p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
+            <h2 className="mb-4 text-sm font-semibold text-ink">{t("howTitle")}</h2>
             <ol className="space-y-4">
               {STEP_KEYS.map((key, index) => (
                 <li key={key} className="flex gap-3">
@@ -516,10 +516,10 @@ export function ClientAffiliateDashboard({
                     {index + 1}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-[#1c1917]">
+                    <p className="text-sm font-semibold text-ink">
                       {t(`steps.${key}.title`)}
                     </p>
-                    <p className="text-xs leading-5 text-[#78716c]">{t(`steps.${key}.body`)}</p>
+                    <p className="text-xs leading-5 text-ink-2">{t(`steps.${key}.body`)}</p>
                   </div>
                 </li>
               ))}
@@ -528,18 +528,18 @@ export function ClientAffiliateDashboard({
         </aside>
       </div>
 
-      <section className="flex flex-col gap-4 overflow-hidden rounded-[1.25rem] bg-[linear-gradient(90deg,#fff7f1_0%,#ffe7d4_55%,#ffd7bf_100%)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-4 overflow-hidden rounded-card bg-[linear-gradient(90deg,#fff7f1_0%,#ffe7d4_55%,#ffd7bf_100%)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-[var(--brand-primary)] shadow-sm">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-card bg-surface text-[var(--brand-primary)] shadow-sm">
             <TrophyIcon />
           </span>
           <div>
-            <p className="font-semibold text-[#1c1917]">{t("footerTitle")}</p>
-            <p className="text-sm text-[#78716c]">{t("footerBody")}</p>
+            <p className="font-semibold text-ink">{t("footerTitle")}</p>
+            <p className="text-sm text-ink-2">{t("footerBody")}</p>
           </div>
         </div>
         <p
-          className="text-right text-[1.7rem] leading-none text-[#7c2d12]"
+          className="text-right text-[1.7rem] leading-none text-accent-text"
           style={{ ...SCRIPT, transform: "rotate(-3deg)" }}
         >
           {t("footerScriptA")}
@@ -557,21 +557,21 @@ export function ClientAffiliateDashboard({
           <div className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-semibold tracking-wide text-[#a8a29e] uppercase">
+                <p className="text-xs font-semibold tracking-wide text-ink-3 uppercase">
                   {t("detailTitle")}
                 </p>
-                <h3 className="mt-1 text-lg font-semibold text-[#1c1917] [overflow-wrap:anywhere]">{detail.name}</h3>
+                <h3 className="mt-1 text-lg font-semibold text-ink [overflow-wrap:anywhere]">{detail.name}</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDetail(null)}
-                className="shrink-0 rounded-lg px-2 py-1 text-sm text-[#78716c] hover:bg-[#fff7f1]"
+                className="shrink-0 rounded-lg px-2 py-1 text-sm text-ink-2 hover:bg-field"
               >
                 {t("detailClose")}
               </button>
             </div>
             {program.smoke ? (
-              <p className="mt-3 rounded-xl bg-[#fff6eb] px-3 py-2 text-xs leading-5 text-[#9a3412]">
+              <p className="mt-3 rounded-box bg-field px-3 py-2 text-xs leading-5 text-accent-text">
                 {t("detailSmoke")}
               </p>
             ) : null}
@@ -588,10 +588,10 @@ export function ClientAffiliateDashboard({
                 value={formatAffiliateUsd(detail.benefitUsd)}
               />
             </dl>
-            <p className="mt-4 text-xs font-semibold tracking-wide text-[#a8a29e] uppercase">
+            <p className="mt-4 text-xs font-semibold tracking-wide text-ink-3 uppercase">
               {t("detailNext")}
             </p>
-            <p className="mt-1 text-sm leading-6 text-[#44403c]">
+            <p className="mt-1 text-sm leading-6 text-ink">
               {nextCopy(t, detail.stage)}
             </p>
           </div>
@@ -680,13 +680,13 @@ function StatCard({
   icon: ReactNode;
 }) {
   return (
-    <article className="flex items-center gap-3 rounded-2xl border border-[#f0e6df] bg-white px-4 py-3.5 shadow-[0_12px_28px_-24px_rgb(28_25_23_/_0.35)]">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fff1e6] text-[var(--brand-primary)]">
+    <article className="flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3.5 shadow-[0_12px_28px_-24px_rgb(28_25_23_/_0.35)]">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-xl font-bold tabular-nums tracking-tight text-[#1c1917]">{value}</p>
-        <p className="text-xs text-[#78716c]">{label}</p>
+        <p className="text-xl font-bold tabular-nums tracking-tight text-ink">{value}</p>
+        <p className="text-xs text-ink-2">{label}</p>
       </div>
     </article>
   );
@@ -694,8 +694,8 @@ function StatCard({
 
 function BenefitItem({ children }: { children: ReactNode }) {
   return (
-    <li className="flex gap-2 text-sm leading-5 text-[#44403c]">
-      <span className="mt-0.5 shrink-0 text-emerald-600">
+    <li className="flex gap-2 text-sm leading-5 text-ink">
+      <span className="mt-0.5 shrink-0 text-ok-fg">
         <CheckIcon />
       </span>
       <span>{children}</span>
@@ -706,14 +706,14 @@ function BenefitItem({ children }: { children: ReactNode }) {
 function StagePill({ stage, label }: { stage: ClientReferralStage; label: string }) {
   const tone =
     stage === "closed"
-      ? "bg-emerald-50 text-emerald-700"
+      ? "bg-ok-bg text-ok-fg"
       : stage === "negotiating"
-        ? "bg-amber-50 text-amber-700"
+        ? "bg-warn-bg text-warn-fg"
         : stage === "contract_sent"
-          ? "bg-sky-50 text-sky-700"
+          ? "bg-info-bg text-info-fg"
           : stage === "declined"
-            ? "bg-rose-50 text-rose-700"
-            : "bg-slate-100 text-slate-600";
+            ? "bg-danger-bg text-danger-fg"
+            : "bg-subtle text-ink-2";
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>
       <StageMark stage={stage} />
@@ -739,9 +739,9 @@ function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#eadfd6] bg-[#fffdfb] px-4 py-8 text-center">
-      <p className="font-semibold text-[#1c1917]">{title}</p>
-      {body ? <p className="mx-auto mt-1 max-w-md text-sm text-[#78716c]">{body}</p> : null}
+    <div className="rounded-card border border-dashed border-line bg-surface px-4 py-8 text-center">
+      <p className="font-semibold text-ink">{title}</p>
+      {body ? <p className="mx-auto mt-1 max-w-md text-sm text-ink-2">{body}</p> : null}
       {action ? <div className="mt-3">{action}</div> : null}
     </div>
   );
@@ -759,9 +759,9 @@ function MaterialCard({
   onCopy: () => void;
 }) {
   return (
-    <article className="rounded-2xl border border-[#f0e6df] bg-[#fffdfb] p-4">
-      <p className="text-sm font-semibold text-[#1c1917]">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[#57534e] [overflow-wrap:anywhere]">{body}</p>
+    <article className="rounded-card border border-line bg-surface p-4">
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-ink-2 [overflow-wrap:anywhere]">{body}</p>
       <button
         type="button"
         onClick={onCopy}
@@ -776,8 +776,8 @@ function MaterialCard({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <dt className="shrink-0 text-[#78716c]">{label}</dt>
-      <dd className="min-w-0 text-right font-medium text-[#1c1917] [overflow-wrap:anywhere]">{value}</dd>
+      <dt className="shrink-0 text-ink-2">{label}</dt>
+      <dd className="min-w-0 text-right font-medium text-ink [overflow-wrap:anywhere]">{value}</dd>
     </div>
   );
 }
@@ -800,7 +800,7 @@ function ShareButton({
       rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
       aria-label={label}
       title={label}
-      className={`grid h-10 w-10 place-items-center rounded-xl ${className}`}
+      className={`grid h-10 w-10 place-items-center rounded-box ${className}`}
     >
       {children}
       <span className="sr-only">{label}</span>

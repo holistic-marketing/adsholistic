@@ -14,7 +14,7 @@ export function InfoAlert({
   return (
     <div
       className={cn(
-        "flex gap-3 rounded-xl border border-[var(--brand-primary)]/20 bg-[var(--admin-accent-soft)] p-4",
+        "flex gap-3 rounded-box border border-[var(--brand-primary)]/20 bg-[var(--admin-accent-soft)] p-4",
         className,
       )}
       {...props}
@@ -34,9 +34,9 @@ export function InfoAlert({
         />
       </svg>
       <div className="min-w-0">
-        <p className="text-sm font-medium text-[#141210]">{title}</p>
+        <p className="text-sm font-medium text-ink">{title}</p>
         {children ? (
-          <div className="mt-1 text-sm text-[#6b645c]">{children}</div>
+          <div className="mt-1 text-sm text-ink-2">{children}</div>
         ) : null}
       </div>
     </div>

@@ -90,23 +90,23 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
 
   return (
     <div className="grid items-start gap-3 lg:h-[calc(100dvh-12.75rem)] lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] lg:items-stretch lg:overflow-hidden">
-      <section className="flex h-[min(68dvh,36rem)] flex-col overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4] lg:h-full">
-        <div className="shrink-0 border-b border-[#efe8df] px-4 py-3.5">
+      <section className="flex h-[min(68dvh,36rem)] flex-col overflow-hidden rounded-card bg-surface ring-1 ring-line lg:h-full">
+        <div className="shrink-0 border-b border-line px-4 py-3.5">
           <div className="flex items-center justify-between gap-2">
             <label
               htmlFor="links-deuda-search"
-              className="text-[14px] font-semibold tracking-[-0.01em] text-[#1a1714]"
+              className="text-[14px] font-semibold tracking-[-0.01em] text-ink"
             >
               Clientes
             </label>
-            <span className="rounded-full bg-[#f5f0ea] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#5c564e]">
+            <span className="rounded-full bg-subtle px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink-2">
               {filtered.length} de {clients.length}
             </span>
           </div>
           <div className="relative mt-2.5">
             <svg
               viewBox="0 0 20 20"
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#a39b92]"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3"
               fill="none"
               aria-hidden
             >
@@ -118,13 +118,13 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Busca por nombre"
-              className="h-10 w-full rounded-full border border-[#ece7e0] bg-[#faf8f5] pl-9 pr-4 text-[13px] text-[#1a1714] outline-none transition placeholder:text-[#a39b92] focus:border-[#d47840] focus:bg-white focus-visible:ring-2 focus-visible:ring-[#d47840]/30"
+              className="h-10 w-full rounded-full border border-line bg-field pl-9 pr-4 text-[13px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-accent/30"
             />
           </div>
         </div>
         <ul className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-1.5">
           {filtered.length === 0 ? (
-            <li className="m-2 rounded-2xl bg-[#fcfaf7] px-3.5 py-8 text-center text-[13px] text-[#5c564e]">
+            <li className="m-2 rounded-card bg-field px-3.5 py-8 text-center text-[13px] text-ink-2">
               Ningún cliente con ese nombre.
             </li>
           ) : (
@@ -140,12 +140,12 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
                     }}
                     aria-pressed={active}
                     className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/40 ${
-                      active ? "bg-[#fff6ee] ring-1 ring-[#f3d6bf]" : "hover:bg-[#faf8f5]"
+                      active ? "bg-field ring-1 ring-accent-line" : "hover:bg-field"
                     }`}
                   >
                     <span
                       className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                        active ? "bg-[#1a1714] text-[#f0b889]" : "bg-[#f7f0e9] text-[#b85f2e]"
+                        active ? "bg-accent-soft text-accent-text" : "bg-subtle text-accent-text"
                       }`}
                       aria-hidden
                     >
@@ -153,13 +153,13 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
                     </span>
                     <span
                       className={`min-w-0 flex-1 truncate text-[14px] leading-5 ${
-                        active ? "font-semibold text-[#1a1714]" : "font-medium text-[#3f3a34]"
+                        active ? "font-semibold text-ink" : "font-medium text-ink"
                       }`}
                     >
                       {row.name}
                     </span>
                     {active ? (
-                      <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-[#d47840]" fill="none" aria-hidden>
+                      <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-accent-text" fill="none" aria-hidden>
                         <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     ) : null}
@@ -171,29 +171,29 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
         </ul>
       </section>
 
-      <section className="flex flex-col overflow-hidden rounded-[22px] bg-white p-5 ring-1 ring-[#e8dfd4] sm:p-6 lg:sticky lg:top-0 lg:h-full lg:overflow-y-auto">
+      <section className="flex flex-col overflow-hidden rounded-card bg-surface p-5 ring-1 ring-line sm:p-6 lg:sticky lg:top-0 lg:h-full lg:overflow-y-auto">
         {selected ? (
           <div className="space-y-4">
             <div className="flex items-center gap-3.5">
               <span
-                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1a1714] text-[14px] font-bold text-[#f0b889]"
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-card bg-accent-soft text-[14px] font-bold text-accent-text"
                 aria-hidden
               >
                 {initialsOf(selected.name)}
               </span>
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">
                   Link público
                 </p>
-                <h2 className="truncate text-[1.35rem] font-semibold tracking-[-0.03em] text-[#1a1714]">
+                <h2 className="truncate text-[1.35rem] font-semibold tracking-[-0.03em] text-ink">
                   {selected.name}
                 </h2>
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[22px] bg-[#1a1714] p-5 text-white">
+            <div className="relative overflow-hidden rounded-card bg-[#1a1714] p-5 text-white">
               <div
-                className="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-[#d47840]/25 blur-2xl"
+                className="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-accent/25 blur-2xl"
                 aria-hidden
               />
               <div className="relative">
@@ -201,14 +201,14 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
                   Abre en el mes ya cerrado (en octubre, setiembre). Arriba puede
                   pasar a otro mes, pagar o subir un comprobante.
                 </p>
-                <p className="mt-3 break-all rounded-2xl bg-white/[0.06] px-4 py-3 font-mono text-[12px] leading-5 text-white/90 ring-1 ring-white/10">
+                <p className="mt-3 break-all rounded-card bg-surface/[0.06] px-4 py-3 font-mono text-[12px] leading-5 text-white/90 ring-1 ring-white/10">
                   {selected.url}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => void copyLink()}
-                    className="inline-flex h-10 items-center gap-2 rounded-full bg-[#d47840] px-4 text-[13px] font-semibold text-white transition hover:bg-[#b85f2e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0b889]/60"
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
                   >
                     {copied ? (
                       <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
@@ -226,7 +226,7 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
                     href={selected.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-[13px] font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f0b889]/60"
+                    className="inline-flex h-10 items-center gap-2 rounded-full bg-surface/10 px-4 text-[13px] font-semibold text-white ring-1 ring-white/15 transition hover:bg-surface/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
                   >
                     Abrir
                     <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
@@ -238,20 +238,20 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
             </div>
 
             <div>
-              <p className="text-[12px] font-medium text-[#5c564e]">Qué ve el cliente</p>
+              <p className="text-[12px] font-medium text-ink-2">Qué ve el cliente</p>
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
                 {LINK_FEATURES.map((item) => (
-                  <div key={item.title} className="rounded-2xl bg-[#fcfaf7] px-4 py-3.5 ring-1 ring-[#efe8df]">
+                  <div key={item.title} className="rounded-card bg-field px-4 py-3.5 ring-1 ring-line">
                     <span
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-[#f7f0e9] text-[#b85f2e]"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-box bg-subtle text-accent-text"
                       aria-hidden
                     >
                       <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
                         <path d={item.icon} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
-                    <p className="mt-2.5 text-[13px] font-semibold text-[#1a1714]">{item.title}</p>
-                    <p className="mt-0.5 text-[11px] leading-4 text-[#8a8177]">{item.body}</p>
+                    <p className="mt-2.5 text-[13px] font-semibold text-ink">{item.title}</p>
+                    <p className="mt-0.5 text-[11px] leading-4 text-ink-3">{item.body}</p>
                   </div>
                 ))}
               </div>
@@ -264,17 +264,17 @@ export function LinksDeudaPanel({ clients }: { clients: DebtLinkClient[] }) {
             />
           </div>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl bg-[#fcfaf7] px-6 py-12 text-center ring-1 ring-[#efe8df]">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-card bg-field px-6 py-12 text-center ring-1 ring-line">
             <span
-              className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f7f0e9] text-[#b85f2e]"
+              className="inline-flex h-12 w-12 items-center justify-center rounded-card bg-subtle text-accent-text"
               aria-hidden
             >
               <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
                 <path d="M8.5 11.5a3 3 0 0 0 4.2 0l2.6-2.6a3 3 0 0 0-4.2-4.2l-.9.9M11.5 8.5a3 3 0 0 0-4.2 0l-2.6 2.6a3 3 0 0 0 4.2 4.2l.9-.9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
               </svg>
             </span>
-            <p className="mt-3 text-[14px] font-semibold text-[#1a1714]">Link público</p>
-            <p className="mt-1 max-w-sm text-[13px] leading-5 text-[#5c564e]">
+            <p className="mt-3 text-[14px] font-semibold text-ink">Link público</p>
+            <p className="mt-1 max-w-sm text-[13px] leading-5 text-ink-2">
               Elige un cliente para ver su link de deuda.
             </p>
           </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { HecomClienteAvatar } from "@/features/clientes/components/HecomClienteAvatar.client";
 import { CrmQuickLinks } from "@/components/dashboard/CrmQuickLinks.client";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export { CrmQuickLinks };
 
@@ -18,26 +19,7 @@ export function CrmPageHeader({
   description?: string;
   action?: ReactNode;
 }) {
-  return (
-    <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--auth-divider)] pb-5">
-      <div className="max-w-2xl">
-        {eyebrow ? (
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-text-soft)]">
-            {eyebrow}
-          </p>
-        ) : null}
-        <h1 className="text-[1.125rem] font-bold leading-snug tracking-[-0.02em] text-[var(--auth-text)] sm:text-[1.25rem]">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-1 text-[13px] leading-relaxed text-[var(--auth-text-muted)]">
-            {description}
-          </p>
-        ) : null}
-      </div>
-      {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
-    </header>
-  );
+  return <PageHeader eyebrow={eyebrow} title={title} lede={description} actions={action} className="mb-0" />;
 }
 
 export function CrmMetricCell({
@@ -112,7 +94,7 @@ export function CrmMetricRow({
 
 export function CrmMetricsStrip({ children }: { children: ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-[var(--auth-border)] bg-white">
+    <section className="overflow-hidden rounded-lg border border-[var(--auth-border)] bg-surface">
       {children}
     </section>
   );
@@ -230,9 +212,9 @@ export function CrmHeroButton({
 }) {
   const className =
     variant === "primary"
-      ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[var(--auth-accent)] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.04] sm:w-auto"
+      ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.04] sm:w-auto"
       : variant === "secondary"
-        ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[var(--auth-border)] bg-white px-4 text-[13px] font-semibold text-[var(--auth-text)] transition-colors hover:border-[var(--auth-text-soft)] sm:w-auto"
+        ? "inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[var(--auth-border)] bg-surface px-4 text-[13px] font-semibold text-[var(--auth-text)] transition-colors hover:border-[var(--auth-text-soft)] sm:w-auto"
         : "inline-flex h-10 w-full items-center justify-center rounded-lg px-3 text-[13px] font-medium text-[var(--auth-text-muted)] transition-colors hover:text-[var(--auth-text)] sm:w-auto";
 
   return (
@@ -259,7 +241,7 @@ export function CrmPanel({
 }) {
   return (
     <section
-      className={`rounded-lg border border-[var(--auth-border)] bg-white ${className}`}
+      className={`rounded-lg border border-[var(--auth-border)] bg-surface ${className}`}
     >
       {title ? (
         <div
@@ -320,7 +302,7 @@ export function CrmActionTile({
   return (
     <Link
       href={href}
-      className="block rounded-lg border border-[var(--auth-border)] bg-white p-4 transition-colors hover:border-[var(--auth-text-soft)]"
+      className="block rounded-lg border border-[var(--auth-border)] bg-surface p-4 transition-colors hover:border-[var(--auth-text-soft)]"
     >
       <p className="text-[14px] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
         {title}

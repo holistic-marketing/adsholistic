@@ -45,7 +45,7 @@ function BellMark() {
           d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
         />
       </svg>
-      <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
+      <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-danger-btn ring-2 ring-white" />
     </span>
   );
 }
@@ -53,11 +53,11 @@ function BellMark() {
 /** Así se ve un aviso: ayuda a entender qué se está activando. */
 function SamplePush() {
   return (
-    <div className="mt-3.5 flex items-start gap-2.5 rounded-2xl border border-[#efe8df] bg-gradient-to-b from-[#fbf8f5] to-[#f4efe8] px-3 py-2.5 shadow-[0_1px_0_rgb(255_255_255)_inset]">
+    <div className="mt-3.5 flex items-start gap-2.5 rounded-card border border-line bg-gradient-to-b from-field to-subtle px-3 py-2.5 shadow-[0_1px_0_rgb(255_255_255)_inset]">
       <span className="relative shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icon-192.png" alt="" className="h-8 w-8 rounded-[9px]" />
-        <span className="absolute -bottom-1 -right-1 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-[#f8f4ef]">
+        <span className="absolute -bottom-1 -right-1 inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-ok-solid text-white ring-2 ring-line">
           <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.4} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
@@ -65,10 +65,10 @@ function SamplePush() {
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="truncate text-[12.5px] font-semibold text-[#1c1917]">Recarga acreditada</p>
-          <span className="shrink-0 text-[10.5px] text-[#9a9187]">ahora</span>
+          <p className="truncate text-[12.5px] font-semibold text-ink">Recarga acreditada</p>
+          <span className="shrink-0 text-[10.5px] text-ink-3">ahora</span>
         </div>
-        <p className="truncate text-[12px] text-[#6b645c]">Ya tienes $100 de saldo para pautar.</p>
+        <p className="truncate text-[12px] text-ink-2">Ya tienes $100 de saldo para pautar.</p>
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ function SamplePush() {
 const PRIMARY_BTN =
   "inline-flex h-10 items-center justify-center rounded-full bg-gradient-to-b from-[var(--brand-primary)] to-[var(--brand-primary-deep)] px-4 text-[13.5px] font-semibold text-white shadow-[0_8px_18px_-8px_rgb(184_95_46_/_0.85)] transition hover:brightness-105 active:scale-[0.98] disabled:opacity-60";
 const GHOST_BTN =
-  "inline-flex h-10 items-center justify-center rounded-full px-4 text-[13.5px] font-semibold text-[#6b645c] transition hover:bg-[#f3eee8] active:scale-[0.98] disabled:opacity-60";
+  "inline-flex h-10 items-center justify-center rounded-full px-4 text-[13.5px] font-semibold text-ink-2 transition hover:bg-hover active:scale-[0.98] disabled:opacity-60";
 
 export function HomeScreenAppBanner() {
   const [mode, setMode] = useState<Mode>("hidden");
@@ -152,7 +152,7 @@ export function HomeScreenAppBanner() {
     >
       <div
         data-leaving={leaving ? "true" : undefined}
-        className="push-sheet pointer-events-auto relative overflow-hidden rounded-[24px] border border-white/70 bg-white/95 p-4 shadow-[0_1px_0_rgb(255_255_255)_inset,0_2px_8px_-2px_rgb(28_25_23_/_0.12),0_30px_70px_-24px_rgb(28_25_23_/_0.6)] ring-1 ring-[#1c1917]/[0.06] backdrop-blur-xl sm:p-[18px]"
+        className="push-sheet pointer-events-auto relative overflow-hidden rounded-card border border-white/70 bg-surface/95 p-4 shadow-[0_1px_0_rgb(255_255_255)_inset,0_2px_8px_-2px_rgb(28_25_23_/_0.12),0_30px_70px_-24px_rgb(28_25_23_/_0.6)] ring-1 ring-ink/[0.06] backdrop-blur-xl sm:p-[18px]"
       >
         <span
           aria-hidden
@@ -161,15 +161,15 @@ export function HomeScreenAppBanner() {
         {mode === "done" ? (
           <div className="flex items-center gap-3">
             <span
-              className={`${ICON_TILE} bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_8px_18px_-8px_rgb(5_150_105_/_0.8)]`}
+              className={`${ICON_TILE} bg-gradient-to-b from-ok-solid to-ok-solid shadow-[0_8px_18px_-8px_rgb(5_150_105_/_0.8)]`}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </span>
             <div>
-              <p className="text-[15px] font-semibold tracking-[-0.01em] text-[#1c1917]">Avisos activados</p>
-              <p className="text-[12.5px] leading-snug text-[#6b645c]">
+              <p className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Avisos activados</p>
+              <p className="text-[12.5px] leading-snug text-ink-2">
                 Te avisamos al instante, aunque no tengas la app abierta.
               </p>
             </div>
@@ -179,16 +179,16 @@ export function HomeScreenAppBanner() {
             <div className="flex items-start gap-3">
               <BellMark />
               <div className="min-w-0">
-                <p className="text-[15px] font-semibold leading-tight tracking-[-0.01em] text-[#1c1917]">
+                <p className="text-[15px] font-semibold leading-tight tracking-[-0.01em] text-ink">
                   Entérate al instante
                 </p>
-                <p className="mt-1 text-[12.5px] leading-snug text-[#6b645c]">
+                <p className="mt-1 text-[12.5px] leading-snug text-ink-2">
                   Te avisamos cuando se acredita tu recarga y te contamos las novedades de Ads Holistic.
                 </p>
               </div>
             </div>
             <SamplePush />
-            {error ? <p className="mt-2 text-[12px] text-amber-800">{error}</p> : null}
+            {error ? <p className="mt-2 text-[12px] text-warn-fg">{error}</p> : null}
             <div className="mt-3.5 flex items-center gap-2">
               <button type="button" disabled={busy} onClick={() => void activate()} className={`${PRIMARY_BTN} flex-1`}>
                 {busy ? "Activando…" : "Activar avisos"}
@@ -216,15 +216,15 @@ export function HomeScreenAppBanner() {
                 className="push-icon-pop h-11 w-11 shrink-0 rounded-[13px] shadow-[0_8px_18px_-8px_rgb(184_95_46_/_0.8)]"
               />
               <div className="min-w-0">
-                <p className="text-[15px] font-semibold leading-tight tracking-[-0.01em] text-[#1c1917]">
+                <p className="text-[15px] font-semibold leading-tight tracking-[-0.01em] text-ink">
                   Ten Ads Holistic como app
                 </p>
-                <p className="mt-1 text-[12.5px] leading-snug text-[#6b645c]">
+                <p className="mt-1 text-[12.5px] leading-snug text-ink-2">
                   En iPhone los avisos solo llegan si la abres desde tu pantalla de inicio. Además no se te cierra la sesión.
                 </p>
               </div>
             </div>
-            <ol className="mt-3.5 space-y-2 rounded-2xl border border-[#efe8df] bg-gradient-to-b from-[#fbf8f5] to-[#f4efe8] px-3 py-3 text-[12.5px] text-[#3f3a35]">
+            <ol className="mt-3.5 space-y-2 rounded-card border border-line bg-gradient-to-b from-field to-subtle px-3 py-3 text-[12.5px] text-ink">
               {[
                 <span key="1" className="flex items-center gap-1">
                   Toca
@@ -246,7 +246,7 @@ export function HomeScreenAppBanner() {
             </ol>
             <button
               type="button"
-              className={`${GHOST_BTN} mt-3 w-full ring-1 ring-[#ece4da]`}
+              className={`${GHOST_BTN} mt-3 w-full ring-1 ring-line`}
               onClick={() => {
                 snooze(INSTALL_SNOOZE_KEY);
                 hide();

@@ -518,10 +518,10 @@ export function GerenteSupportInbox() {
   const headerActions = hasRealTicket ? (
     <div className="flex items-center gap-2">
       <details className="relative">
-        <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-lg font-bold text-white/80 hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="Más acciones">•••</summary>
-        <div className="absolute right-0 top-11 z-30 w-48 overflow-hidden rounded-xl border border-black/10 bg-white p-1.5 text-[#332820] shadow-xl">
+        <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-lg font-bold text-white/80 hover:bg-surface/10 [&::-webkit-details-marker]:hidden" aria-label="Más acciones">•••</summary>
+        <div className="absolute right-0 top-11 z-30 w-48 overflow-hidden rounded-box border border-black/10 bg-surface p-1.5 text-ink shadow-xl">
           {hasRealTicket ? (
-            <button type="button" disabled={clearingChat} onClick={() => { if (window.confirm("¿Borrar todos los mensajes de esta conversación?")) void handleClearChat(); }} className="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50">Borrar conversación</button>
+            <button type="button" disabled={clearingChat} onClick={() => { if (window.confirm("¿Borrar todos los mensajes de esta conversación?")) void handleClearChat(); }} className="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-danger-fg hover:bg-danger-bg">Borrar conversación</button>
           ) : null}
         </div>
       </details>
@@ -533,7 +533,7 @@ export function GerenteSupportInbox() {
       {workspace === "meetings" ? (
         <>
           <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-top))]" aria-hidden />
-          <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-[#f6f4f1] pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
+          <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-subtle pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
             <StaffMeetingsBoard
               onBackToChats={() => setWorkspace("chats")}
               onPending={setPendingMeetings}
@@ -545,19 +545,19 @@ export function GerenteSupportInbox() {
       <>
       {/* Reserva altura en el flujo; el panel real va fixed pegado al sidebar. */}
       <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-top))]" aria-hidden />
-      <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] flex flex-col overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-white pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
+      <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] flex flex-col overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-surface pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
         <div className="flex min-h-0 flex-1">
           {/* Lista de chats — columna izquierda tipo CRM */}
           <aside
             className={cn(
-              "flex w-full shrink-0 flex-col border-r border-[rgb(15_23_42_/_0.08)] bg-[#faf9f7] lg:w-[22rem] xl:w-[24rem]",
+              "flex w-full shrink-0 flex-col border-r border-[rgb(15_23_42_/_0.08)] bg-field lg:w-[22rem] xl:w-[24rem]",
               mobileShowChat && "hidden lg:flex",
             )}
           >
-          <div className="shrink-0 border-b border-[rgb(15_23_42_/_0.08)] bg-white px-3 py-2.5">
+          <div className="shrink-0 border-b border-[rgb(15_23_42_/_0.08)] bg-surface px-3 py-2.5">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-accent)]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">
                   Soporte
                 </p>
                 <h1 className="text-[15px] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
@@ -572,7 +572,7 @@ export function GerenteSupportInbox() {
                 >
                   Reuniones
                   {pendingMeetings > 0 ? (
-                    <span className="rounded-full bg-white/20 px-1.5 py-0.5 tabular-nums">
+                    <span className="rounded-full bg-surface/20 px-1.5 py-0.5 tabular-nums">
                       {pendingMeetings}
                     </span>
                   ) : null}
@@ -592,7 +592,7 @@ export function GerenteSupportInbox() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar chat…"
               aria-label="Buscar chat"
-              className="mt-3 h-10 w-full rounded-xl border border-[var(--auth-input-border)] bg-[#f7f5f2] px-3.5 text-[13px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15"
+              className="mt-3 h-10 w-full rounded-box border border-[var(--auth-input-border)] bg-field px-3.5 text-[13px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/70 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15"
             />
             <div className="mt-2 flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {FILTERS.map((item) => (
@@ -614,7 +614,7 @@ export function GerenteSupportInbox() {
           </div>
 
           {error ? (
-            <p className="mx-3 mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">
+            <p className="mx-3 mt-2 rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[12px] text-danger-fg">
               {error}
             </p>
           ) : null}
@@ -628,7 +628,7 @@ export function GerenteSupportInbox() {
               <div className="flex flex-col items-center px-6 py-14 text-center">
                 <span
                   aria-hidden
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-black/5"
+                  className="flex h-14 w-14 items-center justify-center rounded-card bg-surface text-2xl shadow-sm ring-1 ring-black/5"
                 >
                   {q.trim() ? "🔍" : "💬"}
                 </span>
@@ -664,7 +664,7 @@ export function GerenteSupportInbox() {
                             ? "bg-[rgb(255_120_31_/_0.1)]"
                             : unread
                               ? "bg-[rgb(255_120_31_/_0.06)] hover:bg-[rgb(255_120_31_/_0.1)]"
-                              : "hover:bg-white",
+                              : "hover:bg-surface",
                         )}
                       >
                         {unread ? (
@@ -730,17 +730,17 @@ export function GerenteSupportInbox() {
         {/* Panel de conversación */}
         <section
           className={cn(
-            "min-w-0 flex-1 bg-[#efeae2]",
+            "min-w-0 flex-1 bg-subtle",
             !mobileShowChat && "hidden lg:flex lg:flex-col",
             mobileShowChat && "flex flex-col",
           )}
         >
           {!selectedId ? (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-[#efeae2] px-8 text-center">
-              <p className="text-[17px] font-bold tracking-[-0.02em] text-[#3f3a34]">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-subtle px-8 text-center">
+              <p className="text-[17px] font-bold tracking-[-0.02em] text-ink">
                 Chats de soporte
               </p>
-              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-[#6b645c]">
+              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-2">
                 Elige un chat. Cualquier gerente puede leer y responder. Si ya
                 lo abrieron, queda leído para todos.
               </p>

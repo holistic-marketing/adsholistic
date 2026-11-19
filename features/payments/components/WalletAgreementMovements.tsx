@@ -5,11 +5,11 @@ export async function WalletAgreementMovements({ userId }: { userId: string }) {
   try {
     rows = await getSelectedClientWalletSettlements(userId);
   } catch {
-    return <section aria-label="Abonos por acuerdo" role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">No se pudieron consultar los abonos por acuerdo de esta cartera. Vuelve a cargar para intentarlo.</section>;
+    return <section aria-label="Abonos por acuerdo" role="status" className="rounded-card border border-warn-line bg-warn-bg p-5 text-sm text-warn-fg">No se pudieron consultar los abonos por acuerdo de esta cartera. Vuelve a cargar para intentarlo.</section>;
   }
   if (!rows.length) return null;
   return (
-    <section id="abonos-por-acuerdo" aria-label="Abonos por acuerdo" className="overflow-hidden rounded-2xl border border-[var(--auth-border)] bg-white">
+    <section id="abonos-por-acuerdo" aria-label="Abonos por acuerdo" className="overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface">
       <header className="border-b border-[var(--auth-divider)] px-5 py-4 sm:px-6">
         <h2 className="text-base font-semibold text-[var(--auth-text)]">Movimientos de cartera · abonos por acuerdo</h2>
         <p className="mt-1 text-sm text-[var(--auth-text-muted)]">Acuerdos sobre saldos históricos a favor. No son nuevos pagos bancarios ni nuevos cobros en Hecom.</p>

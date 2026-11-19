@@ -120,10 +120,10 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
   return (
     <section
       id="campaign-brief"
-      className="overflow-hidden rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
     >
       <div className="border-b border-[rgb(20_18_16_/_0.06)] bg-[linear-gradient(135deg,#fff7f0_0%,#ffffff_60%)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-accent)]">{t("kicker")}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
         <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">{t("title")}</h2>
         <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
       </div>
@@ -149,7 +149,7 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
             disabled={loading}
             onChange={(e) => setCountry(e.target.value as CampaignCountry)}
             aria-label={t("country")}
-            className="h-11 rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white px-3 text-[13px] text-[var(--auth-text)] sm:w-36"
+            className="h-11 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)] sm:w-36"
           >
             {COUNTRIES.map((c) => (
               <option key={c} value={c}>
@@ -160,36 +160,36 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
           <button
             type="submit"
             disabled={loading || !url.trim()}
-            className="h-11 rounded-xl bg-[var(--auth-accent)] px-5 text-[13px] font-bold text-white transition disabled:opacity-50"
+            className="h-11 rounded-box bg-accent-btn px-5 text-[13px] font-bold text-on-accent transition disabled:opacity-50"
           >
             {loading ? t("generating") : result ? t("again") : t("generate")}
           </button>
         </form>
 
         {loading ? (
-          <div className="mt-4 flex items-center gap-3 rounded-xl bg-[rgb(255_248_243_/_0.8)] px-4 py-3">
+          <div className="mt-4 flex items-center gap-3 rounded-box bg-[rgb(255_248_243_/_0.8)] px-4 py-3">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--auth-accent)] border-t-transparent" />
             <p className="text-[13px] font-medium text-[var(--auth-text)]">{t(`steps.${STEPS[step]}`)}</p>
           </div>
         ) : null}
-        {error ? <p className="mt-4 rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]">{error}</p> : null}
+        {error ? <p className="mt-4 rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{error}</p> : null}
 
         {result && product ? (
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
             <div className="space-y-4">
-              <div className="flex gap-3.5 rounded-2xl border border-[rgb(20_18_16_/_0.08)] p-3">
+              <div className="flex gap-3.5 rounded-card border border-[rgb(20_18_16_/_0.08)] p-3">
                 {product.images[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={productImageSrc(product.images[0])}
                     alt=""
-                    className="h-24 w-24 shrink-0 rounded-xl bg-[#f4f1ed] object-cover"
+                    className="h-24 w-24 shrink-0 rounded-box bg-subtle object-cover"
                   />
                 ) : null}
                 <div className="min-w-0">
                   <p className="line-clamp-2 text-[14px] font-semibold text-[var(--auth-text)]">{product.title}</p>
                   {product.price !== null ? (
-                    <p className="mt-1 text-[15px] font-bold text-[var(--auth-accent)]">
+                    <p className="mt-1 text-[15px] font-bold text-accent-text">
                       {money(product.price, product.currency)}
                       {product.oldPrice !== null ? (
                         <span className="ml-2 text-[12px] font-medium text-[var(--auth-text-muted)] line-through">
@@ -204,31 +204,31 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-[#ecf7f0] p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1f5c40]">{t("budget.title")}</p>
-                <p className="font-display mt-1 text-[1.5rem] font-semibold text-[#1f5c40]">
+              <div className="rounded-card bg-subtle p-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ok-fg">{t("budget.title")}</p>
+                <p className="font-display mt-1 text-[1.5rem] font-semibold text-ok-fg">
                   {t("budget.amount", { amount: money(result.budget.amount, "USD") })}
                 </p>
-                <p className="mt-1 text-[12px] leading-5 text-[#2f6b4f]">{budgetReason}</p>
+                <p className="mt-1 text-[12px] leading-5 text-ok-fg">{budgetReason}</p>
               </div>
 
-              <div className="rounded-2xl border border-[rgb(20_18_16_/_0.08)] p-4">
+              <div className="rounded-card border border-[rgb(20_18_16_/_0.08)] p-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">{t("script.title")}</p>
                 <p className="mt-2 text-[14px] font-semibold text-[var(--auth-text)]">{result.brief.studio.hook}</p>
                 <ul className="mt-2 space-y-1">
                   {result.brief.studio.benefits.filter(Boolean).map((b) => (
                     <li key={b} className="flex gap-2 text-[13px] text-[var(--auth-text)]">
-                      <span className="text-[var(--auth-accent)]">✓</span>
+                      <span className="text-accent-text">✓</span>
                       {b}
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2 text-[12px] font-semibold text-[var(--auth-accent)]">{result.brief.studio.cta}</p>
+                <p className="mt-2 text-[12px] font-semibold text-accent-text">{result.brief.studio.cta}</p>
                 {showVideoStudio ? (
                   <button
                     type="button"
                     onClick={sendToStudio}
-                    className="mt-3 h-9 rounded-xl border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
+                    className="mt-3 h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
                   >
                     {t("toStudio")}
                   </button>
@@ -249,14 +249,14 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
                         type="button"
                         onClick={() => toggle(i)}
                         className={cn(
-                          "flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition",
-                          on ? "border-[var(--auth-accent)] bg-[rgb(255_248_243_/_0.8)]" : "border-[rgb(20_18_16_/_0.08)] bg-white",
+                          "flex w-full items-start gap-3 rounded-box border px-3.5 py-3 text-left transition",
+                          on ? "border-[var(--auth-accent)] bg-[rgb(255_248_243_/_0.8)]" : "border-[rgb(20_18_16_/_0.08)] bg-surface",
                         )}
                       >
                         <span
                           className={cn(
                             "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 text-[11px] font-bold text-white",
-                            on ? "border-[var(--auth-accent)] bg-[var(--auth-accent)]" : "border-[rgb(20_18_16_/_0.2)]",
+                            on ? "border-[var(--auth-accent)] bg-accent-btn" : "border-[rgb(20_18_16_/_0.2)]",
                           )}
                         >
                           {on ? "✓" : ""}
@@ -268,7 +268,7 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
                               {item.angle}
                             </span>
                             {item.risky ? (
-                              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                              <span className="rounded-md bg-warn-bg px-1.5 py-0.5 text-[10px] font-bold text-warn-fg">
                                 {t("texts.risky", { reason: item.risky })}
                               </span>
                             ) : null}
@@ -284,11 +284,11 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
                   type="button"
                   disabled={picked.length === 0}
                   onClick={sendToLaunch}
-                  className="h-11 rounded-xl bg-[var(--auth-text)] px-5 text-[13px] font-bold text-white disabled:opacity-50"
+                  className="h-11 rounded-box bg-[var(--auth-text)] px-5 text-[13px] font-bold text-white disabled:opacity-50"
                 >
                   {t("toLaunch")}
                 </button>
-                {sent ? <p className="text-[12px] font-semibold text-[#1f5c40]">{t(sent === "launch" ? "sentLaunch" : "sentStudio")}</p> : null}
+                {sent ? <p className="text-[12px] font-semibold text-ok-fg">{t(sent === "launch" ? "sentLaunch" : "sentStudio")}</p> : null}
               </div>
               <p className="mt-2 text-[11px] text-[var(--auth-text-muted)]">{t("reviewHint")}</p>
             </div>

@@ -44,7 +44,7 @@ export function PickOwnCliente({
           type="button"
           disabled={busy !== null}
           onClick={() => void pick(c)}
-          className="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--auth-accent)] px-5 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05] disabled:opacity-60"
+          className="inline-flex h-11 items-center justify-center rounded-lg bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05] disabled:opacity-60"
         >
           {busy === c.id ? "…" : c.name}
         </button>

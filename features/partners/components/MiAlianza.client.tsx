@@ -117,9 +117,9 @@ export function MiAlianza({ partner, panel }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <header>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">Tu alianza</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-[#1a1714]">Alianzas</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[#6b645c]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Tu alianza</p>
+        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Alianzas</h1>
+        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
           Comparte tu link o un código de invitación. Cuando alguien se registra, confirmas si es de tu gente y recién
           ahí queda a tu nombre
           {earns ? (
@@ -139,17 +139,17 @@ export function MiAlianza({ partner, panel }: Props) {
       </header>
 
       {/* Link */}
-      <section className="rounded-2xl border border-[#ece4da] bg-white p-4 sm:p-5">
-        <p className="text-[12px] font-semibold text-[#6b645c]">Tu link para compartir</p>
+      <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
+        <p className="text-[12px] font-semibold text-ink-2">Tu link para compartir</p>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <code className="min-w-0 flex-1 truncate rounded-xl border border-[#efe7de] bg-[#fcfbf9] px-3 py-2.5 text-[14px] font-semibold text-[#1a1714]">
+          <code className="min-w-0 flex-1 truncate rounded-box border border-line bg-field px-3 py-2.5 text-[14px] font-semibold text-ink">
             {link.replace("https://", "")}
           </code>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={copy}
-              className="h-10 flex-1 rounded-xl bg-[#1a1714] px-4 text-[13px] font-semibold text-white transition hover:bg-black sm:flex-none"
+              className="h-10 flex-1 rounded-box bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-black sm:flex-none"
             >
               {copied ? "Copiado ✓" : "Copiar link"}
             </button>
@@ -157,7 +157,7 @@ export function MiAlianza({ partner, panel }: Props) {
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-10 flex-1 items-center justify-center rounded-xl border border-[#e3dbd1] px-4 text-[13px] font-semibold text-[#3a332d] transition hover:bg-[#f7f5f2] sm:flex-none"
+              className="inline-flex h-10 flex-1 items-center justify-center rounded-box border border-line px-4 text-[13px] font-semibold text-ink transition hover:bg-hover sm:flex-none"
             >
               Ver mi landing
             </a>
@@ -184,10 +184,10 @@ export function MiAlianza({ partner, panel }: Props) {
 
       {/* Editor + vista previa */}
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <div className="flex flex-col gap-4 rounded-2xl border border-[#ece4da] bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-4 rounded-card border border-line bg-surface p-4 sm:p-5">
           <div>
-            <h2 className="text-[15px] font-semibold text-[#1a1714]">Diseña tu landing</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#6b645c]">Los cambios se ven al lado. Guarda para publicarlos.</p>
+            <h2 className="text-[15px] font-semibold text-ink">Diseña tu landing</h2>
+            <p className="mt-0.5 text-[12.5px] text-ink-2">Los cambios se ven al lado. Guarda para publicarlos.</p>
           </div>
 
           <Group title="Marca">
@@ -258,7 +258,7 @@ export function MiAlianza({ partner, panel }: Props) {
               />
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[12px] text-[#9b928a]">Empezar desde:</span>
+              <span className="text-[12px] text-ink-3">Empezar desde:</span>
               {(["light", "dark"] as const).map((t) => (
                 <button
                   key={t}
@@ -272,7 +272,7 @@ export function MiAlianza({ partner, panel }: Props) {
                       textColor: PARTNER_THEME_COLORS[t].text,
                     }));
                   }}
-                  className="inline-flex h-8 items-center gap-2 rounded-lg border border-[#e3dbd1] px-3 text-[12px] font-semibold text-[#3a332d] transition hover:bg-[#f7f5f2]"
+                  className="inline-flex h-8 items-center gap-2 rounded-lg border border-line px-3 text-[12px] font-semibold text-ink transition hover:bg-hover"
                 >
                   <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-black/10" style={{ background: PARTNER_THEME_COLORS[t].background }} />
                   {t === "light" ? "Fondo claro" : "Fondo oscuro"}
@@ -282,7 +282,7 @@ export function MiAlianza({ partner, panel }: Props) {
           </Group>
 
           <Group title="Banners">
-            <p className="-mt-1 text-[12px] text-[#9b928a]">
+            <p className="-mt-1 text-[12px] text-ink-3">
               Van debajo del inicio de tu landing. En celular se ve el de celular; si subes uno solo, se usa en los dos.
             </p>
             <BannerField label="Banner para computadora" size="1224 × 270" {...imageField("banner")} />
@@ -330,11 +330,11 @@ export function MiAlianza({ partner, panel }: Props) {
             </Field>
           </Group>
 
-          {error ? <p className="rounded-xl bg-[#fff1ee] px-3 py-2 text-[13px] text-[#a32e23]">{error}</p> : null}
-          {notice ? <p className="rounded-xl bg-[#ecfdf3] px-3 py-2 text-[13px] text-[#15803d]">{notice}</p> : null}
+          {error ? <p className="rounded-box bg-field px-3 py-2 text-[13px] text-danger-fg">{error}</p> : null}
+          {notice ? <p className="rounded-box bg-field px-3 py-2 text-[13px] text-ok-fg">{notice}</p> : null}
 
-          <div className="sticky bottom-0 -mx-4 -mb-4 flex items-center justify-end gap-2 rounded-b-2xl border-t border-[#f1ebe4] bg-white/95 px-4 py-3 backdrop-blur sm:-mx-5 sm:-mb-5 sm:px-5">
-            {dirty ? <span className="mr-auto text-[12px] text-[#9a6b4a]">Tienes cambios sin guardar</span> : null}
+          <div className="sticky bottom-0 -mx-4 -mb-4 flex items-center justify-end gap-2 rounded-b-2xl border-t border-line bg-surface/95 px-4 py-3 backdrop-blur sm:-mx-5 sm:-mb-5 sm:px-5">
+            {dirty ? <span className="mr-auto text-[12px] text-accent-text">Tienes cambios sin guardar</span> : null}
             <button
               type="button"
               disabled={!dirty || pending}
@@ -342,7 +342,7 @@ export function MiAlianza({ partner, panel }: Props) {
                 setForm(saved);
                 setError(null);
               }}
-              className="h-10 rounded-xl px-4 text-[13px] font-semibold text-[#6b645c] disabled:opacity-40"
+              className="h-10 rounded-box px-4 text-[13px] font-semibold text-ink-2 disabled:opacity-40"
             >
               Deshacer
             </button>
@@ -350,7 +350,7 @@ export function MiAlianza({ partner, panel }: Props) {
               type="button"
               disabled={!dirty || pending}
               onClick={save}
-              className="h-10 rounded-xl bg-[#1a1714] px-5 text-[13px] font-semibold text-white transition hover:bg-black disabled:opacity-40"
+              className="h-10 rounded-box bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-black disabled:opacity-40"
             >
               {pending ? "Guardando…" : "Guardar y publicar"}
             </button>
@@ -358,7 +358,7 @@ export function MiAlianza({ partner, panel }: Props) {
         </div>
 
         <div className="lg:sticky lg:top-4 lg:self-start">
-          <p className="mb-2 text-[12px] font-semibold text-[#6b645c]">Vista previa</p>
+          <p className="mb-2 text-[12px] font-semibold text-ink-2">Vista previa</p>
           <LandingPreview form={form} images={images} link={link} />
         </div>
       </section>
@@ -367,22 +367,22 @@ export function MiAlianza({ partner, panel }: Props) {
 }
 
 const inputCls =
-  "h-10 w-full rounded-xl border border-[#e3dbd1] bg-[#fffdfb] px-3 text-[14px] text-[#1a1714] outline-none transition placeholder:text-[#b5ada5] focus:border-[#c9a78a] focus:ring-2 focus:ring-[#f3e3d3]";
+  "h-10 w-full rounded-box border border-line bg-surface px-3 text-[14px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:ring-2 focus:ring-accent-line";
 
 function Stat({ label, value, hint, accent }: { label: string; value: string; hint: string; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? "border-[#f3dcc6] bg-[#fff8f1]" : "border-[#ece4da] bg-white"}`}>
-      <p className="text-[12px] font-medium text-[#6b645c]">{label}</p>
-      <p className="mt-1 text-[22px] font-semibold tabular-nums tracking-[-0.02em] text-[#1a1714]">{value}</p>
-      <p className="mt-0.5 text-[12px] text-[#9b928a]">{hint}</p>
+    <div className={`rounded-card border p-4 ${accent ? "border-accent-line bg-field" : "border-line bg-surface"}`}>
+      <p className="text-[12px] font-medium text-ink-2">{label}</p>
+      <p className="mt-1 text-[22px] font-semibold tabular-nums tracking-[-0.02em] text-ink">{value}</p>
+      <p className="mt-0.5 text-[12px] text-ink-3">{hint}</p>
     </div>
   );
 }
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="flex flex-col gap-3 border-t border-[#f1ebe4] pt-4 first-of-type:border-0 first-of-type:pt-0">
-      <legend className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a6b4a]">{title}</legend>
+    <fieldset className="flex flex-col gap-3 border-t border-line pt-4 first-of-type:border-0 first-of-type:pt-0">
+      <legend className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">{title}</legend>
       {children}
     </fieldset>
   );
@@ -391,9 +391,9 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 function Field({ label, counter, children }: { label: string; counter?: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="flex justify-between text-[12.5px] font-medium text-[#3a332d]">
+      <span className="flex justify-between text-[12.5px] font-medium text-ink">
         {label}
-        {counter ? <span className="font-normal tabular-nums text-[#b5ada5]">{counter}</span> : null}
+        {counter ? <span className="font-normal tabular-nums text-ink-3">{counter}</span> : null}
       </span>
       {children}
     </label>
@@ -416,29 +416,29 @@ function ImageField(props: {
       <div
         className={`flex shrink-0 items-center justify-center overflow-hidden border border-[#efe7de] bg-[#fcfbf9] ${
           props.small ? "h-10 w-10" : "h-14 w-14"
-        } ${props.round ? "rounded-full" : "rounded-xl"}`}
+        } ${props.round ? "rounded-full" : "rounded-box"}`}
       >
         {props.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={props.url} alt="" className={`h-full w-full ${props.round ? "object-cover" : "object-contain p-1.5"}`} />
         ) : (
-          <span className="px-1 text-center text-[11px] leading-tight text-[#b5ada5]">Sin imagen</span>
+          <span className="px-1 text-center text-[11px] leading-tight text-ink-3">Sin imagen</span>
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[12.5px] font-medium text-[#3a332d]">{props.label}</p>
-        <p className="text-[12px] text-[#9b928a]">{props.hint}</p>
+        <p className="text-[12.5px] font-medium text-ink">{props.label}</p>
+        <p className="text-[12px] text-ink-3">{props.hint}</p>
         <div className="mt-1.5 flex gap-2">
           <button
             type="button"
             disabled={props.busy}
             onClick={() => input.current?.click()}
-            className="h-8 rounded-lg border border-[#e3dbd1] px-3 text-[12px] font-semibold text-[#3a332d] transition hover:bg-[#f7f5f2] disabled:opacity-50"
+            className="h-8 rounded-lg border border-line px-3 text-[12px] font-semibold text-ink transition hover:bg-hover disabled:opacity-50"
           >
             {props.busy ? "Subiendo…" : props.url ? "Cambiar" : "Subir"}
           </button>
           {props.url && !props.busy ? (
-            <button type="button" onClick={props.onRemove} className="h-8 px-2 text-[12px] font-semibold text-[#a32e23]">
+            <button type="button" onClick={props.onRemove} className="h-8 px-2 text-[12px] font-semibold text-danger-fg">
               Quitar
             </button>
           ) : null}
@@ -464,10 +464,10 @@ function ColorField(props: { label: string; hint: string; value: string; onChang
   const valid = PARTNER_ACCENT_RE.test(props.value);
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[12.5px] font-medium text-[#3a332d]">{props.label}</span>
+      <span className="text-[12.5px] font-medium text-ink">{props.label}</span>
       <div className="flex items-center gap-2">
         <label
-          className="relative h-10 w-12 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-[#e3dbd1]"
+          className="relative h-10 w-12 shrink-0 cursor-pointer overflow-hidden rounded-box border border-line"
           style={{ background: valid ? props.value : "#ffffff" }}
           title="Elegir color"
         >
@@ -487,10 +487,10 @@ function ColorField(props: { label: string; hint: string; value: string; onChang
             const raw = e.target.value.replace(/[^#0-9a-fA-F]/g, "").replace(/(?!^)#/g, "");
             props.onChange(raw.startsWith("#") ? raw : `#${raw}`);
           }}
-          className={`${inputCls} font-mono uppercase ${valid ? "" : "border-[#f0b4ab] focus:border-[#e0786a] focus:ring-[#fde2dd]"}`}
+          className={`${inputCls} font-mono uppercase ${valid ? "" : "border-danger-line focus:border-danger-solid focus:ring-danger-line"}`}
         />
       </div>
-      <span className="text-[11.5px] text-[#9b928a]">{valid ? props.hint : "Usa un código de 6 dígitos, ej. #FF5A2A."}</span>
+      <span className="text-[11.5px] text-ink-3">{valid ? props.hint : "Usa un código de 6 dígitos, ej. #FF5A2A."}</span>
     </div>
   );
 }
@@ -507,15 +507,15 @@ function BannerField(props: {
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="flex justify-between text-[12.5px] font-medium text-[#3a332d]">
+      <span className="flex justify-between text-[12.5px] font-medium text-ink">
         {props.label}
-        <span className="font-normal text-[#b5ada5]">{props.size} px</span>
+        <span className="font-normal text-ink-3">{props.size} px</span>
       </span>
       <button
         type="button"
         disabled={props.busy}
         onClick={() => input.current?.click()}
-        className="flex aspect-[1224/270] w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#dcd2c6] bg-[#fcfbf9] px-3 text-center text-[12px] font-semibold text-[#9b928a] transition hover:bg-[#f7f5f2] disabled:opacity-60"
+        className="flex aspect-[1224/270] w-full items-center justify-center overflow-hidden rounded-box border border-dashed border-accent-line bg-field px-3 text-center text-[12px] font-semibold text-ink-3 transition hover:bg-hover disabled:opacity-60"
       >
         {props.busy ? (
           "Subiendo…"
@@ -528,10 +528,10 @@ function BannerField(props: {
       </button>
       {props.url && !props.busy ? (
         <div className="flex gap-3">
-          <button type="button" onClick={() => input.current?.click()} className="text-[12px] font-semibold text-[#3a332d]">
+          <button type="button" onClick={() => input.current?.click()} className="text-[12px] font-semibold text-ink">
             Cambiar
           </button>
-          <button type="button" onClick={props.onRemove} className="text-[12px] font-semibold text-[#a32e23]">
+          <button type="button" onClick={props.onRemove} className="text-[12px] font-semibold text-danger-fg">
             Quitar
           </button>
         </div>
@@ -569,12 +569,12 @@ function LandingPreview({
   const banner = images.banner ?? images.banner_mobile;
   const sameTone = pal.secondary.toLowerCase() === pal.accent.toLowerCase();
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e3dbd1] shadow-[0_24px_50px_-32px_rgb(60_35_15/0.45)]">
-      <div className="flex items-center gap-1.5 border-b border-[#ece4da] bg-[#f4efe9] px-3 py-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#e4dad0]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#e4dad0]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#e4dad0]" />
-        <span className="ml-2 inline-flex min-w-0 items-center gap-1.5 rounded-md bg-white px-2 py-0.5 text-[11px] text-[#8a8177]">
+    <div className="overflow-hidden rounded-card border border-line shadow-[0_24px_50px_-32px_rgb(60_35_15/0.45)]">
+      <div className="flex items-center gap-1.5 border-b border-line bg-subtle px-3 py-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-active" />
+        <span className="h-2.5 w-2.5 rounded-full bg-active" />
+        <span className="h-2.5 w-2.5 rounded-full bg-active" />
+        <span className="ml-2 inline-flex min-w-0 items-center gap-1.5 rounded-md bg-surface px-2 py-0.5 text-[11px] text-ink-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {images.favicon ? <img src={images.favicon} alt="" className="h-3.5 w-3.5 shrink-0 object-contain" /> : null}
           <span className="truncate">{link.replace("https://", "")}</span>
@@ -632,19 +632,19 @@ function LandingPreview({
         {banner ? (
           <div className="px-5 pb-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={banner} alt="" className="block h-auto w-full rounded-xl border" style={{ borderColor: pal.border }} />
+            <img src={banner} alt="" className="block h-auto w-full rounded-box border" style={{ borderColor: pal.border }} />
           </div>
         ) : null}
         <div className="grid grid-cols-2 gap-2 border-t px-5 py-4" style={{ borderColor: pal.border, background: pal.band }}>
           {["Cuentas de agencia", "Recarga como prefieras"].map((t) => (
-            <div key={t} className="rounded-xl border p-3" style={{ borderColor: pal.border, background: pal.card }}>
+            <div key={t} className="rounded-box border p-3" style={{ borderColor: pal.border, background: pal.card }}>
               <span className="block h-1 w-6 rounded-full" style={{ background: pal.secondary }} />
               <p className="mt-2 text-[11.5px] font-bold">{t}</p>
             </div>
           ))}
         </div>
         <div className="px-5 pb-5 pt-1">
-          <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-3" style={{ background: pal.secondary, color: pal.secondaryInk }}>
+          <div className="flex items-center justify-between gap-3 rounded-box px-4 py-3" style={{ background: pal.secondary, color: pal.secondaryInk }}>
             <p className="text-[12.5px] font-bold">¿Listo para anunciar?</p>
             <span
               className="shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-bold"

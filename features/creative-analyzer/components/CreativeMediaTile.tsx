@@ -80,7 +80,7 @@ export function CreativeMediaTile({
     <>
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden rounded-xl bg-[rgb(20_18_16_/_0.06)]",
+          "relative shrink-0 overflow-hidden rounded-box bg-[rgb(20_18_16_/_0.06)]",
           size === "poster"
             ? "h-44 w-28"
             : size === "card"
@@ -112,7 +112,7 @@ export function CreativeMediaTile({
             )}
             {canPlay ? (
               <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/35">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[11px] font-bold text-[var(--auth-text)] shadow-sm">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface/95 text-[11px] font-bold text-[var(--auth-text)] shadow-sm">
                   ▶
                 </span>
               </span>
@@ -143,14 +143,14 @@ export function CreativeMediaTile({
             onClick={() => setZoomOpen(false)}
           >
             <div
-              className="relative w-full max-w-md overflow-hidden rounded-2xl bg-black shadow-2xl"
+              className="relative w-full max-w-md overflow-hidden rounded-card bg-black shadow-2xl"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
                 // Portal en <body>, fuera de .dashboard-canvas: ahí --auth-text es el claro de :root
                 // y el texto quedaba blanco sobre blanco. Tinta fija.
-                className="absolute right-3 top-3 z-10 inline-flex min-h-9 items-center rounded-full bg-white/90 px-3 py-1 text-[12px] font-bold text-[#1c1917] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                className="absolute right-3 top-3 z-10 inline-flex min-h-9 items-center rounded-full bg-surface/90 px-3 py-1 text-[12px] font-bold text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 onClick={() => setZoomOpen(false)}
               >
                 {closeLabel}

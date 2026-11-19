@@ -23,19 +23,19 @@ import { buildGastosUrlForAdvertiser } from "@/lib/hecom/gastos-url";
 import type { AdAccount, AdAccountStatus } from "@/types/ad-account";
 
 const statusStyles: Record<AdAccountStatus, string> = {
-  active: "bg-[#ecf7f0] text-[#1f5c40] ring-[#c5e4d2]",
-  pending: "bg-[#fff7eb] text-[#92400e] ring-[#f0d9b0]",
-  disabled: "bg-[#f3eee8] text-[#7a736a] ring-[#e4ddd4]",
-  review: "bg-[#f0f4f8] text-[#334e68] ring-[#d3dde8]",
-  archived: "bg-[#f3eee8] text-[#7a736a] ring-[#e4ddd4]",
+  active: "bg-subtle text-ok-fg ring-ok-line",
+  pending: "bg-field text-accent-text ring-warn-line",
+  disabled: "bg-subtle text-ink-2 ring-line",
+  review: "bg-field text-info-fg ring-line",
+  archived: "bg-subtle text-ink-2 ring-line",
 };
 
 const statusDot: Record<AdAccountStatus, string> = {
-  active: "bg-[#2f7a57]",
-  pending: "bg-[#d97706]",
-  disabled: "bg-[#a39a90]",
-  review: "bg-[#486581]",
-  archived: "bg-[#a39a90]",
+  active: "bg-ok-solid",
+  pending: "bg-accent",
+  disabled: "bg-line-strong",
+  review: "bg-line-strong",
+  archived: "bg-line-strong",
 };
 
 function StatusPill({ status }: { status: AdAccountStatus }) {
@@ -59,10 +59,10 @@ function MetaChip({
 }) {
   const cls =
     tone === "fee"
-      ? "bg-[#fff1e8] font-semibold text-[#c45a18]"
+      ? "bg-accent-soft font-semibold text-accent-text"
       : tone === "mono"
-        ? "bg-[#f3eee8] font-mono text-[#6b645c]"
-        : "bg-[#f3eee8] font-medium text-[#6b645c]";
+        ? "bg-subtle font-mono text-ink-2"
+        : "bg-subtle font-medium text-ink-2";
   return (
     <span className={`max-w-full break-words rounded px-1.5 py-0.5 text-[11px] md:text-[10px] ${cls}`}>{children}</span>
   );
@@ -100,8 +100,8 @@ function CopyIdChip({ id }: { id: string | null | undefined }) {
       aria-label={`${t("table.copyId")} ${id}`}
       className={`inline-flex max-w-full items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[11px] transition-colors md:text-[10px] ${
         copied
-          ? "bg-[#ecf7f0] text-[#1f5c40]"
-          : "bg-[#f3eee8] text-[#6b645c] hover:bg-[#e9e2d9] hover:text-[#1a1612]"
+          ? "bg-subtle text-ok-fg"
+          : "bg-subtle text-ink-2 hover:bg-hover hover:text-ink"
       }`}
     >
       <span className="break-all">{copied ? t("table.idCopied") : shortId(id)}</span>
@@ -140,13 +140,13 @@ function PlatformMark({ platform }: { platform: AdAccount["platform"] }) {
   }
   if (platform === "google") {
     return (
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#f3eee8] text-[9px] font-bold text-[#5c564e] ring-1 ring-[#e4ddd4]">
+      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-subtle text-[9px] font-bold text-ink-2 ring-1 ring-line">
         G
       </span>
     );
   }
   return (
-    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#f3eee8] text-[9px] font-bold text-[#5c564e] ring-1 ring-[#e4ddd4]">
+    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-subtle text-[9px] font-bold text-ink-2 ring-1 ring-line">
       Ad
     </span>
   );
@@ -192,7 +192,7 @@ function parseAccountDisplay(account: AdAccount, defaultName: string) {
 
 function Head({ children }: { children: ReactNode }) {
   return (
-    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
       {children}
     </TableHead>
   );
@@ -276,10 +276,10 @@ export function AdAccountsTable({
         href={href}
         className={
           inline
-            ? "inline-flex h-9 shrink-0 items-center rounded-lg border border-[#e85a1c]/30 bg-white px-3 text-[12px] font-semibold text-[#c45a18] transition hover:bg-[#fff1e8]"
+            ? "inline-flex h-9 shrink-0 items-center rounded-lg border border-accent/30 bg-surface px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
             : compact
-            ? "inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#e85a1c]/30 bg-[#fff7f0] px-3 text-[12px] font-semibold text-[#c45a18] transition hover:bg-[#fff1e8]"
-            : "inline-flex h-8 items-center rounded-lg border border-[#e85a1c]/30 bg-[#fff7f0] px-3 text-[12px] font-semibold text-[#c45a18] transition hover:bg-[#fff1e8]"
+            ? "inline-flex h-10 w-full items-center justify-center rounded-lg border border-accent/30 bg-field px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
+            : "inline-flex h-8 items-center rounded-lg border border-accent/30 bg-field px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
         }
       >
         {t("table.viewProfit")}
@@ -298,7 +298,7 @@ export function AdAccountsTable({
       return (
         <div className={compact ? "flex flex-col gap-2" : "flex flex-col items-start gap-2"}>
           <GastosLinkButton account={account} compact={compact} />
-          <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-[#9a9187] md:text-[10px]">
+          <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-ink-3 md:text-[10px]">
             {t("table.pollHint", { seconds: live.pollSeconds })}
           </p>
         </div>
@@ -312,8 +312,8 @@ export function AdAccountsTable({
           size="sm"
           className={
             compact
-              ? "h-11 w-full rounded-lg bg-[#e85a1c] text-[13px] font-medium hover:bg-[#d14e16]"
-              : "text-[#c45a18]"
+              ? "h-11 w-full rounded-lg bg-accent text-[13px] font-medium hover:bg-accent-btn-hover"
+              : "text-accent-text"
           }
           onClick={() => setSelectedAccount(account)}
         >
@@ -389,7 +389,7 @@ export function AdAccountsTable({
       <div className="flex min-w-0 flex-1 items-start gap-2.5">
         <PlatformMark platform={account.platform} />
         <div className="min-w-0">
-          <p className="line-clamp-2 break-words text-[14px] font-semibold tracking-[-0.02em] text-[#1a1612] md:truncate">
+          <p className="line-clamp-2 break-words text-[14px] font-semibold tracking-[-0.02em] text-ink md:truncate">
             {display.title}
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -398,7 +398,7 @@ export function AdAccountsTable({
               <MetaChip tone="fee">{display.balanceHint}</MetaChip>
             ) : null}
             {display.secondary ? (
-              <span className="min-w-0 max-w-full truncate text-[11px] text-[#9a9187]">
+              <span className="min-w-0 max-w-full truncate text-[11px] text-ink-3">
                 {display.secondary}
               </span>
             ) : null}
@@ -411,19 +411,19 @@ export function AdAccountsTable({
   return (
     <div>
       {readOnly && !isEmpty ? (
-        <div className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-[rgb(20_18_16_/_0.08)] bg-[#fffaf5] px-3 py-2 text-[12px] leading-5 text-[#5c564e] md:mx-4 md:mb-3 md:px-4 md:py-3">
+        <div className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-[rgb(20_18_16_/_0.08)] bg-field px-3 py-2 text-[12px] leading-5 text-ink-2 md:mx-4 md:mb-3 md:px-4 md:py-3">
           <p>
-            <span className="font-semibold text-[#1a1612]">{t("live.title")}</span>
+            <span className="font-semibold text-ink">{t("live.title")}</span>
             {" · "}
             {t("live.autoRefresh", { seconds: live.pollSeconds })}.
           </p>
           {live.error ? (
-            <span className="text-[11px] font-medium text-red-600">{live.error}</span>
+            <span className="text-[11px] font-medium text-danger-fg">{live.error}</span>
           ) : (
             <button
               type="button"
               onClick={() => void live.refresh()}
-              className="-mx-2 inline-flex min-h-9 items-center px-2 text-[12px] font-semibold text-[#c45a18] hover:underline md:min-h-0 md:text-[11px]"
+              className="-mx-2 inline-flex min-h-9 items-center px-2 text-[12px] font-semibold text-accent-text hover:underline md:min-h-0 md:text-[11px]"
             >
               {t("live.refreshNow")}
             </button>
@@ -435,8 +435,8 @@ export function AdAccountsTable({
         <div
           className={`mx-4 mb-3 rounded-lg border px-4 py-3 text-[13px] ${
             error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+              ? "border-danger-line bg-danger-bg text-danger-fg"
+              : "border-ok-line bg-ok-bg text-ok-fg"
           }`}
           role="status"
         >
@@ -451,7 +451,7 @@ export function AdAccountsTable({
             return (
               <article
                 key={account.id}
-                className="rounded-xl border border-[rgb(20_18_16_/_0.08)] bg-white p-3.5"
+                className="rounded-box border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <AccountCell account={account} />
@@ -470,9 +470,9 @@ export function AdAccountsTable({
                 </div>
                 {readOnly ? (
                   // Saldo y "Ver Profit" en una sola fila; el aviso de 45 s ya está arriba.
-                  <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-[#faf7f3] px-3 py-2.5">
+                  <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-field px-3 py-2.5">
                     <div className="min-w-0">
-                      <p className="text-[11px] text-[#9a9187]">{t("live.mobileLabel")}</p>
+                      <p className="text-[11px] text-ink-3">{t("live.mobileLabel")}</p>
                       <AdAccountLiveBalanceCell
                         advertiserId={account.externalAccountId}
                         metric={
@@ -489,14 +489,14 @@ export function AdAccountsTable({
                   <>
                     <dl className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
                       <div>
-                        <dt className="text-[#9a9187]">{t("table.balance")}</dt>
-                        <dd className="tabular-nums text-[#1a1612]">
+                        <dt className="text-ink-3">{t("table.balance")}</dt>
+                        <dd className="tabular-nums text-ink">
                           {formatMoney(account.balance)}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-[#9a9187]">{t("table.timezone")}</dt>
-                        <dd className="text-[#5c564e]">
+                        <dt className="text-ink-3">{t("table.timezone")}</dt>
+                        <dd className="text-ink-2">
                           {account.timezone || "—"}
                         </dd>
                       </div>
@@ -516,7 +516,7 @@ export function AdAccountsTable({
         <div className="hidden md:block overflow-x-auto">
           <Table embedded className="rounded-none">
             <TableHeader>
-              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-[#faf7f3] hover:bg-[#faf7f3]">
+              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-field hover:bg-field">
                 <Head>{t("table.account")}</Head>
                 <Head>{t("table.colId")}</Head>
                 <Head>{t("table.status")}</Head>
@@ -542,7 +542,7 @@ export function AdAccountsTable({
                 return (
                     <TableRow
                       key={account.id}
-                      className="border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-[#faf7f3]"
+                      className="border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-field"
                     >
                       <TableCell className="max-w-[280px]">
                         <AccountCell account={account} />
@@ -577,7 +577,7 @@ export function AdAccountsTable({
                                 {t("table.fee")} {display.fee}%
                               </MetaChip>
                             ) : (
-                              <span className="text-[12px] text-[#5c564e]">
+                              <span className="text-[12px] text-ink-2">
                                 {account.thresholdInfo}
                               </span>
                             )}
@@ -585,27 +585,27 @@ export function AdAccountsTable({
                         </>
                       ) : (
                         <>
-                          <TableCell className="text-[12px] tabular-nums text-[#5c564e]">
+                          <TableCell className="text-[12px] tabular-nums text-ink-2">
                             <div>
                               {t("table.daily", {
                                 amount: formatMoney(account.dailyBudget),
                               })}
                             </div>
-                            <div className="text-[#9a9187]">
+                            <div className="text-ink-3">
                               {t("table.monthly", {
                                 amount: formatMoney(account.monthlyLimit),
                               })}
                             </div>
                           </TableCell>
-                          <TableCell className="text-[14px] font-semibold tabular-nums tracking-[-0.02em] text-[#1a1612]">
+                          <TableCell className="text-[14px] font-semibold tabular-nums tracking-[-0.02em] text-ink">
                             {formatMoney(account.balance)}
                           </TableCell>
                           <TableCell>
                             <span
                               className={
                                 account.autoRecharge
-                                  ? "text-[12px] font-semibold text-[#1f5c40]"
-                                  : "text-[12px] text-[#7a736a]"
+                                  ? "text-[12px] font-semibold text-ok-fg"
+                                  : "text-[12px] text-ink-2"
                               }
                             >
                               {account.autoRecharge
@@ -618,13 +618,13 @@ export function AdAccountsTable({
                                   {t("table.fee")} {display.fee}%
                                 </MetaChip>
                               ) : (
-                                <span className="text-[11px] text-[#9a9187]">
+                                <span className="text-[11px] text-ink-3">
                                   {account.thresholdInfo}
                                 </span>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-[12px] text-[#5c564e]">
+                          <TableCell className="text-[12px] text-ink-2">
                             {account.timezone || "—"}
                           </TableCell>
                         </>
@@ -643,10 +643,10 @@ export function AdAccountsTable({
       {isEmpty && !readOnly ? <AdAccountsEmptyState /> : null}
       {isEmpty && readOnly ? (
         <div className="px-6 py-12 text-center">
-          <p className="text-[14px] font-medium text-[#1a1612]">
+          <p className="text-[14px] font-medium text-ink">
             {t("table.noFilterMatch")}
           </p>
-          <p className="mt-1 text-[13px] text-[#7a736a]">
+          <p className="mt-1 text-[13px] text-ink-2">
             {t("table.noFilterHint")}
           </p>
         </div>

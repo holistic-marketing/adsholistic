@@ -202,7 +202,7 @@ function AllocateBalanceModalBody({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-sm"
         aria-label={t("allocateModal.closeAria")}
         onClick={resetAndClose}
       />
@@ -210,7 +210,7 @@ function AllocateBalanceModalBody({
         role="dialog"
         aria-modal="true"
         aria-labelledby="allocate-balance-title"
-        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-2xl sm:p-6"
+        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-card border border-[var(--border-subtle)] bg-surface p-5 shadow-2xl sm:p-6"
       >
         <h2
           id="allocate-balance-title"
@@ -225,17 +225,17 @@ function AllocateBalanceModalBody({
             ? t("allocateModal.bodyBm")
             : t("allocateModal.body")}
         </p>
-        <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] leading-5 text-emerald-950">
+        <p className="mt-2 rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[12px] leading-5 text-ok-fg">
           <span className="font-semibold">{t("allocateModal.oneToOne")}</span>{" "}
           {t("allocateModal.oneToOneBody", { amount: oneToOneExample })}
         </p>
         {agencyBmFunding ? (
-          <p className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-[12px] leading-5 text-sky-950">
+          <p className="mt-2 rounded-lg border border-info-line bg-info-bg px-3 py-2 text-[12px] leading-5 text-info-fg">
             {t("allocateModal.budgetHint")}
           </p>
         ) : null}
 
-        <div className="mt-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
+        <div className="mt-5 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
           <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
             {t("allocateModal.account")}
           </p>
@@ -243,7 +243,7 @@ function AllocateBalanceModalBody({
             {targetAccount.name}
           </p>
           {targetAccount.bmLabel ? (
-            <span className="mt-1.5 inline-flex rounded-md bg-[#eef4ff] px-1.5 py-0.5 text-[10px] font-semibold text-[#1e40af] ring-1 ring-[#c7d7fe]">
+            <span className="mt-1.5 inline-flex rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
               {targetAccount.bmLabel}
             </span>
           ) : null}
@@ -272,13 +272,13 @@ function AllocateBalanceModalBody({
           <p className="mt-2 break-all font-mono text-[11px] text-[var(--admin-text-muted,#64748b)]">
             {t("allocateModal.advertiserLabel")}{" "}
             {targetAccount.externalAccountId?.trim() || (
-              <span className="text-red-600">
+              <span className="text-danger-fg">
                 {t("allocateModal.notConfigured")}
               </span>
             )}
           </p>
           {targetAccount.status === "disabled" ? (
-            <p className="mt-2 text-[11px] leading-4 text-amber-800" role="alert">
+            <p className="mt-2 text-[11px] leading-4 text-warn-fg" role="alert">
               {t("allocateModal.disabledAlert")}
             </p>
           ) : null}
@@ -303,11 +303,11 @@ function AllocateBalanceModalBody({
             autoFocus
           />
           {agencyBmFunding ? (
-            <p className="mt-1.5 text-[12px] leading-5 text-[#6b645c]">
+            <p className="mt-1.5 text-[12px] leading-5 text-ink-2">
               {t("allocateModal.minHint", { amount: tiktokMinLabel })}
             </p>
           ) : (
-            <p className="mt-1.5 text-[12px] leading-5 text-[#6b645c]">
+            <p className="mt-1.5 text-[12px] leading-5 text-ink-2">
               {t("allocateModal.maxNow", {
                 amount: formatMoney(walletAvailable),
               })}
@@ -317,7 +317,7 @@ function AllocateBalanceModalBody({
 
         {error && (
           <p
-            className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] leading-5 text-amber-950"
+            className="mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] leading-5 text-warn-fg"
             role="alert"
           >
             {error}

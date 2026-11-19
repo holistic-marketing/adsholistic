@@ -66,20 +66,20 @@ function limaDate(ymd: string): Date {
 }
 
 function statusClass(status: string) {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-800";
-  if (status === "pending") return "bg-amber-50 text-amber-800";
-  if (status === "rescheduled") return "bg-orange-50 text-orange-800";
-  if (status === "completed") return "bg-slate-100 text-slate-600";
-  if (status === "no_show") return "bg-rose-50 text-rose-700";
-  return "bg-slate-100 text-slate-500";
+  if (status === "confirmed") return "bg-ok-bg text-ok-fg";
+  if (status === "pending") return "bg-warn-bg text-warn-fg";
+  if (status === "rescheduled") return "bg-warn-bg text-warn-fg";
+  if (status === "completed") return "bg-subtle text-ink-2";
+  if (status === "no_show") return "bg-danger-bg text-danger-fg";
+  return "bg-subtle text-ink-3";
 }
 
 function cellClass(kind: HourKind, active: boolean) {
   return cn(
     "flex h-10 items-center justify-center rounded-md text-[10px] font-semibold transition-colors",
-    kind === "free" && "bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
-    kind === "break" && "bg-amber-50 text-amber-800",
-    kind === "full" && "bg-slate-200/80 text-slate-500",
+    kind === "free" && "bg-ok-bg text-ok-fg hover:bg-ok-line",
+    kind === "break" && "bg-warn-bg text-warn-fg",
+    kind === "full" && "bg-active/80 text-ink-3",
     kind === "off" && "bg-[var(--surface-soft)] text-transparent",
     active && "ring-2 ring-[var(--auth-accent)] ring-offset-1",
   );
@@ -332,7 +332,7 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
           <button
             type="button"
             onClick={onBack}
-            className="mb-2 text-[12px] font-semibold text-[var(--auth-accent)] lg:hidden"
+            className="mb-2 text-[12px] font-semibold text-accent-text lg:hidden"
           >
             {t("meetings.back")}
           </button>
@@ -354,17 +354,17 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
       </div>
 
       {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800" role="alert">
+        <p className="rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}
       {notice ? (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-900">
+        <p className="rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[13px] text-ok-fg">
           {notice}
         </p>
       ) : null}
       {rescheduleId ? (
-        <div className="flex items-start justify-between gap-3 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-[13px] text-orange-900">
+        <div className="flex items-start justify-between gap-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">
           <p>{t("meetings.rescheduleHint")}</p>
           <button
             type="button"
@@ -397,13 +397,13 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
                       "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[13px] font-semibold",
                       active
                         ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-                        : "border-[var(--auth-input-border)] bg-white text-[var(--auth-text)]",
+                        : "border-[var(--auth-input-border)] bg-surface text-[var(--auth-text)]",
                     )}
                   >
                     <span
                       className={cn(
                         "grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold",
-                        active ? "bg-white/20 text-white" : "bg-orange-100 text-orange-800",
+                        active ? "bg-surface/20 text-white" : "bg-warn-bg text-warn-fg",
                       )}
                     >
                       {initials(person.displayName)}
@@ -419,9 +419,9 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
               {advisorEmail ? t("meetings.clickHint") : t("meetings.pickPerson")}
             </p>
             <div className="flex flex-wrap gap-2 text-[11px] font-medium text-[var(--auth-text-muted)]">
-              <Legend swatch="bg-emerald-100" label={t("meetings.legendFree")} />
-              <Legend swatch="bg-amber-50" label={t("meetings.legendBreak")} />
-              <Legend swatch="bg-slate-200" label={t("meetings.legendFull")} />
+              <Legend swatch="bg-ok-bg" label={t("meetings.legendFree")} />
+              <Legend swatch="bg-warn-bg" label={t("meetings.legendBreak")} />
+              <Legend swatch="bg-active" label={t("meetings.legendFull")} />
             </div>
           </div>
           {!advisorEmail ? (
@@ -467,7 +467,7 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-accent)]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">
                     {t("meetings.bookTitle")}
                   </p>
                   <p className="mt-1 text-[15px] font-bold text-[var(--auth-text)]">
@@ -515,7 +515,7 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
                 <select
                   value={meetingType}
                   onChange={(event) => setMeetingType(event.target.value as MeetingType)}
-                  className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-white px-3 text-[14px] font-medium"
+                  className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3 text-[14px] font-medium"
                 >
                   {MEETING_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -606,7 +606,7 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <article className="dashboard-surface-card rounded-xl px-3 py-3">
+    <article className="dashboard-surface-card rounded-box px-3 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">{label}</p>
       <p className="mt-1 truncate text-[14px] font-bold capitalize tabular-nums text-[var(--auth-text)]">{value}</p>
     </article>
@@ -732,7 +732,7 @@ function MeetingGroup({
   const t = useTranslations("support");
   return (
     <div>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-accent)]">{title}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{title}</p>
       {meetings.length === 0 ? (
         <p className="mt-2 text-[13px] leading-relaxed text-[var(--auth-text-muted)]">{empty}</p>
       ) : (
@@ -740,7 +740,7 @@ function MeetingGroup({
           {meetings.map((meeting) => {
             const canMove = Boolean(onReschedule) && Date.parse(meeting.startsAt) > now;
             return (
-              <li key={meeting.id} className="rounded-xl border border-[var(--auth-input-border)] px-3 py-2.5">
+              <li key={meeting.id} className="rounded-box border border-[var(--auth-input-border)] px-3 py-2.5">
                 <button type="button" onClick={() => onSelect(meeting.id)} className="flex w-full items-start justify-between gap-3 text-left">
                   <span className="min-w-0">
                     <span className="block text-[13px] font-semibold text-[var(--auth-text)] [overflow-wrap:anywhere]">{meeting.subject}</span>
@@ -757,7 +757,7 @@ function MeetingGroup({
                   <button
                     type="button"
                     onClick={() => onReschedule?.(meeting)}
-                    className="mt-2 text-[12px] font-semibold text-[var(--auth-accent)]"
+                    className="mt-2 text-[12px] font-semibold text-accent-text"
                   >
                     {t("meetings.reschedule")}
                   </button>
@@ -835,7 +835,7 @@ function MeetingDetail({
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-accent)]">{t("meetings.detail")}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{t("meetings.detail")}</p>
         <button type="button" onClick={onClose} className="text-[12px] font-semibold text-[var(--auth-text-muted)]">
           {t("meetings.cancelBook")}
         </button>
@@ -866,7 +866,7 @@ function MeetingDetail({
           href={meeting.meetUrl ?? "#"}
           target="_blank"
           rel="noreferrer"
-          className="flex h-10 items-center justify-center rounded-lg bg-emerald-600 text-[14px] font-semibold text-white"
+          className="flex h-10 items-center justify-center rounded-lg bg-ok-solid text-[14px] font-semibold text-white"
         >
           {t("meetings.join")}
         </a>
@@ -887,7 +887,7 @@ function MeetingDetail({
             type="button"
             disabled={saving}
             onClick={onCancel}
-            className="h-10 flex-1 rounded-lg border border-rose-200 text-[13px] font-semibold text-rose-700"
+            className="h-10 flex-1 rounded-lg border border-danger-line text-[13px] font-semibold text-danger-fg"
           >
             {t("meetings.cancel")}
           </button>

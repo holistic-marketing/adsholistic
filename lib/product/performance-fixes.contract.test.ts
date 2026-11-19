@@ -27,7 +27,8 @@ test("el layout pide en paralelo y redirige antes de pintar el dashboard", () =>
   );
   assert.equal(layout.includes("getWalletLedgerBalance"), false);
   assert.equal(layout.includes("getHecomClienteShell"), false);
-  assert.match(layout, /SidebarClienteWalletBoundary/);
+  // El armazón v3 no pide la cartera: el saldo vive en el resumen y en pagos.
+  assert.match(layout, /<PanelShell/);
 });
 
 test("el modo tester se lee una vez por request", () => {
@@ -79,18 +80,15 @@ test("el chat cerrado usa el poll lento y se detiene con la pestaña oculta", ()
   assert.doesNotMatch(widget, /setInterval\([\s\S]{0,80}5_?000\)/);
 });
 
-test("la tarjeta de cartera no bloquea el layout y no pinta un cero mientras carga", () => {
-  const wallet = source("components/layout/SidebarClienteWallet.tsx");
-  const skeleton = source("components/layout/SidebarWalletCard.client.tsx");
+test("el saldo en cartera del resumen no bloquea la página y no pinta un cero mientras carga", () => {
+  const wallet = source("features/clientes/components/OverviewWallet.tsx");
+  const page = source("app/(dashboard)/overview/page.tsx");
+  assert.match(page, /<OverviewWallet/);
   assert.match(wallet, /pickClienteWalletOrganizationId/);
   assert.match(wallet, /resolveOrganizationIdForHecomCliente\(clienteId\)/);
-  assert.match(wallet, /sidebarWalletCents/);
-  assert.match(wallet, /walletBalanceCents: null/);
+  assert.match(wallet, /clienteWalletCents/);
+  assert.match(wallet, /walletBalanceIsUnknown/);
   assert.match(wallet, /<Suspense/);
-  assert.match(wallet, /SidebarWalletCardSkeleton/);
-  assert.match(skeleton, /aria-busy="true"/);
-  assert.doesNotMatch(
-    skeleton.slice(skeleton.indexOf("function SidebarWalletCardSkeleton")),
-    /formatMoney/,
-  );
+  // El reemplazo mientras carga marca la espera y muestra «…», no un monto.
+  assert.match(wallet, /fallback=\{<OverviewKpi[^>]*value="…"[^>]*busy/);
 });

@@ -25,7 +25,7 @@ export function Badge({ className, variant = "default", tone, ...props }: BadgeP
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center rounded-md px-2 text-[0.6875rem] font-medium",
+        "inline-flex h-[22px] items-center gap-1 whitespace-nowrap rounded-full border border-current/15 px-2 text-xs font-medium",
         variantClasses[resolvedVariant],
         className,
       )}

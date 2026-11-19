@@ -30,9 +30,9 @@ function whenLabel(iso: string) {
 }
 
 function statusClass(status: string) {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-800";
-  if (status === "pending") return "bg-amber-50 text-amber-800";
-  return "bg-orange-50 text-orange-800";
+  if (status === "confirmed") return "bg-ok-bg text-ok-fg";
+  if (status === "pending") return "bg-warn-bg text-warn-fg";
+  return "bg-warn-bg text-warn-fg";
 }
 
 /**
@@ -110,7 +110,7 @@ export function StaffCalendarFab() {
       )}
     >
       {open ? (
-        <div className="pointer-events-auto w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-white shadow-2xl shadow-black/15">
+        <div className="pointer-events-auto w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-card border border-[var(--border-subtle)] bg-surface shadow-2xl shadow-black/15">
           <div className="flex items-center justify-between gap-2 border-b border-[var(--border-subtle)] bg-[rgb(255_120_31_/_0.08)] px-3 py-2.5">
             <div>
               <p className="text-[13px] font-bold text-[var(--auth-text)]">Tus citas</p>
@@ -173,7 +173,7 @@ export function StaffCalendarFab() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3.75 8.25h16.5M4.5 5.25h15a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V6a.75.75 0 01.75-.75z" />
         </svg>
         {meetings.length > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[10px] font-extrabold text-[var(--brand-primary)]">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-surface px-1 text-[10px] font-extrabold text-[var(--brand-primary)]">
             {meetings.length > 9 ? "9+" : meetings.length}
           </span>
         ) : null}

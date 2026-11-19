@@ -317,12 +317,12 @@ export function CreditLockPanel({
   const messages = (
     <>
       {error ? (
-        <p className="mt-4 border-l-2 border-[#b42318] pl-3 text-[13px] text-[#b42318]" role="alert">
+        <p className="mt-4 border-l-2 border-danger-solid pl-3 text-[13px] text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}
       {success ? (
-        <p className="mt-4 border-l-2 border-[#067647] pl-3 text-[13px] text-[#067647]" role="status">
+        <p className="mt-4 border-l-2 border-ok-solid pl-3 text-[13px] text-ok-fg" role="status">
           {success}
         </p>
       ) : null}
@@ -338,16 +338,16 @@ export function CreditLockPanel({
         : "—";
     return (
       <section
-        className="rounded-xl border border-[#e4e7ec] bg-white px-5 py-4 sm:px-6"
+        className="rounded-box border border-line bg-surface px-5 py-4 sm:px-6"
         aria-label={t("creditLock.aria", { name: clienteName })}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
           <CardGlyph />
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#667085]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-2">
               {t("creditLock.reviewEyebrow")}
             </p>
-            <p className="mt-1 text-[15px] font-semibold text-[#101828]">
+            <p className="mt-1 text-[15px] font-semibold text-ink">
               {status === "requested"
                 ? t("creditLock.reviewRequested", { name: clienteName, amount })
                 : status === "approved"
@@ -355,14 +355,14 @@ export function CreditLockPanel({
                   : t("creditLock.reviewRejected", { amount })}
             </p>
             {status === "approved" ? (
-              <p className="mt-0.5 text-[13px] text-[#475467]">
+              <p className="mt-0.5 text-[13px] text-ink-2">
                 {paymentMethod
                   ? t("creditLock.reviewCard", { card: `${brand} •••• ${last4}` })
                   : t("creditLock.reviewNoCard")}
               </p>
             ) : null}
             {autocharge?.failed ? (
-              <p className="mt-1 text-[13px] text-[#b42318]" role="alert">
+              <p className="mt-1 text-[13px] text-danger-fg" role="alert">
                 {autocharge.frozen ? t("creditLock.autochargeFrozen") : t("creditLock.autochargeFailed")}
               </p>
             ) : null}
@@ -402,16 +402,16 @@ export function CreditLockPanel({
   if (idle && !expanded) {
     return (
       <section
-        className="rounded-xl border border-[#e4e7ec] bg-white px-5 py-5 sm:px-6"
+        className="rounded-box border border-line bg-surface px-5 py-5 sm:px-6"
         aria-label={t("creditLock.aria", { name: clienteName })}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
           <CardGlyph />
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-[#101828]">
+            <p className="text-[15px] font-semibold text-ink">
               {t("creditLock.idleTitle")}
             </p>
-            <p className="mt-1 max-w-[40rem] text-[13px] leading-5 text-[#475467]">
+            <p className="mt-1 max-w-[40rem] text-[13px] leading-5 text-ink-2">
               {t("creditLock.idleBody")}
               {status === "rejected" ? t("creditLock.idleRejected") : ""}
             </p>
@@ -430,20 +430,20 @@ export function CreditLockPanel({
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-[#e4e7ec] bg-white"
+      className="overflow-hidden rounded-box border border-line bg-surface"
       aria-label={t("creditLock.aria", { name: clienteName })}
     >
       <header className="px-5 pt-5 sm:px-7 sm:pt-6">
         <div className="flex items-start gap-4">
           <CardGlyph />
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#667085]">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-2">
               {t("creditLock.title")}
             </p>
-            <h2 className="mt-1 text-[1.2rem] font-semibold tracking-[-0.01em] text-[#101828]">
+            <h2 className="mt-1 text-[1.2rem] font-semibold tracking-[-0.01em] text-ink">
               {t("creditLock.heading")}
             </h2>
-            <p className="mt-1 max-w-[42rem] text-[13px] leading-5 text-[#475467]">
+            <p className="mt-1 max-w-[42rem] text-[13px] leading-5 text-ink-2">
               {t("creditLock.intro")}
             </p>
           </div>
@@ -452,7 +452,7 @@ export function CreditLockPanel({
               type="button"
               onClick={() => setExpanded(false)}
               aria-label={t("creditLock.closeAria")}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[#667085] transition-colors hover:bg-[#f2f4f7] hover:text-[#101828] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101828]/20 sm:h-8 sm:w-8"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 sm:h-8 sm:w-8"
             >
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
                 <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" />
@@ -474,8 +474,8 @@ export function CreditLockPanel({
                       done
                         ? "bg-[#101828] text-white"
                         : current
-                          ? "border border-[#101828] text-[#101828]"
-                          : "border border-[#d0d5dd] text-[#98a2b3]",
+                          ? "border border-ink text-ink"
+                          : "border border-line text-ink-3",
                     )}
                     aria-current={current ? "step" : undefined}
                   >
@@ -490,14 +490,14 @@ export function CreditLockPanel({
                   <span
                     className={cn(
                       "hidden text-[12px] sm:inline",
-                      done || current ? "font-medium text-[#101828]" : "text-[#98a2b3]",
+                      done || current ? "font-medium text-ink" : "text-ink-3",
                     )}
                   >
                     {label.replace(/^\d+\.\s*/, "")}
                   </span>
                 </span>
                 {i < stepLabels.length - 1 ? (
-                  <span className={cn("mx-3 h-px flex-1", done ? "bg-[#101828]" : "bg-[#e4e7ec]")} aria-hidden />
+                  <span className={cn("mx-3 h-px flex-1", done ? "bg-[#101828]" : "bg-subtle")} aria-hidden />
                 ) : null}
               </li>
             );
@@ -505,13 +505,13 @@ export function CreditLockPanel({
         </ol>
       </header>
 
-      <div className="mt-5 border-t border-[#eaecf0] px-5 py-5 sm:px-7 sm:py-6">
+      <div className="mt-5 border-t border-line px-5 py-5 sm:px-7 sm:py-6">
         {loading ? (
-          <p className="text-[13px] text-[#667085]">{tCommon("loading")}</p>
+          <p className="text-[13px] text-ink-2">{tCommon("loading")}</p>
         ) : (
           <div className="space-y-5">
             <div>
-              <p className="text-[13px] font-medium text-[#344054]">
+              <p className="text-[13px] font-medium text-ink-2">
                 {t("creditLock.howMuch")}
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -524,10 +524,10 @@ export function CreditLockPanel({
                       onClick={() => setAmountInput(String(amount))}
                       aria-pressed={selected}
                       className={cn(
-                        "h-11 rounded-lg border text-[14px] font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101828]/20",
+                        "h-11 rounded-lg border text-[14px] font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20",
                         selected
-                          ? "border-[#101828] bg-[#f9fafb] text-[#101828]"
-                          : "border-[#d0d5dd] bg-white text-[#344054] hover:border-[#98a2b3]",
+                          ? "border-ink bg-field text-ink"
+                          : "border-line bg-surface text-ink-2 hover:border-line-strong",
                       )}
                     >
                       {formatMoney(amount, "USD")}
@@ -536,7 +536,7 @@ export function CreditLockPanel({
                 })}
               </div>
               <label className="mt-3 block">
-                <span className="text-[12px] text-[#667085]">
+                <span className="text-[12px] text-ink-2">
                   {t("creditLock.otherAmount")}
                 </span>
                 <Input
@@ -546,26 +546,26 @@ export function CreditLockPanel({
                   step={50}
                   value={amountInput}
                   onChange={(e) => setAmountInput(e.target.value)}
-                  className="mt-1 h-11 rounded-lg border-[#d0d5dd] bg-white text-[15px] font-medium tabular-nums"
+                  className="mt-1 h-11 rounded-lg border-line bg-surface text-[15px] font-medium tabular-nums"
                 />
               </label>
             </div>
 
             {preview ? (
-              <dl className="divide-y divide-[#eaecf0] rounded-lg border border-[#eaecf0] text-[13px]">
+              <dl className="divide-y divide-line rounded-lg border border-line text-[13px]">
                 <div className="flex items-center justify-between gap-4 px-4 py-3">
-                  <dt className="text-[#475467]">{t("creditLock.willAsk")}</dt>
-                  <dd className="font-semibold tabular-nums text-[#101828]">
+                  <dt className="text-ink-2">{t("creditLock.willAsk")}</dt>
+                  <dd className="font-semibold tabular-nums text-ink">
                     {formatMoney(preview.requested, "USD")}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 px-4 py-3">
-                  <dt className="text-[#475467]">{t("creditLock.idealCard")}</dt>
-                  <dd className="font-semibold tabular-nums text-[#101828]">
+                  <dt className="text-ink-2">{t("creditLock.idealCard")}</dt>
+                  <dd className="font-semibold tabular-nums text-ink">
                     {formatMoney(preview.recommended, "USD")}
                   </dd>
                 </div>
-                <p className="bg-[#f9fafb] px-4 py-2.5 text-[12px] leading-4 text-[#667085]">
+                <p className="bg-field px-4 py-2.5 text-[12px] leading-4 text-ink-2">
                   {t("creditLock.previewHint", {
                     requested: formatMoney(preview.requested, "USD"),
                     recommended: formatMoney(preview.recommended, "USD"),
@@ -630,16 +630,16 @@ export function CreditLockPanel({
                 ) : null}
 
                 {paymentMethod ? (
-                  <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[#eaecf0] px-4 py-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-line px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <span className="inline-flex h-8 w-12 items-center justify-center rounded-md border border-[#eaecf0] bg-[#f9fafb] text-[10px] font-bold tracking-[0.04em] text-[#344054]">
+                      <span className="inline-flex h-8 w-12 items-center justify-center rounded-md border border-line bg-field text-[10px] font-bold tracking-[0.04em] text-ink-2">
                         {brand}
                       </span>
                       <div>
-                        <p className="text-[14px] font-medium tabular-nums text-[#101828]">
+                        <p className="text-[14px] font-medium tabular-nums text-ink">
                           •••• {last4}
                         </p>
-                        <p className="text-[12px] text-[#667085]">
+                        <p className="text-[12px] text-ink-2">
                           {t("creditLock.cardRegistered")}
                           {cardExpiry ? ` · ${cardExpiry}` : ""}
                         </p>
@@ -658,7 +658,7 @@ export function CreditLockPanel({
                         type="button"
                         disabled={detachLoading}
                         onClick={() => void handleDetach()}
-                        className="inline-flex h-10 items-center justify-center rounded-lg px-3 text-[13px] font-medium text-[#475467] transition-colors hover:bg-[#f2f4f7] hover:text-[#101828] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101828]/20 disabled:opacity-50"
+                        className="inline-flex h-10 items-center justify-center rounded-lg px-3 text-[13px] font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-50"
                       >
                         {t("creditLock.remove")}
                       </button>
@@ -668,14 +668,14 @@ export function CreditLockPanel({
 
                 {canLinkCard && (!paymentMethod || autocharge?.failed) ? (
                   <div className="space-y-3">
-                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#eaecf0] bg-[#f9fafb] px-4 py-3.5">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line bg-field px-4 py-3.5">
                       <input
                         type="checkbox"
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
                         className="mt-0.5 h-4 w-4 shrink-0 accent-[#101828]"
                       />
-                      <span className="text-[12px] leading-5 text-[#344054]">
+                      <span className="text-[12px] leading-5 text-ink-2">
                         {t("creditLock.consent")}
                       </span>
                     </label>
@@ -696,7 +696,7 @@ export function CreditLockPanel({
               </div>
             ) : null}
 
-            <p className="flex items-center gap-1.5 text-[12px] leading-5 text-[#667085]">
+            <p className="flex items-center gap-1.5 text-[12px] leading-5 text-ink-2">
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <rect x="3" y="7" width="10" height="7" rx="1.5" />
                 <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
@@ -713,16 +713,16 @@ export function CreditLockPanel({
 }
 
 const PRIMARY_BUTTON =
-  "inline-flex h-10 items-center justify-center rounded-lg bg-[#101828] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#1d2939] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101828]/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex h-10 items-center justify-center rounded-lg bg-[#101828] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-info-solid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40";
 
 const SECONDARY_BUTTON =
-  "inline-flex h-10 items-center justify-center rounded-lg border border-[#d0d5dd] bg-white px-4 text-[13px] font-semibold text-[#344054] transition-colors hover:bg-[#f9fafb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#101828]/20 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-lg border border-line bg-surface px-4 text-[13px] font-semibold text-ink-2 transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 disabled:cursor-not-allowed disabled:opacity-50";
 
 function CardGlyph() {
   return (
     <span
       aria-hidden
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#eaecf0] bg-[#f9fafb] text-[#344054]"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-field text-ink-2"
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="5.5" width="18" height="13" rx="2" />
@@ -733,9 +733,9 @@ function CardGlyph() {
 }
 
 const NOTICE_TONE = {
-  success: "border-[#067647] text-[#054f31]",
-  pending: "border-[#b54708] text-[#7a2e0e]",
-  danger: "border-[#b42318] text-[#7a271a]",
+  success: "border-ok-solid text-ok-fg",
+  pending: "border-accent text-accent-text",
+  danger: "border-danger-solid text-danger-fg",
 } as const;
 
 function Notice({
@@ -751,7 +751,7 @@ function Notice({
     <p
       role={alert ? "alert" : undefined}
       className={cn(
-        "rounded-r-lg border-l-2 bg-[#f9fafb] px-4 py-3 text-[13px] leading-5",
+        "rounded-r-lg border-l-2 bg-field px-4 py-3 text-[13px] leading-5",
         NOTICE_TONE[tone],
       )}
     >

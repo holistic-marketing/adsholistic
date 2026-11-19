@@ -118,8 +118,8 @@ function CopyButton({
       }
       className={
         dark
-          ? "inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-[#1c1917] px-4 text-[13px] font-semibold text-white transition hover:bg-[#3a342e]"
-          : "inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-[#e7e0d8] bg-white px-3 text-[12px] font-semibold text-[#1c1917] transition hover:border-[#cfc6bb]"
+          ? "inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
+          : "inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface px-3 text-[12px] font-semibold text-ink transition hover:border-line-strong"
       }
     >
       {copied ? copiedLabel : label}
@@ -442,13 +442,13 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#ff781f]">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent-text">
             {t("module")}
           </p>
-          <h1 className="mt-1 text-[1.55rem] font-bold tracking-[-0.035em] text-[#1c1917] sm:text-[1.75rem]">
+          <h1 className="mt-1 text-[1.55rem] font-bold tracking-[-0.035em] text-ink sm:text-[1.75rem]">
             {clienteName || t("title")}
           </h1>
-          <p className="mt-1 text-[13px] leading-5 text-[#5c564e]">
+          <p className="mt-1 text-[13px] leading-5 text-ink-2">
             {t("subtitle")}
           </p>
         </div>
@@ -459,7 +459,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
               setShowCreate(true);
               setNotice(null);
             }}
-            className="inline-flex h-10 items-center rounded-xl border border-[#e7e0d8] bg-white px-4 text-[13px] font-semibold text-[#1c1917] transition hover:border-[#cfc6bb]"
+            className="inline-flex h-10 items-center rounded-box border border-line bg-surface px-4 text-[13px] font-semibold text-ink transition hover:border-line-strong"
           >
             {t("newPixel")}
           </button>
@@ -468,7 +468,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
 
       {error ? (
         <div
-          className="rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-[13px] font-medium text-amber-950"
+          className="rounded-box border border-warn-line/80 bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
           role="alert"
         >
           {error}
@@ -476,7 +476,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       ) : null}
       {notice ? (
         <div
-          className="rounded-xl border border-emerald-200/80 bg-emerald-50 px-4 py-3 text-[13px] font-medium text-emerald-950"
+          className="rounded-box border border-ok-line/80 bg-ok-bg px-4 py-3 text-[13px] font-medium text-ok-fg"
           role="status"
         >
           {notice}
@@ -484,19 +484,19 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       ) : null}
 
       {loading && pixels.length === 0 ? (
-        <p className="rounded-2xl border border-[#ece7e0] bg-white px-5 py-8 text-center text-[13px] text-[#8a8177]">
+        <p className="rounded-card border border-line bg-surface px-5 py-8 text-center text-[13px] text-ink-3">
           {tCommon("loading")}
         </p>
       ) : null}
 
       {creatorOpen && !loading ? (
-        <section className="rounded-2xl border border-[#ece7e0] bg-white p-5 sm:p-6">
+        <section className="rounded-card border border-line bg-surface p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[1.1rem] font-bold tracking-[-0.02em] text-[#1c1917]">
+              <h2 className="text-[1.1rem] font-bold tracking-[-0.02em] text-ink">
                 {pixels.length === 0 ? t("createFirstTitle") : t("createTitle")}
               </h2>
-              <p className="mt-1 text-[13px] leading-5 text-[#5c564e]">
+              <p className="mt-1 text-[13px] leading-5 text-ink-2">
                 {t("createBody")}
               </p>
             </div>
@@ -504,7 +504,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="text-[12px] font-semibold text-[#8a8177] hover:text-[#1c1917]"
+                className="text-[12px] font-semibold text-ink-3 hover:text-ink"
               >
                 {tCommon("cancel")}
               </button>
@@ -512,12 +512,12 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
           </div>
 
           {accounts.length === 0 ? (
-            <p className="mt-4 rounded-xl border border-dashed border-[#e0d8ce] bg-[#faf8f5] px-4 py-5 text-[13px] text-[#8a8177]">
+            <p className="mt-4 rounded-box border border-dashed border-line bg-field px-4 py-5 text-[13px] text-ink-3">
               {t("noAccounts")}
             </p>
           ) : (
             <>
-              <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#8a8177]">
+              <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
                 {t("accountsLabel")}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -531,8 +531,8 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                       aria-pressed={on}
                       className={`max-w-full truncate rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                         on
-                          ? "border-[#ff781f] bg-[#fff4ec] text-[#1c1917]"
-                          : "border-[#e7e0d8] bg-white text-[#8a8177] hover:border-[#cfc6bb]"
+                          ? "border-accent bg-field text-ink"
+                          : "border-line bg-surface text-ink-3 hover:border-line-strong"
                       }`}
                     >
                       {on ? "✓ " : ""}
@@ -542,10 +542,10 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 })}
               </div>
 
-              <label className="mt-5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#8a8177]">
+              <label className="mt-5 block text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
                 {t("nameOptional")}
                 <input
-                  className="mt-1.5 w-full rounded-xl border border-[#e7e0d8] bg-[#faf8f5] px-3.5 py-2.5 text-[13px] font-medium normal-case tracking-normal text-[#1c1917] outline-none transition focus:border-[#cfc6bb] focus:bg-white focus:ring-2 focus:ring-[#1c1917]/8"
+                  className="mt-1.5 w-full rounded-box border border-line bg-field px-3.5 py-2.5 text-[13px] font-medium normal-case tracking-normal text-ink outline-none transition focus:border-line-strong focus:bg-surface focus:ring-2 focus:ring-ink/8"
                   value={pixelName}
                   onChange={(e) => setPixelName(e.target.value)}
                   placeholder={`${clienteName} · Pixel`}
@@ -557,7 +557,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                   type="button"
                   onClick={() => void handleCreate()}
                   disabled={creating || syncing || pickedIds.length === 0}
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff781f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#f06a12] disabled:opacity-50"
+                  className="inline-flex h-11 items-center justify-center rounded-box bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
                 >
                   {creating ? t("creating") : t("createAction")}
                 </button>
@@ -565,7 +565,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                   type="button"
                   onClick={() => void handleImport()}
                   disabled={creating || syncing || pickedIds.length === 0}
-                  className="text-[13px] font-semibold text-[#c2410c] underline-offset-2 hover:underline disabled:opacity-50"
+                  className="text-[13px] font-semibold text-accent-text underline-offset-2 hover:underline disabled:opacity-50"
                 >
                   {syncing ? t("importing") : t("importExisting")}
                 </button>
@@ -576,7 +576,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       ) : null}
 
       {pixels.length > 1 && accounts.length > 1 ? (
-        <label className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] font-semibold text-[#1c1917]">
+        <label className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] font-semibold text-ink">
           {t("filterLabel")}
           <select
             value={accountFilter ?? ""}
@@ -585,7 +585,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
               setSelectedKey(null);
               setLinkPickedRaw(null);
             }}
-            className="h-10 min-w-0 max-w-full rounded-xl border border-[#e7e0d8] bg-white px-3 text-[13px] font-medium text-[#1c1917] outline-none transition focus:border-[#cfc6bb] focus:ring-2 focus:ring-[#1c1917]/8"
+            className="h-10 min-w-0 max-w-full rounded-box border border-line bg-surface px-3 text-[13px] font-medium text-ink outline-none transition focus:border-line-strong focus:ring-2 focus:ring-ink/8"
           >
             <option value="">{t("filterAll")}</option>
             {accounts.map((a) => (
@@ -598,7 +598,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       ) : null}
 
       {accountFilter && visiblePixels.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-[#e0d8ce] bg-[#faf8f5] px-5 py-6 text-[13px] text-[#5c564e]">
+        <p className="rounded-card border border-dashed border-line bg-field px-5 py-6 text-[13px] text-ink-2">
           {t("filterEmpty")}
         </p>
       ) : null}
@@ -620,19 +620,19 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 }}
                 className={`flex max-w-full items-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                   active
-                    ? "border-[#1c1917] bg-[#1c1917] text-white"
-                    : "border-[#e7e0d8] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                    ? "border-accent-line bg-accent-soft text-accent-text"
+                    : "border-line bg-surface text-ink hover:border-line-strong"
                 }`}
               >
                 <span
                   className={`h-2 w-2 shrink-0 rounded-full ${
-                    p.events.length ? "bg-emerald-500" : "bg-amber-400"
+                    p.events.length ? "bg-ok-solid" : "bg-warn-solid"
                   }`}
                 />
                 <span className="min-w-0 truncate">{p.name}</span>
                 <span
                   className={`shrink-0 text-[11px] font-medium ${
-                    active ? "text-white/70" : "text-[#8a8177]"
+                    active ? "text-white/70" : "text-ink-3"
                   }`}
                 >
                   {fromShopify ? `${t("shopifyBadge")} · ` : ""}
@@ -645,34 +645,34 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       ) : null}
 
       {selected ? (
-        <section className="rounded-2xl border border-[#ece7e0] bg-white p-5 sm:p-7">
+        <section className="rounded-card border border-line bg-surface p-5 sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-[1.25rem] font-bold tracking-[-0.025em] text-[#1c1917]">
+              <h2 className="truncate text-[1.25rem] font-bold tracking-[-0.025em] text-ink">
                 {selected.name}
               </h2>
-              <p className="mt-1 text-[13px] leading-5 text-[#5c564e]">
+              <p className="mt-1 text-[13px] leading-5 text-ink-2">
                 {t("installBody")}
               </p>
             </div>
             <a
               href={emailHref}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-[#1c1917] px-4 text-[13px] font-semibold text-white transition hover:bg-[#3a342e]"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
             >
               <span aria-hidden>✉</span>
               {t("emailInstructions")}
             </a>
           </div>
 
-          <div className="mt-5 rounded-xl bg-[#f6f4f1] px-4 py-4 sm:px-5">
-            <p className="text-[13.5px] font-bold text-[#1c1917]">
+          <div className="mt-5 rounded-box bg-subtle px-4 py-4 sm:px-5">
+            <p className="text-[13.5px] font-bold text-ink">
               {t("gettingStarted")}
             </p>
-            <p className="mt-1 text-[12.5px] leading-5 text-[#5c564e]">
+            <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
               {t("gettingStartedBody")}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <p className="min-w-0 break-all text-[14px] font-bold text-[#1c1917]">
+              <p className="min-w-0 break-all text-[14px] font-bold text-ink">
                 Pixel ID:{" "}
                 <span className="font-mono tracking-wide">{selected.pixelCode}</span>
               </p>
@@ -682,7 +682,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 copiedLabel={t("copied")}
               />
             </div>
-            <p className="mt-2 text-[11.5px] text-[#8a8177]">
+            <p className="mt-2 text-[11.5px] text-ink-3">
               {t("linkedTo", {
                 accounts: selected.advertiserIds.map(accountName).join(" · "),
               })}
@@ -690,11 +690,11 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
           </div>
 
           {unlinkedAccounts.length > 0 ? (
-            <div className="mt-4 rounded-xl border border-[#ffd9bf] bg-[#fff8f3] p-4 sm:p-5">
-              <h3 className="text-[15px] font-bold text-[#1c1917]">
+            <div className="mt-4 rounded-box border border-accent-line bg-field p-4 sm:p-5">
+              <h3 className="text-[15px] font-bold text-ink">
                 {t("linkMoreTitle")}
               </h3>
-              <p className="mt-1 text-[12.5px] leading-5 text-[#5c564e]">
+              <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
                 {t("linkMoreBody")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -708,8 +708,8 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                       aria-pressed={on}
                       className={`max-w-full truncate rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                         on
-                          ? "border-[#ff781f] bg-white text-[#1c1917]"
-                          : "border-[#e7e0d8] bg-white text-[#8a8177] hover:border-[#cfc6bb]"
+                          ? "border-accent bg-surface text-ink"
+                          : "border-line bg-surface text-ink-3 hover:border-line-strong"
                       }`}
                     >
                       {on ? "✓ " : ""}
@@ -722,23 +722,23 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 type="button"
                 onClick={() => void handleLinkMore()}
                 disabled={linking || linkPicked.length === 0}
-                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-[#ff781f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#f06a12] disabled:opacity-50"
+                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
               >
                 {linking ? t("linkingMore") : t("linkMoreAction")}
               </button>
             </div>
           ) : null}
 
-          <div className="mt-4 rounded-xl border border-[#ece7e0] p-4 sm:p-5">
+          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-[#1c1917]">
+                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-ink">
                   {t("tokenTitle")}
-                  <span className="rounded-md bg-[#f3efe9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#5c564e]">
+                  <span className="rounded-md bg-subtle px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-2">
                     {t("optional")}
                   </span>
                 </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-[#5c564e]">
+                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
                   {t("tokenBody")}
                 </p>
               </div>
@@ -746,7 +746,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 type="button"
                 onClick={() => void handleGenerateToken()}
                 disabled={generating}
-                className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-[#1c1917] px-4 text-[13px] font-semibold text-white transition hover:bg-[#3a342e] disabled:opacity-50"
+                className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
               >
                 {generating
                   ? t("tokenGenerating")
@@ -757,19 +757,19 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
             </div>
 
             {shownToken ? (
-              <div className="mt-4 rounded-lg bg-[#f6f4f1] p-4">
-                <p className="text-[13px] font-bold text-[#1c1917]">
+              <div className="mt-4 rounded-lg bg-subtle p-4">
+                <p className="text-[13px] font-bold text-ink">
                   {t("tokenSaveNow")}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <code className="min-w-0 flex-1 break-all rounded-lg bg-white px-3 py-2.5 font-mono text-[12.5px] text-[#5c564e]">
+                  <code className="min-w-0 flex-1 break-all rounded-lg bg-surface px-3 py-2.5 font-mono text-[12.5px] text-ink-2">
                     {shownToken}
                   </code>
                   <CopyButton value={shownToken} label={t("copy")} copiedLabel={t("copied")} />
                 </div>
               </div>
             ) : activeToken ? (
-              <p className="mt-3 text-[12px] text-[#5c564e]">
+              <p className="mt-3 text-[12px] text-ink-2">
                 {t("tokenActive", {
                   hint: activeToken.hint,
                   date: new Date(activeToken.createdAt).toLocaleDateString(),
@@ -780,28 +780,28 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
 
             {shownToken || activeToken ? (
               <div className="mt-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#8a8177]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
                   {t("tokenEndpoint")}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <code className="min-w-0 flex-1 break-all rounded-lg bg-[#f6f4f1] px-3 py-2.5 font-mono text-[12px] text-[#5c564e]">
+                  <code className="min-w-0 flex-1 break-all rounded-lg bg-subtle px-3 py-2.5 font-mono text-[12px] text-ink-2">
                     {EVENTS_ENDPOINT}
                   </code>
                   <CopyButton value={EVENTS_ENDPOINT} label={t("copy")} copiedLabel={t("copied")} />
                 </div>
-                <p className="mt-2 text-[11.5px] leading-5 text-[#8a8177]">
+                <p className="mt-2 text-[11.5px] leading-5 text-ink-3">
                   {t("tokenEndpointHint")}
                 </p>
               </div>
             ) : null}
           </div>
-          <div className="mt-4 rounded-xl border border-[#ece7e0] p-4 sm:p-5">
+          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="text-[15px] font-bold text-[#1c1917]">
+                <h3 className="text-[15px] font-bold text-ink">
                   {t("step1Title")}
                 </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-[#5c564e]">
+                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
                   {t("step1Body")}
                 </p>
               </div>
@@ -812,27 +812,27 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 dark
               />
             </div>
-            <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-[#f6f4f1] p-4 font-mono text-[11.5px] leading-5 text-[#5c564e]">
+            <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-subtle p-4 font-mono text-[11.5px] leading-5 text-ink-2">
               {snippetFor(selected.pixelCode)}
             </pre>
           </div>
 
-          <div className="mt-4 rounded-xl border border-[#ece7e0] p-4 sm:p-5">
+          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-[#1c1917]">
+                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-ink">
                   {t("step2Title")}
                   <span
                     className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                       selected.events.length
-                        ? "bg-emerald-100 text-emerald-900"
-                        : "bg-amber-100 text-amber-950"
+                        ? "bg-ok-bg text-ok-fg"
+                        : "bg-warn-bg text-warn-fg"
                     }`}
                   >
                     {selected.events.length ? t("eventsOn") : t("eventsOff")}
                   </span>
                 </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-[#5c564e]">
+                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
                   {t("step2Body")}
                 </p>
               </div>
@@ -842,8 +842,8 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 disabled={activating}
                 className={`inline-flex h-10 shrink-0 items-center justify-center rounded-lg px-4 text-[13px] font-semibold transition disabled:opacity-50 ${
                   selected.events.length
-                    ? "border border-[#e7e0d8] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
-                    : "bg-[#ff781f] text-white hover:bg-[#f06a12]"
+                    ? "border border-line bg-surface text-ink hover:border-line-strong"
+                    : "bg-accent-btn text-on-accent hover:bg-accent-btn-hover"
                 }`}
               >
                 {activating
@@ -858,7 +858,7 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                 {selected.events.map((ev) => (
                   <span
                     key={ev}
-                    className="rounded-md bg-[#f3efe9] px-2 py-0.5 text-[11px] font-semibold text-[#5c564e]"
+                    className="rounded-md bg-subtle px-2 py-0.5 text-[11px] font-semibold text-ink-2"
                   >
                     {ev}
                   </span>

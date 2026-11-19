@@ -450,7 +450,7 @@ export async function PaymentsGatewayPanel({
 
         {syncNote ? (
           <p
-            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-950"
+            className="rounded-box border border-warn-line bg-warn-bg px-4 py-3 text-[13px] text-warn-fg"
             role="status"
           >
             {syncNote}
@@ -460,9 +460,9 @@ export async function PaymentsGatewayPanel({
         {hasClienteScope && scopedAccounts.length === 0 ? (
           <section
             id="asignar-saldo"
-            className="dashboard-surface-card scroll-mt-20 rounded-[1rem] px-5 py-5 sm:px-6 sm:py-6"
+            className="dashboard-surface-card scroll-mt-20 rounded-card px-5 py-5 sm:px-6 sm:py-6"
           >
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[var(--auth-accent)]">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-text">
               {t("emptyAllocate.eyebrow", {
                 name: clienteName ?? t("emptyAllocate.thisClient"),
               })}
@@ -479,7 +479,7 @@ export async function PaymentsGatewayPanel({
             </p>
             <Link
               href={routes.adAccounts}
-              className="mt-4 inline-flex h-10 items-center rounded-lg bg-[var(--auth-accent)] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05]"
+              className="mt-4 inline-flex h-10 items-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05]"
             >
               {t("emptyAllocate.cta")}
             </Link>

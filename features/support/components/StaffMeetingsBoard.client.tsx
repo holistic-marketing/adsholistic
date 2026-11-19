@@ -65,19 +65,19 @@ function whenLabel(iso: string) {
 }
 
 function statusClass(status: string) {
-  if (status === "confirmed") return "bg-emerald-50 text-emerald-800";
-  if (status === "pending") return "bg-amber-50 text-amber-800";
-  if (status === "rescheduled") return "bg-orange-50 text-orange-800";
-  if (status === "no_show") return "bg-rose-50 text-rose-700";
-  if (status === "completed") return "bg-slate-100 text-slate-600";
-  return "bg-slate-100 text-slate-500";
+  if (status === "confirmed") return "bg-ok-bg text-ok-fg";
+  if (status === "pending") return "bg-warn-bg text-warn-fg";
+  if (status === "rescheduled") return "bg-warn-bg text-warn-fg";
+  if (status === "no_show") return "bg-danger-bg text-danger-fg";
+  if (status === "completed") return "bg-subtle text-ink-2";
+  return "bg-subtle text-ink-3";
 }
 
 function cellClass(kind: HourKind) {
-  if (kind === "free") return "bg-emerald-100 text-emerald-800";
-  if (kind === "break") return "bg-amber-50 text-amber-800";
-  if (kind === "full") return "bg-slate-200 text-slate-500";
-  return "bg-[#f3f1ee] text-transparent";
+  if (kind === "free") return "bg-ok-bg text-ok-fg";
+  if (kind === "break") return "bg-warn-bg text-warn-fg";
+  if (kind === "full") return "bg-active text-ink-3";
+  return "bg-subtle text-transparent";
 }
 
 function initials(name: string) {
@@ -243,16 +243,16 @@ export function StaffMeetingsBoard({
   }, [cells]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#f6f4f1]">
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-black/5 bg-white px-4 py-3 sm:px-5">
+    <div className="flex h-full min-h-0 flex-col bg-subtle">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-black/5 bg-surface px-4 py-3 sm:px-5">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-accent)]">Soporte</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">Soporte</p>
           <h1 className="text-[16px] font-bold tracking-[-0.02em] text-[var(--auth-text)]">Reuniones</h1>
         </div>
         <button
           type="button"
           onClick={onBackToChats}
-          className="rounded-lg border border-[var(--auth-input-border)] bg-white px-3 py-2 text-[12px] font-semibold text-[var(--auth-text)]"
+          className="rounded-lg border border-[var(--auth-input-border)] bg-surface px-3 py-2 text-[12px] font-semibold text-[var(--auth-text)]"
         >
           Volver a chats
         </button>
@@ -260,7 +260,7 @@ export function StaffMeetingsBoard({
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-4 sm:px-5">
         {error ? (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800" role="alert">
+          <p className="rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg" role="alert">
             {error}
           </p>
         ) : null}
@@ -287,7 +287,7 @@ export function StaffMeetingsBoard({
             </p>
             <ul className="mt-3 space-y-2">
               {schedules.map((schedule) => (
-                <li key={schedule.email} className="rounded-xl border border-[var(--auth-input-border)] bg-white p-3">
+                <li key={schedule.email} className="rounded-box border border-[var(--auth-input-border)] bg-surface p-3">
                   <div className="flex items-start gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#1a1008_0%,#e8451a_140%)] text-[12px] font-bold text-white">
                       {initials(schedule.displayName)}
@@ -298,7 +298,7 @@ export function StaffMeetingsBoard({
                         <span
                           className={cn(
                             "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold",
-                            schedule.isAvailable ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-700",
+                            schedule.isAvailable ? "bg-ok-bg text-ok-fg" : "bg-danger-bg text-danger-fg",
                           )}
                         >
                           {schedule.isAvailable ? "Disponible" : "Ocupado"}
@@ -314,7 +314,7 @@ export function StaffMeetingsBoard({
                       <button
                         type="button"
                         onClick={() => setEditing(schedule)}
-                        className="mt-2 text-[12px] font-semibold text-[var(--auth-accent)]"
+                        className="mt-2 text-[12px] font-semibold text-accent-text"
                       >
                         Editar horario
                       </button>
@@ -414,9 +414,9 @@ export function StaffMeetingsBoard({
                         setMeetUrl(meeting.meetUrl ?? "");
                         setAdvisorEmail(meeting.advisorEmail ?? "");
                       }}
-                      className="w-full rounded-xl border border-[var(--auth-input-border)] px-3 py-2 text-left hover:border-[var(--auth-accent)]/40"
+                      className="w-full rounded-box border border-[var(--auth-input-border)] px-3 py-2 text-left hover:border-[var(--auth-accent)]/40"
                     >
-                      <p className="text-[12px] font-bold tabular-nums text-[var(--auth-accent)]">
+                      <p className="text-[12px] font-bold tabular-nums text-accent-text">
                         {formatMinute(limaParts(new Date(meeting.startsAt)).minuteOfDay)}
                       </p>
                       <p className="truncate text-[13px] font-semibold text-[var(--auth-text)]">{meeting.requesterName}</p>
@@ -455,7 +455,7 @@ export function StaffMeetingsBoard({
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
               aria-label="Filtrar por estado"
-              className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-white px-2 text-[13px]"
+              className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-surface px-2 text-[13px]"
             >
               <option value="all">Todos los estados</option>
               {STATUSES.map((status) => (
@@ -468,7 +468,7 @@ export function StaffMeetingsBoard({
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
               aria-label="Filtrar por tipo"
-              className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-white px-2 text-[13px]"
+              className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-surface px-2 text-[13px]"
             >
               <option value="all">Todos los tipos</option>
               {TYPES.map((type) => (
@@ -481,7 +481,7 @@ export function StaffMeetingsBoard({
           <div className="grid xl:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[46rem] text-left text-[12px]">
-                <thead className="bg-[#faf9f7] text-[11px] uppercase tracking-[0.06em] text-[var(--auth-text-soft)]">
+                <thead className="bg-field text-[11px] uppercase tracking-[0.06em] text-[var(--auth-text-soft)]">
                   <tr>
                     {["Fecha", "Cliente", "Asesor", "Asunto", "Tipo", "Estado"].map((heading) => (
                       <th key={heading} className="whitespace-nowrap px-3 py-2 font-semibold">
@@ -509,7 +509,7 @@ export function StaffMeetingsBoard({
                         }}
                         className={cn(
                           "cursor-pointer border-t border-[var(--auth-divider)]",
-                          selectedId === meeting.id ? "bg-[rgb(255_120_31_/_0.08)]" : "hover:bg-white",
+                          selectedId === meeting.id ? "bg-[rgb(255_120_31_/_0.08)]" : "hover:bg-surface",
                         )}
                       >
                         <td className="whitespace-nowrap px-3 py-2.5 capitalize tabular-nums text-[var(--auth-text)]">{whenLabel(meeting.startsAt)}</td>
@@ -579,7 +579,7 @@ export function StaffMeetingsBoard({
 
 function Kpi({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <article className="dashboard-surface-card rounded-xl px-3 py-3">
+    <article className="dashboard-surface-card rounded-box px-3 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--auth-text-soft)]">{label}</p>
       <p className="mt-1 text-[20px] font-bold tabular-nums tracking-[-0.03em] text-[var(--auth-text)]">{value}</p>
       <p className="text-[11px] text-[var(--auth-text-muted)]">{detail}</p>
@@ -729,7 +729,7 @@ function MinuteField({
       <select
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-white px-2 text-[13px]"
+        className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-2 text-[13px]"
       >
         {options.map((minute) => (
           <option key={minute} value={minute}>
@@ -797,7 +797,7 @@ function Detail({
         <p className="whitespace-pre-wrap rounded-lg bg-[var(--surface-soft)] px-3 py-2 text-[13px] [overflow-wrap:anywhere]">{meeting.notes}</p>
       ) : null}
       {meeting.meetUrl ? (
-        <a href={meeting.meetUrl} target="_blank" rel="noreferrer" className="text-[13px] font-semibold text-emerald-700">
+        <a href={meeting.meetUrl} target="_blank" rel="noreferrer" className="text-[13px] font-semibold text-ok-fg">
           Abrir Meet
         </a>
       ) : null}
@@ -808,7 +808,7 @@ function Detail({
             <select
               value={advisorEmail}
               onChange={(event) => onAdvisor(event.target.value)}
-              className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-white px-2 text-[13px]"
+              className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-2 text-[13px]"
             >
               <option value="">Elegir</option>
               {schedules
@@ -833,7 +833,7 @@ function Detail({
             type="button"
             disabled={saving}
             onClick={onConfirm}
-            className="h-10 w-full rounded-lg bg-emerald-600 text-[13px] font-semibold text-white disabled:opacity-60"
+            className="h-10 w-full rounded-lg bg-ok-solid text-[13px] font-semibold text-white disabled:opacity-60"
           >
             Confirmar
           </button>
@@ -847,7 +847,7 @@ function Detail({
             <button type="button" disabled={saving} onClick={() => onStatus("complete")} className="h-9 rounded-lg border text-[12px] font-semibold">
               Completar
             </button>
-            <button type="button" disabled={saving} onClick={() => onStatus("no_show")} className="h-9 rounded-lg border text-[12px] font-semibold text-rose-700">
+            <button type="button" disabled={saving} onClick={() => onStatus("no_show")} className="h-9 rounded-lg border text-[12px] font-semibold text-danger-fg">
               No show
             </button>
           </div>
@@ -864,7 +864,7 @@ function Detail({
                         "rounded-full px-3 py-1.5 text-[12px] font-bold tabular-nums",
                         slotStart === choice.startsAt
                           ? "bg-[var(--brand-primary)] text-white"
-                          : "bg-white text-[var(--auth-text)] ring-1 ring-black/10",
+                          : "bg-surface text-[var(--auth-text)] ring-1 ring-black/10",
                       )}
                     >
                       {formatMinute(choice.minute)}
@@ -888,7 +888,7 @@ function Detail({
             onClick={() => {
               if (window.confirm("¿Cancelar esta reunión?")) onStatus("cancel");
             }}
-            className="h-9 w-full text-[12px] font-semibold text-rose-700"
+            className="h-9 w-full text-[12px] font-semibold text-danger-fg"
           >
             Cancelar reunión
           </button>

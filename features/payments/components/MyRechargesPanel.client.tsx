@@ -8,15 +8,15 @@ import { ManualPaymentModal } from "@/features/payments/components/ManualPayment
 import type { RechargeRow, RechargeState } from "@/lib/payments/my-recharges.shared";
 
 const TONE: Record<RechargeState, string> = {
-  credited: "bg-[#eaf5ee] text-[#2f6b47]",
-  in_review: "bg-[#eef3fb] text-[#2f5596]",
-  needs_proof: "bg-[#fff4e5] text-[#9a5a12]",
-  pay_yape: "bg-[#f4eefb] text-[#6b3fa0]",
-  pay_crypto: "bg-[#fff4e5] text-[#9a5a12]",
-  processing: "bg-[#f3eee8] text-[#5c564e]",
-  replaced: "bg-[#f3eee8] text-[#8a8177]",
-  cancelled: "bg-[#f3eee8] text-[#8a8177]",
-  failed: "bg-[#fdf0f0] text-[#a23b3b]",
+  credited: "bg-subtle text-ok-fg",
+  in_review: "bg-field text-info-fg",
+  needs_proof: "bg-accent-soft text-accent-text",
+  pay_yape: "bg-field text-[#6b3fa0]",
+  pay_crypto: "bg-accent-soft text-accent-text",
+  processing: "bg-subtle text-ink-2",
+  replaced: "bg-subtle text-ink-3",
+  cancelled: "bg-subtle text-ink-3",
+  failed: "bg-field text-danger-fg",
 };
 
 type ProviderKey = "providerManual" | "providerYape" | "providerCrypto" | "providerCard" | "providerOther";
@@ -51,37 +51,37 @@ export function MyRechargesPanel({ rows, feePercent }: { rows: RechargeRow[]; fe
   }
 
   return (
-    <section id="mis-recargas" className="overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4]">
+    <section id="mis-recargas" className="overflow-hidden rounded-card bg-surface ring-1 ring-line">
       <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
         <div>
-          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#1a1714]">{t("title")}</h2>
-          <p className="mt-0.5 text-[12px] text-[#5c564e]">{t("subtitle")}</p>
+          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">{t("title")}</h2>
+          <p className="mt-0.5 text-[12px] text-ink-2">{t("subtitle")}</p>
         </div>
         {pending > 0 ? (
-          <span className="rounded-full bg-[#fff4e5] px-2.5 py-1 text-[11px] font-semibold text-[#9a5a12]">
+          <span className="rounded-full bg-accent-soft px-2.5 py-1 text-[11px] font-semibold text-accent-text">
             {t("pendingCount", { count: pending })}
           </span>
         ) : null}
       </div>
       <ul className="px-4 pb-3 sm:px-5">
         {rows.map((row) => (
-          <li key={row.id} className="flex flex-col gap-2 border-t border-[#f1ebe4] py-3 sm:flex-row sm:items-center sm:justify-between">
+          <li key={row.id} className="flex flex-col gap-2 border-t border-line py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE[row.state]}`}>
                   {t(`state.${row.state}`)}
                 </span>
-                <span className="text-[13.5px] font-semibold tabular-nums text-[#1a1714]">{charge(row)}</span>
+                <span className="text-[13.5px] font-semibold tabular-nums text-ink">{charge(row)}</span>
                 {row.creditUsdCents != null && row.state !== "replaced" && row.state !== "cancelled" ? (
-                  <span className="text-[12px] text-[#8a8177]">
+                  <span className="text-[12px] text-ink-3">
                     {t("credit", { amount: formatMoney(row.creditUsdCents / 100) })}
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-[11.5px] text-[#8a8177]">
+              <p className="mt-1 text-[11.5px] text-ink-3">
                 {[t(PROVIDER_KEY[row.provider] ?? "providerOther"), when(row.createdAt)].join(" · ")}
               </p>
-              <p className="mt-0.5 break-words text-[12px] leading-5 text-[#5c564e]">
+              <p className="mt-0.5 break-words text-[12px] leading-5 text-ink-2">
                 {row.note ??
                   (row.cryptoMissingUsdt != null
                     ? t("hint.pay_crypto_short", { amount: row.cryptoMissingUsdt.toFixed(2) })
@@ -94,7 +94,7 @@ export function MyRechargesPanel({ rows, feePercent }: { rows: RechargeRow[]; fe
                 <button
                   type="button"
                   onClick={() => setResume(row)}
-                  className="inline-flex h-9 items-center rounded-full bg-[#c46d3c] px-3.5 text-[12.5px] font-semibold text-white transition hover:bg-[#b0602f]"
+                  className="inline-flex h-9 items-center rounded-full bg-accent-btn px-3.5 text-[12.5px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
                 >
                   {t("uploadProof")}
                 </button>
@@ -103,10 +103,10 @@ export function MyRechargesPanel({ rows, feePercent }: { rows: RechargeRow[]; fe
                 <button
                   type="button"
                   onClick={() => void copy(row.yapeCode as string)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-[12.5px] font-semibold text-[#1a1714] ring-1 ring-[#e8dfd4] transition hover:bg-[#faf8f5]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface px-3.5 text-[12.5px] font-semibold text-ink ring-1 ring-line transition hover:bg-field"
                 >
                   <span className="font-mono text-[12px]">{row.yapeCode}</span>
-                  <span className="text-[#8a8177]">{copied === row.yapeCode ? t("copied") : t("copy")}</span>
+                  <span className="text-ink-3">{copied === row.yapeCode ? t("copied") : t("copy")}</span>
                 </button>
               ) : null}
               {row.state === "pay_crypto" && row.checkoutUrl ? (
@@ -114,7 +114,7 @@ export function MyRechargesPanel({ rows, feePercent }: { rows: RechargeRow[]; fe
                   href={row.checkoutUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-9 items-center rounded-full bg-white px-3.5 text-[12.5px] font-semibold text-[#1a1714] ring-1 ring-[#e8dfd4] transition hover:bg-[#faf8f5]"
+                  className="inline-flex h-9 items-center rounded-full bg-surface px-3.5 text-[12.5px] font-semibold text-ink ring-1 ring-line transition hover:bg-field"
                 >
                   {t("payCrypto")}
                 </a>

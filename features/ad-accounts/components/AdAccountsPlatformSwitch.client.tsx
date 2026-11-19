@@ -66,7 +66,7 @@ export function AdAccountsPlatformSwitch({
       <div hidden={active !== "meta"}>{metaHeader}</div>
 
       <div role="tablist" aria-label={t("aria")} className="-mx-1 overflow-x-auto px-1">
-        <div className="inline-flex min-w-full gap-1 rounded-xl border border-[var(--auth-border)] bg-[var(--auth-surface-muted)] p-1 sm:min-w-0">
+        <div className="inline-flex min-w-full gap-1 rounded-box border border-[var(--auth-border)] bg-[var(--auth-surface-muted)] p-1 sm:min-w-0">
           {tabs.map((tab) => {
             const isActive = tab.key === active;
             return (
@@ -78,8 +78,8 @@ export function AdAccountsPlatformSwitch({
                 onClick={() => select(tab.key)}
                 className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors sm:flex-none ${
                   isActive
-                    ? "bg-white text-[var(--auth-text)] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_0_0_1px_rgba(16,24,40,0.04)]"
-                    : "text-[var(--auth-text-muted)] hover:bg-white/60 hover:text-[var(--auth-text)]"
+                    ? "bg-surface text-[var(--auth-text)] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_0_0_1px_rgba(16,24,40,0.04)]"
+                    : "text-[var(--auth-text-muted)] hover:bg-surface/60 hover:text-[var(--auth-text)]"
                 }`}
               >
                 {tab.mark}
@@ -87,9 +87,9 @@ export function AdAccountsPlatformSwitch({
                 {tab.badge ? (
                   <span
                     title={tab.badge}
-                    className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 p-1 text-[10px] font-semibold uppercase tracking-[0.04em] text-amber-700 sm:px-2 sm:py-0.5"
+                    className="inline-flex items-center gap-1 rounded-full border border-warn-line bg-warn-bg p-1 text-[10px] font-semibold uppercase tracking-[0.04em] text-warn-fg sm:px-2 sm:py-0.5"
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-warn-solid" />
                     <span className="hidden sm:inline">{tab.badge}</span>
                   </span>
                 ) : null}

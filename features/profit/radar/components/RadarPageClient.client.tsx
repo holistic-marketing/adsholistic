@@ -35,10 +35,10 @@ const GROUP = 3;
 const MIN_ROUND1 = 6;
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff781f]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf8f5]";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-line";
 /* Sin altura ni padding: en Tailwind v4 "h-11 … h-10" gana h-11 (orden del CSS), así que cada uso los fija. */
-const primaryBase = `inline-flex items-center justify-center rounded-[12px] bg-[#17150f] text-[14px] font-semibold text-white transition-colors hover:bg-[#2b2620] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-const secondaryBase = `inline-flex items-center justify-center rounded-[12px] border border-[#e0d9d0] bg-white text-[14px] font-semibold text-[#1c1917] transition-colors hover:border-[#cfc6bb] disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
+const primaryBase = `inline-flex items-center justify-center rounded-box bg-accent-btn text-[14px] font-semibold text-on-accent transition-colors hover:bg-accent-btn-hover disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
+const secondaryBase = `inline-flex items-center justify-center rounded-box border border-line bg-surface text-[14px] font-semibold text-ink transition-colors hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
 const primaryBtn = `${primaryBase} h-11 px-5`;
 const secondaryBtn = `${secondaryBase} h-11 px-5`;
 const chipBase = `inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-medium transition-colors ${focusRing}`;
@@ -98,8 +98,8 @@ function Enter({ children, className = "" }: { children: ReactNode; className?: 
 function ProfitSays({ speaker, children }: { speaker: string; children: ReactNode }) {
   return (
     <Enter className="flex flex-col gap-1.5">
-      <span className="pl-1 text-[12px] font-semibold text-[#8a8177]">{speaker}</span>
-      <div className="rounded-[18px] rounded-tl-[6px] border border-[#ece7e0] bg-white px-4 py-4 text-[15px] leading-[1.6] text-[#1c1917] shadow-[0_1px_2px_rgb(28_25_23/0.04)] sm:px-5">
+      <span className="pl-1 text-[12px] font-semibold text-ink-3">{speaker}</span>
+      <div className="rounded-card rounded-tl-[6px] border border-line bg-surface px-4 py-4 text-[15px] leading-[1.6] text-ink shadow-[0_1px_2px_rgb(28_25_23/0.04)] sm:px-5">
         {children}
       </div>
     </Enter>
@@ -109,7 +109,7 @@ function ProfitSays({ speaker, children }: { speaker: string; children: ReactNod
 function YouSay({ children }: { children: ReactNode }) {
   return (
     <Enter className="flex justify-end">
-      <p className="max-w-[80%] rounded-[18px] rounded-tr-[6px] bg-[#17150f] px-4 py-2.5 text-[14px] leading-[1.5] text-white [overflow-wrap:anywhere]">
+      <p className="max-w-[80%] rounded-card rounded-tr-[6px] bg-accent-btn px-4 py-2.5 text-[14px] leading-[1.5] text-on-accent [overflow-wrap:anywhere]">
         {children}
       </p>
     </Enter>
@@ -124,7 +124,7 @@ function SkeletonGrid() {
   return (
     <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3" aria-hidden>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="aspect-[9/16] animate-pulse rounded-[14px] bg-[#f0ece6] motion-reduce:animate-none" />
+        <div key={i} className="aspect-[9/16] animate-pulse rounded-box bg-subtle motion-reduce:animate-none" />
       ))}
     </div>
   );
@@ -499,14 +499,14 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
         <RadarHeader t={t} clienteName={clienteName} />
         <div className="mx-auto w-full max-w-[760px]">
           {loadError ? (
-            <div role="alert" className="rounded-[14px] border border-[#ece7e0] bg-white px-5 py-4 text-[14px] text-[#1c1917]">
+            <div role="alert" className="rounded-box border border-line bg-surface px-5 py-4 text-[14px] text-ink">
               <p>{loadError}</p>
               <button type="button" onClick={retryLoad} className={`${secondaryBase} mt-3 h-10 px-5`}>
                 {t("errors.retry")}
               </button>
             </div>
           ) : (
-            <div className="h-40 animate-pulse rounded-[18px] bg-[#f0ece6] motion-reduce:animate-none" aria-busy />
+            <div className="h-40 animate-pulse rounded-card bg-subtle motion-reduce:animate-none" aria-busy />
           )}
         </div>
       </div>
@@ -524,7 +524,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               type="button"
               onClick={() => void skip()}
               disabled={busy}
-              className={`rounded-lg px-2 py-1 text-[13px] font-semibold text-[#5c564e] underline-offset-[3px] hover:text-[#1c1917] hover:underline disabled:opacity-40 ${focusRing}`}
+              className={`rounded-lg px-2 py-1 text-[13px] font-semibold text-ink-2 underline-offset-[3px] hover:text-ink hover:underline disabled:opacity-40 ${focusRing}`}
             >
               {t("skip")}
             </button>
@@ -534,10 +534,10 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
 
       {/* Tu perfil: cada respuesta entra aquí como un chip. */}
       <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top)+0.5rem)] z-10 mx-auto w-full max-w-[760px] sm:top-[calc(4rem+env(safe-area-inset-top)+0.5rem)]">
-        <div className="flex min-h-[52px] flex-wrap items-center gap-2 rounded-[14px] border border-[#ece7e0] bg-white/95 px-4 py-2.5 shadow-[0_8px_24px_-18px_rgb(28_25_23/0.35)] backdrop-blur-sm">
-          <span className="mr-1 text-[12.5px] font-semibold text-[#1c1917]">{t("profileLine")}</span>
+        <div className="flex min-h-[52px] flex-wrap items-center gap-2 rounded-box border border-line bg-surface/95 px-4 py-2.5 shadow-[0_8px_24px_-18px_rgb(28_25_23/0.35)] backdrop-blur-sm">
+          <span className="mr-1 text-[12.5px] font-semibold text-ink">{t("profileLine")}</span>
           {profileChips.length === 0 ? (
-            <span className="text-[13px] text-[#8a8177]">{t("profileEmpty")}</span>
+            <span className="text-[13px] text-ink-3">{t("profileEmpty")}</span>
           ) : null}
           <AnimatePresence initial={false}>
             {profileChips.map((chip) => (
@@ -549,7 +549,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
                 className={`inline-flex h-7 min-w-0 max-w-full items-center rounded-full px-3 text-[13px] font-medium ${
-                  chip.learned ? "bg-[#fff1e8] text-[#9a3412]" : "bg-[#f5f2ed] text-[#1c1917]"
+                  chip.learned ? "bg-accent-soft text-accent-text" : "bg-subtle text-ink"
                 }`}
               >
                 <span className="truncate">{chip.label}</span>
@@ -589,13 +589,13 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                         onClick={() => setCategory(c)}
                         className={`${chipBase} ${
                           selected
-                            ? "border-[#17150f] bg-[#17150f] text-white"
-                            : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                            ? "border-accent-line bg-accent-soft text-accent-text"
+                            : "border-line bg-surface text-ink hover:border-line-strong"
                         }`}
                       >
                         {categoryLabel(c)}
                         {suggested === c ? (
-                          <span className={`text-[11px] font-semibold ${selected ? "text-white/70" : "text-[#8a8177]"}`}>
+                          <span className={`text-[11px] font-semibold ${selected ? "text-white/70" : "text-ink-3"}`}>
                             · {t("intro.suggested")}
                           </span>
                         ) : null}
@@ -624,13 +624,13 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <ul className="mt-4 flex flex-wrap gap-2">
                     {products.map((name) => (
                       <li key={name} className="min-w-0 max-w-full">
-                        <span className="inline-flex h-9 max-w-full items-center gap-1 rounded-full bg-[#f5f2ed] pl-3.5 pr-1.5 text-[13.5px] font-medium">
+                        <span className="inline-flex h-9 max-w-full items-center gap-1 rounded-full bg-subtle pl-3.5 pr-1.5 text-[13.5px] font-medium">
                           <span className="min-w-0 truncate" title={name}>{name}</span>
                           <button
                             type="button"
                             aria-label={t("products.remove", { name })}
                             onClick={() => setProducts((prev) => prev.filter((p) => p !== name))}
-                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[#8a8177] hover:bg-[#ebe5dd] hover:text-[#1c1917] ${focusRing}`}
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-3 hover:bg-hover hover:text-ink ${focusRing}`}
                           >
                             <svg viewBox="0 0 24 24" aria-hidden className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
                               <path d="M6 6l12 12M18 6 6 18" />
@@ -657,7 +657,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                     onChange={(e) => setProductDraft(e.target.value)}
                     placeholder={t("products.placeholder")}
                     maxLength={80}
-                    className="h-10 min-w-0 flex-1 rounded-[10px] border border-[#e0d9d0] bg-white px-3 text-[14px] text-[#1c1917] caret-[#ff781f] placeholder:text-[#8a8177] hover:border-[#cfc6bb] focus:border-[#1c1917] focus:outline-none"
+                    className="h-10 min-w-0 flex-1 rounded-box border border-line bg-surface px-3 text-[14px] text-ink caret-[#ff781f] placeholder:text-ink-3 hover:border-line-strong focus:border-ink focus:outline-none"
                   />
                   <button type="submit" className={`${secondaryBase} h-10 shrink-0 px-4`} disabled={!productDraft.trim()}>
                     {t("products.add")}
@@ -695,8 +695,8 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                         }
                         className={`${chipBase} ${
                           on
-                            ? "border-[#17150f] bg-[#17150f] text-white"
-                            : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                            ? "border-accent-line bg-accent-soft text-accent-text"
+                            : "border-line bg-surface text-ink hover:border-line-strong"
                         }`}
                       >
                         {appearLabel(a)}
@@ -731,8 +731,8 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                     }}
                     className={`${chipBase} ${
                       objective === o && seed?.objective === o
-                        ? "border-[#1c1917] bg-white text-[#1c1917]"
-                        : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                        ? "border-ink bg-surface text-ink"
+                        : "border-line bg-surface text-ink hover:border-line-strong"
                     }`}
                   >
                     {objectiveLabel(o)}
@@ -770,7 +770,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
             {round1Loading || !round1 ? (
               <ProfitSays speaker={t("speaker.profit")}>
                 <p>{category ? t("round1.intro", { category: categoryLabel(category) }) : null}</p>
-                <p aria-live="polite" className="mt-2 text-[13.5px] text-[#5c564e]">{t("searching")}</p>
+                <p aria-live="polite" className="mt-2 text-[13.5px] text-ink-2">{t("searching")}</p>
                 <SkeletonGrid />
               </ProfitSays>
             ) : round1.videos.length === 0 ? (
@@ -783,7 +783,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   {index === 0 ? (
                     <>
                       <p className="max-w-[62ch]">{t("round1.intro", { category: category ? categoryLabel(category) : "" })}</p>
-                      {round1.regionFallback ? <p className="mt-2 text-[13.5px] text-[#5c564e]">{t("region")}</p> : null}
+                      {round1.regionFallback ? <p className="mt-2 text-[13.5px] text-ink-2">{t("region")}</p> : null}
                     </>
                   ) : (
                     <p>{t("round1.more")}</p>
@@ -831,7 +831,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <p>{t("learned.intro")}</p>
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {learned.map((p) => (
-                      <li key={p.dimension} className="inline-flex h-8 items-center rounded-full bg-[#fff1e8] px-3 text-[13.5px] font-medium text-[#9a3412]">
+                      <li key={p.dimension} className="inline-flex h-8 items-center rounded-full bg-accent-soft px-3 text-[13.5px] font-medium text-accent-text">
                         {tagLabel(p.dimension, p.value)}
                       </li>
                     ))}
@@ -850,11 +850,11 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
             <p className="max-w-[62ch]">{t("round2.intro")}</p>
             {round2Loading || !round2 ? (
               <>
-                <p aria-live="polite" className="mt-2 text-[13.5px] text-[#5c564e]">{t("searching")}</p>
+                <p aria-live="polite" className="mt-2 text-[13.5px] text-ink-2">{t("searching")}</p>
                 <SkeletonGrid />
               </>
             ) : round2.videos.length === 0 ? (
-              <p className="mt-3 text-[14px] text-[#5c564e]">{t("emptyPool")}</p>
+              <p className="mt-3 text-[14px] text-ink-2">{t("emptyPool")}</p>
             ) : (
               <>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -880,7 +880,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <button type="button" className={primaryBtn} disabled={busy || picks.size === 0} onClick={() => void finishRound2()}>
                     {t("round2.submit")}
                   </button>
-                  <span className="text-[13.5px] tabular-nums text-[#5c564e]" aria-live="polite">
+                  <span className="text-[13.5px] tabular-nums text-ink-2" aria-live="polite">
                     {t("round2.count", { count: picks.size })}
                   </span>
                 </Actions>
@@ -897,7 +897,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               <p className="max-w-[62ch]">{t("done.message")}</p>
               {products.length > 1 ? (
                 <>
-                  <p className="mt-3 text-[14px] text-[#5c564e]">{t("recipe.ask")}</p>
+                  <p className="mt-3 text-[14px] text-ink-2">{t("recipe.ask")}</p>
                   <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("recipe.ask")}>
                     {products.map((name) => {
                       const selected = (recipeProduct ?? products[0]) === name;
@@ -910,8 +910,8 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                           onClick={() => setRecipeProduct(name)}
                           className={`${chipBase} max-w-full ${
                             selected
-                              ? "border-[#17150f] bg-[#17150f] text-white"
-                              : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                              ? "border-accent-line bg-accent-soft text-accent-text"
+                              : "border-line bg-surface text-ink hover:border-line-strong"
                           }`}
                         >
                           <span className="truncate">{name}</span>
@@ -921,7 +921,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   </div>
                 </>
               ) : null}
-              <p className="mt-4 text-[14px] text-[#5c564e]">{t("recipe.lengthAsk")}</p>
+              <p className="mt-4 text-[14px] text-ink-2">{t("recipe.lengthAsk")}</p>
               <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("recipe.lengthAsk")}>
                 {(["short", "medium", "long"] as const).map((value) => {
                   const selected = recipeLength === value;
@@ -934,8 +934,8 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                       onClick={() => setRecipeLength(value)}
                       className={`${chipBase} ${
                         selected
-                          ? "border-[#17150f] bg-[#17150f] text-white"
-                          : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                          ? "border-accent-line bg-accent-soft text-accent-text"
+                          : "border-line bg-surface text-ink hover:border-line-strong"
                       }`}
                     >
                       {t(`recipe.length.${value}`)}
@@ -944,13 +944,13 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                 })}
               </div>
               <label className="mt-4 block max-w-[62ch]">
-                <span className="text-[14px] text-[#5c564e]">{t("recipe.detailsLabel")}</span>
+                <span className="text-[14px] text-ink-2">{t("recipe.detailsLabel")}</span>
                 <textarea
                   value={recipeDetails}
                   onChange={(e) => setRecipeDetails(e.target.value.slice(0, 600))}
                   rows={3}
                   placeholder={t("recipe.detailsPlaceholder")}
-                  className="mt-2 block w-full resize-y rounded-[12px] border border-[#e0d9d0] bg-white px-3.5 py-2.5 text-[14px] leading-[1.5] text-[#1c1917] placeholder:text-[#a79e95] focus-visible:border-[#cfc6bb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff781f]/50"
+                  className="mt-2 block w-full resize-y rounded-box border border-line bg-surface px-3.5 py-2.5 text-[14px] leading-[1.5] text-ink placeholder:text-ink-3 focus-visible:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                 />
               </label>
               <Actions>
@@ -969,7 +969,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   {[92, 78, 85, 60].map((w) => (
                     <div
                       key={w}
-                      className="h-3 animate-pulse rounded-full bg-[#f0ece6] motion-reduce:animate-none"
+                      className="h-3 animate-pulse rounded-full bg-subtle motion-reduce:animate-none"
                       style={{ width: `${w}%` }}
                     />
                   ))}
@@ -977,7 +977,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               </ProfitSays>
             ) : latestRecipe ? (
               <Enter className="flex flex-col gap-1.5">
-                <span className="pl-1 text-[12px] font-semibold text-[#8a8177]">{t("speaker.profit")}</span>
+                <span className="pl-1 text-[12px] font-semibold text-ink-3">{t("speaker.profit")}</span>
                 <RadarRecipeView stored={latestRecipe} />
               </Enter>
             ) : null}
@@ -985,7 +985,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
         ) : null}
 
         {actionError ? (
-          <div role="alert" className="rounded-[12px] border border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-[14px] text-[#991b1b]">
+          <div role="alert" className="rounded-box border border-danger-line bg-field px-4 py-3 text-[14px] text-danger-fg">
             {actionError}
           </div>
         ) : null}
@@ -1003,11 +1003,11 @@ function RadarHeader({ t, clienteName, trailing }: { t: RadarT; clienteName: str
   return (
     <header className="flex flex-wrap items-end justify-between gap-4 px-1 pt-1">
       <div className="min-w-0">
-        <h1 className="text-[1.6rem] font-bold leading-tight tracking-[-0.03em] text-[#1c1917] sm:text-[1.75rem]">
+        <h1 className="text-[1.6rem] font-bold leading-tight tracking-[-0.03em] text-ink sm:text-[1.75rem]">
           {t("title")}
-          <span className="font-semibold text-[#8a8177]"> · {clienteName}</span>
+          <span className="font-semibold text-ink-3"> · {clienteName}</span>
         </h1>
-        <p className="mt-1.5 max-w-xl text-[14px] leading-[1.55] text-[#5c564e]">{t("subtitle")}</p>
+        <p className="mt-1.5 max-w-xl text-[14px] leading-[1.55] text-ink-2">{t("subtitle")}</p>
       </div>
       <div className="flex items-center gap-3">
         {trailing}
@@ -1038,15 +1038,15 @@ function Round1Footer({
 }) {
   const ready = done >= min && total > 0;
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-[#ece7e0] pt-4">
+    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line pt-4">
       <div className="flex min-w-[180px] flex-1 items-center gap-3">
-        <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-[#f0ece6]" aria-hidden>
+        <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-subtle" aria-hidden>
           <div
-            className="h-full rounded-full bg-[#ff781f] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="h-full rounded-full bg-accent transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{ width: `${total > 0 ? Math.min(100, (done / total) * 100) : 0}%` }}
           />
         </div>
-        <span className="text-[13px] tabular-nums text-[#5c564e]" aria-live="polite">
+        <span className="text-[13px] tabular-nums text-ink-2" aria-live="polite">
           {t("round1.progress", { done, total })}
         </span>
       </div>
@@ -1059,7 +1059,7 @@ function Round1Footer({
         {t("round1.finish")}
       </button>
       {!ready && total > 0 ? (
-        <span className="w-full text-[12.5px] text-[#8a8177]">{t("round1.needMore", { min })}</span>
+        <span className="w-full text-[12.5px] text-ink-3">{t("round1.needMore", { min })}</span>
       ) : null}
     </div>
   );

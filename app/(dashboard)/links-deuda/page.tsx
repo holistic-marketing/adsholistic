@@ -37,24 +37,24 @@ export default async function LinksDeudaPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">
           Gerente
         </p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-[#1a1714]">
+        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">
           Links deuda
         </h1>
-        <p className="mt-1 max-w-xl text-[13px] leading-5 text-[#6b645c]">
+        <p className="mt-1 max-w-xl text-[13px] leading-5 text-ink-2">
           Elige un cliente y copia su link. Ve lo que debe, sus pagos y gastos,
           y puede abonar o subir comprobante.
         </p>
       </header>
 
       {loadError ? (
-        <p className="rounded-2xl bg-white px-4 py-6 text-[13px] text-[#9a3412] ring-1 ring-[#e8dfd4]">
+        <p className="rounded-card bg-surface px-4 py-6 text-[13px] text-accent-text ring-1 ring-line">
           {loadError}
         </p>
       ) : !ready ? (
-        <p className="rounded-2xl bg-white px-4 py-6 text-[13px] text-[#5c564e] ring-1 ring-[#e8dfd4]">
+        <p className="rounded-card bg-surface px-4 py-6 text-[13px] text-ink-2 ring-1 ring-line">
           En este ambiente todavía no se pueden armar los links.
         </p>
       ) : (

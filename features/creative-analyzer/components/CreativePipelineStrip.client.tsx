@@ -22,7 +22,7 @@ export function CreativePipelineStrip({
   return (
     <nav
       aria-label={t("ariaLabel")}
-      className="overflow-hidden rounded-[1.25rem] border border-[rgb(20_18_16_/_0.08)] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_55%,#f7faf8_100%)] px-3 py-3.5 sm:px-5"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-[linear-gradient(135deg,#fffaf6_0%,#ffffff_55%,#f7faf8_100%)] px-3 py-3.5 sm:px-5"
     >
       <ol className="grid grid-cols-4 gap-1 sm:gap-2">
         {steps.map((step, index) => {
@@ -46,9 +46,9 @@ export function CreativePipelineStrip({
                   className={cn(
                     "flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold tabular-nums transition-colors",
                     done
-                      ? "bg-[var(--auth-accent)] text-white"
+                      ? "bg-accent-btn text-on-accent"
                       : current
-                        ? "bg-[rgb(255_120_31_/_0.15)] text-[var(--auth-accent)] ring-2 ring-[rgb(255_120_31_/_0.35)]"
+                        ? "bg-[rgb(255_120_31_/_0.15)] text-accent-text ring-2 ring-[rgb(255_120_31_/_0.35)]"
                         : "bg-[rgb(20_18_16_/_0.05)] text-[var(--auth-text-soft)]",
                   )}
                 >

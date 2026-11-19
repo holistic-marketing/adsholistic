@@ -152,9 +152,9 @@ export function PaymentsAssignmentPanel({
           role="status"
           aria-live="polite"
         >
-          <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-[0_18px_50px_-24px_rgb(16_185_129_/_0.55)]">
+          <div className="overflow-hidden rounded-card border border-ok-line bg-surface shadow-[0_18px_50px_-24px_rgb(16_185_129_/_0.55)]">
             <div className="flex items-start gap-3 px-4 py-3.5">
-              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-ok-bg text-ok-fg ring-1 ring-ok-line">
                 <svg
                   aria-hidden
                   viewBox="0 0 24 24"
@@ -169,7 +169,7 @@ export function PaymentsAssignmentPanel({
                 </svg>
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold tracking-[-0.01em] text-[#14532d]">
+                <p className="text-[13px] font-bold tracking-[-0.01em] text-ok-fg">
                   {allocateToast.agencyBmFunding
                     ? t("toast.reloadReady")
                     : t("toast.assignedOk")}
@@ -184,13 +184,13 @@ export function PaymentsAssignmentPanel({
               <button
                 type="button"
                 onClick={() => setAllocateToast(null)}
-                className="min-h-10 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#64748b] hover:bg-[#f8fafc] sm:min-h-0"
+                className="min-h-10 rounded-lg px-3 py-1 text-[11px] font-semibold text-ink-2 hover:bg-field sm:min-h-0"
               >
                 {tCommon("close")}
               </button>
             </div>
-            <div className="h-1 bg-emerald-100">
-              <div className="h-full w-full origin-left animate-[allocateToast_5.6s_linear_forwards] bg-emerald-500" />
+            <div className="h-1 bg-ok-bg">
+              <div className="h-full w-full origin-left animate-[allocateToast_5.6s_linear_forwards] bg-ok-solid" />
             </div>
           </div>
         </div>
@@ -364,11 +364,11 @@ function ClientBalanceComparison({
 
   return (
     <div
-      className="border-b border-[var(--auth-border)] bg-[#faf8f5] px-4 py-3 sm:px-5"
+      className="border-b border-[var(--auth-border)] bg-field px-4 py-3 sm:px-5"
       aria-label={t("balanceCompare.aria")}
       aria-busy={loading}
     >
-      <div className="grid grid-cols-2 divide-x divide-[var(--auth-divider)] overflow-hidden rounded-xl border border-[var(--auth-divider)] bg-white">
+      <div className="grid grid-cols-2 divide-x divide-[var(--auth-divider)] overflow-hidden rounded-box border border-[var(--auth-divider)] bg-surface">
         <BalanceValue
           label={t("balanceCompare.holistic")}
           value={formatMoney(walletBalance)}
@@ -398,7 +398,7 @@ function BalanceValue({
 }) {
   return (
     <div className="min-w-0 px-3 py-3 sm:px-4">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8a8178]">
+      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-3">
         {label}
       </p>
       <p
@@ -407,7 +407,7 @@ function BalanceValue({
       >
         {value}
       </p>
-      <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-[#9a9187] sm:line-clamp-none">
+      <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-ink-3 sm:line-clamp-none">
         {hint}
       </p>
     </div>

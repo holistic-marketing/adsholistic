@@ -31,15 +31,15 @@ export function PaymentModalHeader({
   const tCommon = useTranslations("common");
 
   return (
-    <header className="border-b border-[#eee8e2] bg-[#fffaf6] px-5 pb-5 pt-5 sm:px-6">
+    <header className="border-b border-line bg-field px-5 pb-5 pt-5 sm:px-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           {identityIcon}
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-[#1c1917]">
+            <p className="truncate text-[13px] font-semibold text-ink">
               {identityLabel}
             </p>
-            <p className="mt-0.5 truncate text-[11px] text-[#6f675f]">
+            <p className="mt-0.5 truncate text-[11px] text-ink-2">
               {identityDescription}
             </p>
           </div>
@@ -47,7 +47,7 @@ export function PaymentModalHeader({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e7dfd7] bg-white text-[#6f675f] transition-colors hover:bg-[#f7f2ed] hover:text-[#1c1917] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fffaf6]"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-box border border-line bg-surface text-ink-2 transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-line"
           aria-label={tCommon("close")}
         >
           <CloseIcon />
@@ -57,11 +57,11 @@ export function PaymentModalHeader({
       <div className="mt-5 max-w-[38rem]">
         <h2
           id={titleId}
-          className="text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[#171412]"
+          className="text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-ink"
         >
           {title}
         </h2>
-        <p className="mt-1.5 max-w-[62ch] text-[13px] leading-5 text-[#625b54]">
+        <p className="mt-1.5 max-w-[62ch] text-[13px] leading-5 text-ink-2">
           {description}
         </p>
       </div>
@@ -78,17 +78,17 @@ export function PaymentModalHeader({
               <span
                 className={cn(
                   "block h-1 rounded-full transition-colors",
-                  reached ? "bg-[#d47840]" : "bg-[#e5ddd5]",
+                  reached ? "bg-accent" : "bg-active",
                 )}
               />
               <span
                 className={cn(
                   "mt-1.5 block text-[10px] font-semibold",
                   current
-                    ? "text-[#1c1917]"
+                    ? "text-ink"
                     : reached
-                      ? "text-[#a85a32]"
-                      : "text-[#8a8177]",
+                      ? "text-accent-text"
+                      : "text-ink-3",
                 )}
               >
                 {step}
@@ -111,7 +111,7 @@ export function PaymentModalFooter({
   return (
     <div
       className={cn(
-        "mt-6 flex flex-col-reverse gap-2 border-t border-[#eee8e2] pt-4 sm:flex-row sm:justify-end",
+        "mt-6 flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end",
         className,
       )}
     >

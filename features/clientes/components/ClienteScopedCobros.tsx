@@ -60,7 +60,7 @@ export async function ClienteScopedCobros({
         </div>
         <Link
           href={routes.payments}
-          className="text-[12px] font-semibold text-[var(--auth-accent)] hover:underline"
+          className="text-[12px] font-semibold text-accent-text hover:underline"
         >
           {t("goPayments")}
         </Link>

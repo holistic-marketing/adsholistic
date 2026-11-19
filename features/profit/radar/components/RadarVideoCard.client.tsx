@@ -8,7 +8,7 @@ import { TikTokEmbed } from "./TikTokEmbed.client";
 export type CardReaction = "like" | "dislike" | null;
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff781f]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
 function PlayIcon() {
   return (
@@ -67,7 +67,7 @@ export function RadarVideoCard({
       <div
         className={`relative aspect-[9/16] overflow-hidden rounded-[14px] bg-[#1c1917] transition-[opacity,filter] duration-300 ${
           dimmed ? "opacity-45 grayscale" : ""
-        } ${mode === "pick" && picked ? "ring-2 ring-[#17150f] ring-offset-2 ring-offset-white" : ""}`}
+        } ${mode === "pick" && picked ? "ring-2 ring-ink ring-offset-2 ring-offset-white" : ""}`}
       >
         {playing ? (
           <TikTokEmbed videoId={video.videoId} title={t("play", { author })} onDead={onDead} />
@@ -91,7 +91,7 @@ export function RadarVideoCard({
               />
             ) : null}
             <span className="absolute inset-x-0 bottom-0 h-[55%] bg-[linear-gradient(180deg,rgb(28_25_23/0)_0%,rgb(28_25_23/0.82)_100%)]" />
-            <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/92 text-[#17150f] shadow-[0_6px_18px_-6px_rgb(0_0_0/0.5)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+            <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-surface/92 text-ink shadow-[0_6px_18px_-6px_rgb(0_0_0/0.5)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
               <PlayIcon />
             </span>
             <span className="absolute inset-x-3 bottom-3 flex flex-col gap-1 text-white">
@@ -112,8 +112,8 @@ export function RadarVideoCard({
             onClick={() => onReact?.("like")}
             className={`h-9 rounded-[10px] border text-[13px] font-semibold transition-colors ${focusRing} ${
               reaction === "like"
-                ? "border-[#17150f] bg-[#17150f] text-white"
-                : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+                ? "border-accent-line bg-accent-soft text-accent-text"
+                : "border-line bg-surface text-ink hover:border-line-strong"
             }`}
           >
             {t("like")}
@@ -124,8 +124,8 @@ export function RadarVideoCard({
             onClick={() => onReact?.("dislike")}
             className={`h-9 rounded-[10px] border text-[13px] font-semibold transition-colors ${focusRing} ${
               reaction === "dislike"
-                ? "border-[#e0d9d0] bg-[#f5f2ed] text-[#5c564e]"
-                : "border-[#e0d9d0] bg-white text-[#5c564e] hover:border-[#cfc6bb]"
+                ? "border-line bg-subtle text-ink-2"
+                : "border-line bg-surface text-ink-2 hover:border-line-strong"
             }`}
           >
             {t("dislike")}
@@ -138,8 +138,8 @@ export function RadarVideoCard({
           onClick={onTogglePick}
           className={`flex h-9 items-center justify-center gap-1.5 rounded-[10px] border text-[13px] font-semibold transition-colors ${focusRing} ${
             picked
-              ? "border-[#17150f] bg-[#17150f] text-white"
-              : "border-[#e0d9d0] bg-white text-[#1c1917] hover:border-[#cfc6bb]"
+              ? "border-accent-line bg-accent-soft text-accent-text"
+              : "border-line bg-surface text-ink hover:border-line-strong"
           }`}
         >
           {picked ? <CheckIcon /> : null}
@@ -151,7 +151,7 @@ export function RadarVideoCard({
         href={video.shareUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className={`inline-flex items-center gap-1 self-start rounded text-[12px] font-medium text-[#8a8177] underline-offset-[3px] transition-colors hover:text-[#1c1917] hover:underline ${focusRing}`}
+        className={`inline-flex items-center gap-1 self-start rounded text-[12px] font-medium text-ink-3 underline-offset-[3px] transition-colors hover:text-ink hover:underline ${focusRing}`}
       >
         {t("openTikTok")}
         <ExternalIcon />

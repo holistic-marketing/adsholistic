@@ -165,7 +165,7 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
               </Suspense> : null}
               {filteredAccounts.length === 0 && data.accounts.length === 0 ? (
                 <div className="px-6 py-12 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#16161a] text-[9px] font-bold tracking-wide">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-box bg-[#16161a] text-[9px] font-bold tracking-wide">
                     <span className="text-[#25f4ee]">T</span>
                     <span className="text-[#fe2c55]">T</span>
                   </div>
@@ -175,7 +175,7 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
                   <p className="mx-auto mt-2 max-w-lg text-[13px] leading-5 text-[var(--auth-text-muted)]">
                     {t("panel.emptyBodyCreate", { name: clienteName })}
                   </p>
-                  <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-[var(--auth-accent)] px-4 text-[13px] font-semibold text-white transition-[filter] hover:brightness-[1.05]">
+                  <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05]">
                     {t("panel.emptyCtaCreate")}
                   </AdAccountsOpenCreateModalButton>
                 </div>

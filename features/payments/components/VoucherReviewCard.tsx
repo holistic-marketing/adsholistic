@@ -78,16 +78,16 @@ export function VoucherReviewCard({ notice }: { notice: VoucherReviewNotice }) {
   const palette =
     tone === "error"
       ? {
-          box: "border-rose-200 bg-rose-50/70",
-          icon: "bg-rose-100 text-rose-600",
-          title: "text-rose-900",
-          text: "text-rose-900/80",
+          box: "border-danger-line bg-danger-bg/70",
+          icon: "bg-danger-bg text-danger-fg",
+          title: "text-danger-fg",
+          text: "text-danger-fg/80",
         }
       : {
-          box: "border-amber-200 bg-amber-50/70",
-          icon: "bg-amber-100 text-amber-700",
-          title: "text-amber-950",
-          text: "text-amber-900/80",
+          box: "border-warn-line bg-warn-bg/70",
+          icon: "bg-warn-bg text-warn-fg",
+          title: "text-warn-fg",
+          text: "text-warn-fg/80",
         };
   const showAmounts =
     notice.kind === "amount_mismatch" &&
@@ -97,7 +97,7 @@ export function VoucherReviewCard({ notice }: { notice: VoucherReviewNotice }) {
 
   return (
     <div className="space-y-3">
-      <div className={`rounded-2xl border p-4 sm:p-5 ${palette.box}`} role="alert">
+      <div className={`rounded-card border p-4 sm:p-5 ${palette.box}`} role="alert">
         <div className="flex items-start gap-3.5">
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${palette.icon}`}>
             <KindIcon kind={notice.kind} />
@@ -110,15 +110,15 @@ export function VoucherReviewCard({ notice }: { notice: VoucherReviewNotice }) {
 
         {showAmounts ? (
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-white/80 px-3 py-2.5 ring-1 ring-inset ring-rose-100">
-              <p className="text-[11px] font-medium text-[#8a8178]">Monto que ingresaste</p>
-              <p className="mt-0.5 text-[16px] font-semibold tabular-nums text-[#1c1917] line-through decoration-rose-400/70">
+            <div className="rounded-box bg-surface/80 px-3 py-2.5 ring-1 ring-inset ring-danger-line">
+              <p className="text-[11px] font-medium text-ink-3">Monto que ingresaste</p>
+              <p className="mt-0.5 text-[16px] font-semibold tabular-nums text-ink line-through decoration-danger-fg/70">
                 {formatChargeAmount(notice.enteredAmount!, notice.currency!)}
               </p>
             </div>
-            <div className="rounded-xl bg-white/80 px-3 py-2.5 ring-1 ring-inset ring-rose-100">
-              <p className="text-[11px] font-medium text-[#8a8178]">Monto en tu boleta</p>
-              <p className="mt-0.5 text-[16px] font-semibold tabular-nums text-[#1c1917]">
+            <div className="rounded-box bg-surface/80 px-3 py-2.5 ring-1 ring-inset ring-danger-line">
+              <p className="text-[11px] font-medium text-ink-3">Monto en tu boleta</p>
+              <p className="mt-0.5 text-[16px] font-semibold tabular-nums text-ink">
                 {formatChargeAmount(notice.voucherAmount!, notice.currency!)}
               </p>
             </div>
@@ -126,17 +126,17 @@ export function VoucherReviewCard({ notice }: { notice: VoucherReviewNotice }) {
         ) : null}
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-xl bg-[#f6f3ef] px-3.5 py-2.5 text-[12px] leading-5 text-[#57534e]">
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#d47840]" aria-hidden />
+      <div className="flex items-center gap-2.5 rounded-box bg-subtle px-3.5 py-2.5 text-[12px] leading-5 text-ink-2">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
         <span>
-          <span className="font-semibold text-[#1c1917]">Soporte ya tiene tu caso.</span> Te avisaremos por aquí y por
+          <span className="font-semibold text-ink">Soporte ya tiene tu caso.</span> Te avisaremos por aquí y por
           correo. No vuelvas a pagar.
         </span>
       </div>
 
       {notice.tip ? (
-        <p className="px-1 text-[12px] leading-5 text-[#78716c]">
-          <span className="font-semibold text-[#57534e]">Para la próxima: </span>
+        <p className="px-1 text-[12px] leading-5 text-ink-2">
+          <span className="font-semibold text-ink-2">Para la próxima: </span>
           {notice.tip.replace(/^Para la próxima,\s*/i, "").replace(/^./, (c) => c.toUpperCase())}
         </p>
       ) : null}

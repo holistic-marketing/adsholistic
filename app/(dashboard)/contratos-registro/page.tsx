@@ -52,15 +52,15 @@ export default async function RegistrationContractsPage() {
         }
       />
       {loaded.error ? (
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
+        <div className="rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
           No se pudo cargar la lista. Aplica las migraciones 046, 047, 048 y 049.
         </div>
       ) : (loaded.data ?? []).length === 0 ? (
-        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
+        <div className="rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
           Todavía no hay contratos de registro.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+        <div className="overflow-x-auto rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)]">
           <table className="min-w-full text-left text-sm">
             <thead className="text-[var(--admin-text-muted)]">
               <tr>

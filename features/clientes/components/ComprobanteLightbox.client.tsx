@@ -80,24 +80,24 @@ function ComprobanteLightboxBody({
     >
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/82 backdrop-blur-[6px]"
+        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-[6px]"
         aria-label="Cerrar vista ampliada"
         onClick={onClose}
       />
 
-      <div className="relative flex max-h-[min(94vh,calc(100dvh-1.5rem))] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/12 bg-[#161412] shadow-[0_24px_80px_-24px_rgb(0_0_0_/_0.65)]">
+      <div className="relative flex max-h-[min(94vh,calc(100dvh-1.5rem))] w-full max-w-5xl flex-col overflow-hidden rounded-card border border-white/12 bg-[#161412] shadow-[0_24px_80px_-24px_rgb(0_0_0_/_0.65)]">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2.5 sm:px-5 sm:py-3">
           <p className="min-w-0 truncate text-[13px] font-semibold text-white sm:text-sm">
             {title}
           </p>
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
             {isImage ? (
-              <div className="mr-1 flex items-center gap-0.5 rounded-lg bg-white/8 p-0.5 ring-1 ring-white/10">
+              <div className="mr-1 flex items-center gap-0.5 rounded-lg bg-surface/8 p-0.5 ring-1 ring-white/10">
                 <button
                   type="button"
                   onClick={zoomOut}
                   disabled={zoom <= ZOOM_MIN}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-white/10 disabled:opacity-35"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-surface/10 disabled:opacity-35"
                   aria-label="Alejar"
                   title="Alejar (−)"
                 >
@@ -117,7 +117,7 @@ function ComprobanteLightboxBody({
                   type="button"
                   onClick={zoomIn}
                   disabled={zoom >= ZOOM_MAX}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-white/10 disabled:opacity-35"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-surface/10 disabled:opacity-35"
                   aria-label="Acercar"
                   title="Acercar (+)"
                 >
@@ -131,14 +131,14 @@ function ComprobanteLightboxBody({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white sm:inline-flex"
+              className="hidden rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-surface/10 hover:text-white sm:inline-flex"
             >
               Abrir archivo
             </a>
             <button
               type="button"
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition hover:bg-white/10 hover:text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition hover:bg-surface/10 hover:text-white"
               aria-label="Cerrar"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -153,7 +153,7 @@ function ComprobanteLightboxBody({
             <iframe
               src={url}
               title={title}
-              className="h-[min(78vh,760px)] w-full rounded-xl bg-white"
+              className="h-[min(78vh,760px)] w-full rounded-box bg-surface"
             />
           ) : (
             <div className="flex min-h-full w-full items-center justify-center">
@@ -165,7 +165,7 @@ function ComprobanteLightboxBody({
                   setZoom((z) => (z >= 1.5 ? 1 : Math.min(ZOOM_MAX, z + 0.5)))
                 }
                 style={{ transform: `scale(${zoom})` }}
-                className="max-h-[min(78vh,760px)] max-w-full origin-center rounded-xl object-contain shadow-[0_16px_48px_-12px_rgb(0_0_0_/_0.55)] transition-transform duration-200 ease-out"
+                className="max-h-[min(78vh,760px)] max-w-full origin-center rounded-box object-contain shadow-[0_16px_48px_-12px_rgb(0_0_0_/_0.55)] transition-transform duration-200 ease-out"
               />
             </div>
           )}

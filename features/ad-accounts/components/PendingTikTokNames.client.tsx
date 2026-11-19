@@ -21,7 +21,7 @@ export function CopyNameButton({ text }: { text: string }) {
           setTimeout(() => setDone(false), 1200);
         });
       }}
-      className="rounded-md bg-white px-2 py-0.5 text-[11px] font-semibold text-[#c2410c] ring-1 ring-[#f3d5c0] hover:bg-[#fff4ec]"
+      className="rounded-md bg-surface px-2 py-0.5 text-[11px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field"
     >
       {done ? "Copiado ✓" : "Copiar nombre"}
     </button>
@@ -67,11 +67,11 @@ export function PendingTikTokNames() {
   }
 
   return (
-    <section className="rounded-2xl border border-[#e8e1d8] bg-white p-4 sm:p-5">
+    <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-[14px] font-semibold text-[#1c1917]">Nombres pendientes en TikTok (BM 10)</h3>
-          <p className="text-[12px] text-[#6f675f]">
+          <h3 className="text-[14px] font-semibold text-ink">Nombres pendientes en TikTok (BM 10)</h3>
+          <p className="text-[12px] text-ink-2">
             TikTok no deja cambiar el nombre de estas cuentas desde Ads Holistic. Cámbialo a mano y se quita solo de la lista.
           </p>
         </div>
@@ -79,22 +79,22 @@ export function PendingTikTokNames() {
           type="button"
           onClick={load}
           disabled={loading}
-          className="rounded-lg bg-white px-3 py-1.5 text-[12px] font-semibold text-[#c2410c] ring-1 ring-[#f3d5c0] hover:bg-[#fff4ec] disabled:opacity-50"
+          className="rounded-lg bg-surface px-3 py-1.5 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-50"
         >
           {loading ? "Leyendo TikTok…" : "Revisar de nuevo"}
         </button>
       </div>
-      {error ? <p className="mt-2 text-[12px] text-amber-900">{error}</p> : null}
+      {error ? <p className="mt-2 text-[12px] text-warn-fg">{error}</p> : null}
       {rows && !rows.length && !loading ? (
-        <p className="mt-3 text-[13px] text-emerald-700">✓ Todas las cuentas BM 10 de clientes ya tienen su nombre en TikTok.</p>
+        <p className="mt-3 text-[13px] text-ok-fg">✓ Todas las cuentas BM 10 de clientes ya tienen su nombre en TikTok.</p>
       ) : null}
       {rows && rows.length ? (
         <ul className="mt-3 divide-y divide-[#f1ebe3]">
           {rows.map((r) => (
             <li key={r.advertiserId} className="flex flex-wrap items-center justify-between gap-2 py-2 text-[13px]">
               <div className="min-w-0">
-                <p className="font-semibold text-[#1c1917]">{r.expected}</p>
-                <p className="text-[12px] text-[#6f675f]">
+                <p className="font-semibold text-ink">{r.expected}</p>
+                <p className="text-[12px] text-ink-2">
                   En TikTok: “{r.live ?? "?"}” · <span className="font-mono">{r.advertiserId}</span>
                 </p>
               </div>
@@ -104,7 +104,7 @@ export function PendingTikTokNames() {
                   href={tiktokAccountUrl(r.advertiserId)}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-md px-2 py-0.5 text-[11px] font-semibold text-[#c2410c] hover:bg-[#fff4ec]"
+                  className="rounded-md px-2 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
                 >
                   Abrir en TikTok ↗
                 </a>

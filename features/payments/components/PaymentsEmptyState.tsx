@@ -10,7 +10,7 @@ export function PaymentsEmptyState() {
 
   return (
     <div className="flex min-h-[220px] flex-col items-center justify-center px-6 py-10 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]/15">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-card bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]/15">
         <svg
           className="h-7 w-7"
           fill="none"
@@ -31,7 +31,7 @@ export function PaymentsEmptyState() {
       <p className="mt-2 max-w-md text-[14px] leading-6 text-[var(--admin-text-muted,#64748b)]">
         {t("empty.body")}
       </p>
-      <PaymentsOpenAddBalanceButton className="mt-5 inline-flex h-10 items-center rounded-xl bg-[var(--brand-primary)] px-5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[var(--brand-primary-deep)]">
+      <PaymentsOpenAddBalanceButton className="mt-5 inline-flex h-10 items-center rounded-box bg-[var(--brand-primary)] px-5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-[var(--brand-primary-deep)]">
         {t("empty.ctaAdd")}
       </PaymentsOpenAddBalanceButton>
       <Link

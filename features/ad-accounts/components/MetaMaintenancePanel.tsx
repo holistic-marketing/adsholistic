@@ -17,7 +17,7 @@ import { MetaMark } from "./platform-marks";
 
 function Head({ children }: { children: React.ReactNode }) {
   return (
-    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
       {children}
     </TableHead>
   );
@@ -34,8 +34,8 @@ function LockIcon() {
 
 function MaintenancePill({ label }: { label: string }) {
   return (
-    <span className="inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-amber-50 px-2 text-[11px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
-      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+    <span className="inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-warn-bg px-2 text-[11px] font-semibold text-warn-fg ring-1 ring-inset ring-warn-line">
+      <span className="h-1.5 w-1.5 rounded-full bg-warn-solid" />
       {label}
     </span>
   );
@@ -70,13 +70,13 @@ export async function MetaMaintenancePanel({ clienteName }: { clienteName?: stri
                 disabled
                 placeholder={t("toolbar.search")}
                 aria-label={t("toolbar.search")}
-                className="h-9 w-full cursor-not-allowed rounded-lg border border-[var(--auth-border)] bg-white pl-9 pr-3 text-[13px] text-[var(--auth-text)] opacity-60"
+                className="h-9 w-full cursor-not-allowed rounded-lg border border-[var(--auth-border)] bg-surface pl-9 pr-3 text-[13px] text-[var(--auth-text)] opacity-60"
               />
             </div>
             <select
               disabled
               aria-label={tm("allStatuses")}
-              className="h-9 w-full cursor-not-allowed rounded-lg border border-[var(--auth-border)] bg-white px-3 text-[13px] text-[var(--auth-text)] opacity-60 sm:w-auto"
+              className="h-9 w-full cursor-not-allowed rounded-lg border border-[var(--auth-border)] bg-surface px-3 text-[13px] text-[var(--auth-text)] opacity-60 sm:w-auto"
             >
               <option>{tm("allStatuses")}</option>
             </select>
@@ -86,7 +86,7 @@ export async function MetaMaintenancePanel({ clienteName }: { clienteName?: stri
               type="button"
               disabled
               title={tm("ctaHint")}
-              className="inline-flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-[var(--auth-accent)] px-3.5 text-[12px] font-semibold text-white opacity-45"
+              className="inline-flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-accent-btn px-3.5 text-[12px] font-semibold text-on-accent opacity-45"
             >
               <LockIcon />
               {tm("cta")}
@@ -99,7 +99,7 @@ export async function MetaMaintenancePanel({ clienteName }: { clienteName?: stri
       <div className="hidden overflow-x-auto md:block">
         <Table embedded className="rounded-none">
           <TableHeader>
-            <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-[#faf7f3] hover:bg-[#faf7f3]">
+            <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-field hover:bg-field">
               <Head>{t("table.account")}</Head>
               <Head>{t("table.colId")}</Head>
               <Head>{t("table.status")}</Head>

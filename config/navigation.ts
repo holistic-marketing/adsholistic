@@ -1,47 +1,139 @@
 import { routes } from "./routes";
-import type { NavItem } from "@/types/navigation";
+import type { NavGroup, NavItem } from "@/types/navigation";
+import type { DashboardPersona } from "@/types/dashboard-persona";
 
-export const mainNavigation: NavItem[] = [
-  { key: "overview", href: routes.overview, icon: "overview" },
-  { key: "clients", href: routes.clientes, icon: "clients" },
-  { key: "adAccounts", href: routes.adAccounts, icon: "ad-accounts" },
-  { key: "payments", href: routes.payments, icon: "payments" },
-  { key: "profit", href: routes.profit, icon: "profit" },
-  { key: "simulator", href: routes.simulator, icon: "profit" },
-  { key: "assistant", href: routes.assistant, icon: "assistant" },
+/* Menú del panel (sistema visual v3).
+   El equipo ve cuatro grupos; Finanzas se pliega. El cliente ve solo lo suyo,
+   con nombres en primera persona («Mis cuentas», «Saldo y recargas»). */
+
+const item = (
+  key: NavItem["key"],
+  href: string,
+  icon: NavItem["icon"],
+  extra: Partial<NavItem> = {},
+): NavItem => ({ key, href, icon, ...extra });
+
+export const staffNavigation: NavGroup[] = [
   {
-    key: "paymentsManual",
-    href: routes.paymentsManual,
-    icon: "payments-manual",
+    key: "agency",
+    items: [
+      item("overview", routes.overview, "gauge"),
+      item("adAccounts", routes.adAccounts, "layers"),
+      item("clients", routes.clientes, "users"),
+      item("prepagoMonitor", routes.monitoreo, "activity"),
+      {
+        key: "finance",
+        href: routes.payments,
+        icon: "wallet",
+        children: [
+          item("payments", routes.payments, "card"),
+          item("cobros", routes.cobros, "ledger"),
+          item("paymentsManual", routes.paymentsManual, "bank"),
+          item("paymentsProfit", routes.paymentsProfit, "bolt"),
+          item("paymentsMissingCobros", routes.paymentsMissingCobros, "file"),
+          item("debtLinks", routes.linksDeuda, "link"),
+        ],
+      },
+      item("freeAccounts", routes.adAccountsFree, "grid"),
+      item("appeals", routes.apelaciones, "shield"),
+    ],
   },
   {
-    key: "paymentsProfit",
-    href: routes.paymentsProfit,
-    icon: "payments-profit",
+    key: "growth",
+    items: [
+      item("profit", routes.profit, "trend-up"),
+      item("creativeAnalyzer", routes.creativeAnalyzer, "video"),
+      item("pixels", routes.pixels, "target"),
+      item("affiliates", routes.affiliates, "gift"),
+      item("alliances", routes.alianzas, "globe"),
+    ],
   },
   {
-    key: "paymentsMissingCobros",
-    href: routes.paymentsMissingCobros,
-    icon: "payments-missing-cobros",
+    key: "management",
+    items: [
+      item("simulator", routes.simulator, "scale"),
+      item("assistant", routes.assistant, "sparkle"),
+      item("broadcasts", routes.avisos, "megaphone"),
+      item("registrationContracts", routes.registrationContracts, "contract"),
+    ],
   },
-  { key: "debtLinks", href: routes.linksDeuda, icon: "debt-links" },
-  { key: "prepagoMonitor", href: routes.monitoreo, icon: "monitor" },
-  { key: "broadcasts", href: routes.avisos, icon: "broadcasts" },
-  { key: "freeAccounts", href: routes.adAccountsFree, icon: "ad-accounts" },
-  { key: "appeals", href: routes.apelaciones, icon: "support" },
-  { key: "cobros", href: routes.cobros, icon: "cobros" },
-  { key: "affiliates", href: routes.affiliates, icon: "affiliates" },
-  { key: "alliances", href: routes.alianzas, icon: "affiliates" },
-  { key: "registrationContracts", href: routes.registrationContracts, icon: "contracts" },
   {
-    key: "creativeAnalyzer",
-    href: routes.creativeAnalyzer,
-    icon: "creative-analyzer",
+    key: "support",
+    items: [
+      item("support", routes.support, "inbox", { labelKey: "supportStaff" }),
+      item("education", routes.education, "cap"),
+    ],
   },
-  { key: "pixels", href: routes.pixels, icon: "pixels" },
-  { key: "education", href: routes.education, icon: "education" },
-  { key: "support", href: routes.support, icon: "support" },
 ];
+
+export const clienteNavigation: NavGroup[] = [
+  {
+    key: "account",
+    items: [
+      item("overview", routes.overview, "gauge"),
+      item("adAccounts", routes.adAccounts, "layers", { labelKey: "adAccountsClient" }),
+      item("payments", routes.payments, "card", { labelKey: "paymentsClient" }),
+      item("cobros", routes.cobros, "ledger"),
+    ],
+  },
+  {
+    key: "growth",
+    items: [
+      item("profit", routes.profit, "trend-up"),
+      item("creativeAnalyzer", routes.creativeAnalyzer, "video"),
+      item("pixels", routes.pixels, "target"),
+      item("affiliates", routes.affiliates, "gift"),
+      item("alliances", routes.alianzas, "globe"),
+    ],
+  },
+  {
+    key: "help",
+    items: [
+      item("education", routes.education, "cap"),
+      item("support", routes.support, "inbox"),
+    ],
+  },
+];
+
+/** Menú que corresponde a quien mira el panel. */
+export function navigationFor(
+  persona: DashboardPersona,
+  { showAlliances = false }: { showAlliances?: boolean } = {},
+): NavGroup[] {
+  if (persona !== "cliente") return staffNavigation;
+  // «Alianzas» solo para el cliente que ya firmó su contrato de alianza.
+  return clienteNavigation.map((group) => ({
+    ...group,
+    items: group.items.filter((entry) => entry.href !== routes.alianzas || showAlliances),
+  }));
+}
+
+/** Lista plana de destinos (las subsecciones llevan a su sección madre en `parent`). */
+export function flattenNavigation(groups: NavGroup[]): Array<NavItem & { parent?: NavItem }> {
+  return groups.flatMap((group) =>
+    group.items.flatMap((entry) =>
+      entry.children
+        ? entry.children.map((child) => ({ ...child, parent: entry }))
+        : [entry],
+    ),
+  );
+}
+
+/**
+ * La sección activa para una ruta: la coincidencia más larga gana, así
+ * `/payments/manual` no marca también «Recargas y saldo».
+ */
+export function findActiveNavItem(
+  groups: NavGroup[],
+  pathname: string,
+): (NavItem & { parent?: NavItem }) | null {
+  let best: (NavItem & { parent?: NavItem }) | null = null;
+  for (const entry of flattenNavigation(groups)) {
+    const matches = pathname === entry.href || pathname.startsWith(`${entry.href}/`);
+    if (matches && (!best || entry.href.length > best.href.length)) best = entry;
+  }
+  return best;
+}
 
 export interface AdminNavItem {
   label: string;

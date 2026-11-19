@@ -36,15 +36,15 @@ export default async function AlianzasPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">Gerente</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-[#1a1714]">Alianzas</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[#6b645c]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Gerente</p>
+        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Alianzas</h1>
+        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
           Cada aliado tiene su landing en <strong>adsholistic.com/a/&lt;link&gt;</strong>. Los clientes que se registran
           por ahí quedan a su nombre y el aliado gana un % del fee que les cobramos.
         </p>
       </header>
       {loadError ? (
-        <p className="rounded-xl bg-[#fff1ee] px-4 py-3 text-[13px] text-[#a32e23]">{loadError}</p>
+        <p className="rounded-box bg-field px-4 py-3 text-[13px] text-danger-fg">{loadError}</p>
       ) : (
         <AlianzasPanel partners={partners} />
       )}

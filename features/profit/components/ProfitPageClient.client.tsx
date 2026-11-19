@@ -51,26 +51,26 @@ function ProfitAdvisorBotFallback() {
       id="profit-advisor"
       aria-busy="true"
       aria-label={t("advisorTitle")}
-      className="overflow-hidden rounded-[1.4rem] border border-[#eadfd5] bg-[#fffdfb]"
+      className="overflow-hidden rounded-[1.4rem] border border-line bg-surface"
     >
-      <header className="flex items-center gap-4 border-b border-[#eee3da] px-6 py-5">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#1c1917]">
-          <span className="text-[11px] font-black tracking-tight text-[#ff8a45]">
+      <header className="flex items-center gap-4 border-b border-line px-6 py-5">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-card bg-[#1c1917]">
+          <span className="text-[11px] font-black tracking-tight text-accent-text">
             AI
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#cf5a20]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent-text">
             {t("advisorEyebrow")}
           </p>
-          <h2 className="mt-1 text-[1.15rem] font-bold tracking-[-0.025em] text-[#1c1917]">
+          <h2 className="mt-1 text-[1.15rem] font-bold tracking-[-0.025em] text-ink">
             {t("advisorTitle")}
           </h2>
         </div>
       </header>
-      <div className="min-h-[220px] animate-pulse bg-[#fffaf6] motion-reduce:animate-none" />
-      <div className="border-t border-[#eee3da] px-5 py-4 sm:px-6">
-        <div className="h-12 rounded-2xl bg-[#fffaf6]" />
+      <div className="min-h-[220px] animate-pulse bg-field motion-reduce:animate-none" />
+      <div className="border-t border-line px-5 py-4 sm:px-6">
+        <div className="h-12 rounded-card bg-field" />
       </div>
     </section>
   );
@@ -222,15 +222,15 @@ function formatDelta(pct: number | null, noBaselineLabel: string): string {
 function pacingBadgeClass(label: Analysis["pacingLabel"]): string {
   switch (label) {
     case "acelerando":
-      return "bg-[#fff7f0] text-[#c2410c]";
+      return "bg-field text-accent-text";
     case "bajo":
-      return "bg-amber-50 text-amber-900";
+      return "bg-warn-bg text-warn-fg";
     case "parado":
-      return "bg-[#f3efe9] text-[#6b645c]";
+      return "bg-subtle text-ink-2";
     case "normal":
-      return "bg-emerald-50 text-emerald-800";
+      return "bg-ok-bg text-ok-fg";
     default:
-      return "bg-[#f3efe9] text-[#6b645c]";
+      return "bg-subtle text-ink-2";
   }
 }
 
@@ -269,21 +269,21 @@ function Kpi({
     <div
       className={`min-w-0 rounded-xl border px-3.5 py-3.5 ${
         accent
-          ? "border-[#ffd7b8] bg-[#fff7f0]"
-          : "border-[#ece7e0] bg-white"
+          ? "border-accent-line bg-field"
+          : "border-line bg-surface"
       }`}
     >
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9a9187]">
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-ink-3">
         {label}
       </p>
       <p
         className={`mt-1 break-words text-[1.05rem] font-bold tabular-nums tracking-[-0.02em] sm:text-[1.25rem] ${
-          accent ? "text-[#c2410c]" : "text-[#1c1917]"
+          accent ? "text-accent-text" : "text-ink"
         }`}
       >
         {value}
       </p>
-      <p className="mt-0.5 break-words text-[11px] text-[#8a8177]">{hint}</p>
+      <p className="mt-0.5 break-words text-[11px] text-ink-3">{hint}</p>
     </div>
   );
 }
@@ -321,37 +321,37 @@ function scoreInk(verdict: ClienteScore["verdict"] | undefined) {
     case "green":
       return {
         stroke: "#6ee7b7",
-        glow: "bg-emerald-400/25",
-        chip: "bg-emerald-400/15 text-emerald-100 ring-1 ring-emerald-300/35",
-        action: "bg-[#e7f8ef] text-[#14532d]",
+        glow: "bg-ok-solid/25",
+        chip: "bg-ok-solid/15 text-ok-fg ring-1 ring-ok-line/35",
+        action: "bg-subtle text-ok-fg",
       };
     case "yellow":
       return {
         stroke: "#fcd34d",
-        glow: "bg-amber-300/20",
-        chip: "bg-amber-300/15 text-amber-100 ring-1 ring-amber-200/35",
-        action: "bg-[#fff6d8] text-[#854d0e]",
+        glow: "bg-warn-line/20",
+        chip: "bg-warn-line/15 text-warn-fg ring-1 ring-warn-line/35",
+        action: "bg-warn-bg text-accent-text",
       };
     case "orange":
       return {
         stroke: "#ffb080",
-        glow: "bg-[#ff781f]/30",
-        chip: "bg-[#ff781f]/15 text-[#ffe0cc] ring-1 ring-[#ffb080]/40",
-        action: "bg-[#fff1e6] text-[#9a3412]",
+        glow: "bg-accent/30",
+        chip: "bg-accent/15 text-accent-text ring-1 ring-accent/40",
+        action: "bg-accent-soft text-accent-text",
       };
     case "red":
       return {
         stroke: "#fca5a5",
-        glow: "bg-red-400/25",
-        chip: "bg-red-400/15 text-red-100 ring-1 ring-red-300/40",
-        action: "bg-[#fee2e2] text-[#991b1b]",
+        glow: "bg-danger-btn/25",
+        chip: "bg-danger-btn/15 text-danger-fg ring-1 ring-danger-line/40",
+        action: "bg-danger-bg text-danger-fg",
       };
     default:
       return {
         stroke: "rgba(255,255,255,0.45)",
-        glow: "bg-white/10",
-        chip: "bg-white/10 text-white/70 ring-1 ring-white/15",
-        action: "bg-white/10 text-white/70",
+        glow: "bg-surface/10",
+        chip: "bg-surface/10 text-white/70 ring-1 ring-white/15",
+        action: "bg-surface/10 text-white/70",
       };
   }
 }
@@ -445,14 +445,14 @@ function FactorMeter({
   }, [points]);
   const tone =
     points == null
-      ? "bg-white/25"
+      ? "bg-surface/25"
       : points >= 70
-        ? "bg-emerald-400"
+        ? "bg-ok-solid"
         : points >= 45
-          ? "bg-amber-300"
-          : "bg-red-400";
+          ? "bg-warn-line"
+          : "bg-danger-btn";
   return (
-    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface/10">
       <div
         // La transición va en clases: un `transition` inline anulaba motion-reduce.
         className={`h-full rounded-full ${tone} transition-[width] duration-[720ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none`}
@@ -597,7 +597,7 @@ function StaffOpsPanel({
   const score = ops.score;
   const ink = scoreInk(score?.verdict);
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#ff781f]/40 bg-[#1c1917] p-5 text-white shadow-[0_18px_50px_-22px_rgb(28_25_23_/_0.7)] sm:p-6">
+    <section className="relative overflow-hidden rounded-card border border-accent/40 bg-[#1c1917] p-5 text-white shadow-[0_18px_50px_-22px_rgb(28_25_23_/_0.7)] sm:p-6">
       <div
         aria-hidden
         className={`pointer-events-none absolute -left-16 -top-20 h-52 w-52 rounded-full blur-3xl ${ink.glow}`}
@@ -616,7 +616,7 @@ function StaffOpsPanel({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#ffb080]">
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-accent-text">
               {t("staffOpsLabel")}
             </p>
             <h2 className="mt-1 text-[1.2rem] font-bold tracking-tight">
@@ -644,7 +644,7 @@ function StaffOpsPanel({
                         className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
                           active
                             ? bandInk.chip
-                            : "bg-white/5 text-white/35 ring-1 ring-white/10"
+                            : "bg-surface/5 text-white/35 ring-1 ring-white/10"
                         }`}
                       >
                         {scoreVerdictLabel(band, t)} {t(rangeKey)}
@@ -666,11 +666,11 @@ function StaffOpsPanel({
                 </p>
                 <a
                   href="#profit-advisor"
-                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#ff781f] px-3.5 py-2 text-[12px] font-bold text-[#1c1917] transition hover:brightness-110"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-2 text-[12px] font-bold text-ink transition hover:brightness-110"
                 >
                   <span
                     aria-hidden
-                    className="grid h-5 w-5 place-items-center rounded-full bg-[#1c1917] text-[9px] font-black text-[#ff781f]"
+                    className="grid h-5 w-5 place-items-center rounded-full bg-accent-soft text-[9px] font-black text-accent-text"
                   >
                     AI
                   </span>
@@ -682,11 +682,11 @@ function StaffOpsPanel({
                 <p className="mt-2 text-[13px] text-white/70">{t("scorePending")}</p>
                 <a
                   href="#profit-advisor"
-                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#ff781f] px-3.5 py-2 text-[12px] font-bold text-[#1c1917] transition hover:brightness-110"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-2 text-[12px] font-bold text-ink transition hover:brightness-110"
                 >
                   <span
                     aria-hidden
-                    className="grid h-5 w-5 place-items-center rounded-full bg-[#1c1917] text-[9px] font-black text-[#ff781f]"
+                    className="grid h-5 w-5 place-items-center rounded-full bg-accent-soft text-[9px] font-black text-accent-text"
                   >
                     AI
                   </span>
@@ -702,7 +702,7 @@ function StaffOpsPanel({
             {score.factors.map((factor, index) => (
               <div
                 key={factor.id}
-                className="rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3"
+                className="rounded-box border border-white/10 bg-surface/[0.04] px-3.5 py-3"
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
@@ -729,13 +729,13 @@ function StaffOpsPanel({
             {ops.creditHint}
           </p>
           {fromLiveFallback ? (
-            <p className="mt-1 text-[11px] font-medium text-[#ffb080]">
+            <p className="mt-1 text-[11px] font-medium text-accent-text">
               {t("staffOpsLiveFallback")}
             </p>
           ) : null}
         </div>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl bg-white/10 px-3.5 py-3">
+        <div className="rounded-box bg-surface/10 px-3.5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
             {t("staffOpsWallet")}
           </p>
@@ -745,7 +745,7 @@ function StaffOpsPanel({
               : "—"}
           </p>
         </div>
-        <div className="rounded-xl bg-white/10 px-3.5 py-3">
+        <div className="rounded-box bg-surface/10 px-3.5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
             {t("staffOpsAdLedger")}
           </p>
@@ -758,7 +758,7 @@ function StaffOpsPanel({
             })}
           </p>
         </div>
-        <div className="rounded-xl bg-white/10 px-3.5 py-3">
+        <div className="rounded-box bg-surface/10 px-3.5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
             {t("staffOpsLastAlloc")}
           </p>
@@ -778,7 +778,7 @@ function StaffOpsPanel({
             <p className="mt-1 text-[13px] text-white/70">{t("staffOpsNoAlloc")}</p>
           )}
         </div>
-        <div className="rounded-xl bg-white/10 px-3.5 py-3">
+        <div className="rounded-box bg-surface/10 px-3.5 py-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
             {t("staffOpsBurn")}
           </p>
@@ -801,15 +801,15 @@ function StaffOpsPanel({
         </div>
       </div>
       <div className="grid gap-2 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/10 px-3.5 py-2.5">
+        <div className="rounded-box border border-white/10 px-3.5 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/45">
             {t("staffOpsSpendToday")}
           </p>
-          <p className="mt-0.5 text-[14px] font-semibold tabular-nums text-[#ffb080]">
+          <p className="mt-0.5 text-[14px] font-semibold tabular-nums text-accent-text">
             {moneyUsd(spendTodayUsd)}
           </p>
         </div>
-        <div className="rounded-xl border border-white/10 px-3.5 py-2.5">
+        <div className="rounded-box border border-white/10 px-3.5 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/45">
             {t("staffOpsSpend7d")}
           </p>
@@ -817,7 +817,7 @@ function StaffOpsPanel({
             {moneyUsd(spend7dUsd)}
           </p>
         </div>
-        <div className="rounded-xl border border-white/10 px-3.5 py-2.5">
+        <div className="rounded-box border border-white/10 px-3.5 py-2.5">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-white/45">
             {t("staffOpsPacing")}
           </p>
@@ -1134,7 +1134,7 @@ export function ProfitPageClient({
 
       {displayError ? (
         <div
-          className="rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-[13px] font-medium text-amber-950"
+          className="rounded-box border border-warn-line/80 bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
           role="alert"
         >
           {displayError}
@@ -1144,19 +1144,19 @@ export function ProfitPageClient({
       {/* Métricas TikTok: solo cuando el cliente conectó TikTok Ads en el panel. */}
       {tiktokLinked ? (
         <>
-        <header className="relative overflow-hidden rounded-2xl border border-[#ece7e0] bg-[linear-gradient(145deg,#fffaf6_0%,#ffffff_45%,#f7f4ef_100%)] px-5 py-6 sm:px-7">
+        <header className="relative overflow-hidden rounded-card border border-line bg-[linear-gradient(145deg,#fffaf6_0%,#ffffff_45%,#f7f4ef_100%)] px-5 py-6 sm:px-7">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#ff781f]/[0.12] blur-3xl"
+            className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-accent/[0.12] blur-3xl"
           />
           <div className="relative">
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#ff781f]">
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent-text">
               {t("rp.tiktokTitle")}
             </p>
-            <h2 className="mt-1.5 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c1917]">
+            <h2 className="mt-1.5 text-[1.35rem] font-bold tracking-[-0.03em] text-ink">
               {t("heroTitle", { name: clienteName })}
             </h2>
-            <p className="mt-2 max-w-xl text-[13px] leading-5 text-[#5c564e]">
+            <p className="mt-2 max-w-xl text-[13px] leading-5 text-ink-2">
               {t("heroSubtitle")}
             </p>
             <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -1176,7 +1176,7 @@ export function ProfitPageClient({
                 }}
               />
               {loading ? (
-                <p className="pb-3 text-[11px] font-semibold text-[#c2410c]">
+                <p className="pb-3 text-[11px] font-semibold text-accent-text">
                   {tCommon("loading")}
                 </p>
               ) : null}
@@ -1184,21 +1184,21 @@ export function ProfitPageClient({
           </div>
         </header>
 
-        <section className="space-y-4 rounded-2xl border border-[#ffd7b8] bg-[linear-gradient(160deg,#fffaf6_0%,#ffffff_55%,#fff7f0_100%)] p-5 shadow-[0_14px_36px_-24px_rgb(255_120_31_/_0.55)] sm:p-6">
+        <section className="space-y-4 rounded-card border border-accent-line bg-[linear-gradient(160deg,#fffaf6_0%,#ffffff_55%,#fff7f0_100%)] p-5 shadow-[0_14px_36px_-24px_rgb(255_120_31_/_0.55)] sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#ff781f]">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-accent-text">
                 {t("spendTodayTitle")}
               </p>
-              <h2 className="mt-1 text-[1.15rem] font-bold tracking-[-0.02em] text-[#1c1917]">
+              <h2 className="mt-1 text-[1.15rem] font-bold tracking-[-0.02em] text-ink">
                 {t("spendTodaySubtitle")}
               </h2>
-              <p className="mt-0.5 text-[12px] text-[#8a8177]">{hoyHint}</p>
+              <p className="mt-0.5 text-[12px] text-ink-3">{hoyHint}</p>
             </div>
             <div className="flex flex-col items-end gap-2">
               <p
                 className={`text-[2rem] font-bold leading-none tabular-nums tracking-[-0.04em] sm:text-[2.3rem] ${
-                  spendTodayDisplay > 0 ? "text-[#c2410c]" : "text-[#1c1917]"
+                  spendTodayDisplay > 0 ? "text-accent-text" : "text-ink"
                 }`}
                 aria-label={t("spendTodayLiveLabel", { date: formatDayShort(todayYmd, bcp47) })}
               >
@@ -1217,7 +1217,7 @@ export function ProfitPageClient({
                 type="button"
                 onClick={() => void live.refresh({ force: true })}
                 disabled={live.loading}
-                className="rounded-full border border-[#ffd7b8] bg-white px-3 py-2.5 text-[11px] font-bold text-[#c2410c] sm:py-1.5 transition hover:bg-[#fff7f0] disabled:opacity-55"
+                className="rounded-full border border-accent-line bg-surface px-3 py-2.5 text-[11px] font-bold text-accent-text sm:py-1.5 transition hover:bg-field disabled:opacity-55"
               >
                 {live.loading ? tCommon("loading") : t("refreshLive")}
               </button>
@@ -1230,18 +1230,18 @@ export function ProfitPageClient({
               {liveAccounts.slice(0, 6).map((acc) => (
                 <li
                   key={acc.advertiserId}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-[#f0ebe4] bg-white/80 px-3.5 py-2.5"
+                  className="flex items-center justify-between gap-3 rounded-box border border-line bg-surface/80 px-3.5 py-2.5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-[#1c1917]">
+                    <p className="truncate text-[13px] font-semibold text-ink">
                       {acc.accountName}
                     </p>
-                    <p className="truncate text-[11px] tabular-nums text-[#9a9187]">
+                    <p className="truncate text-[11px] tabular-nums text-ink-3">
                       {acc.bmBucket ? `${t("bmLabel")} ${acc.bmBucket} · ` : ""}
                       {acc.advertiserId}
                     </p>
                   </div>
-                  <p className="shrink-0 text-[14px] font-bold tabular-nums text-[#c2410c]">
+                  <p className="shrink-0 text-[14px] font-bold tabular-nums text-accent-text">
                     {moneyUsd(acc.spendTodayUsd ?? 0)}
                   </p>
                 </li>
@@ -1250,7 +1250,7 @@ export function ProfitPageClient({
           ) : null}
 
           {live.error ? (
-            <p className="text-[12px] font-medium text-amber-800" role="alert">
+            <p className="text-[12px] font-medium text-warn-fg" role="alert">
               {analysis
                 ? t("liveFallback", {
                     error: live.error,
@@ -1264,35 +1264,35 @@ export function ProfitPageClient({
         {loading && !analysis ? (
           <div className="space-y-3" role="status" aria-live="polite">
             <span className="sr-only">{t("loadingAnalysis")}</span>
-            <div className="h-24 animate-pulse rounded-2xl border border-[#ece7e0] bg-white" />
+            <div className="h-24 animate-pulse rounded-card border border-line bg-surface" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-20 animate-pulse rounded-2xl border border-[#ece7e0] bg-white"
+                  className="h-20 animate-pulse rounded-card border border-line bg-surface"
                 />
               ))}
             </div>
-            <div className="h-64 animate-pulse rounded-2xl border border-[#ece7e0] bg-white" />
+            <div className="h-64 animate-pulse rounded-card border border-line bg-surface" />
           </div>
         ) : analysis ? (
           <>
             {displaySignals.length > 0 ? (
-              <section className="space-y-3 rounded-2xl border border-[#ece7e0] bg-white p-5 sm:p-6">
+              <section className="space-y-3 rounded-card border border-line bg-surface p-5 sm:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-2">
                   <div>
-                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#8a8177]">
+                    <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-ink-3">
                       {t("signals")}
                     </p>
-                    <h2 className="mt-1 text-[1.1rem] font-bold text-[#1c1917]">
+                    <h2 className="mt-1 text-[1.1rem] font-bold text-ink">
                       {t("signalsTitle")}
                     </h2>
-                    <p className="mt-0.5 text-[12px] text-[#5c564e]">
+                    <p className="mt-0.5 text-[12px] text-ink-2">
                       {isStaff ? t("signalsStaffHint") : t("signalsClientHint")}
                     </p>
                   </div>
                   {isStaff ? (
-                    <p className="rounded-lg bg-[#fff7f0] px-2.5 py-1 text-[11px] font-semibold text-[#c2410c]">
+                    <p className="rounded-lg bg-field px-2.5 py-1 text-[11px] font-semibold text-accent-text">
                       {t("signalsStaffBadge", {
                         warn: warnSignalCount,
                         total: displaySignals.length,
@@ -1313,20 +1313,20 @@ export function ProfitPageClient({
                         key={`${signal.kind}-${idx}-${signal.title}`}
                         className={`rounded-xl border px-3.5 py-3 ${
                           tone === "critical"
-                            ? "border-[#fecaca] bg-[#fef2f2]"
+                            ? "border-danger-line bg-field"
                             : tone === "warn"
-                              ? "border-[#ffd7b8] bg-[#fff7f0]"
-                              : "border-[#ece7e0] bg-[#faf8f5]"
+                              ? "border-accent-line bg-field"
+                              : "border-line bg-field"
                         }`}
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           <span
                             className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] ${
                               tone === "critical"
-                                ? "bg-[#fee2e2] text-[#b91c1c]"
+                                ? "bg-danger-bg text-danger-fg"
                                 : tone === "warn"
-                                  ? "bg-[#ffedd5] text-[#c2410c]"
-                                  : "bg-[#e7e0d8] text-[#5c564e]"
+                                  ? "bg-accent-soft text-accent-text"
+                                  : "bg-active text-ink-2"
                             }`}
                           >
                             {tone === "critical"
@@ -1336,15 +1336,15 @@ export function ProfitPageClient({
                                 : t("severityInfo")}
                           </span>
                           {isStaff ? (
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9187]">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-3">
                               {signal.kind}
                             </span>
                           ) : null}
                         </div>
-                        <p className="mt-1.5 text-[13px] font-semibold text-[#1c1917]">
+                        <p className="mt-1.5 text-[13px] font-semibold text-ink">
                           {signal.title}
                         </p>
-                        <p className="mt-0.5 text-[12px] leading-5 text-[#5c564e]">
+                        <p className="mt-0.5 text-[12px] leading-5 text-ink-2">
                           {signal.detail}
                         </p>
                       </li>
@@ -1354,16 +1354,16 @@ export function ProfitPageClient({
               </section>
             ) : null}
 
-            <section className="space-y-4 rounded-2xl border border-[#ece7e0] bg-white p-5 sm:p-6">
+            <section className="space-y-4 rounded-card border border-line bg-surface p-5 sm:p-6">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#8a8177]">
+                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-ink-3">
                     {t("campaigns")}
                   </p>
-                  <h2 className="mt-1 text-[1.1rem] font-bold text-[#1c1917]">
+                  <h2 className="mt-1 text-[1.1rem] font-bold text-ink">
                     {t("campaignsSubtitle")}
                   </h2>
-                  <p className="mt-0.5 text-[12px] text-[#5c564e]">
+                  <p className="mt-0.5 text-[12px] text-ink-2">
                     {t("rangeMeta", {
                       range: formatRangeLabel(analysis.from, analysis.to, bcp47),
                     })}
@@ -1377,16 +1377,16 @@ export function ProfitPageClient({
                         })}`
                       : ""}
                     {` · ${t("inRangeSpend")} `}
-                    <span className="font-semibold text-[#1c1917]">
+                    <span className="font-semibold text-ink">
                       {moneyUsd(analysis.spendInRange)}
                     </span>
                   </p>
                 </div>
                 {bmOptions.length > 0 ? (
-                  <label className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#8a8177]">
+                  <label className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink-3">
                     BM
                     <select
-                      className="mt-1 block min-w-[140px] rounded-xl border border-[#e7e0d8] bg-[#faf8f5] px-3 py-2 text-[13px] font-medium text-[#1c1917]"
+                      className="mt-1 block min-w-[140px] rounded-box border border-line bg-field px-3 py-2 text-[13px] font-medium text-ink"
                       value={bmFilter}
                       onChange={(e) => setBmFilter(e.target.value)}
                     >
@@ -1516,7 +1516,7 @@ export function ProfitPageClient({
                   />
                 </div>
               ) : analysis.feePercent != null ? (
-                <div className="rounded-xl border border-[#ece7e0] bg-[#faf8f5] px-4 py-3 text-[12px] text-[#5c564e]">
+                <div className="rounded-box border border-line bg-field px-4 py-3 text-[12px] text-ink-2">
                   {t("feeHolisticLine", {
                     fee: analysis.feePercent,
                     spend: moneyUsd(
@@ -1532,21 +1532,21 @@ export function ProfitPageClient({
                 <div
                   className={`rounded-xl border px-4 py-3 ${
                     analysis.netProfit >= 0
-                      ? "border-[#bfe3c9] bg-[#f2faf4]"
-                      : "border-[#f3c4c4] bg-[#fdf3f3]"
+                      ? "border-ok-line bg-field"
+                      : "border-danger-line bg-field"
                   }`}
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9a9187]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-ink-3">
                     {t("netProfitLabel")}
                   </p>
                   <p
                     className={`mt-1 text-[1.35rem] font-bold tabular-nums tracking-[-0.02em] ${
-                      analysis.netProfit >= 0 ? "text-[#15803d]" : "text-[#b91c1c]"
+                      analysis.netProfit >= 0 ? "text-ok-fg" : "text-danger-fg"
                     }`}
                   >
                     {formatMoney(analysis.netProfit, "PEN")}
                   </p>
-                  <p className="mt-0.5 break-words text-[11px] text-[#5c564e]">
+                  <p className="mt-0.5 break-words text-[11px] text-ink-2">
                     {t("netProfitBreakdown", {
                       collected: formatMoney(analysis.collectedRevenue, "PEN"),
                       product: formatMoney(analysis.cogsTotal ?? 0, "PEN"),
@@ -1557,7 +1557,7 @@ export function ProfitPageClient({
                     })}
                   </p>
                   {analysis.hasProductCosts === false ? (
-                    <p className="mt-1 text-[11px] font-semibold text-[#b45309]">
+                    <p className="mt-1 text-[11px] font-semibold text-accent-text">
                       {t("netProfitNoCosts")}
                     </p>
                   ) : null}
@@ -1565,20 +1565,20 @@ export function ProfitPageClient({
               ) : null}
 
               {sortedCampaigns.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[#e0d8ce] bg-[#faf8f5] px-4 py-8 text-center">
-                  <p className="text-[13px] font-semibold text-[#1c1917]">
+                <div className="rounded-box border border-dashed border-line bg-field px-4 py-8 text-center">
+                  <p className="text-[13px] font-semibold text-ink">
                     {t("emptyCampaigns")}
                   </p>
-                  <p className="mx-auto mt-1 max-w-sm text-[12px] leading-5 text-[#5c564e]">
+                  <p className="mx-auto mt-1 max-w-sm text-[12px] leading-5 text-ink-2">
                     {t("emptyTryRange")}
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-[#ece7e0]">
+                <div className="overflow-x-auto rounded-box border border-line">
                   <table className="min-w-[960px] w-full border-collapse text-left text-[11.5px]">
-                    <thead className="sticky top-0 z-[1] bg-[#f7f4ef] text-[10px] uppercase tracking-[0.07em] text-[#9a9187]">
+                    <thead className="sticky top-0 z-[1] bg-subtle text-[10px] uppercase tracking-[0.07em] text-ink-3">
                       <tr>
-                        <th className="sticky left-0 z-[2] bg-[#f7f4ef] px-2.5 py-2.5 sm:px-3">
+                        <th className="sticky left-0 z-[2] bg-subtle px-2.5 py-2.5 sm:px-3">
                           <button
                             type="button"
                             className="font-bold uppercase tracking-[0.07em]"
@@ -1662,36 +1662,36 @@ export function ProfitPageClient({
                         return (
                           <tr
                             key={`${c.platform}-${c.campaignExternalId}-${c.advertiserId ?? ""}`}
-                            className="group border-t border-[#f0ebe4] hover:bg-[#fffaf6]"
+                            className="group border-t border-line hover:bg-field"
                           >
-                            <td className="sticky left-0 z-[1] max-w-[150px] bg-white px-2.5 py-2.5 group-hover:bg-[#fffaf6] sm:max-w-[240px] sm:px-3">
-                              <p className="truncate font-semibold text-[#1c1917]">
+                            <td className="sticky left-0 z-[1] max-w-[150px] bg-surface px-2.5 py-2.5 group-hover:bg-field sm:max-w-[240px] sm:px-3">
+                              <p className="truncate font-semibold text-ink">
                                 {displayCampaignTitle(c.campaignName, c.campaignExternalId)}
                               </p>
                               {isStaff ? (
-                                <p className="mt-0.5 truncate font-mono text-[10px] tabular-nums text-[#9a9187]">
+                                <p className="mt-0.5 truncate font-mono text-[10px] tabular-nums text-ink-3">
                                   {idShown ?? t("noId")}
                                   {c.advertiserId ? ` · ${c.advertiserId}` : ""}
                                 </p>
                               ) : null}
                             </td>
                             <td className="whitespace-nowrap px-2.5 py-2.5 align-top">
-                              <p className="font-semibold tabular-nums text-[#1c1917]">
+                              <p className="font-semibold tabular-nums text-ink">
                                 {deliveryDate}
                               </p>
                               {isStaff && deliveryTime ? (
-                                <p className="mt-0.5 text-[10px] font-medium text-[#c2410c]">
+                                <p className="mt-0.5 text-[10px] font-medium text-accent-text">
                                   {t("updatedShort", { time: deliveryTime })}
                                 </p>
                               ) : null}
                             </td>
-                            <td className="px-2.5 py-2.5 tabular-nums text-[#6b645c]">
+                            <td className="px-2.5 py-2.5 tabular-nums text-ink-2">
                               {c.bm ?? "—"}
                             </td>
-                            <td className="px-2.5 py-2.5 font-semibold tabular-nums text-[#1c1917]">
+                            <td className="px-2.5 py-2.5 font-semibold tabular-nums text-ink">
                               {moneyUsd(c.spend)}
                             </td>
-                            <td className="px-2.5 py-2.5 tabular-nums text-[#6b645c]">
+                            <td className="px-2.5 py-2.5 tabular-nums text-ink-2">
                               {(c.spendShare * 100).toFixed(1)}%
                             </td>
                             <td className="px-2.5 py-2.5 tabular-nums">
@@ -1728,7 +1728,7 @@ export function ProfitPageClient({
                                 <td className="px-2.5 py-2.5 tabular-nums">
                                   {formatMoney(c.collectedEstimated, "PEN")}
                                 </td>
-                                <td className="px-2.5 py-2.5 font-semibold tabular-nums text-[#c2410c]">
+                                <td className="px-2.5 py-2.5 font-semibold tabular-nums text-accent-text">
                                   {c.roasEstimated != null
                                     ? `${c.roasEstimated.toFixed(2)}x`
                                     : "—"}
@@ -1744,7 +1744,7 @@ export function ProfitPageClient({
                     <button
                       type="button"
                       onClick={() => setShowAllCampaigns((v) => !v)}
-                      className="w-full border-t border-[#f0ebe4] bg-[#faf8f5] py-2.5 text-[12px] font-semibold text-[#c2410c] transition hover:bg-[#fff7f0]"
+                      className="w-full border-t border-line bg-field py-2.5 text-[12px] font-semibold text-accent-text transition hover:bg-field"
                     >
                       {showAllCampaigns
                         ? t("campaignsShowLess")
@@ -1762,19 +1762,19 @@ export function ProfitPageClient({
 
       {snapshots.length > 0 ? (
         <section className="space-y-3">
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#8a8177]">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-ink-3">
             {t("snapshotCodTitle")}
           </p>
           {snapshots.map((snap) => (
             <div
               key={snap.store.id}
-              className="grid grid-cols-2 gap-3 rounded-2xl border border-[#ece7e0] bg-white p-4 sm:grid-cols-4"
+              className="grid grid-cols-2 gap-3 rounded-card border border-line bg-surface p-4 sm:grid-cols-4"
             >
               <div className="col-span-2 sm:col-span-4">
-                <p className="text-[14px] font-bold text-[#1c1917]">
+                <p className="text-[14px] font-bold text-ink">
                   {snap.store.name}
                 </p>
-                <p className="text-[11px] text-[#8a8177]">
+                <p className="text-[11px] text-ink-3">
                   {t("snapshotOrdersHint")}
                 </p>
               </div>
@@ -1815,19 +1815,19 @@ export function ProfitPageClient({
       {isStaff ? (
         <section
           aria-labelledby="profit-staff-zone"
-          className="space-y-5 border-t border-dashed border-[#e7e0d8] pt-6"
+          className="space-y-5 border-t border-dashed border-line pt-6"
         >
           <div>
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#ff781f]">
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent-text">
               {t("staffZoneEyebrow")}
             </p>
             <h2
               id="profit-staff-zone"
-              className="mt-1 text-[1.15rem] font-bold tracking-[-0.02em] text-[#1c1917]"
+              className="mt-1 text-[1.15rem] font-bold tracking-[-0.02em] text-ink"
             >
               {t("staffZoneTitle")}
             </h2>
-            <p className="mt-0.5 max-w-xl text-[12px] leading-5 text-[#5c564e]">
+            <p className="mt-0.5 max-w-xl text-[12px] leading-5 text-ink-2">
               {t("staffZoneHint")}
             </p>
           </div>

@@ -57,14 +57,14 @@ export function AddVideosPicker({
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-[rgb(20_18_16_/_0.1)] bg-white p-3">
+    <div className="mt-3 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface p-3">
       <p className="text-[12px] font-semibold text-[var(--auth-text)]">{t("title", { count: picked.length, max: MAX_PICK })}</p>
       {error ? (
-        <p className="mt-2 rounded-lg bg-[#fef2f2] px-2.5 py-1.5 text-[12px] text-[#991b1b]">{error}</p>
+        <p className="mt-2 rounded-lg bg-field px-2.5 py-1.5 text-[12px] text-danger-fg">{error}</p>
       ) : videos === null ? (
         <p className="mt-2 text-[12px] text-[var(--auth-text-muted)]">{t("loading")}</p>
       ) : videos.length === 0 ? (
-        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[12px] text-amber-950">{t("empty")}</p>
+        <p className="mt-2 rounded-lg border border-warn-line bg-warn-bg px-2.5 py-1.5 text-[12px] text-warn-fg">{t("empty")}</p>
       ) : (
         <div className="mt-2 flex max-h-[15rem] flex-wrap gap-2 overflow-y-auto">
           {videos.map((video) => {
@@ -86,7 +86,7 @@ export function AddVideosPicker({
                   <img src={video.coverUrl} alt="" className="h-full w-full object-cover" />
                 ) : null}
                 {on ? (
-                  <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-[var(--auth-accent)] text-[11px] font-bold text-white">
+                  <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-accent-btn text-[11px] font-bold text-on-accent">
                     ✓
                   </span>
                 ) : null}
@@ -106,7 +106,7 @@ export function AddVideosPicker({
           type="button"
           disabled={saving || picked.length === 0}
           onClick={() => void submit()}
-          className="h-9 rounded-xl bg-[var(--auth-accent)] px-3.5 text-[12px] font-bold text-white disabled:opacity-50"
+          className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-50"
         >
           {saving ? t("saving") : t("submit", { count: picked.length })}
         </button>
@@ -114,7 +114,7 @@ export function AddVideosPicker({
           type="button"
           disabled={saving}
           onClick={onCancel}
-          className="h-9 rounded-xl border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
+          className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
         >
           {t("cancel")}
         </button>

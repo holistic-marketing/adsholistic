@@ -50,15 +50,15 @@ export function PaymentsAccountBalanceCell({
       <div className={compact ? "min-w-0" : "min-w-[6.5rem]"}>
         {hasLedger ? (
           <>
-            <p className="text-[13px] font-semibold tabular-nums text-[#1a1612]">
+            <p className="text-[13px] font-semibold tabular-nums text-ink">
               {formatMoney(ledger)}
             </p>
-            <p className="mt-0.5 text-[10px] text-[#9a9187]">
+            <p className="mt-0.5 text-[10px] text-ink-3">
               {t("accountBalance.assignedHolistic")}
             </p>
           </>
         ) : (
-          <span className="text-[12px] text-[#9a9187]">
+          <span className="text-[12px] text-ink-3">
             {t("accountBalance.noTikTokId")}
           </span>
         )}
@@ -68,7 +68,7 @@ export function PaymentsAccountBalanceCell({
 
   if (loading && !metric) {
     return (
-      <span className="animate-pulse motion-reduce:animate-none text-[12px] text-[#9a9187]">
+      <span className="animate-pulse motion-reduce:animate-none text-[12px] text-ink-3">
         {t("accountBalance.tiktokLoading")}
       </span>
     );
@@ -103,22 +103,22 @@ export function PaymentsAccountBalanceCell({
                 ? formatMoney(ledger)
                 : "—"}
           </p>
-          <p className="mt-0.5 text-[10px] leading-4 text-[#9a9187]">
+          <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
             {creditUsd != null
               ? balanceLabel
               : t("accountBalance.assignedHolistic")}
             {metric?.error ? (
-              <span className="ml-1 text-amber-700" title={metric.error}>
+              <span className="ml-1 text-warn-fg" title={metric.error}>
                 · {t("accountBalance.noData")}
               </span>
             ) : null}
           </p>
         </div>
         {compact && agencyBmFunding && spendToday != null ? (
-          <p className="shrink-0 text-right text-[10px] leading-4 text-[#9a9187]">
+          <p className="shrink-0 text-right text-[10px] leading-4 text-ink-3">
             {t("accountBalance.spendToday")}
             <br />
-            <span className="font-semibold tabular-nums text-[#a85a32]">
+            <span className="font-semibold tabular-nums text-accent-text">
               {formatMoney(spendToday)}
             </span>
           </p>
@@ -126,33 +126,33 @@ export function PaymentsAccountBalanceCell({
       </div>
 
       {budgetParts?.kind === "unlimited" ? (
-        <p className="mt-1.5 text-[10px] leading-4 text-[#6b645c]">
+        <p className="mt-1.5 text-[10px] leading-4 text-ink-2">
           {t("accountBalance.budgetUnlimited")}
         </p>
       ) : null}
       {budgetParts?.kind === "limited" ? (
-        <div className="mt-1.5 grid grid-cols-3 gap-1 rounded-lg bg-[#f7f3ee] px-2 py-1.5 text-center">
+        <div className="mt-1.5 grid grid-cols-3 gap-1 rounded-lg bg-subtle px-2 py-1.5 text-center">
           <div className="min-w-0">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#9a9187]">
+            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetCap")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-[#6b645c]">
+            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
               {budgetParts.budget}
             </p>
           </div>
           <div className="min-w-0 border-x border-[rgb(20_18_16_/_0.06)]">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#9a9187]">
+            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetSpent")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-[#6b645c]">
+            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
               {budgetParts.used}
             </p>
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-[#9a9187]">
+            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetLeft")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-[#6b645c]">
+            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
               {budgetParts.left}
             </p>
           </div>
@@ -160,15 +160,15 @@ export function PaymentsAccountBalanceCell({
       ) : null}
 
       {budgetLimitLine ? (
-        <p className="mt-0.5 text-[10px] leading-4 tabular-nums text-[#6b645c]">
+        <p className="mt-0.5 text-[10px] leading-4 tabular-nums text-ink-2">
           {budgetLimitLine}
         </p>
       ) : null}
 
       {!compact && agencyBmFunding && spendToday != null ? (
-        <p className="mt-0.5 text-[10px] leading-4 text-[#9a9187]">
+        <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
           {t("accountBalance.spendToday")}{" "}
-          <span className="font-medium tabular-nums text-[#a85a32]">
+          <span className="font-medium tabular-nums text-accent-text">
             {formatMoney(spendToday)}
           </span>
         </p>
@@ -189,7 +189,7 @@ export function PaymentsAccountBalanceCell({
       ) : null}
 
       {!compact && metric?.fetchedAt ? (
-        <p className="mt-0.5 text-[10px] leading-4 text-[#c8c0b8]">
+        <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
           {formatUpdatedAgo(metric.fetchedAt)}
         </p>
       ) : null}

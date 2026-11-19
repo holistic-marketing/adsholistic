@@ -97,7 +97,7 @@ export function EditTikTokIdsModal({
           />
           <button
             type="button"
-            className="mt-2 text-[12px] font-medium text-[#a85a32] underline-offset-2 hover:underline"
+            className="mt-2 text-[12px] font-medium text-accent-text underline-offset-2 hover:underline"
             onClick={() => setAdvertiserId(BRANLYN_206)}
           >
             {t("editTikTok.useBranlyn")}
@@ -121,7 +121,7 @@ export function EditTikTokIdsModal({
       </div>
 
       {error ? (
-        <p className="mt-3 text-xs text-red-600" role="alert">
+        <p className="mt-3 text-xs text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}

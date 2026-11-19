@@ -5,9 +5,9 @@ export async function PaymentsHistoryEmpty() {
 
   return (
     <div className="flex min-h-[180px] flex-col items-center justify-center px-6 py-10 text-center">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 ring-1 ring-[#e5e7eb]">
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-box bg-subtle ring-1 ring-line">
         <svg
-          className="h-6 w-6 text-[#64748b]"
+          className="h-6 w-6 text-ink-2"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -20,8 +20,8 @@ export async function PaymentsHistoryEmpty() {
           />
         </svg>
       </div>
-      <p className="text-sm font-semibold text-[#0f172a]">{t("historyEmpty.title")}</p>
-      <p className="mt-1 max-w-sm text-sm text-[#64748b]">
+      <p className="text-sm font-semibold text-ink">{t("historyEmpty.title")}</p>
+      <p className="mt-1 max-w-sm text-sm text-ink-2">
         {t("historyEmpty.body")}
       </p>
     </div>

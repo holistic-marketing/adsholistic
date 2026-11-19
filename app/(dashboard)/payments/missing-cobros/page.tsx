@@ -73,7 +73,7 @@ export default async function MissingCobrosReviewPage({
         <div className="flex flex-wrap items-center gap-2 pt-1">
           {hecomClienteId ? (
             <>
-              <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-900 ring-1 ring-sky-200/80">
+              <span className="rounded-full bg-info-bg px-3 py-1 text-xs font-semibold text-info-fg ring-1 ring-info-line/80">
                 Filtrado
                 {clienteName ? `: ${clienteName}` : ""}
               </span>

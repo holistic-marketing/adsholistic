@@ -65,22 +65,22 @@ function hasTransferableBalance(
 
 const APPEAL_CHIP: Record<AppealStatus, string> = {
   pending:
-    "rounded-full bg-[#ecfdf3] px-2 py-0.5 text-[10px] font-semibold text-[#067647] ring-1 ring-[#abefc6]",
-  sent: "rounded-full bg-[#ecfdf3] px-2 py-0.5 text-[10px] font-semibold text-[#067647] ring-1 ring-[#abefc6]",
+    "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line",
+  sent: "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line",
   approved:
-    "rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-[#05603a] ring-1 ring-[#6ce9a6]",
+    "rounded-full bg-ok-bg px-2 py-0.5 text-[10px] font-bold text-ok-fg ring-1 ring-ok-solid",
   rejected:
-    "rounded-full bg-[#fef3f2] px-2 py-0.5 text-[10px] font-semibold text-[#b42318] ring-1 ring-[#fecdca]",
+    "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-danger-fg ring-1 ring-danger-line",
 };
 
 function statusBadgeClass(status: string): string {
   if (status === "disabled") {
-    return "rounded-md bg-[#fef2f2] px-1.5 py-0.5 text-[10px] font-semibold text-[#991b1b] ring-1 ring-[#fecaca]";
+    return "rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-danger-fg ring-1 ring-danger-line";
   }
   if (status === "active") {
-    return "rounded-md bg-[#ecf7f0] px-1.5 py-0.5 text-[10px] font-semibold text-[#1f5c40] ring-1 ring-[#b8e6cc]";
+    return "rounded-md bg-subtle px-1.5 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line";
   }
-  return "rounded-md bg-[#fff7eb] px-1.5 py-0.5 text-[10px] font-semibold text-[#92400e] ring-1 ring-[#f0d9b0]";
+  return "rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-accent-text ring-1 ring-warn-line";
 }
 
 export function PaymentsTable({
@@ -219,7 +219,7 @@ export function PaymentsTable({
       return (
         <button
           type="button"
-          className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#1c1917]/25 bg-white text-[13px] font-semibold text-[#1c1917] transition hover:bg-[#f6f4f1]"
+          className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-ink/25 bg-surface text-[13px] font-semibold text-ink transition hover:bg-hover"
           onClick={() => onAppeal(account)}
         >
           {label}
@@ -230,8 +230,8 @@ export function PaymentsTable({
       <Button
         className={
           mobile
-            ? "h-10 w-full rounded-lg border border-[#1c1917]/25 bg-white text-[13px] font-semibold text-[#1c1917] hover:bg-[#f6f4f1]"
-            : "font-semibold text-[#1c1917]"
+            ? "h-10 w-full rounded-lg border border-ink/25 bg-surface text-[13px] font-semibold text-ink hover:bg-hover"
+            : "font-semibold text-ink"
         }
         variant={mobile ? undefined : "ghost"}
         size={mobile ? undefined : "sm"}
@@ -251,7 +251,7 @@ export function PaymentsTable({
     const transferable = hasTransferableBalance(account, liveUsd) && Boolean(onTransfer);
     // Botón nativo: <Button> primary agrega text-white y dejaba el texto invisible.
     const secondary =
-      "inline-flex h-10 items-center justify-center rounded-lg border border-[var(--brand-primary-deep)]/40 bg-white text-[13px] font-semibold text-[var(--brand-primary-deep)] transition hover:bg-[#fff7f0]";
+      "inline-flex h-10 items-center justify-center rounded-lg border border-[var(--brand-primary-deep)]/40 bg-surface text-[13px] font-semibold text-[var(--brand-primary-deep)] transition hover:bg-field";
     const primary =
       "h-10 rounded-lg bg-[var(--brand-primary)] text-[13px] font-semibold hover:bg-[var(--brand-primary-deep)]";
     const hint = reclaimable
@@ -291,7 +291,7 @@ export function PaymentsTable({
             </Button>
           )}
         </div>
-        {hint ? <p className="text-[11px] leading-4 text-[#7a736a]">{hint}</p> : null}
+        {hint ? <p className="text-[11px] leading-4 text-ink-2">{hint}</p> : null}
         {onEditTikTokIds ? (
           <button
             type="button"
@@ -333,8 +333,8 @@ export function PaymentsTable({
           <p
             className={
               mobile
-                ? "text-[11px] leading-snug text-[#7a736a]"
-                : "max-w-[13rem] text-[10px] leading-[1.45] text-[#7a736a]"
+                ? "text-[11px] leading-snug text-ink-2"
+                : "max-w-[13rem] text-[10px] leading-[1.45] text-ink-2"
             }
           >
             {mobile
@@ -348,8 +348,8 @@ export function PaymentsTable({
             <Button
               className={
                 mobile
-                  ? "h-11 w-full rounded-lg border border-[var(--brand-primary-deep)] bg-white text-[13px] font-semibold text-[var(--brand-primary-deep)] hover:bg-[var(--admin-accent-soft)]"
-                  : "font-semibold text-[#8a8178]"
+                  ? "h-11 w-full rounded-lg border border-[var(--brand-primary-deep)] bg-surface text-[13px] font-semibold text-[var(--brand-primary-deep)] hover:bg-[var(--admin-accent-soft)]"
+                  : "font-semibold text-ink-3"
               }
               variant={mobile ? undefined : "ghost"}
               size={mobile ? undefined : "sm"}
@@ -360,8 +360,8 @@ export function PaymentsTable({
             <p
               className={
                 mobile
-                  ? "text-[11px] leading-4 text-[#7a736a]"
-                  : "max-w-[11rem] px-2 text-[10px] leading-3.5 text-[#7a736a]"
+                  ? "text-[11px] leading-4 text-ink-2"
+                  : "max-w-[11rem] px-2 text-[10px] leading-3.5 text-ink-2"
               }
             >
               {transferable
@@ -397,7 +397,7 @@ export function PaymentsTable({
             className={
               mobile
                 ? "inline-flex min-h-10 w-full items-center justify-center text-center text-[12px] font-medium text-[var(--brand-primary-deep)] underline-offset-2 hover:underline"
-                : "px-2 text-[11px] font-medium text-[#8a8178] underline-offset-2 hover:text-[var(--brand-primary-deep)] hover:underline"
+                : "px-2 text-[11px] font-medium text-ink-3 underline-offset-2 hover:text-[var(--brand-primary-deep)] hover:underline"
             }
             onClick={() => onEditTikTokIds(account)}
           >
@@ -414,8 +414,8 @@ export function PaymentsTable({
         <div
           className={`mx-4 mb-3 rounded-xl border px-4 py-3 text-[13px] ${
             error
-              ? "border-red-200 bg-red-50 text-red-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+              ? "border-danger-line bg-danger-bg text-danger-fg"
+              : "border-ok-line bg-ok-bg text-ok-fg"
           }`}
           role="status"
         >
@@ -430,17 +430,17 @@ export function PaymentsTable({
               key={account.id}
               className={
                 isReclaimableSuspended(account)
-                  ? "rounded-xl border border-[#f0c4a8] bg-[#fff8f2] p-3.5"
-                  : "rounded-xl border border-[rgb(20_18_16_/_0.08)] bg-white p-3.5"
+                  ? "rounded-box border border-accent-line bg-field p-3.5"
+                  : "rounded-box border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5"
               }
             >
               <div className="min-w-0">
-                <p className="break-words text-[14px] font-semibold leading-snug tracking-[-0.02em] text-[#1a1612]">
+                <p className="break-words text-[14px] font-semibold leading-snug tracking-[-0.02em] text-ink">
                   {account.name}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   {account.bmLabel ? (
-                    <span className="rounded-md bg-[#eef4ff] px-1.5 py-0.5 text-[10px] font-semibold text-[#1e40af] ring-1 ring-[#c7d7fe]">
+                    <span className="rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
                       {account.bmLabel}
                     </span>
                   ) : null}
@@ -450,22 +450,22 @@ export function PaymentsTable({
                   {renderAppealChip(account)}
                   {/* Débito apagado ya lo dice la línea de auto-recarga: solo marcar cuando está activo. */}
                   {!agencyBmFunding && account.autoRecharge ? (
-                    <span className="rounded bg-[#ecf7f0] px-1.5 py-0.5 text-[10px] font-semibold text-[#1f5c40]">
+                    <span className="rounded bg-subtle px-1.5 py-0.5 text-[10px] font-semibold text-ok-fg">
                       {t("assignmentTable.autoDebitOn")}
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 break-all font-mono text-[10px] leading-4 text-[#9a9187]">
+                <p className="mt-1 break-all font-mono text-[10px] leading-4 text-ink-3">
                   adv{" "}
                   {account.externalAccountId?.trim() ||
                     t("assignmentTable.noTikTokId")}
                 </p>
               </div>
 
-              <div className="mt-3 rounded-lg bg-[#faf7f3] px-3 py-2.5">
+              <div className="mt-3 rounded-lg bg-field px-3 py-2.5">
                 {renderBalanceCell(account, true)}
                 {!agencyBmFunding && account.thresholdInfo ? (
-                  <p className="mt-1 text-[11px] leading-4 text-[#9a9187]">
+                  <p className="mt-1 text-[11px] leading-4 text-ink-3">
                     {account.thresholdInfo}
                   </p>
                 ) : null}
@@ -480,17 +480,17 @@ export function PaymentsTable({
         <div className="hidden overflow-x-auto md:block">
           <Table embedded className="rounded-none">
             <TableHeader>
-              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-[#faf7f3] hover:bg-[#faf7f3]">
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-field hover:bg-field">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
                   {t("assignmentTable.account")}
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
                   {t("assignmentTable.status")}
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
                   {balanceColumnLabel}
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8178]">
+                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
                   {t("assignmentTable.action")}
                 </TableHead>
               </TableRow>
@@ -501,27 +501,27 @@ export function PaymentsTable({
                   key={account.id}
                   className={
                     isReclaimableSuspended(account)
-                      ? "border-b border-[#f0d9c4] bg-[#fff8f2] transition-colors hover:bg-[#fff3e8]"
-                      : "border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-[#faf7f3]"
+                      ? "border-b border-accent-line bg-field transition-colors hover:bg-accent-soft"
+                      : "border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-field"
                   }
                 >
-                  <TableCell className="text-[14px] font-semibold tracking-[-0.02em] text-[#1a1612]">
+                  <TableCell className="text-[14px] font-semibold tracking-[-0.02em] text-ink">
                     <div className="min-w-0 max-w-[18rem]">
                       <p className="truncate" title={account.name}>{account.name}</p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                         {account.bmLabel ? (
-                          <span className="rounded-md bg-[#eef4ff] px-1.5 py-0.5 text-[10px] font-semibold text-[#1e40af] ring-1 ring-[#c7d7fe]">
+                          <span className="rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
                             {account.bmLabel}
                           </span>
                         ) : null}
-                        <p className="min-w-0 truncate font-mono text-[10px] font-normal text-[#9a9187]">
+                        <p className="min-w-0 truncate font-mono text-[10px] font-normal text-ink-3">
                           adv{" "}
                           {account.externalAccountId?.trim() ||
                             t("assignmentTable.noTikTokId")}
                         </p>
                       </div>
                       {!agencyBmFunding ? (
-                        <p className="mt-1 whitespace-normal text-[10px] font-normal text-[#8a8178]">
+                        <p className="mt-1 whitespace-normal text-[10px] font-normal text-ink-3">
                           {account.autoRecharge
                             ? t("assignmentTable.autoDebitOn")
                             : t("assignmentTable.autoDebitOff")}

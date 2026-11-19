@@ -58,18 +58,18 @@ function withShop(installUrl: string | null, shop: string): string | null {
 }
 
 const inputClass =
-  "h-10 w-full min-w-0 rounded-xl sm:flex-1 border border-[#e7e0d8] bg-[#faf8f5] px-3 text-[13px] font-medium text-[#1c1917] outline-none transition placeholder:text-[#b0a89e] focus:border-[#ff781f]/50 focus:bg-white focus:ring-2 focus:ring-[#ff781f]/15";
+  "h-10 w-full min-w-0 rounded-box sm:flex-1 border border-line bg-field px-3 text-[13px] font-medium text-ink outline-none transition placeholder:text-ink-3 focus:border-accent/50 focus:bg-surface focus:ring-2 focus:ring-accent/15";
 const primaryBtn =
-  "inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-[#ff781f] px-4 text-[13px] font-semibold text-white transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] disabled:opacity-50";
+  "inline-flex h-10 shrink-0 items-center justify-center rounded-box bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] disabled:opacity-50";
 const ghostBtn =
-  "inline-flex h-10 shrink-0 items-center justify-center rounded-xl border border-[#e7e0d8] bg-white px-4 text-[13px] font-semibold text-[#3f3a34] transition hover:bg-[#faf8f5] disabled:opacity-50";
+  "inline-flex h-10 shrink-0 items-center justify-center rounded-box border border-line bg-surface px-4 text-[13px] font-semibold text-ink transition hover:bg-field disabled:opacity-50";
 
 function StatusPill({ tone, children }: { tone: "ok" | "auto" | "todo" | "locked"; children: ReactNode }) {
   const cls = {
-    ok: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    auto: "bg-sky-50 text-sky-700 ring-sky-200",
-    todo: "bg-[#fff4ec] text-[#c2410c] ring-[#ffd7b8]",
-    locked: "bg-[#f5f2ee] text-[#8a8177] ring-[#e7e0d8]",
+    ok: "bg-ok-bg text-ok-fg ring-ok-line",
+    auto: "bg-info-bg text-info-fg ring-info-line",
+    todo: "bg-field text-accent-text ring-accent-line",
+    locked: "bg-subtle text-ink-3 ring-line",
   }[tone];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}>
@@ -93,22 +93,22 @@ function SourceCard({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-[#ece7e0] bg-white p-4 sm:p-5">
+    <div className="flex flex-col rounded-card border border-line bg-surface p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#faf8f5] ring-1 ring-[#ece7e0]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-field ring-1 ring-line">
           {logo}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#b0a89e]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-3">
             {step}
           </p>
-          <h3 className="truncate text-[15px] font-bold tracking-[-0.01em] text-[#1c1917]">
+          <h3 className="truncate text-[15px] font-bold tracking-[-0.01em] text-ink">
             {title}
           </h3>
         </div>
         {status}
       </div>
-      <div className="mt-3 flex flex-1 flex-col text-[12.5px] leading-5 text-[#5c564e]">
+      <div className="mt-3 flex flex-1 flex-col text-[12.5px] leading-5 text-ink-2">
         {children}
       </div>
     </div>
@@ -136,7 +136,7 @@ const logos = {
     </svg>
   ),
   courier: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#ff781f]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-accent-text" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" />
       <circle cx="7" cy="17.5" r="1.8" />
       <circle cx="17" cy="17.5" r="1.8" />
@@ -362,15 +362,15 @@ export function RealProfitConnect({
     URL.revokeObjectURL(url);
   }
 
-  const lockedNote = <p className="mt-auto pt-2 text-[12px] text-[#8a8177]">{t("needsShopify")}</p>;
+  const lockedNote = <p className="mt-auto pt-2 text-[12px] text-ink-3">{t("needsShopify")}</p>;
 
   return (
     <section
       id="profit-shopify-connect"
       aria-labelledby="rp-connect-title"
-      className="scroll-mt-6 overflow-hidden rounded-2xl border border-[#ece7e0] bg-[linear-gradient(160deg,#fffaf6_0%,#ffffff_50%,#faf8f5_100%)]"
+      className="scroll-mt-6 overflow-hidden rounded-card border border-line bg-[linear-gradient(160deg,#fffaf6_0%,#ffffff_50%,#faf8f5_100%)]"
     >
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#ece7e0] px-5 py-5 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-5 sm:px-6">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <a
@@ -378,26 +378,26 @@ export function RealProfitConnect({
               href={realProfitUrl}
               target="_blank"
               rel="noreferrer"
-              className="group inline-flex items-center gap-1.5 text-[1.35rem] font-bold tracking-[-0.03em] text-[#1c1917] hover:text-[#ff781f]"
+              className="group inline-flex items-center gap-1.5 text-[1.35rem] font-bold tracking-[-0.03em] text-ink hover:text-accent-text"
             >
               Real Profit COD
               <svg viewBox="0 0 20 20" className="h-4 w-4 opacity-50 transition group-hover:opacity-100" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <path d="M7 13 13 7M8 7h5v5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+            <span className="rounded-full bg-ok-bg px-2 py-0.5 text-[11px] font-bold text-ok-fg ring-1 ring-ok-line">
               {t("free")}
             </span>
           </div>
-          <p className="mt-1 max-w-xl text-[13px] leading-5 text-[#5c564e]">{t("subtitle")}</p>
+          <p className="mt-1 max-w-xl text-[13px] leading-5 text-ink-2">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2" aria-label={t("progress", { done: connectedCount, total: 4 })}>
           <div className="flex gap-1" aria-hidden>
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={`h-1.5 w-6 rounded-full ${i < connectedCount ? "bg-[#ff781f]" : "bg-[#ece7e0]"}`} />
+              <span key={i} className={`h-1.5 w-6 rounded-full ${i < connectedCount ? "bg-accent" : "bg-subtle"}`} />
             ))}
           </div>
-          <span className="text-[12px] font-semibold tabular-nums text-[#5c564e]">
+          <span className="text-[12px] font-semibold tabular-nums text-ink-2">
             {t("progress", { done: connectedCount, total: 4 })}
           </span>
         </div>
@@ -427,7 +427,7 @@ export function RealProfitConnect({
               <button
                 type="button"
                 onClick={() => onTikTokLinkedChange(false)}
-                className="mt-2 self-start text-[12px] font-semibold text-[#8a8177] underline-offset-2 hover:underline"
+                className="mt-2 self-start text-[12px] font-semibold text-ink-3 underline-offset-2 hover:underline"
               >
                 {t("tiktokHide")}
               </button>
@@ -462,15 +462,15 @@ export function RealProfitConnect({
           {c?.meta.connected && !metaEditing ? (
             <>
               <p>
-                <span className="font-semibold text-[#1c1917]">{c.meta.accountName}</span>
+                <span className="font-semibold text-ink">{c.meta.accountName}</span>
                 <br />
                 {c.meta.lastSyncError ? (
-                  <span className="text-[#b91c1c]">{c.meta.lastSyncError}</span>
+                  <span className="text-danger-fg">{c.meta.lastSyncError}</span>
                 ) : (
                   t("metaOnBody")
                 )}
               </p>
-              <button type="button" onClick={() => setMetaEditing(true)} className="mt-2 self-start text-[12px] font-semibold text-[#c2410c] underline-offset-2 hover:underline">
+              <button type="button" onClick={() => setMetaEditing(true)} className="mt-2 self-start text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline">
                 {t("metaChange")}
               </button>
             </>
@@ -481,14 +481,14 @@ export function RealProfitConnect({
                   <a href="/api/profit/meta-oauth" className={`${primaryBtn} gap-2 self-start bg-[#1877f2]`}>
                     {t("metaOAuthButton")}
                   </a>
-                  <p className="mt-2 text-[12px] text-[#8a8177]">{t("metaOAuthOr")}</p>
+                  <p className="mt-2 text-[12px] text-ink-3">{t("metaOAuthOr")}</p>
                 </>
               ) : null}
               <ol className="list-decimal space-y-1.5 pl-4">
                 <li>
                   {t("metaStep1")}
                   <span className="mt-1.5 flex items-center gap-2">
-                    <code className="rounded-lg bg-[#faf8f5] px-2 py-1 text-[12.5px] font-bold tabular-nums text-[#1c1917] ring-1 ring-[#ece7e0]">
+                    <code className="rounded-lg bg-field px-2 py-1 text-[12.5px] font-bold tabular-nums text-ink ring-1 ring-line">
                       {metaBusinessId}
                     </code>
                     <button
@@ -498,7 +498,7 @@ export function RealProfitConnect({
                         setCopied(true);
                         window.setTimeout(() => setCopied(false), 1800);
                       }}
-                      className="text-[12px] font-semibold text-[#c2410c] hover:underline"
+                      className="text-[12px] font-semibold text-accent-text hover:underline"
                     >
                       {copied ? t("copied") : t("copy")}
                     </button>
@@ -521,21 +521,21 @@ export function RealProfitConnect({
                 </button>
               </div>
               {metaMsg ? (
-                <p className={`mt-2 text-[12px] font-medium ${metaMsg.ok ? "text-emerald-700" : "text-[#b91c1c]"}`}>{metaMsg.text}</p>
+                <p className={`mt-2 text-[12px] font-medium ${metaMsg.ok ? "text-ok-fg" : "text-danger-fg"}`}>{metaMsg.text}</p>
               ) : null}
               {metaRequestsUrl ? (
                 <a
                   href={metaRequestsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 self-start text-[12px] font-semibold text-[#c2410c] underline-offset-2 hover:underline"
+                  className="mt-1 self-start text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline"
                 >
                   {t("metaOpenRequests")}
                 </a>
               ) : null}
-              <details className="mt-4 rounded-xl border border-dashed border-[#e7e0d8] bg-white/60 p-3">
-                <summary className="cursor-pointer text-[12.5px] font-semibold text-[#3f3a34]">{t("metaCsvTitle")}</summary>
-                <ol className="mt-2 list-decimal space-y-1 pl-4 text-[12px] text-[#5c564e]">
+              <details className="mt-4 rounded-box border border-dashed border-line bg-surface/60 p-3">
+                <summary className="cursor-pointer text-[12.5px] font-semibold text-ink">{t("metaCsvTitle")}</summary>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-[12px] text-ink-2">
                   <li>{t("metaCsvStep1")}</li>
                   <li>{t("metaCsvStep2")}</li>
                   <li>{t("metaCsvStep3")}</li>
@@ -555,10 +555,10 @@ export function RealProfitConnect({
                 </button>
                 {metaCsvPreview ? (
                   metaCsvPreview.error ? (
-                    <p className="mt-2 text-[12px] font-medium text-[#b91c1c]">{metaCsvPreview.error}</p>
+                    <p className="mt-2 text-[12px] font-medium text-danger-fg">{metaCsvPreview.error}</p>
                   ) : (
-                    <div className="mt-2 rounded-xl bg-[#faf8f5] p-3">
-                      <p className="text-[12.5px] font-semibold text-[#1c1917]">
+                    <div className="mt-2 rounded-box bg-field p-3">
+                      <p className="text-[12.5px] font-semibold text-ink">
                         {t("metaCsvSummary", {
                           days: metaCsvPreview.days ?? 0,
                           campaigns: metaCsvPreview.campaigns ?? 0,
@@ -577,7 +577,7 @@ export function RealProfitConnect({
                   )
                 ) : null}
                 {metaCsvDone ? (
-                  <p className={`mt-2 text-[12px] font-medium ${metaCsvDone.error ? "text-[#b91c1c]" : "text-emerald-700"}`}>
+                  <p className={`mt-2 text-[12px] font-medium ${metaCsvDone.error ? "text-danger-fg" : "text-ok-fg"}`}>
                     {metaCsvDone.error ?? metaCsvDone.message}
                   </p>
                 ) : null}
@@ -595,8 +595,8 @@ export function RealProfitConnect({
         >
           {shopifyOn ? (
             <p>
-              <span className="font-semibold text-[#1c1917]">{c?.shopify.storeName}</span>
-              {c?.shopify.shopDomain ? <span className="text-[#8a8177]"> · {c.shopify.shopDomain}</span> : null}
+              <span className="font-semibold text-ink">{c?.shopify.storeName}</span>
+              {c?.shopify.shopDomain ? <span className="text-ink-3"> · {c.shopify.shopDomain}</span> : null}
               <br />
               {t("shopifyOnBody")}
             </p>
@@ -620,12 +620,12 @@ export function RealProfitConnect({
                 ) : null}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => void retryLink()} disabled={linkBusy} className="text-[12px] font-semibold text-[#c2410c] underline-offset-2 hover:underline disabled:opacity-50">
+                <button type="button" onClick={() => void retryLink()} disabled={linkBusy} className="text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline disabled:opacity-50">
                   {linkBusy ? t("checking") : t("shopifyAlready")}
                 </button>
               </div>
               {linkMsg ? (
-                <p className={`mt-2 text-[12px] font-medium ${linkMsg.ok ? "text-emerald-700" : "text-[#b91c1c]"}`}>{linkMsg.text}</p>
+                <p className={`mt-2 text-[12px] font-medium ${linkMsg.ok ? "text-ok-fg" : "text-danger-fg"}`}>{linkMsg.text}</p>
               ) : null}
             </>
           )}
@@ -671,24 +671,24 @@ export function RealProfitConnect({
               </div>
 
               {preview ? (
-                <div className="mt-3 rounded-xl border border-[#ece7e0] bg-[#faf8f5] p-3">
+                <div className="mt-3 rounded-box border border-line bg-field p-3">
                   {preview.error && !preview.matched ? (
-                    <p className="font-medium text-[#b91c1c]">{preview.error}</p>
+                    <p className="font-medium text-danger-fg">{preview.error}</p>
                   ) : (
                     <>
-                      <p className="font-semibold text-[#1c1917]">
+                      <p className="font-semibold text-ink">
                         {fileName ? `${fileName} · ` : ""}
                         {t("courierMatched", { matched: preview.matched ?? 0, total: preview.totalRows ?? 0 })}
                       </p>
                       {preview.byStatus ? (
-                        <p className="mt-1 text-[12px] text-[#5c564e]">
+                        <p className="mt-1 text-[12px] text-ink-2">
                           {Object.entries(preview.byStatus)
                             .map(([k, v]) => `${t(`status.${k}` as never)}: ${v}`)
                             .join(" · ")}
                         </p>
                       ) : null}
                       {preview.notFound ? (
-                        <p className="mt-1 text-[12px] text-[#8a8177]">{t("courierNotFound", { count: preview.notFound })}</p>
+                        <p className="mt-1 text-[12px] text-ink-3">{t("courierNotFound", { count: preview.notFound })}</p>
                       ) : null}
                       <div className="mt-2 flex gap-2">
                         <button
@@ -708,7 +708,7 @@ export function RealProfitConnect({
                 </div>
               ) : null}
               {applied ? (
-                <p className={`mt-2 text-[12px] font-medium ${applied.error ? "text-[#b91c1c]" : "text-emerald-700"}`}>
+                <p className={`mt-2 text-[12px] font-medium ${applied.error ? "text-danger-fg" : "text-ok-fg"}`}>
                   {applied.error ?? applied.message}
                 </p>
               ) : null}

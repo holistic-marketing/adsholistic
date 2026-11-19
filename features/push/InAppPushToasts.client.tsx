@@ -28,7 +28,7 @@ function KindSeal({ kind }: { kind: Kind }) {
   return (
     <span
       className={`absolute -bottom-1 -right-1 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full text-white ring-2 ring-white ${
-        ok ? "bg-emerald-500" : "bg-red-500"
+        ok ? "bg-ok-solid" : "bg-danger-btn"
       }`}
     >
       <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.2} aria-hidden>
@@ -142,7 +142,7 @@ function ToastCard({
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <div className="relative overflow-hidden rounded-[22px] border border-white/70 bg-white/[0.92] shadow-[0_1px_0_rgb(255_255_255)_inset,0_2px_6px_-2px_rgb(28_25_23_/_0.12),0_24px_56px_-22px_rgb(28_25_23_/_0.55)] ring-1 ring-[#1c1917]/[0.06] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-card border border-white/70 bg-surface/[0.92] shadow-[0_1px_0_rgb(255_255_255)_inset,0_2px_6px_-2px_rgb(28_25_23_/_0.12),0_24px_56px_-22px_rgb(28_25_23_/_0.55)] ring-1 ring-ink/[0.06] backdrop-blur-xl">
           <span aria-hidden className="push-sheen pointer-events-none absolute inset-0" />
           <span
             aria-hidden
@@ -168,16 +168,16 @@ function ToastCard({
                 onOpen(toast);
               }}
             >
-              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9a9187]">
+              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
                 Ads Holistic
-                <span aria-hidden className="h-[3px] w-[3px] rounded-full bg-[#c9c0b5]" />
+                <span aria-hidden className="h-[3px] w-[3px] rounded-full bg-line-strong" />
                 <span className="font-medium normal-case tracking-normal">ahora</span>
               </span>
-              <span className="mt-0.5 block text-[14.5px] font-semibold leading-snug tracking-[-0.01em] text-[#1c1917]">
+              <span className="mt-0.5 block text-[14.5px] font-semibold leading-snug tracking-[-0.01em] text-ink">
                 {toast.title}
               </span>
               {toast.body ? (
-                <span className="mt-0.5 line-clamp-3 block text-[13px] leading-[1.4] text-[#5c564e]">{toast.body}</span>
+                <span className="mt-0.5 line-clamp-3 block text-[13px] leading-[1.4] text-ink-2">{toast.body}</span>
               ) : null}
               {toast.actionLabel ? (
                 <span className="mt-2.5 inline-flex h-8 items-center gap-1.5 rounded-full bg-gradient-to-b from-[var(--brand-primary)] to-[var(--brand-primary-deep)] pl-3.5 pr-3 text-[12.5px] font-semibold text-white shadow-[0_6px_14px_-6px_rgb(184_95_46_/_0.8)]">
@@ -193,7 +193,7 @@ function ToastCard({
               type="button"
               aria-label="Cerrar"
               onClick={close}
-              className="-mr-1.5 -mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#a39a90] transition hover:bg-[#f3eee8] hover:text-[#1c1917]"
+              className="-mr-1.5 -mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-3 transition hover:bg-hover hover:text-ink"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -201,9 +201,9 @@ function ToastCard({
             </button>
           </div>
 
-          <div className="relative h-[3px] bg-[#f3eee8]">
+          <div className="relative h-[3px] bg-subtle">
             <div
-              className="push-toast-timer h-full rounded-r-full bg-gradient-to-r from-[var(--brand-primary)] to-[#e9a06b]"
+              className="push-toast-timer h-full rounded-r-full bg-gradient-to-r from-[var(--brand-primary)] to-accent"
               style={{ animationDuration: `${VISIBLE_MS}ms`, animationPlayState: paused ? "paused" : "running" }}
             />
           </div>

@@ -160,13 +160,13 @@ export function LinksDeudaCuentas({
   }
 
   return (
-    <div className="overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8dfd4]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe8df] px-4 py-3.5 sm:px-5">
+    <div className="overflow-hidden rounded-card bg-surface ring-1 ring-line">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">
         <div className="min-w-0">
-          <p className="text-[14px] font-semibold tracking-[-0.01em] text-[#1a1714]">
+          <p className="text-[14px] font-semibold tracking-[-0.01em] text-ink">
             Cuentas del cliente
           </p>
-          <p className="mt-0.5 text-[12px] text-[#8a8177]">
+          <p className="mt-0.5 text-[12px] text-ink-3">
             Recargar y los demás cambios se hacen en Pagos con este cliente.
           </p>
         </div>
@@ -174,7 +174,7 @@ export function LinksDeudaCuentas({
           type="button"
           onClick={openInPagos}
           disabled={opening}
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-[#e7d3c4] bg-white px-3.5 text-[12px] font-semibold text-[#1a1714] transition hover:border-[#d47840] hover:bg-[#fff8f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/40 disabled:opacity-60"
+          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-accent-line bg-surface px-3.5 text-[12px] font-semibold text-ink transition hover:border-accent hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-60"
         >
           {opening ? "Abriendo…" : "Gestionar en Pagos"}
           <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" aria-hidden>
@@ -184,7 +184,7 @@ export function LinksDeudaCuentas({
       </div>
 
       {openError ? (
-        <p className="mx-4 mt-3 rounded-xl bg-red-50 px-3 py-2 text-[12px] text-red-700 ring-1 ring-red-200 sm:mx-5" role="alert">
+        <p className="mx-4 mt-3 rounded-box bg-danger-bg px-3 py-2 text-[12px] text-danger-fg ring-1 ring-danger-line sm:mx-5" role="alert">
           {openError}
         </p>
       ) : null}
@@ -193,13 +193,13 @@ export function LinksDeudaCuentas({
         <div className="space-y-2 p-4 sm:p-5" aria-busy>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-16 animate-pulse motion-reduce:animate-none rounded-xl bg-[#f5f0ea]" />
+              <div key={i} className="h-16 animate-pulse motion-reduce:animate-none rounded-box bg-subtle" />
             ))}
           </div>
-          <div className="h-24 animate-pulse motion-reduce:animate-none rounded-xl bg-[#faf8f5]" />
+          <div className="h-24 animate-pulse motion-reduce:animate-none rounded-box bg-field" />
         </div>
       ) : state.status === "error" ? (
-        <p className="m-4 rounded-2xl bg-[#fcfaf7] px-4 py-6 text-center text-[13px] text-[#9a3412] ring-1 ring-[#efe8df] sm:m-5">
+        <p className="m-4 rounded-card bg-field px-4 py-6 text-center text-[13px] text-accent-text ring-1 ring-line sm:m-5">
           {state.message}
         </p>
       ) : (

@@ -25,7 +25,7 @@ export default async function SupportPage() {
   return (
     <Suspense
       fallback={
-        <div className="dashboard-surface-card rounded-[1rem] p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+        <div className="dashboard-surface-card rounded-card p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
           {t("loadingPage")}
         </div>
       }

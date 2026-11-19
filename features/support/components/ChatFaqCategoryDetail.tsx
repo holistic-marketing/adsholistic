@@ -35,18 +35,18 @@ export function ChatFaqCategoryDetail({
         <p className="text-sm font-semibold text-white">{categoryTitle}</p>
       </div>
 
-      <div className="max-h-[420px] overflow-y-auto bg-white">
+      <div className="max-h-[420px] overflow-y-auto bg-surface">
         <ul className="divide-y divide-[var(--border-subtle)]">
           {articles.map((article) => (
             <li key={article.id}>
               <button
                 type="button"
                 onClick={() => onSelectArticle(article.id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-[#3f3a34] transition-colors hover:bg-[var(--surface-soft)]"
+                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-ink transition-colors hover:bg-[var(--surface-soft)]"
               >
                 <span>{article.title}</span>
                 <svg
-                  className="h-4 w-4 shrink-0 text-[#9a9187]"
+                  className="h-4 w-4 shrink-0 text-ink-3"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

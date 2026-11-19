@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { routes } from "@/config/routes";
-import { HecomClienteAvatar } from "@/features/clientes/components/HecomClienteAvatar.client";
 import {
   formatHecomFecha,
   formatHecomGastoDisplay,
@@ -15,19 +14,23 @@ import {
   type HecomGastoRow,
 } from "@/lib/hecom/cliente-dashboard.server";
 import { getAppFormatter } from "@/lib/i18n/get-app-formatter";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { buttonClass } from "@/components/ui/Button";
+import { OverviewKpi } from "./OverviewKpi";
 import type { HecomTiktokAccount } from "@/lib/hecom/clientes.server";
 
 /*
- * Resumen del cliente con el mismo lenguaje visual de «Lo pagado» (links deuda):
- * tarjeta oscura con la cifra principal, tarjetas blancas con borde cálido y
- * listas ordenadas. No mostramos «Deuda neta» Hecom aquí: suele estar
- * incompleta (cobros faltantes) y asusta al cliente.
+ * Resumen del cliente (sistema visual v3): encabezado, cuatro indicadores,
+ * primeros pasos, gasto diario, gasto por cuenta, cuentas y últimos gastos.
+ * No mostramos «Deuda neta» Hecom aquí: suele estar incompleta (cobros
+ * faltantes) y asusta al cliente.
  */
 
-const CARD = "rounded-[22px] bg-white ring-1 ring-[#e8dfd4]";
-const INK = "text-[#1a1714]";
-const SOFT = "text-[#5c564e]";
-const MUTED = "text-[#8a8177]";
+const CARD = "rounded-card bg-surface ring-1 ring-line";
+const INK = "text-ink";
+const SOFT = "text-ink-2";
+const MUTED = "text-ink-3";
 
 /** «Jesus Fuentes 201.0 USD - Agencia» → nombre + número de cuenta (no es saldo). */
 function parseAdvertiserLabel(raw: string | null) {
@@ -56,8 +59,8 @@ function shortDayLabel(dateYmd: string) {
 }
 
 /**
- * Guía de primeros pasos para el cliente nuevo (recarga → cuenta → campaña), como en Ecomdy.
- * Se oculta sola cuando ya hizo los 3.
+ * «Empieza en 3 pasos» (recarga → cuenta → campaña). Se oculta sola cuando
+ * ya hizo los 3. Sistema visual v3: el paso actual con borde naranja.
  */
 function OnboardingSteps({
   t,
@@ -70,47 +73,36 @@ function OnboardingSteps({
   if (done === steps.length) return null;
   const next = steps.find((s) => !s.done)?.key;
   return (
-    <section className={`${CARD} px-4 py-4 sm:px-5`}>
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h2 className={`text-[1.05rem] font-semibold tracking-[-0.02em] ${INK}`}>{t("onboarding.title")}</h2>
-          <p className={`text-[13px] ${SOFT}`}>{t("onboarding.sub")}</p>
-        </div>
-        <span className="rounded-full bg-[#fbefe4] px-2.5 py-1 text-[12px] font-semibold text-[#9a5a32]">
-          {t("onboarding.progress", { done })}
-        </span>
-      </div>
-      <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+    <PanelCard
+      aria-labelledby="ov-steps"
+      title={<span id="ov-steps">{t("onboarding.title")}</span>}
+      description={t("onboarding.sub")}
+      action={<span className="panel-badge">{t("onboarding.progress", { done })}</span>}
+    >
+      <ol className="grid gap-2.5 md:grid-cols-3">
         {steps.map((s, i) => {
           const current = s.key === next;
           return (
             <li
               key={s.key}
-              className={`flex flex-col gap-2 rounded-[18px] px-4 py-3 ring-1 ${
-                current ? "bg-[#fffaf5] ring-[#e2a074]" : "bg-[#faf8f5] ring-[#e8dfd4]"
-              }`}
+              className={`rounded-box border px-4 py-3.5 ${current ? "border-accent bg-surface" : "border-line bg-field"}`}
             >
-              <div className="flex items-center gap-2">
+              <h3 className="flex items-center gap-2.5 text-sm font-semibold text-ink">
                 <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold ${
-                    s.done ? "bg-[#1f6b3a] text-white" : current ? "bg-[#c46d3c] text-white" : "bg-white text-[#8a8177] ring-1 ring-[#e8dfd4]"
-                  }`}
                   aria-hidden
-                >
-                  {s.done ? "✓" : i + 1}
-                </span>
-                <p className={`text-[14px] font-semibold ${s.done ? MUTED : INK}`}>{t(`onboarding.${s.key}`)}</p>
-              </div>
-              <p className={`text-[12px] ${SOFT}`}>{t(`onboarding.${s.key}b`)}</p>
-              {s.done ? (
-                <span className="text-[12px] font-semibold text-[#1f6b3a]">{t("onboarding.done")}</span>
-              ) : (
-                <Link
-                  href={s.href}
-                  className={`mt-auto inline-flex h-9 w-fit items-center rounded-full px-3.5 text-[13px] font-semibold transition ${
-                    current ? "bg-[#c46d3c] text-white hover:bg-[#b0602f]" : `bg-white ring-1 ring-[#e8dfd4] hover:bg-[#faf8f5] ${INK}`
+                  className={`grid size-[22px] shrink-0 place-items-center rounded-[6px] font-mono text-[11px] font-semibold ${
+                    s.done ? "bg-ok-bg text-ok-fg" : "bg-subtle text-ink"
                   }`}
                 >
+                  {s.done ? <PanelIcon name="check" className="size-3" /> : i + 1}
+                </span>
+                {t(`onboarding.${s.key}`)}
+              </h3>
+              <p className="mt-1.5 text-[13px] text-ink-2">{t(`onboarding.${s.key}b`)}</p>
+              {s.done ? (
+                <p className="mt-2.5 text-[13px] font-medium text-ok-fg">{t("onboarding.done")}</p>
+              ) : (
+                <Link href={s.href} className={buttonClass(current ? "primary" : "outline", "sm", "mt-2.5")}>
                   {t(`onboarding.${s.key}c`)}
                 </Link>
               )}
@@ -118,7 +110,7 @@ function OnboardingSteps({
           );
         })}
       </ol>
-    </section>
+    </PanelCard>
   );
 }
 
@@ -126,11 +118,14 @@ export async function ClienteScopedOverview({
   data,
   canChangeCliente = false,
   accountSpend,
+  wallet,
 }: {
   data: HecomClienteDashboard;
   canChangeCliente?: boolean;
   /** Gasto por cuenta. Si viene de fuera, el overview no espera las filas de campaña. */
   accountSpend?: ReactNode;
+  /** «Saldo en cartera»: llega aparte, con su propio Suspense. */
+  wallet?: ReactNode;
 }) {
   const t = await getTranslations("overview");
   const { formatMoney } = await getAppFormatter();
@@ -139,7 +134,6 @@ export async function ClienteScopedOverview({
   const recentGastos = gastos.slice(0, 8);
   const activeAccounts = accounts.filter((a) => a.syncEnabled !== false).length;
   const pausedAccounts = Math.max(0, accounts.length - activeAccounts);
-  const share7d = summary.gasto30d > 0.004 ? Math.min(1, summary.gasto7d / summary.gasto30d) : 0;
   const todayHint =
     summary.dailySource === "none"
       ? t("noDaySync")
@@ -148,164 +142,81 @@ export async function ClienteScopedOverview({
         : t("noActivityToday");
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      {/* Cabecera: quién es y qué puede hacer */}
-      <header className={`${CARD} flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5`}>
-        <div className="flex min-w-0 items-center gap-3">
-          <HecomClienteAvatar name={cliente.name} avatarUrl={cliente.avatarUrl} size="md" />
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">{t("module")}</p>
-            <h1 className={`truncate text-[1.35rem] font-semibold tracking-[-0.03em] ${INK}`}>{cliente.name}</h1>
-            <p className={`text-[12px] ${SOFT}`}>{t("feeMeta", { percent: summary.depositFeePercent })}</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={routes.payments}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-[#c46d3c] px-4 text-[13px] font-semibold text-white transition hover:bg-[#b0602f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e2a074]"
-          >
-            <WalletIcon />
-            {canChangeCliente ? t("ctaReloadAssign") : t("ctaReload")}
-          </Link>
-          <Link
-            href={routes.adAccounts}
-            className={`inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold ring-1 ring-[#e8dfd4] transition hover:bg-[#faf8f5] ${INK}`}
-          >
-            <ChartIcon />
-            {t("ctaAccounts")}
-          </Link>
-          {canChangeCliente ? (
-            <Link href={routes.clientes} className={`px-2 text-[13px] font-semibold underline-offset-4 hover:underline ${SOFT}`}>
-              {t("changeClient")}
+    <div>
+      <PageHeader
+        title={t("title")}
+        lede={canChangeCliente ? t("ledeStaff", { name: cliente.name }) : t("ledeCliente")}
+        actions={
+          <>
+            <Link href={routes.adAccounts} className={buttonClass("outline")}>
+              <PanelIcon name="layers" />
+              {t("ctaAccounts")}
             </Link>
-          ) : null}
-        </div>
-      </header>
-
-      <OnboardingSteps
-        t={t}
-        steps={[
-          { key: "s1", done: data.cobros.length > 0, href: routes.payments },
-          { key: "s2", done: accounts.length > 0, href: routes.adAccounts },
-          { key: "s3", done: summary.gastoTotal > 0, href: routes.payments },
-        ]}
+            <Link href={routes.payments} className={buttonClass("primary")}>
+              <PanelIcon name="plus" />
+              {canChangeCliente ? t("ctaReloadAssign") : t("ctaReload")}
+            </Link>
+          </>
+        }
       />
 
-      {/* Cifra principal + KPIs */}
-      <section className="rounded-[24px] bg-[#faf8f5] p-3 ring-1 ring-[#e8dfd4] sm:p-4">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <div className="relative col-span-2 overflow-hidden rounded-[22px] bg-gradient-to-br from-[#fffaf5] to-[#fbefe4] px-5 py-5 ring-1 ring-[#f0e0d1] sm:px-6 sm:py-6">
-            <div className="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-[#f3c9a8]/30 blur-2xl" aria-hidden />
-            <div className="relative">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-[#9a5a32] ring-1 ring-[#f0e0d1]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#e2a074]" aria-hidden />
-                {t("hero.badge")}
-              </span>
-              <p className={`mt-3 text-[2rem] font-semibold leading-none tabular-nums tracking-[-0.045em] min-[400px]:text-[2.4rem] sm:text-[2.75rem] ${INK}`}>
-                {moneyUsd(summary.gasto30d)}
-              </p>
-              <p className={`mt-2 text-[12px] ${SOFT}`}>{t("hero.caption")}</p>
-              <div className="mt-5">
-                <div className={`flex items-center justify-between gap-3 text-[11px] ${SOFT}`}>
-                  <span>
-                    {t("spend7d")} {moneyUsd(summary.gasto7d)}
-                  </span>
-                  <span className="tabular-nums">{Math.round(share7d * 100)}%</span>
-                </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#f1e4d8]">
-                  <div className="h-full rounded-full bg-[#e2a074]" style={{ width: `${share7d * 100}%` }} />
-                </div>
-                <p className={`mt-2 text-[11px] leading-4 ${MUTED}`}>
-                  {t("spendToday")}: {moneyUsd(summary.gastoHoy)} · {todayHint}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <OverviewKpi
+          label={t("hero.badge")}
+          value={moneyUsd(summary.gasto30d)}
+          lead={t("hero.caption")}
+          detail={`${t("spend7d")}: ${moneyUsd(summary.gasto7d)} · ${t("spendToday")}: ${moneyUsd(summary.gastoHoy)}`}
+        />
+        {wallet ?? (
+          <OverviewKpi label={t("feeHolistic")} value={`${summary.depositFeePercent}%`} lead={t("feeMeta", { percent: summary.depositFeePercent })} />
+        )}
+        <OverviewKpi
+          label={t("cobros")}
+          value={moneyUsd(summary.cobroTotal)}
+          lead={t("hero.cobrosHint")}
+          detail={`${t("adSpend")}: ${moneyUsd(summary.gastoTotal)}`}
+        />
+        <OverviewKpi
+          label={t("tiktokAccounts")}
+          value={String(summary.accountCount)}
+          lead={summary.accountCount > 0 ? t("accountsHint", { active: activeAccounts, paused: pausedAccounts }) : undefined}
+          detail={todayHint}
+        />
+      </div>
 
-          <Kpi label={t("cobros")} value={moneyUsd(summary.cobroTotal)} tone="paid" hint={t("hero.cobrosHint")} className="col-span-1" />
-          <Kpi label={t("adSpend")} value={moneyUsd(summary.gastoTotal)} hint={t("hero.adSpendHint")} className="col-span-1" />
-          <Kpi
-            label={t("tiktokAccounts")}
-            value={String(summary.accountCount)}
-            hint={summary.accountCount > 0 ? t("accountsHint", { active: activeAccounts, paused: pausedAccounts }) : undefined}
-            footer={t("feeMeta", { percent: summary.depositFeePercent })}
-            className="col-span-2 lg:col-span-1"
-          />
-        </div>
-      </section>
+      <div className="mt-4 space-y-4">
+        <OnboardingSteps
+          t={t}
+          steps={[
+            { key: "s1", done: data.cobros.length > 0, href: routes.payments },
+            { key: "s2", done: accounts.length > 0, href: routes.adAccounts },
+            { key: "s3", done: summary.gastoTotal > 0, href: routes.payments },
+          ]}
+        />
 
-      {accountSpend ?? (
-        <AccountSpendPanel
-          rows={data.campaignSpendRows}
-          accounts={accounts}
-          anchorDate={summary.dailyAnchorDate}
+        <DailySpendPanel
+          series={summary.dailySeries}
+          gastoHoy={summary.gastoHoy}
+          gasto7d={summary.gasto7d}
+          gasto30d={summary.gasto30d}
+          source={summary.dailySource}
           moneyUsd={moneyUsd}
         />
-      )}
 
-      <DailySpendPanel
-        series={summary.dailySeries}
-        gastoHoy={summary.gastoHoy}
-        gasto7d={summary.gasto7d}
-        gasto30d={summary.gasto30d}
-        source={summary.dailySource}
-        moneyUsd={moneyUsd}
-      />
+        {accountSpend ?? (
+          <AccountSpendPanel
+            rows={data.campaignSpendRows}
+            accounts={accounts}
+            anchorDate={summary.dailyAnchorDate}
+            moneyUsd={moneyUsd}
+          />
+        )}
 
-      {/* Accesos */}
-      <nav className="flex flex-wrap items-center gap-2" aria-label={t("hero.quickLinks")}>
-        {[
-          { href: routes.adAccounts, label: t("quickAdAccounts") },
-          { href: routes.payments, label: t("quickPayments") },
-          { href: routes.profit, label: t("quickProfit") },
-          { href: `${routes.payments}#asignar-saldo`, label: t("quickAssign") },
-        ].map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-[12.5px] font-semibold ring-1 ring-[#e8dfd4] transition hover:bg-[#faf8f5] hover:ring-[#d9c9b8] ${INK}`}
-          >
-            {link.label}
-            <span aria-hidden className="text-[#e2a074]">→</span>
-          </Link>
-        ))}
-      </nav>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <AccountsPanel accounts={accounts} />
-        <GastosPanel gastos={recentGastos} accounts={accounts} source={data.source} moneyUsd={moneyUsd} />
+        <div className="grid gap-4 xl:grid-cols-2">
+          <AccountsPanel accounts={accounts} />
+          <GastosPanel gastos={recentGastos} accounts={accounts} source={data.source} moneyUsd={moneyUsd} />
+        </div>
       </div>
-    </div>
-  );
-}
-
-function Kpi({
-  label,
-  value,
-  hint,
-  footer,
-  tone = "neutral",
-  className = "",
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  footer?: string;
-  tone?: "neutral" | "paid";
-  className?: string;
-}) {
-  return (
-    <div className={`${CARD} flex min-w-0 flex-col px-4 py-4 sm:px-5 ${className}`}>
-      <p className={`text-[12px] font-medium ${SOFT}`}>{label}</p>
-      <p className={`mt-1 text-[1.25rem] font-semibold tabular-nums tracking-[-0.03em] [overflow-wrap:anywhere] min-[400px]:text-[1.45rem] ${tone === "paid" ? "text-[#2f7a4a]" : INK}`}>
-        {value}
-      </p>
-      {hint ? <p className={`mt-1 text-[11.5px] leading-4 ${MUTED}`}>{hint}</p> : null}
-      {footer ? (
-        <p className="mt-auto pt-3">
-          <span className="inline-flex rounded-full bg-[#fbeee3] px-2 py-0.5 text-[11px] font-semibold text-[#b85f2e]">{footer}</span>
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -334,7 +245,7 @@ function Panel({
         </div>
         <div className="flex items-center gap-2">
           {count != null ? (
-            <span className={`rounded-full bg-[#f3eee8] px-2 py-0.5 text-[11px] font-semibold tabular-nums ${SOFT}`}>{count}</span>
+            <span className={`rounded-full bg-subtle px-2 py-0.5 text-[11px] font-semibold tabular-nums ${SOFT}`}>{count}</span>
           ) : null}
           {action}
         </div>
@@ -387,20 +298,20 @@ async function DailySpendPanel({
             <span
               className={`max-w-full truncate text-[9.5px] font-semibold tabular-nums transition-opacity ${
                 isPeak || isToday ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              } ${isPeak ? "text-[#b85f2e]" : MUTED}`}
+              } ${isPeak ? "text-accent-text" : MUTED}`}
             >
               {point.spend > 0 ? moneyUsd(point.spend) : " "}
             </span>
             <div
               className={`w-full max-w-[1.6rem] rounded-t-[5px] transition-colors ${
-                isToday || isPeak ? "bg-[#e2a074]" : point.spend > 0 ? "bg-[#f3dccb] group-hover:bg-[#e2a074]" : "bg-[#f1ebe4]"
+                isToday || isPeak ? "bg-accent" : point.spend > 0 ? "bg-accent group-hover:bg-accent-btn-hover" : "bg-subtle"
               }`}
               style={{ height: barPx }}
             />
-            <span className={`text-[9.5px] font-semibold tabular-nums ${isToday ? "text-[#b85f2e]" : MUTED}`}>
+            <span className={`text-[9.5px] font-semibold tabular-nums ${isToday ? "text-accent-text" : MUTED}`}>
               {shortDayLabel(point.date)}
             </span>
-            {isToday ? <span className="h-0.5 w-3 rounded-full bg-[#e2a074]" aria-hidden /> : <span className="h-0.5" aria-hidden />}
+            {isToday ? <span className="h-0.5 w-3 rounded-full bg-accent" aria-hidden /> : <span className="h-0.5" aria-hidden />}
           </div>
         );
       })}
@@ -412,7 +323,7 @@ async function DailySpendPanel({
       title={t("dailySpend.title")}
       subtitle={t("dailySpend.subtitle", { days: series.length })}
       action={
-        <span className={`rounded-full bg-[#f3eee8] px-2.5 py-1 text-[11px] font-medium ${SOFT}`}>
+        <span className={`rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium ${SOFT}`}>
           {t("dailySpend.source")} <span className={INK}>{sourceLabel}</span>
         </span>
       }
@@ -429,7 +340,7 @@ async function DailySpendPanel({
           <div className="px-3 pb-2 pt-5 sm:hidden">{bars(mobileSeries, 110)}</div>
           <div className="hidden px-5 pb-2 pt-5 sm:block">{bars(series, 130)}</div>
           {peakPoint ? (
-            <p className={`border-t border-[#efe8e0] px-4 py-3 text-[11.5px] sm:px-5 ${MUTED}`}>
+            <p className={`border-t border-line px-4 py-3 text-[11.5px] sm:px-5 ${MUTED}`}>
               {t("hero.peakDay", { date: shortDayLabel(peakPoint.date), amount: moneyUsd(peakPoint.spend) })}
             </p>
           ) : null}
@@ -446,11 +357,11 @@ export function OverviewAccountSpendFallback() {
       aria-busy="true"
       aria-live="polite"
     >
-      <div className="h-4 w-40 rounded-full bg-[#f3eee8]" />
-      <div className="mt-1.5 h-3 w-64 max-w-full rounded-full bg-[#f7f2ec]" />
+      <div className="h-4 w-40 rounded-full bg-subtle" />
+      <div className="mt-1.5 h-3 w-64 max-w-full rounded-full bg-subtle" />
       <div className="mt-4 space-y-3 pb-2">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-12 rounded-xl bg-[#faf8f5]" />
+          <div key={index} className="h-12 rounded-box bg-field" />
         ))}
       </div>
     </section>
@@ -548,7 +459,7 @@ async function AccountSpendPanel({
       title={t("byAccount.title")}
       subtitle={t("byAccount.subtitle")}
       action={
-        <span className={`rounded-full bg-[#f3eee8] px-2.5 py-1 text-[11px] font-semibold ${SOFT}`}>
+        <span className={`rounded-full bg-subtle px-2.5 py-1 text-[11px] font-semibold ${SOFT}`}>
           {t("byAccount.count", { count: items.length })}
         </span>
       }
@@ -561,7 +472,7 @@ async function AccountSpendPanel({
             {shown.map((item) => {
               const share = total > 0 ? item.spend / total : 0;
               return (
-                <li key={item.id} className="border-t border-[#f1ebe4] py-3 first:border-t-0">
+                <li key={item.id} className="border-t border-line py-3 first:border-t-0">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className={`truncate text-[13.5px] font-semibold ${INK}`}>{item.name}</p>
@@ -572,14 +483,14 @@ async function AccountSpendPanel({
                       <p className={`text-[11px] tabular-nums ${MUTED}`}>{Math.round(share * 100)}%</p>
                     </div>
                   </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#f3ece5]">
-                    <div className="h-full rounded-full bg-[#e2a074]" style={{ width: `${Math.max(2, share * 100)}%` }} />
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-subtle">
+                    <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(2, share * 100)}%` }} />
                   </div>
                 </li>
               );
             })}
           </ul>
-          <div className="mt-1 flex items-center justify-between border-t border-[#efe8e0] pt-3">
+          <div className="mt-1 flex items-center justify-between border-t border-line pt-3">
             <span className={`text-[12.5px] font-semibold ${SOFT}`}>{t("byAccount.total")}</span>
             <span className={`text-[14px] font-semibold tabular-nums ${INK}`}>{moneyUsd(total)}</span>
           </div>
@@ -591,9 +502,9 @@ async function AccountSpendPanel({
 
 function DayMetric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="min-w-0 rounded-[14px] bg-[#faf8f5] px-3 py-2.5">
+    <div className="min-w-0 rounded-box bg-field px-3 py-2.5">
       <p className={`flex items-center gap-1.5 text-[11px] font-medium ${SOFT}`}>
-        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent ? "bg-[#e2a074]" : "bg-[#d9cfc4]"}`} aria-hidden />
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent ? "bg-accent" : "bg-active"}`} aria-hidden />
         {label}
       </p>
       <p className={`mt-0.5 text-[15px] font-semibold tabular-nums tracking-[-0.02em] [overflow-wrap:anywhere] sm:text-[17px] ${INK}`}>{value}</p>
@@ -623,10 +534,10 @@ async function AccountsPanel({ accounts }: { accounts: HecomTiktokAccount[] }) {
             const label = parseAdvertiserLabel(account.advertiserName);
             const active = account.syncEnabled !== false;
             return (
-              <li key={account.advertiserId} className="flex items-center gap-3 border-t border-[#f1ebe4] py-3 first:border-t-0">
+              <li key={account.advertiserId} className="flex items-center gap-3 border-t border-line py-3 first:border-t-0">
                 <span
                   className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-[11px] font-bold ${
-                    active ? "bg-[#eaf5ee] text-[#2f7a4a]" : "bg-[#f3eee8] text-[#8a8177]"
+                    active ? "bg-subtle text-ok-fg" : "bg-subtle text-ink-3"
                   }`}
                   aria-hidden
                 >
@@ -645,10 +556,10 @@ async function AccountsPanel({ accounts }: { accounts: HecomTiktokAccount[] }) {
                 </div>
                 <span
                   className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
-                    active ? "bg-[#eaf5ee] text-[#2f7a4a]" : "bg-[#f3eee8] text-[#8a8177]"
+                    active ? "bg-subtle text-ok-fg" : "bg-subtle text-ink-3"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-[#3f9a62]" : "bg-[#b5aaa0]"}`} aria-hidden />
+                  <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-ok-solid" : "bg-line-strong"}`} aria-hidden />
                   {active ? t("accountsPanel.inCampaign") : t("accountsPanel.paused")}
                 </span>
               </li>
@@ -688,7 +599,7 @@ async function GastosPanel({
       action={
         <div className="flex items-center gap-3">
           <span className={`inline-flex items-center gap-1 text-[11px] font-medium ${SOFT}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#3f9a62]" : "bg-[#b5aaa0]"}`} aria-hidden />
+            <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-ok-solid" : "bg-line-strong"}`} aria-hidden />
             {live ? t("live") : t("backup")}
           </span>
           <Link href={routes.profit} className={`text-[12px] font-semibold underline-offset-4 hover:underline ${INK}`}>
@@ -707,8 +618,8 @@ async function GastosPanel({
             const bm = resolveBmForGasto(row, bmByAdvertiser);
             const label = formatHecomGastoDisplay(row.camp, { notas: row.notas, fee: row.fee, fecha: null });
             return (
-              <li key={row.id} className="flex items-center gap-3 border-t border-[#f1ebe4] py-3 first:border-t-0">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-[#fbeee3] text-[#e2a074]" aria-hidden>
+              <li key={row.id} className="flex items-center gap-3 border-t border-line py-3 first:border-t-0">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-box bg-accent-soft text-accent-text" aria-hidden>
                   <TrendIcon />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -724,25 +635,6 @@ async function GastosPanel({
         </ul>
       )}
     </Panel>
-  );
-}
-
-function WalletIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M4 8.5h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9Z" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M4 8.5 6 5.2A1.8 1.8 0 0 1 7.6 4.5h8.8A1.8 1.8 0 0 1 18 5.2L20 8.5" stroke="currentColor" strokeWidth="1.7" />
-      <circle cx="16.5" cy="13.2" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ChartIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M4 19V5M4 19h16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M8 15v-3M12 15V8M16 15v-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
   );
 }
 

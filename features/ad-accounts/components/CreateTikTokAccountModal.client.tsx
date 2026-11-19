@@ -161,11 +161,11 @@ function CreateTikTokAccountModalContent({
         <div>
           <h2
             id="create-tiktok-account-title"
-            className="text-[17px] font-semibold tracking-tight text-[#1c1917]"
+            className="text-[17px] font-semibold tracking-tight text-ink"
           >
             {maintenance ? t("maintenanceTitle") : t("title")}
           </h2>
-          <p className="mt-1 text-[13px] leading-5 text-[#6f675f]">
+          <p className="mt-1 text-[13px] leading-5 text-ink-2">
             {maintenance
               ? t("maintenanceSubtitle", { name: clienteName })
               : t("subtitle", { name: clienteName })}
@@ -173,32 +173,32 @@ function CreateTikTokAccountModalContent({
         </div>
 
         {maintenance ? (
-          <div className="rounded-xl border border-[#e8e1d8] bg-[#f7f5f2] px-4 py-3 text-sm leading-6 text-[#3f3a34]">
-            <p className="font-semibold text-[#1c1917]">
+          <div className="rounded-box border border-line bg-field px-4 py-3 text-sm leading-6 text-ink">
+            <p className="font-semibold text-ink">
               {t("maintenanceBadge")}
             </p>
             <p className="mt-1.5">{t("maintenanceBody")}</p>
           </div>
         ) : (
           <>
-            <div className="rounded-2xl border border-[#e8e1d8] bg-[#f7f5f2] p-4">
+            <div className="rounded-card border border-line bg-field p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-medium uppercase tracking-wide text-[#8a8278]">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-ink-3">
                     {t("bmLabel")}
                   </p>
-                  <p className="mt-1 text-[15px] font-semibold text-[#1c1917]">
+                  <p className="mt-1 text-[15px] font-semibold text-ink">
                     {t("bmName")}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-[#6f675f]">
+                  <p className="mt-0.5 text-[12px] text-ink-2">
                     {t("bmHint")}
                   </p>
                 </div>
-                <span className="inline-flex shrink-0 items-center rounded-md bg-[#ecfdf5] px-2 py-1 text-[10px] font-bold text-[#047857]">
+                <span className="inline-flex shrink-0 items-center rounded-md bg-field px-2 py-1 text-[10px] font-bold text-ok-fg">
                   USD
                 </span>
               </div>
-              <div className="mt-4 border-t border-[#e4ddd6] pt-3 text-[12px] text-[#6f675f]">
+              <div className="mt-4 border-t border-line pt-3 text-[12px] text-ink-2">
                 {quotaLoading
                   ? tCommon("loading")
                   : t("quota", {
@@ -210,20 +210,20 @@ function CreateTikTokAccountModalContent({
             </div>
 
             {success ? (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+              <div className="rounded-box border border-ok-line bg-ok-bg px-4 py-3 text-sm text-ok-fg">
                 <p className="font-semibold">{t("successTitle")}</p>
                 <p className="mt-1">{success.advertiserName}</p>
                 <p className="mt-1 break-all font-mono text-[12px]">
                   {success.advertiserId}
                 </p>
-                <p className="mt-2 text-[12px] text-emerald-800">
+                <p className="mt-2 text-[12px] text-ok-fg">
                   {t("successHint")}
                 </p>
               </div>
             ) : null}
 
             {error ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+              <div className="rounded-box border border-warn-line bg-warn-bg px-4 py-3 text-sm text-warn-fg">
                 {error}
               </div>
             ) : null}
@@ -235,7 +235,7 @@ function CreateTikTokAccountModalContent({
             type="button"
             variant="outline"
             onClick={handleClose}
-            className="h-11 rounded-xl"
+            className="h-11 rounded-box"
           >
             {maintenance || success ? tCommon("close") : tCommon("cancel")}
           </Button>
@@ -249,7 +249,7 @@ function CreateTikTokAccountModalContent({
               }
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-[#25D366] px-5 text-[13px] font-semibold text-white transition hover:brightness-105"
+              className="inline-flex h-11 items-center justify-center rounded-box bg-[#25D366] px-5 text-[13px] font-semibold text-white transition hover:brightness-105"
             >
               {t("whatsappCta")}
             </a>
@@ -260,7 +260,7 @@ function CreateTikTokAccountModalContent({
                 handleClose();
                 router.push(routes.payments);
               }}
-              className="h-11 rounded-xl bg-[#ff781f] px-5 hover:bg-[#e85a1c]"
+              className="h-11 rounded-box bg-accent px-5 hover:bg-accent-btn-hover"
             >
               {t("goPayments")}
             </Button>
@@ -269,7 +269,7 @@ function CreateTikTokAccountModalContent({
               type="button"
               disabled={loading || quotaLoading}
               onClick={() => void handleCreate()}
-              className="h-11 rounded-xl bg-[#ff781f] px-5 hover:bg-[#e85a1c]"
+              className="h-11 rounded-box bg-accent px-5 hover:bg-accent-btn-hover"
             >
               {loading ? t("creating") : t("confirm")}
             </Button>

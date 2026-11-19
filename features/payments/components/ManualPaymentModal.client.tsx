@@ -389,7 +389,7 @@ export function ManualPaymentModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-[2px]"
         aria-label={tCommon("close")}
         onClick={resetAndClose}
       />
@@ -397,7 +397,7 @@ export function ManualPaymentModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="manual-payment-title"
-        className="scrollbar-thin relative max-h-[min(92vh,calc(100dvh-1.5rem))] w-full max-w-[36rem] overflow-y-auto rounded-[1.25rem] bg-white shadow-[0_28px_90px_rgb(15_23_42_/_0.24)]"
+        className="scrollbar-thin relative max-h-[min(92vh,calc(100dvh-1.5rem))] w-full max-w-[36rem] overflow-y-auto rounded-card bg-surface shadow-[0_28px_90px_rgb(15_23_42_/_0.24)]"
       >
         {step === "form" ? (
           <>
@@ -428,14 +428,14 @@ export function ManualPaymentModal({
               <div>
                 <label
                   htmlFor={amountFieldId}
-                  className="mb-2 block text-[12px] font-semibold text-[#514b45]"
+                  className="mb-2 block text-[12px] font-semibold text-ink-2"
                 >
                   {paysDebt
                     ? "Deuda que vas a pagar (USD)"
                     : t("manualModal.receiveLabel")}
                 </label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-semibold text-[#8a8177]">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-semibold text-ink-3">
                     $
                   </span>
                   <Input
@@ -448,7 +448,7 @@ export function ManualPaymentModal({
                     value={amount}
                     onChange={(e) => { setAmount(e.target.value); setServerChargeCents(null); }}
                     autoFocus
-                    className="h-14 rounded-xl pl-9 text-lg font-semibold tabular-nums"
+                    className="h-14 rounded-box pl-9 text-lg font-semibold tabular-nums"
                   />
                 </div>
               </div>
@@ -458,14 +458,14 @@ export function ManualPaymentModal({
                   {(["bank", "binance"] as const).map((method) => (
                     <button key={method} type="button" aria-pressed={payMethod === method}
                       onClick={() => { setPayMethod(method); setChargeCurrency(method === "binance" ? "USD" : "PEN"); setServerChargeCents(null); }}
-                      className={`h-11 rounded-xl border text-sm font-semibold ${payMethod === method ? "border-[#d47840] bg-orange-50" : "border-[#e8e1d8]"}`}>
+                      className={`h-11 rounded-box border text-sm font-semibold ${payMethod === method ? "border-accent bg-warn-bg" : "border-line"}`}>
                       {method === "binance" ? "Binance Pay" : "Transferencia BCP"}
                     </button>
                   ))}
                 </div>
               ) : null}
               <div className="mt-5">
-                <p className="mb-2 text-[12px] font-semibold text-[#514b45]">
+                <p className="mb-2 text-[12px] font-semibold text-ink-2">
                   {t("manualModal.currency")}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -477,8 +477,8 @@ export function ManualPaymentModal({
                       aria-pressed={chargeCurrency === c}
                       className={`h-11 rounded-xl border text-sm font-semibold transition ${
                         chargeCurrency === c
-                          ? "border-[#d47840] bg-[#f7f0e9] text-[#a85a32]"
-                          : "border-[#ece7e0] bg-white text-[#5c564e] hover:border-[#d47840]/40"
+                          ? "border-accent bg-subtle text-accent-text"
+                          : "border-line bg-surface text-ink-2 hover:border-accent/40"
                       }`}
                     >
                       {payMethod === "binance" ? "USDT" : c === "PEN"
@@ -490,42 +490,42 @@ export function ManualPaymentModal({
               </div>
 
               {quote ? (
-                <div className="mt-5 rounded-2xl bg-[#f7f5f2] p-4 text-sm sm:p-5">
-                  <p className="mb-3 text-[13px] font-semibold text-[#1c1917]">
+                <div className="mt-5 rounded-card bg-field p-4 text-sm sm:p-5">
+                  <p className="mb-3 text-[13px] font-semibold text-ink">
                     {t("manualModal.transferSummary")}
                   </p>
                   <div className="flex justify-between gap-3">
-                    <span className="text-[#625b54]">
+                    <span className="text-ink-2">
                       {paysDebt
                         ? "Baja tu deuda"
                         : t("manualModal.receiveWallet")}
                     </span>
-                    <span className="font-semibold tabular-nums text-[#1c1917]">
+                    <span className="font-semibold tabular-nums text-ink">
                       {formatMoney(quote.usd.creditCents / 100)}
                     </span>
                   </div>
                   {paysDebt ? null : (
                   <div className="mt-2 flex justify-between gap-3">
-                    <span className="text-[#625b54]">
+                    <span className="text-ink-2">
                       Fee {formatFeePercentLabel(feePercent)}
                     </span>
-                    <span className="font-medium tabular-nums text-[#1c1917]">
+                    <span className="font-medium tabular-nums text-ink">
                       {chargeCurrency === "PEN"
                         ? formatPenAmount(quote.pen.feePenCents)
                         : formatMoney(quote.usd.feeCents / 100)}
                     </span>
                   </div>
                   )}
-                  <div className="mt-3 flex items-end justify-between gap-3 border-t border-[#e4ddd6] pt-3">
-                    <span className="font-semibold text-[#1c1917]">
+                  <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
+                    <span className="font-semibold text-ink">
                       {t("manualModal.totalTransfer")}
                     </span>
-                    <span className="text-xl font-semibold tracking-[-0.02em] tabular-nums text-[#c96a35]">
+                    <span className="text-xl font-semibold tracking-[-0.02em] tabular-nums text-accent-text">
                       {chargeLabel}
                     </span>
                   </div>
                   {chargeCurrency === "PEN" ? (
-                    <p className="mt-3 text-[11px] leading-4 text-[#6f675f]">
+                    <p className="mt-3 text-[11px] leading-4 text-ink-2">
                       {t("manualModal.fxFixed", {
                         label: fxLabel,
                         rate: rate.toFixed(4),
@@ -536,7 +536,7 @@ export function ManualPaymentModal({
               ) : null}
 
               {error ? (
-                <p className="mt-3 text-xs text-red-600" role="alert">
+                <p className="mt-3 text-xs text-danger-fg" role="alert">
                   {error}
                 </p>
               ) : null}
@@ -545,14 +545,14 @@ export function ManualPaymentModal({
                 <Button
                   variant="outline"
                   onClick={resetAndClose}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {tCommon("cancel")}
                 </Button>
                 <Button
                   onClick={handleCreateIntent}
                   disabled={!isValidAmount || loading || (payMethod === "binance" && !config?.binance)}
-                  className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
                 >
                   {loading ? t("addBalance.processing") : t("manualModal.seeBanks")}
                 </Button>
@@ -577,16 +577,16 @@ export function ManualPaymentModal({
             <div className="p-5 sm:p-6">
               <div className="space-y-3">
                 {payMethod === "binance" ? (
-                  <div className="rounded-2xl border border-[#e8e1d8] p-5 space-y-3">
+                  <div className="rounded-card border border-line p-5 space-y-3">
                     <div className="flex items-center gap-3"><PaymentAppIcon app="binance" size="sm" /><strong>Binance Pay · USDT</strong></div>
                     <p className="text-sm">{t("manualModal.binanceInstructions")}</p>
                     <p className="break-all font-semibold">{config?.binance?.email ?? tCommon("emDash")}</p>
                     <Button variant="outline" disabled={!config?.binance?.email}
                       onClick={() => config?.binance?.email && void copyText(config.binance.email)}>{t("addBalance.copy")}</Button>
-                    <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{t("manualModal.binanceReview")}</p>
+                    <p className="rounded-box bg-warn-bg p-3 text-sm text-warn-fg">{t("manualModal.binanceReview")}</p>
                   </div>
                 ) : banks.length === 0 ? (
-                  <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm leading-5 text-amber-900">
+                  <p className="rounded-box bg-warn-bg px-4 py-3 text-sm leading-5 text-warn-fg">
                     Las cuentas bancarias estan pendientes de configuracion.
                     Contacta con soporte.
                   </p>
@@ -598,16 +598,16 @@ export function ManualPaymentModal({
                     return (
                       <div
                         key={bank.id}
-                        className="overflow-hidden rounded-2xl border border-[#e8e1d8] bg-white shadow-[0_1px_0_rgba(28,25,23,0.04)]"
+                        className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_1px_0_rgba(28,25,23,0.04)]"
                       >
-                        <div className="flex items-center justify-between gap-3 bg-[#f7f5f2] px-4 py-3 sm:px-5">
+                        <div className="flex items-center justify-between gap-3 bg-field px-4 py-3 sm:px-5">
                           <div className="flex min-w-0 items-center gap-3">
                             <PaymentAppIcon app={bankApp} size="sm" />
                             <div className="min-w-0">
-                              <p className="truncate text-[13px] font-semibold text-[#1c1917]">
+                              <p className="truncate text-[13px] font-semibold text-ink">
                                 {bank.label}
                               </p>
-                              <p className="mt-0.5 truncate text-[11px] text-[#6f675f]">
+                              <p className="mt-0.5 truncate text-[11px] text-ink-2">
                                 {bank.holder}
                               </p>
                             </div>
@@ -615,8 +615,8 @@ export function ManualPaymentModal({
                           <span
                             className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide ${
                               currencyBadge === "USD"
-                                ? "bg-[#ecfdf5] text-[#047857]"
-                                : "bg-[#fff7ed] text-[#c2410c]"
+                                ? "bg-field text-ok-fg"
+                                : "bg-field text-accent-text"
                             }`}
                           >
                             {currencyBadge}
@@ -625,42 +625,42 @@ export function ManualPaymentModal({
                         <div className="space-y-3 px-4 py-4 sm:px-5">
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
-                              <p className="text-[10px] font-medium uppercase tracking-wide text-[#8a8278]">
+                              <p className="text-[10px] font-medium uppercase tracking-wide text-ink-3">
                                 {t("manualModal.accountNumber")}
                               </p>
-                              <p className="mt-1 break-all font-mono text-[14px] font-semibold tracking-tight text-[#1c1917] sm:truncate">
+                              <p className="mt-1 break-all font-mono text-[14px] font-semibold tracking-tight text-ink sm:truncate">
                                 {bank.accountNumber}
                               </p>
                             </div>
                             <button
                               type="button"
                               onClick={() => void copyText(bank.accountNumber)}
-                              className="inline-flex h-10 shrink-0 items-center rounded-lg border border-[#ddd4cb] bg-[#faf8f5] px-3 text-xs font-semibold text-[#a85a32] transition-colors hover:bg-[#faf6f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/35"
+                              className="inline-flex h-10 shrink-0 items-center rounded-lg border border-line-strong bg-field px-3 text-xs font-semibold text-accent-text transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
                             >
                               {t("addBalance.copy")}
                             </button>
                           </div>
                           {bank.cci ? (
-                            <div className="flex items-center justify-between gap-3 border-t border-[#f0ebe4] pt-3">
+                            <div className="flex items-center justify-between gap-3 border-t border-line pt-3">
                               <div className="min-w-0">
-                                <p className="text-[10px] font-medium uppercase tracking-wide text-[#8a8278]">
+                                <p className="text-[10px] font-medium uppercase tracking-wide text-ink-3">
                                   {t("manualModal.cci")}
                                 </p>
-                                <p className="mt-1 truncate font-mono text-[13px] font-medium tracking-tight text-[#1c1917]">
+                                <p className="mt-1 truncate font-mono text-[13px] font-medium tracking-tight text-ink">
                                   {bank.cci}
                                 </p>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => void copyText(bank.cci!)}
-                                className="inline-flex h-10 shrink-0 items-center rounded-lg border border-[#ddd4cb] bg-[#faf8f5] px-3 text-xs font-semibold text-[#a85a32] transition-colors hover:bg-[#faf6f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/35"
+                                className="inline-flex h-10 shrink-0 items-center rounded-lg border border-line-strong bg-field px-3 text-xs font-semibold text-accent-text transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
                               >
                                 {t("addBalance.copy")}
                               </button>
                             </div>
                           ) : null}
                           {bank.notes ? (
-                            <p className="text-[11px] leading-4 text-[#8a8278]">
+                            <p className="text-[11px] leading-4 text-ink-3">
                               {bank.notes}
                             </p>
                           ) : null}
@@ -675,12 +675,12 @@ export function ManualPaymentModal({
                 <Button
                   variant="outline"
                   onClick={() => setStep("form")}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {tCommon("back")}
                 </Button>
                 <Button
-                  className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
                   onClick={() => setStep("voucher")}
                 >
                   {t("manualModal.paidUpload")}
@@ -711,8 +711,8 @@ export function ManualPaymentModal({
               <div
                 className={`flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 transition ${
                   proofFile
-                    ? "border-emerald-400 bg-emerald-50"
-                    : "border-[#ece7e0] bg-[#faf8f5] hover:border-[#d47840]/50"
+                    ? "border-ok-solid bg-ok-bg"
+                    : "border-line bg-field hover:border-accent/50"
                 }`}
                 onClick={() => fileInputRef.current?.click()}
                 onKeyDown={(e) => {
@@ -729,15 +729,15 @@ export function ManualPaymentModal({
                     className="max-h-32 max-w-full rounded-lg object-contain"
                   />
                 ) : proofFile ? (
-                  <p className="max-w-full break-all text-center text-sm font-medium text-emerald-800">
+                  <p className="max-w-full break-all text-center text-sm font-medium text-ok-fg">
                     {proofFile.name}
                   </p>
                 ) : (
                   <>
-                    <p className="text-sm font-semibold text-[#1c1917]">
+                    <p className="text-sm font-semibold text-ink">
                       {t("manualModal.uploadHint")}
                     </p>
-                    <p className="mt-1 text-xs text-[#8a8177]">
+                    <p className="mt-1 text-xs text-ink-3">
                       {t("manualModal.fileTypesHint")}
                     </p>
                   </>
@@ -775,7 +775,7 @@ export function ManualPaymentModal({
               </div>
 
               {error ? (
-                <p className="mt-3 text-xs text-red-600" role="alert">
+                <p className="mt-3 text-xs text-danger-fg" role="alert">
                   {error}
                 </p>
               ) : null}
@@ -784,13 +784,13 @@ export function ManualPaymentModal({
                 <Button
                   variant="outline"
                   onClick={() => setStep("banks")}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {tCommon("back")}
                 </Button>
                 <Button
                   disabled={!proofFile}
-                  className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
                   onClick={handleSubmitVoucher}
                 >
                   {paysDebt ? "Verificar voucher" : t("manualModal.verify")}
@@ -814,8 +814,8 @@ export function ManualPaymentModal({
               onClose={resetAndClose}
             />
             <div className="flex flex-col items-center px-6 py-12 text-center">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d47840]/20 border-t-[#d47840]" />
-              <p className="mt-5 text-[13px] font-medium text-[#625b54]">
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent/20 border-t-[#d47840]" />
+              <p className="mt-5 text-[13px] font-medium text-ink-2">
                 {t(paysDebt ? "manualModal.reviewWait" : "manualModal.analyzingWait")}
               </p>
             </div>
@@ -840,20 +840,20 @@ export function ManualPaymentModal({
               onClose={resetAndClose}
             />
             <div className="p-5 sm:p-6">
-              <div className="flex items-center gap-4 rounded-2xl bg-emerald-50 p-4 text-emerald-800">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+              <div className="flex items-center gap-4 rounded-card bg-ok-bg p-4 text-ok-fg">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ok-bg">
                   <CheckCircleIcon />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-emerald-700">
+                  <p className="text-[11px] font-medium text-ok-fg">
                     {paysDebt
                       ? "Deuda que pagaste"
                       : t("manualModal.credited")}
                   </p>
-                  <p className="mt-0.5 text-2xl font-semibold tracking-[-0.03em] tabular-nums text-[#1c1917]">
+                  <p className="mt-0.5 text-2xl font-semibold tracking-[-0.03em] tabular-nums text-ink">
                     {formatMoney(creditResult ?? parsedAmount)}
                   </p>
-                  <p className="mt-1 text-[11px] text-emerald-800">
+                  <p className="mt-1 text-[11px] text-ok-fg">
                     {paysDebt
                       ? "Gerencia revisa el voucher y baja la deuda. No entra a cartera."
                       : t("manualModal.canAssign")}
@@ -862,7 +862,7 @@ export function ManualPaymentModal({
               </div>
               <PaymentModalFooter>
                 <Button
-                  className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
                   onClick={resetAndClose}
                 >
                   {t("manualModal.done")}
@@ -901,8 +901,8 @@ export function ManualPaymentModal({
               {reviewNotice && !paysDebt ? (
                 <VoucherReviewCard notice={reviewNotice} />
               ) : (
-                <div className="flex items-start gap-4 rounded-2xl bg-amber-50 p-4 text-amber-900">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                <div className="flex items-start gap-4 rounded-card bg-warn-bg p-4 text-warn-fg">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-warn-bg">
                     <ClockIcon />
                   </span>
                   <p className="pt-1 text-[13px] leading-5">{pendingMessage}</p>
@@ -910,7 +910,7 @@ export function ManualPaymentModal({
               )}
               <PaymentModalFooter>
                 <Button
-                  className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
                   onClick={resetAndClose}
                 >
                   {t("manualModal.understood")}

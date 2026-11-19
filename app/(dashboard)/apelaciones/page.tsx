@@ -25,13 +25,13 @@ export default async function ApelacionesPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9a6b4a]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">
           Gerente
         </p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-[#1a1714]">
+        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">
           Apelaciones TikTok
         </h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-[#6b645c]">
+        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
           Cuentas suspendidas que los clientes pidieron apelar. Cada una trae el mensaje en
           inglés listo y sus documentos: cópialo, mándalo a TikTok y marca cómo va.
         </p>

@@ -47,7 +47,7 @@ export function PaymentsAllocateSectionCopy({
             {t("allocate.bodyEmptyBefore", { balance: walletBalanceLabel })}{" "}
             <a
               href="#recargar-saldo"
-              className="font-semibold text-[var(--auth-accent)] underline-offset-2 hover:underline"
+              className="font-semibold text-accent-text underline-offset-2 hover:underline"
             >
               {t("allocate.bodyEmptyCta")}
             </a>

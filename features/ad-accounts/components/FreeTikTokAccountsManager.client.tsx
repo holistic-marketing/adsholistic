@@ -39,11 +39,11 @@ const BMS: Array<{ id: string; label: string; hint: string }> = [
 ];
 const QUICK_COUNTS = [1, 5, 10, 15, 20];
 
-const card = "rounded-2xl border border-[#e8e1d8] bg-white";
-const label = "text-[12px] font-semibold text-[#5c564e]";
-const input = "h-10 w-full rounded-xl bg-[#faf8f5] px-3 text-[14px] ring-1 ring-[#e8e1d8] focus:outline-none focus:ring-2 focus:ring-[#ff781f]";
+const card = "rounded-card border border-line bg-surface";
+const label = "text-[12px] font-semibold text-ink-2";
+const input = "h-10 w-full rounded-box bg-field px-3 text-[14px] ring-1 ring-line focus:outline-none focus:ring-2 focus:ring-accent";
 const primary =
-  "inline-flex h-11 items-center justify-center rounded-xl bg-[#ff781f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#e85a1c] disabled:opacity-50";
+  "inline-flex h-11 items-center justify-center rounded-box bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50";
 
 /** Mismo prefijo que el servidor (freeNamePrefix), solo para la vista previa. */
 function previewPrefix(raw: string): string {
@@ -74,7 +74,7 @@ function CopyButton({ text }: { text: string }) {
           setTimeout(() => setDone(false), 1200);
         });
       }}
-      className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[#c2410c] hover:bg-[#fff4ec]"
+      className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
     >
       {done ? "Copiado" : "Copiar"}
     </button>
@@ -145,24 +145,24 @@ export function FreeTikTokAccountsManager() {
               setBm(b.id);
             }}
             className={`rounded-xl px-3 py-2 text-left ring-1 transition ${
-              bm === b.id ? "bg-[#fff4ec] ring-2 ring-[#ff781f]" : "bg-white ring-[#e8e1d8] hover:ring-[#d6cbbf]"
+              bm === b.id ? "bg-field ring-2 ring-accent" : "bg-surface ring-line hover:ring-accent-line"
             }`}
           >
             <span className="flex items-baseline justify-between gap-2">
-              <span className="text-[13px] font-semibold text-[#1c1917]">{b.label}</span>
-              <span className="text-[11px] text-[#8a8278]">{b.hint}</span>
+              <span className="text-[13px] font-semibold text-ink">{b.label}</span>
+              <span className="text-[11px] text-ink-3">{b.hint}</span>
             </span>
             {summary[b.id] ? (
               <>
-                <span className="mt-1 block text-[18px] font-semibold leading-6 text-[#1c1917]">
-                  {summary[b.id]!.free ?? "—"} <span className="text-[12px] font-medium text-[#6f675f]">libres</span>
+                <span className="mt-1 block text-[18px] font-semibold leading-6 text-ink">
+                  {summary[b.id]!.free ?? "—"} <span className="text-[12px] font-medium text-ink-2">libres</span>
                 </span>
-                <span className="block text-[11px] leading-4 text-[#6f675f]">
+                <span className="block text-[11px] leading-4 text-ink-2">
                   {summary[b.id]!.total ?? "—"} cuentas en total
                 </span>
                 <span
                   className={`mt-0.5 block text-[11px] font-semibold leading-4 ${
-                    summary[b.id]!.capped ? "text-red-700" : summary[b.id]!.leftToday ? "text-emerald-700" : "text-amber-700"
+                    summary[b.id]!.capped ? "text-danger-fg" : summary[b.id]!.leftToday ? "text-ok-fg" : "text-warn-fg"
                   }`}
                 >
                   {summary[b.id]!.capped
@@ -173,7 +173,7 @@ export function FreeTikTokAccountsManager() {
                 </span>
               </>
             ) : (
-              <span className="mt-1 block text-[11px] leading-4 text-[#8a8278]">Contando…</span>
+              <span className="mt-1 block text-[11px] leading-4 text-ink-3">Contando…</span>
             )}
           </button>
         ))}
@@ -238,8 +238,8 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
   return (
     <section className={`${card} h-fit space-y-4 p-4 sm:p-5`}>
       <div>
-        <h2 className="text-[15px] font-semibold text-[#1c1917]">Crear cuentas libres</h2>
-        <p className="mt-0.5 text-[12px] leading-5 text-[#6f675f]">
+        <h2 className="text-[15px] font-semibold text-ink">Crear cuentas libres</h2>
+        <p className="mt-0.5 text-[12px] leading-5 text-ink-2">
           Nacen en {bmLabel} sin dueño, listas para asignar.
         </p>
       </div>
@@ -253,8 +253,8 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
           maxLength={40}
           className={`${input} mt-1`}
         />
-        <span className="mt-1 block text-[11px] text-[#8a8278]">
-          Quedarán como <b className="text-[#1c1917]">{prefix} 1</b>, <b className="text-[#1c1917]">{prefix} 2</b>… (sigue el número que ya haya).
+        <span className="mt-1 block text-[11px] text-ink-3">
+          Quedarán como <b className="text-ink">{prefix} 1</b>, <b className="text-ink">{prefix} 2</b>… (sigue el número que ya haya).
           Al entregarla a un cliente, el sistema le pone el nombre del cliente.
         </span>
       </label>
@@ -269,7 +269,7 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
               onClick={() => setCount(n)}
               aria-pressed={count === n}
               className={`h-9 min-w-11 rounded-lg px-3 text-[13px] font-semibold ring-1 transition ${
-                count === n ? "bg-[#1c1917] text-white ring-[#1c1917]" : "bg-[#faf8f5] text-[#1c1917] ring-[#e8e1d8] hover:ring-[#d6cbbf]"
+                count === n ? "bg-accent-soft text-accent-text ring-accent-line" : "bg-field text-ink ring-line hover:ring-accent-line"
               }`}
             >
               {n}
@@ -279,7 +279,7 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
             aria-label="Otra cantidad"
-            className="h-9 rounded-lg bg-[#faf8f5] px-2 text-[13px] ring-1 ring-[#e8e1d8]"
+            className="h-9 rounded-lg bg-field px-2 text-[13px] ring-1 ring-line"
           >
             {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
@@ -288,7 +288,7 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
             ))}
           </select>
         </div>
-        <div className="mt-2 rounded-xl bg-[#faf8f5] px-3 py-2 text-[12px] leading-5 text-[#5c564e] ring-1 ring-[#efe9e2]">
+        <div className="mt-2 rounded-box bg-field px-3 py-2 text-[12px] leading-5 text-ink-2 ring-1 ring-line">
           Recomendado: <b>{recommended} por día</b> por BM. Hoy van <b>{today}</b>
           {leftToday > 0 ? ` · te quedan ${leftToday}.` : " · ya llegaste, mejor sigue mañana."}
         </div>
@@ -298,9 +298,9 @@ function CreatePanel({ bm, snap, onCreated }: { bm: string; snap: Snapshot | nul
         {busy ? `Creando en TikTok… (puede tardar ~${Math.ceil(count * 3)} s)` : `Crear ${count} cuenta${count > 1 ? "s" : ""}`}
       </button>
 
-      {error ? <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950">{error}</div> : null}
+      {error ? <div className="rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">{error}</div> : null}
       {created && created.length ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-950">
+        <div className="rounded-box border border-ok-line bg-ok-bg px-3 py-2 text-[13px] text-ok-fg">
           <p className="font-semibold">Listo: {created.length} creada{created.length > 1 ? "s" : ""}</p>
           <ul className="mt-1 max-h-40 space-y-0.5 overflow-auto text-[12px]">
             {created.map((c) => (
@@ -364,18 +364,18 @@ function FreeListPanel({
 
   return (
     <section className={`${card} flex min-w-0 flex-col`}>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#efe9e2] px-4 py-3 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3 sm:px-5">
         <div>
-          <h2 className="text-[15px] font-semibold text-[#1c1917]">
+          <h2 className="text-[15px] font-semibold text-ink">
             Libres listas para asignar{snap ? ` · ${accounts.length}` : ""}
           </h2>
-          <p className="text-[12px] text-[#6f675f]">Sin dueño en Hecom. Marca las que vas a entregar.</p>
+          <p className="text-[12px] text-ink-2">Sin dueño en Hecom. Marca las que vas a entregar.</p>
         </div>
         <button
           type="button"
           onClick={onReload}
           disabled={loading}
-          className="rounded-lg px-3 py-1.5 text-[13px] font-semibold text-[#c2410c] ring-1 ring-[#f3d5c0] hover:bg-[#fff4ec] disabled:opacity-50"
+          className="rounded-lg px-3 py-1.5 text-[13px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-50"
         >
           {loading ? "Leyendo TikTok…" : "Actualizar"}
         </button>
@@ -392,14 +392,14 @@ function FreeListPanel({
       </div>
 
       {loadError ? (
-        <p className="mx-4 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950 sm:mx-5">{loadError}</p>
+        <p className="mx-4 mt-3 rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg sm:mx-5">{loadError}</p>
       ) : null}
 
       <div className="mt-2 max-h-[420px] min-h-[120px] overflow-auto px-2 sm:px-3">
         {loading && !snap ? (
-          <p className="px-2 py-6 text-center text-[13px] text-[#6f675f]">Leyendo las cuentas de {BMS.find((b) => b.id === bm)?.label}…</p>
+          <p className="px-2 py-6 text-center text-[13px] text-ink-2">Leyendo las cuentas de {BMS.find((b) => b.id === bm)?.label}…</p>
         ) : visible.length === 0 ? (
-          <p className="px-2 py-6 text-center text-[13px] text-[#6f675f]">
+          <p className="px-2 py-6 text-center text-[13px] text-ink-2">
             {accounts.length ? "Nada coincide con la búsqueda." : "No hay cuentas libres en este BM. Crea una tanda a la izquierda."}
           </p>
         ) : (
@@ -409,12 +409,12 @@ function FreeListPanel({
               const full = !on && selected.size >= maxPick;
               return (
                 <li key={a.advertiserId}>
-                  <label className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2.5 ${on ? "bg-[#fff4ec]" : "hover:bg-[#faf8f5]"} ${full ? "opacity-50" : ""}`}>
+                  <label className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2.5 ${on ? "bg-field" : "hover:bg-field"} ${full ? "opacity-50" : ""}`}>
                     <input type="checkbox" checked={on} disabled={full} onChange={() => toggle(a.advertiserId)} className="mt-1" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-semibold text-[#1c1917]">{a.name}</span>
-                      <span className="block font-mono text-[11px] text-[#8a8278]">{a.advertiserId}</span>
-                      <span className="block text-[11px] text-[#6f675f]">
+                      <span className="block truncate text-[13px] font-semibold text-ink">{a.name}</span>
+                      <span className="block font-mono text-[11px] text-ink-3">{a.advertiserId}</span>
+                      <span className="block text-[11px] text-ink-2">
                         {a.members === null
                           ? "Acceso: no se pudo leer"
                           : a.members.length
@@ -430,12 +430,12 @@ function FreeListPanel({
         )}
       </div>
 
-      <div className="mt-auto border-t border-[#efe9e2] px-4 py-4 sm:px-5">
+      <div className="mt-auto border-t border-line px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[13px] font-semibold text-[#1c1917]">
+          <span className="text-[13px] font-semibold text-ink">
             {picked.length ? `${picked.length} marcada${picked.length > 1 ? "s" : ""}` : "Marca cuentas para asignar"}
           </span>
-          <div className="ml-auto inline-flex rounded-xl bg-[#faf8f5] p-1 ring-1 ring-[#e8e1d8]" role="tablist">
+          <div className="ml-auto inline-flex rounded-box bg-field p-1 ring-1 ring-line" role="tablist">
             {([
               ["member", "A un miembro"],
               ["cliente", "A un cliente"],
@@ -450,7 +450,7 @@ function FreeListPanel({
                   if (id === "cliente" && selected.size > (snap?.maxPerClienteAssign ?? 5)) setSelected(new Set());
                 }}
                 className={`rounded-lg px-3 py-1.5 text-[12px] font-semibold transition ${
-                  target === id ? "bg-white text-[#1c1917] shadow-sm ring-1 ring-[#e8e1d8]" : "text-[#6f675f] hover:text-[#1c1917]"
+                  target === id ? "bg-surface text-ink shadow-sm ring-1 ring-line" : "text-ink-2 hover:text-ink"
                 }`}
               >
                 {text}
@@ -533,9 +533,9 @@ function AssignToMember({ bm, members, picked, onDone }: { bm: string; members: 
         inputMode="numeric"
         className={input}
       />
-      <p className="text-[11px] text-[#8a8278]">Administrador solo de esas cuentas, nunca del BM.</p>
+      <p className="text-[11px] text-ink-3">Administrador solo de esas cuentas, nunca del BM.</p>
       {msg ? (
-        <p className={`rounded-xl px-3 py-2 text-[13px] ${msg.ok ? "border border-emerald-200 bg-emerald-50 text-emerald-950" : "border border-amber-200 bg-amber-50 text-amber-950"}`}>
+        <p className={`rounded-box px-3 py-2 text-[13px] ${msg.ok ? "border border-ok-line bg-ok-bg text-ok-fg" : "border border-warn-line bg-warn-bg text-warn-fg"}`}>
           {msg.text}
         </p>
       ) : null}
@@ -632,10 +632,10 @@ function AssignToCliente({ bm, picked, max, onDone }: { bm: string; picked: Free
           className={input}
         />
         {!cliente && matches.length ? (
-          <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-xl bg-white py-1 shadow-lg ring-1 ring-[#e8e1d8]">
+          <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-box bg-surface py-1 shadow-lg ring-1 ring-line">
             {matches.map((c) => (
               <li key={c.id}>
-                <button type="button" onClick={() => void pickCliente(c)} className="block w-full px-3 py-2 text-left text-[13px] hover:bg-[#fff4ec]">
+                <button type="button" onClick={() => void pickCliente(c)} className="block w-full px-3 py-2 text-left text-[13px] hover:bg-field">
                   {c.name}
                 </button>
               </li>
@@ -648,12 +648,12 @@ function AssignToCliente({ bm, picked, max, onDone }: { bm: string; picked: Free
         <div>
           <p className={label}>Darle acceso en TikTok (administrador solo de la cuenta)</p>
           {users === null ? (
-            <p className="mt-1 text-[12px] text-[#6f675f]">Buscando sus usuarios de TikTok…</p>
+            <p className="mt-1 text-[12px] text-ink-2">Buscando sus usuarios de TikTok…</p>
           ) : users.length ? (
             <ul className="mt-1 space-y-1">
               {users.map((u) => (
                 <li key={u.userId}>
-                  <label className="flex items-center gap-2 text-[13px] text-[#1c1917]">
+                  <label className="flex items-center gap-2 text-[13px] text-ink">
                     <input
                       type="checkbox"
                       checked={checked.has(u.userId)}
@@ -667,7 +667,7 @@ function AssignToCliente({ bm, picked, max, onDone }: { bm: string; picked: Free
                       }
                     />
                     <span className="font-medium">{u.userName}</span>
-                    <span className="text-[11px] text-[#8a8278]">
+                    <span className="text-[11px] text-ink-3">
                       en {u.accounts} cuenta(s){u.suggested ? " · cliente" : ""}
                     </span>
                   </label>
@@ -675,7 +675,7 @@ function AssignToCliente({ bm, picked, max, onDone }: { bm: string; picked: Free
               ))}
             </ul>
           ) : (
-            <p className="mt-1 text-[12px] text-[#6f675f]">No encontré usuarios en sus cuentas actuales.</p>
+            <p className="mt-1 text-[12px] text-ink-2">No encontré usuarios en sus cuentas actuales.</p>
           )}
           <input
             value={manualUser}
@@ -685,24 +685,24 @@ function AssignToCliente({ bm, picked, max, onDone }: { bm: string; picked: Free
             inputMode="numeric"
             className={`${input} mt-2 max-w-xs`}
           />
-          <p className="mt-1 text-[11px] text-[#8a8278]">Desmarca al equipo: ellos ya ven todo por el BM.</p>
+          <p className="mt-1 text-[11px] text-ink-3">Desmarca al equipo: ellos ya ven todo por el BM.</p>
         </div>
       ) : null}
 
       <button type="button" onClick={() => void assign()} disabled={busy || !cliente || !picked.length} className={primary}>
         {busy ? "Entregando…" : `Entregar ${picked.length || ""} a ${cliente?.name ?? "cliente"}`.replace("  ", " ")}
       </button>
-      <p className="text-[11px] text-[#8a8278]">
+      <p className="text-[11px] text-ink-3">
         Hasta {max} por vez. Queda en su ficha de Hecom y en su panel al instante (BM 10/30 con cupo $0).
       </p>
 
-      {error ? <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-950">{error}</p> : null}
+      {error ? <p className="rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">{error}</p> : null}
       {given && given.length ? (
         <div className="space-y-2">
           <TikTokRenameStatus accounts={given} />
           <ul className="space-y-2">
             {given.map((c) => (
-              <li key={c.advertiserId} className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-950">
+              <li key={c.advertiserId} className="rounded-box border border-ok-line bg-ok-bg px-3 py-2 text-[13px] text-ok-fg">
                 <p className="flex flex-wrap items-center gap-1 font-semibold">
                   {c.advertiserName} <CopyButton text={c.advertiserName} />
                 </p>

@@ -28,11 +28,11 @@ export function PaymentGatewaySelector({
         <div
           key={gateway.id}
           role="status"
-          className="mb-3 flex items-start gap-2.5 rounded-xl border border-[#f0d9a8] bg-[#fff8e8] px-3.5 py-3 text-[12px] leading-5 text-[#7a5a17]"
+          className="mb-3 flex items-start gap-2.5 rounded-box border border-warn-line bg-warn-bg px-3.5 py-3 text-[12px] leading-5 text-warn-fg"
         >
           <span
             aria-hidden
-            className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-[#e9b949] text-[10px] font-bold text-white"
+            className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-warn-solid text-[10px] font-bold text-white"
           >
             !
           </span>
@@ -81,12 +81,12 @@ export function PaymentGatewaySelector({
                 onSelect(gateway.id);
               }}
               className={cn(
-                "relative flex min-h-20 w-full min-w-0 items-start gap-3 rounded-xl border px-3.5 py-3.5 text-left transition-[border-color,background-color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/30 focus-visible:ring-offset-2 active:scale-[0.99] sm:px-4",
+                "relative flex min-h-20 w-full min-w-0 items-start gap-3 rounded-box border px-3.5 py-3.5 text-left transition-[border-color,background-color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/30 focus-visible:ring-offset-2 active:scale-[0.99] sm:px-4",
                 inMaintenance
-                  ? "cursor-not-allowed border-[var(--auth-border)] bg-[#f7f5f2] opacity-80"
+                  ? "cursor-not-allowed border-[var(--auth-border)] bg-field opacity-80"
                   : isSelected
                     ? "border-[var(--auth-accent)] bg-[var(--auth-accent-soft)]"
-                    : "border-[var(--auth-border)] bg-white hover:border-[var(--auth-accent)]/40 hover:bg-[var(--auth-bg)]",
+                    : "border-[var(--auth-border)] bg-surface hover:border-[var(--auth-accent)]/40 hover:bg-[var(--auth-bg)]",
               )}
             >
               <GatewayLogo gatewayId={gateway.id} size="sm" />
@@ -97,7 +97,7 @@ export function PaymentGatewaySelector({
                     {localizedName}
                   </p>
                   {inMaintenance ? (
-                    <span className="shrink-0 rounded-full bg-[#e7e2db] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#5c564e]">
+                    <span className="shrink-0 rounded-full bg-active px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-ink-2">
                       {t("gatewaySelector.maintenance")}
                     </span>
                   ) : null}

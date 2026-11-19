@@ -492,7 +492,7 @@ export function AddBalanceModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
       <button
         type="button"
-        className="absolute inset-0 bg-[#0b1020]/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-[2px]"
         aria-label={tCommon("close")}
         onClick={handleClose}
       />
@@ -500,7 +500,7 @@ export function AddBalanceModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-balance-title"
-        className="scrollbar-thin relative max-h-[min(92vh,calc(100dvh-1.5rem))] w-full max-w-[35rem] overflow-y-auto rounded-[1.25rem] bg-white shadow-[0_28px_90px_rgb(15_23_42_/_0.24)]"
+        className="scrollbar-thin relative max-h-[min(92vh,calc(100dvh-1.5rem))] w-full max-w-[35rem] overflow-y-auto rounded-card bg-surface shadow-[0_28px_90px_rgb(15_23_42_/_0.24)]"
       >
         {step === "form" ? (
           <>
@@ -528,12 +528,12 @@ export function AddBalanceModal({
               <div>
                 <label
                   htmlFor="topup-amount"
-                  className="mb-2 block text-[12px] font-semibold text-[#514b45]"
+                  className="mb-2 block text-[12px] font-semibold text-ink-2"
                 >
                   {t("addBalance.receiveLabel")}
                 </label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-semibold text-[#8a8177]">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-semibold text-ink-3">
                     $
                   </span>
                   <Input
@@ -546,12 +546,12 @@ export function AddBalanceModal({
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     autoFocus
-                    className="h-14 rounded-xl pl-9 text-lg font-semibold tabular-nums"
+                    className="h-14 rounded-box pl-9 text-lg font-semibold tabular-nums"
                   />
                 </div>
                 {error && (
                   <p
-                    className="mt-2 text-xs font-medium text-red-600"
+                    className="mt-2 text-xs font-medium text-danger-fg"
                     role="alert"
                   >
                     {error}
@@ -559,7 +559,7 @@ export function AddBalanceModal({
                 )}
                 {!error && belowCryptoMinimum && (
                   <p
-                    className="mt-2 text-xs font-medium text-amber-700"
+                    className="mt-2 text-xs font-medium text-warn-fg"
                     role="alert"
                   >
                     {t("addBalance.cryptoMinAmount", { min: CRYPTO_MIN_USD })}
@@ -568,24 +568,24 @@ export function AddBalanceModal({
               </div>
 
               {feePreview ? (
-                <div className="rounded-2xl bg-[#f7f5f2] p-4 text-sm sm:p-5">
-                  <p className="mb-3 text-[13px] font-semibold text-[#1c1917]">
+                <div className="rounded-card bg-field p-4 text-sm sm:p-5">
+                  <p className="mb-3 text-[13px] font-semibold text-ink">
                     {t("addBalance.summary")}
                   </p>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[#625b54]">
+                    <span className="text-ink-2">
                       {t("addBalance.receiveWallet")}
                     </span>
-                    <span className="font-semibold tabular-nums text-[#1c1917]">
+                    <span className="font-semibold tabular-nums text-ink">
                       {formatMoney(feePreview.creditCents / 100)}
                     </span>
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-3">
-                    <span className="text-[#625b54]">
+                    <span className="text-ink-2">
                       {t("addBalance.feeHolistic")} (
                       {formatFeePercentLabel(feePercent)})
                     </span>
-                    <span className="font-medium tabular-nums text-[#1c1917]">
+                    <span className="font-medium tabular-nums text-ink">
                       {isCobrana && penPreview
                         ? formatPenAmount(penPreview.feePenCents)
                         : formatMoney((parsedAmount * feePercent) / 100)}
@@ -593,28 +593,28 @@ export function AddBalanceModal({
                   </div>
                   {isCardGateway && stripeExtra > 0 ? (
                     <div className="mt-2 flex items-center justify-between gap-3">
-                      <span className="text-[#625b54]">
+                      <span className="text-ink-2">
                         {isWhop
                           ? t("addBalance.feeGateway")
                           : t("addBalance.feeStripe")}{" "}
                         ({formatFeePercentLabel(stripeExtra)})
                       </span>
-                      <span className="font-medium tabular-nums text-[#1c1917]">
+                      <span className="font-medium tabular-nums text-ink">
                         {formatMoney((parsedAmount * stripeExtra) / 100)}
                       </span>
                     </div>
                   ) : null}
-                  <div className="mt-3 flex items-end justify-between gap-3 border-t border-[#e4ddd6] pt-3">
-                    <span className="font-semibold text-[#1c1917]">
+                  <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
+                    <span className="font-semibold text-ink">
                       {t("addBalance.totalPay")}
                     </span>
-                    <span className="text-xl font-semibold tracking-[-0.02em] tabular-nums text-[#c96a35]">
+                    <span className="text-xl font-semibold tracking-[-0.02em] tabular-nums text-accent-text">
                       {isCobrana && penPreview
                         ? formatPenAmount(penPreview.grossPenCents)
                         : formatMoney(feePreview.grossCents / 100)}
                     </span>
                   </div>
-                  <p className="mt-3 text-[11px] leading-4 text-[#6f675f]">
+                  <p className="mt-3 text-[11px] leading-4 text-ink-2">
                     {isCobrana
                       ? t("addBalance.fxNeedDni", {
                           fx: fxSourceLabel,
@@ -631,12 +631,12 @@ export function AddBalanceModal({
               ) : null}
 
               {isCardGateway ? (
-                <div className="flex items-center justify-between gap-4 rounded-xl bg-[#faf6f1] px-4 py-3">
+                <div className="flex items-center justify-between gap-4 rounded-box bg-field px-4 py-3">
                   <div>
-                    <p className="text-[12px] font-semibold text-[#1c1917]">
+                    <p className="text-[12px] font-semibold text-ink">
                       {t("addBalance.payWithCard")}
                     </p>
-                    <p className="mt-0.5 text-[11px] text-[#6f675f]">
+                    <p className="mt-0.5 text-[11px] text-ink-2">
                       {isWhop
                         ? t("addBalance.whopSecure")
                         : t("addBalance.stripeSecure")}
@@ -649,13 +649,13 @@ export function AddBalanceModal({
                   </div>
                 </div>
               ) : isCobrana ? (
-                <div className="rounded-xl bg-[#fbf7fc] px-4 py-3">
+                <div className="rounded-box bg-field px-4 py-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-[12px] font-semibold text-[#1c1917]">
+                      <p className="text-[12px] font-semibold text-ink">
 {t("addBalance.cobranaProcessed")}
                       </p>
-                      <p className="mt-0.5 text-[11px] leading-4 text-[#6f675f]">
+                      <p className="mt-0.5 text-[11px] leading-4 text-ink-2">
                         {t("addBalance.yapeServiceHint", {
                           company: COBRANA_YAPE_SERVICE_COMPANY,
                         })}
@@ -678,11 +678,11 @@ export function AddBalanceModal({
                   </div>
                 </div>
               ) : isCrypto ? (
-                <p className="rounded-xl bg-[#f7f5f2] px-4 py-3 text-xs leading-5 text-[#625b54]">
+                <p className="rounded-box bg-field px-4 py-3 text-xs leading-5 text-ink-2">
                   {t("addBalance.cryptoCheckoutHint")}
                 </p>
               ) : isVoucher ? (
-                <p className="rounded-xl bg-[#f7f5f2] px-4 py-3 text-xs leading-5 text-[#625b54]">
+                <p className="rounded-box bg-field px-4 py-3 text-xs leading-5 text-ink-2">
                   {t("addBalance.manualAfterCreateHint")}
                 </p>
               ) : null}
@@ -691,13 +691,13 @@ export function AddBalanceModal({
                 <Button
                   variant="outline"
                   onClick={handleClose}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {tCommon("cancel")}
                 </Button>
                 <Button
                   onClick={handleContinueToConfirm}
-                  className="h-11 w-full rounded-xl bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
                 >
                   {t("addBalance.reviewCta")}
                 </Button>
@@ -729,31 +729,31 @@ export function AddBalanceModal({
             />
 
             <div className="p-5 sm:p-6">
-              <div className="overflow-hidden rounded-2xl bg-[#f7f5f2]">
-                <dl className="grid grid-cols-2 divide-x divide-[#e4ddd6]">
+              <div className="overflow-hidden rounded-card bg-field">
+                <dl className="grid grid-cols-2 divide-x divide-line">
                   <div className="p-4 sm:p-5">
-                    <dt className="text-[11px] font-medium text-[#6f675f]">
+                    <dt className="text-[11px] font-medium text-ink-2">
                       {t("addBalance.receiveWallet")}
                     </dt>
-                    <dd className="mt-1 text-xl font-semibold tracking-[-0.025em] tabular-nums text-[#c96a35]">
+                    <dd className="mt-1 text-xl font-semibold tracking-[-0.025em] tabular-nums text-accent-text">
                       {formatMoney(parsedAmount)}
                     </dd>
-                    <dd className="mt-0.5 text-[10px] text-[#8a8177]">
+                    <dd className="mt-0.5 text-[10px] text-ink-3">
                       {t("addBalance.inHolisticWallet")}
                     </dd>
                   </div>
                   <div className="p-4 sm:p-5">
-                    <dt className="text-[11px] font-medium text-[#6f675f]">
+                    <dt className="text-[11px] font-medium text-ink-2">
                       {t("addBalance.totalPay")}
                     </dt>
-                    <dd className="mt-1 text-xl font-semibold tracking-[-0.025em] tabular-nums text-[#1c1917]">
+                    <dd className="mt-1 text-xl font-semibold tracking-[-0.025em] tabular-nums text-ink">
                       {isCobrana && penPreview
                         ? formatPenAmount(penPreview.grossPenCents)
                         : feePreview
                           ? formatMoney(feePreview.grossCents / 100)
                           : formatMoney(parsedAmount)}
                     </dd>
-                    <dd className="mt-0.5 text-[10px] text-[#8a8177]">
+                    <dd className="mt-0.5 text-[10px] text-ink-3">
                       {t("addBalance.viaGateway", {
                         gateway: gatewayLabels[selectedGateway],
                       })}
@@ -761,13 +761,13 @@ export function AddBalanceModal({
                   </div>
                 </dl>
 
-                <dl className="space-y-2 border-t border-[#e4ddd6] px-4 py-3 text-[12px] sm:px-5">
+                <dl className="space-y-2 border-t border-line px-4 py-3 text-[12px] sm:px-5">
                   <div className="flex items-center justify-between gap-3">
-                    <dt className="text-[#625b54]">
+                    <dt className="text-ink-2">
                       {t("addBalance.feeHolistic")} (
                       {formatFeePercentLabel(feePercent)})
                     </dt>
-                    <dd className="font-medium tabular-nums text-[#1c1917]">
+                    <dd className="font-medium tabular-nums text-ink">
                       {isCobrana && penPreview
                         ? formatPenAmount(penPreview.feePenCents)
                         : formatMoney((parsedAmount * feePercent) / 100)}
@@ -775,23 +775,23 @@ export function AddBalanceModal({
                   </div>
                   {isCardGateway && stripeExtra > 0 ? (
                     <div className="flex items-center justify-between gap-3">
-                      <dt className="text-[#625b54]">
+                      <dt className="text-ink-2">
                         {isWhop
                           ? t("addBalance.feeGateway")
                           : t("addBalance.feeStripe")}{" "}
                         ({formatFeePercentLabel(stripeExtra)})
                       </dt>
-                      <dd className="font-medium tabular-nums text-[#1c1917]">
+                      <dd className="font-medium tabular-nums text-ink">
                         {formatMoney((parsedAmount * stripeExtra) / 100)}
                       </dd>
                     </div>
                   ) : null}
                   {isCobrana ? (
                     <div className="flex items-center justify-between gap-3">
-                      <dt className="text-[#625b54]">
+                      <dt className="text-ink-2">
                         {t("addBalance.yapeService")}
                       </dt>
-                      <dd className="font-semibold text-[#1c1917]">
+                      <dd className="font-semibold text-ink">
                         {COBRANA_YAPE_SERVICE_COMPANY}
                       </dd>
                     </div>
@@ -800,17 +800,17 @@ export function AddBalanceModal({
               </div>
 
               {isCobrana && needsCustomerDocument ? (
-                <div className="mt-4 rounded-2xl border border-[#e7dfd7] bg-white px-4 py-4 sm:px-5">
-                  <p className="text-[13px] font-semibold text-[#1c1917]">
+                <div className="mt-4 rounded-card border border-line bg-surface px-4 py-4 sm:px-5">
+                  <p className="text-[13px] font-semibold text-ink">
                     {t("addBalance.dniTitle")}
                   </p>
-                  <p className="mt-1 text-[12px] leading-5 text-[#625b54]">
+                  <p className="mt-1 text-[12px] leading-5 text-ink-2">
                     {crmDocumentHint
                       ? t("addBalance.crmDocInvalid", { doc: crmDocumentHint })
                       : t("addBalance.dniRequired")}
                   </p>
                   <label className="mt-3 block">
-                    <span className="text-[11px] font-medium text-[#6f675f]">
+                    <span className="text-[11px] font-medium text-ink-2">
                       {t("addBalance.dniLabel")}
                     </span>
                     <Input
@@ -825,7 +825,7 @@ export function AddBalanceModal({
                           e.target.value.replace(/\D/g, "").slice(0, 11),
                         )
                       }
-                      className="mt-1 h-11 rounded-xl border-[#ddd4cb] bg-[#f7f5f2] text-[1.05rem] font-semibold tabular-nums tracking-wide"
+                      className="mt-1 h-11 rounded-box border-line-strong bg-field text-[1.05rem] font-semibold tabular-nums tracking-wide"
                     />
                   </label>
                 </div>
@@ -833,7 +833,7 @@ export function AddBalanceModal({
 
               {error && (
                 <p
-                  className="mt-3 text-xs font-medium text-red-600"
+                  className="mt-3 text-xs font-medium text-danger-fg"
                   role="alert"
                 >
                   {error}
@@ -844,7 +844,7 @@ export function AddBalanceModal({
                   variant="outline"
                   onClick={() => setStep("form")}
                   disabled={loading}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {tCommon("back")}
                 </Button>
@@ -856,7 +856,7 @@ export function AddBalanceModal({
                       needsCustomerDocument &&
                       !normalizeYapeDocument(customerDocument).ok)
                   }
-                  className="h-11 w-full rounded-xl bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
                 >
                   {loading
                     ? t("addBalance.processing")
@@ -892,20 +892,20 @@ export function AddBalanceModal({
             />
 
             <div className="p-5 sm:p-6">
-              <div className="overflow-hidden rounded-2xl bg-[#f7f5f2]">
-                <div className="border-b border-[#e4ddd6] px-4 py-4 sm:px-5">
-                  <p className="text-[11px] font-medium text-[#6f675f]">
+              <div className="overflow-hidden rounded-card bg-field">
+                <div className="border-b border-line px-4 py-4 sm:px-5">
+                  <p className="text-[11px] font-medium text-ink-2">
                     {t("addBalance.searchInYape")}
                   </p>
                   <div className="mt-1 flex items-end justify-between gap-4">
-                    <p className="min-w-0 text-2xl font-semibold tracking-[-0.03em] text-[#1c1917]">
+                    <p className="min-w-0 text-2xl font-semibold tracking-[-0.03em] text-ink">
                       {COBRANA_YAPE_SERVICE_COMPANY}
                     </p>
-                    <span className="shrink-0 rounded-full bg-[#eee5f1] px-2.5 py-1 text-[10px] font-semibold text-[#5f0b72]">
+                    <span className="shrink-0 rounded-full bg-subtle px-2.5 py-1 text-[10px] font-semibold text-[#5f0b72]">
                       {t("addBalance.payServices")}
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] leading-4 text-[#6f675f]">
+                  <p className="mt-2 text-[11px] leading-4 text-ink-2">
                     {t("addBalance.yapeNotHolistic", {
                       company: COBRANA_YAPE_SERVICE_COMPANY,
                     })}
@@ -913,16 +913,16 @@ export function AddBalanceModal({
                 </div>
                 {cobranaCode ? (
                   <div className="px-4 py-4 sm:px-5">
-                    <p className="text-[11px] font-medium text-[#6f675f]">
+                    <p className="text-[11px] font-medium text-ink-2">
                       {t("addBalance.paymentCode")}
                     </p>
                     <div className="mt-1.5 flex items-center justify-between gap-3">
-                      <p className="min-w-0 break-all font-mono text-xl font-semibold tracking-[0.04em] text-[#1c1917] sm:text-2xl">
+                      <p className="min-w-0 break-all font-mono text-xl font-semibold tracking-[0.04em] text-ink sm:text-2xl">
                         {cobranaCode}
                       </p>
                       <button
                         type="button"
-                        className="inline-flex h-9 shrink-0 items-center rounded-lg border border-[#ddd4cb] bg-white px-3 text-xs font-semibold text-[#1c1917] transition-colors hover:bg-[#faf6f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d47840]/35"
+                        className="inline-flex h-9 shrink-0 items-center rounded-lg border border-line-strong bg-surface px-3 text-xs font-semibold text-ink transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
                         onClick={() => {
                           void navigator.clipboard
                             ?.writeText(cobranaCode)
@@ -945,13 +945,13 @@ export function AddBalanceModal({
                     </div>
                   </div>
                 ) : (
-                  <p className="px-4 py-4 text-[12px] text-[#6f675f] sm:px-5">
+                  <p className="px-4 py-4 text-[12px] text-ink-2 sm:px-5">
 {t("addBalance.preparingCode")}
                   </p>
                 )}
-                <div className="grid grid-cols-2 divide-x divide-[#e4ddd6] border-t border-[#e4ddd6] px-4 py-4 text-sm sm:px-5">
+                <div className="grid grid-cols-2 divide-x divide-line border-t border-line px-4 py-4 text-sm sm:px-5">
                   <div className="pr-4">
-                    <p className="text-[10px] text-[#6f675f]">
+                    <p className="text-[10px] text-ink-2">
                       {t("addBalance.youPay")}
                     </p>
                     <p className="mt-0.5 font-semibold tabular-nums text-[#5f0b72]">
@@ -961,10 +961,10 @@ export function AddBalanceModal({
                     </p>
                   </div>
                   <div className="pl-4">
-                    <p className="text-[10px] text-[#6f675f]">
+                    <p className="text-[10px] text-ink-2">
                       {t("addBalance.youReceive")}
                     </p>
-                    <p className="mt-0.5 font-semibold tabular-nums text-[#1c1917]">
+                    <p className="mt-0.5 font-semibold tabular-nums text-ink">
                       {formatMoney(parsedAmount)}
                     </p>
                   </div>
@@ -972,7 +972,7 @@ export function AddBalanceModal({
               </div>
 
               <div
-                className="mt-3 flex items-center gap-2 rounded-xl bg-[#fbf7fc] px-3.5 py-3 text-[12px] font-medium text-[#5f0b72]"
+                className="mt-3 flex items-center gap-2 rounded-box bg-field px-3.5 py-3 text-[12px] font-medium text-[#5f0b72]"
                 role="status"
               >
                 <span className="h-2 w-2 shrink-0 animate-pulse motion-reduce:animate-none rounded-full bg-[#8b1aa0]" />
@@ -980,7 +980,7 @@ export function AddBalanceModal({
               </div>
 
               <div className="mt-5">
-                <h3 className="text-[13px] font-semibold text-[#1c1917]">
+                <h3 className="text-[13px] font-semibold text-ink">
                   {t("addBalance.yapeHowToTitle")}
                 </h3>
                 <ol className="mt-3 space-y-3">
@@ -1020,7 +1020,7 @@ text={t("addBalance.yapeStep4", {
                           key={`${link.key}-${link.url}`}
                           type="button"
                           className={cn(
-                            "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-semibold transition-colors",
+                            "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-box px-4 text-sm font-semibold transition-colors",
                             paymentAppButtonClass(app),
                           )}
                           onClick={() => {
@@ -1043,7 +1043,7 @@ text={t("addBalance.yapeStep4", {
               ) : null}
 
               {error && (
-                <p className="mt-3 text-xs text-red-600" role="alert">
+                <p className="mt-3 text-xs text-danger-fg" role="alert">
                   {error}
                 </p>
               )}
@@ -1052,7 +1052,7 @@ text={t("addBalance.yapeStep4", {
                 <Button
                   variant="outline"
                   onClick={handleClose}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {t("addBalance.closeWait")}
                 </Button>
@@ -1079,7 +1079,7 @@ text={t("addBalance.yapeStep4", {
               onClose={handleClose}
             />
             <div className="p-5 sm:p-6">
-              <div className="rounded-2xl bg-[#f7f5f2] p-4 text-sm">
+              <div className="rounded-card bg-field p-4 text-sm">
                 <p className="font-semibold text-[var(--foreground)]">
                   {t("addBalance.receiveAmount", {
                     amount: formatMoney(parsedAmount),
@@ -1113,7 +1113,7 @@ text={t("addBalance.yapeStep4", {
                 </p>
               </div>
               {error && (
-                <p className="mt-3 text-xs text-red-600" role="alert">
+                <p className="mt-3 text-xs text-danger-fg" role="alert">
                   {error}
                 </p>
               )}
@@ -1122,14 +1122,14 @@ text={t("addBalance.yapeStep4", {
                   variant="outline"
                   onClick={handleClose}
                   disabled={uploadingProof}
-                  className="h-11 w-full rounded-xl sm:w-auto"
+                  className="h-11 w-full rounded-box sm:w-auto"
                 >
                   {t("addBalance.uploadLater")}
                 </Button>
                 <Button
                   onClick={handleProofUpload}
                   disabled={uploadingProof}
-                  className="h-11 w-full rounded-xl bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
                 >
                   {uploadingProof
                     ? t("addBalance.processing")
@@ -1164,25 +1164,25 @@ text={t("addBalance.yapeStep4", {
               onClose={handleClose}
             />
             <div className="p-5 sm:p-6">
-              <div className="flex items-start gap-3 rounded-2xl bg-[#f7f5f2] p-4">
+              <div className="flex items-start gap-3 rounded-card bg-field p-4">
                 <span
                   className={cn(
                     "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
                     paidConfirmed
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-700",
+                      ? "bg-ok-bg text-ok-fg"
+                      : "bg-warn-bg text-warn-fg",
                   )}
                 >
                   {paidConfirmed ? <CheckCircleIcon /> : <ClockIcon />}
                 </span>
-                <p className="pt-1 text-sm leading-5 text-[#514b45]">
+                <p className="pt-1 text-sm leading-5 text-ink-2">
                   {resultMessage}
                 </p>
               </div>
               <PaymentModalFooter>
                 <Button
                   onClick={handleClose}
-                  className="h-11 w-full rounded-xl bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
+                  className="h-11 w-full rounded-box bg-[var(--brand-primary)] px-6 hover:bg-[var(--brand-primary-deep)] sm:w-auto"
                 >
                   {tCommon("close")}
                 </Button>
@@ -1204,8 +1204,8 @@ function PaymentInstruction({
   text: ReactNode;
 }) {
   return (
-    <li className="flex gap-3 text-[13px] leading-5 text-[#514b45]">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#f7f0e9] text-[11px] font-semibold text-[#a85a32]">
+    <li className="flex gap-3 text-[13px] leading-5 text-ink-2">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-subtle text-[11px] font-semibold text-accent-text">
         {number}
       </span>
       <span className="pt-0.5">{text}</span>

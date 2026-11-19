@@ -10,10 +10,10 @@ import { AddVideosPicker } from "@/features/campaigns/components/AddVideosPicker
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
 const KIND_TONE: Record<LaunchAction["kind"], string> = {
-  pause_video: "bg-[#fef2f2] text-[#991b1b]",
-  raise_budget: "bg-[#ecf7f0] text-[#1f5c40]",
-  new_video: "bg-amber-50 text-amber-900",
-  all_losing: "bg-[#fef2f2] text-[#991b1b]",
+  pause_video: "bg-field text-danger-fg",
+  raise_budget: "bg-subtle text-ok-fg",
+  new_video: "bg-warn-bg text-warn-fg",
+  all_losing: "bg-field text-danger-fg",
 };
 
 type Action = LaunchSummary["actions"][number];
@@ -174,17 +174,17 @@ export function LaunchedCampaignsPanel() {
   return (
     <section
       id="launched-campaigns"
-      className="overflow-hidden rounded-[1.35rem] border border-[rgb(20_18_16_/_0.08)] bg-white shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
     >
       <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-accent)]">{t("kicker")}</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
         <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">{t("title")}</h2>
         <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
       </div>
 
       <div className="px-5 py-4 sm:px-6 sm:py-5">
         {error ? (
-          <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-[13px] text-[#991b1b]">{error}</p>
+          <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{error}</p>
         ) : launches === null ? (
           <p className="text-[13px] text-[var(--auth-text-muted)]">{t("loading")}</p>
         ) : launches.length === 0 ? (
@@ -213,7 +213,7 @@ export function LaunchedCampaignsPanel() {
                         <span
                           className={cn(
                             "mt-1.5 inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]",
-                            launch.running ? "bg-[#ecf7f0] text-[#1f5c40]" : "bg-[rgb(20_18_16_/_0.06)] text-[var(--auth-text-muted)]",
+                            launch.running ? "bg-subtle text-ok-fg" : "bg-[rgb(20_18_16_/_0.06)] text-[var(--auth-text-muted)]",
                           )}
                         >
                           {t(launch.running ? "running.badgeOn" : "running.badgeOff")}
@@ -230,7 +230,7 @@ export function LaunchedCampaignsPanel() {
                             "h-8 rounded-lg px-3 text-[12px] font-bold disabled:opacity-60",
                             launch.running
                               ? "border border-[rgb(20_18_16_/_0.12)] text-[var(--auth-text)]"
-                              : "bg-[var(--auth-accent)] text-white",
+                              : "bg-accent-btn text-on-accent",
                           )}
                         >
                           {busy === launch.id ? t("applying") : t(launch.running ? "running.pause" : "running.start")}
@@ -240,7 +240,7 @@ export function LaunchedCampaignsPanel() {
                         type="button"
                         disabled={busy !== null}
                         onClick={() => setPicker({ launchId: launch.id, actionId: null })}
-                        className="text-[12px] font-semibold text-[var(--auth-accent)] underline-offset-2 hover:underline"
+                        className="text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline"
                       >
                         {t("addVideos.open")}
                       </button>
@@ -270,7 +270,7 @@ export function LaunchedCampaignsPanel() {
                   </label>
 
                   {notice?.id === launch.id ? (
-                    <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-[#ecf7f0] text-[#1f5c40]" : "bg-[#fef2f2] text-[#991b1b]")}>
+                    <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-subtle text-ok-fg" : "bg-field text-danger-fg")}>
                       {notice.text}
                     </p>
                   ) : null}
@@ -287,14 +287,14 @@ export function LaunchedCampaignsPanel() {
                   ) : (
                     <ul className="mt-3 space-y-2.5">
                       {pending.map((action) => (
-                        <li key={action.id} className="rounded-xl bg-[rgb(255_248_243_/_0.7)] p-3">
+                        <li key={action.id} className="rounded-box bg-[rgb(255_248_243_/_0.7)] p-3">
                           <span className={cn("inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]", KIND_TONE[action.kind])}>
                             {t(`kind.${action.kind}`)}
                           </span>
                           <p className="mt-1.5 text-[13px] leading-5 text-[var(--auth-text)]">{describe(action.payload)}</p>
-                          {action.error ? <p className="mt-1 text-[11px] text-[#991b1b]">{action.error}</p> : null}
+                          {action.error ? <p className="mt-1 text-[11px] text-danger-fg">{action.error}</p> : null}
                           {notice?.id === action.id ? (
-                            <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-[#ecf7f0] text-[#1f5c40]" : "bg-[#fef2f2] text-[#991b1b]")}>
+                            <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-subtle text-ok-fg" : "bg-field text-danger-fg")}>
                               {notice.text}
                             </p>
                           ) : null}
@@ -305,7 +305,7 @@ export function LaunchedCampaignsPanel() {
                                   type="button"
                                   disabled={busy !== null}
                                   onClick={() => void decide(action, "apply")}
-                                  className="h-9 rounded-xl bg-[var(--auth-accent)] px-3.5 text-[12px] font-bold text-white disabled:opacity-60"
+                                  className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-60"
                                 >
                                   {busy === action.id ? t("applying") : t(`confirm.${action.kind}`)}
                                 </button>
@@ -313,7 +313,7 @@ export function LaunchedCampaignsPanel() {
                                   type="button"
                                   disabled={busy !== null}
                                   onClick={() => setConfirming(null)}
-                                  className="h-9 rounded-xl border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
+                                  className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
                                 >
                                   {t("cancel")}
                                 </button>
@@ -325,7 +325,7 @@ export function LaunchedCampaignsPanel() {
                                     type="button"
                                     disabled={busy !== null}
                                     onClick={() => setPicker({ launchId: launch.id, actionId: action.id })}
-                                    className="h-9 rounded-xl bg-[var(--auth-accent)] px-3.5 text-[12px] font-bold text-white disabled:opacity-60"
+                                    className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-60"
                                   >
                                     {t("addVideos.fromSuggestion")}
                                   </button>
@@ -334,7 +334,7 @@ export function LaunchedCampaignsPanel() {
                                   type="button"
                                   disabled={busy !== null}
                                   onClick={() => setConfirming(action.id)}
-                                  className="h-9 rounded-xl bg-[var(--auth-text)] px-3.5 text-[12px] font-bold text-white disabled:opacity-60"
+                                  className="h-9 rounded-box bg-[var(--auth-text)] px-3.5 text-[12px] font-bold text-white disabled:opacity-60"
                                 >
                                   {t(`apply.${action.kind}`)}
                                 </button>
@@ -342,7 +342,7 @@ export function LaunchedCampaignsPanel() {
                                   type="button"
                                   disabled={busy !== null}
                                   onClick={() => void decide(action, "dismiss")}
-                                  className="h-9 rounded-xl border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text-muted)]"
+                                  className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text-muted)]"
                                 >
                                   {t("dismiss")}
                                 </button>
@@ -365,7 +365,7 @@ export function LaunchedCampaignsPanel() {
                     <ul className="mt-3 space-y-1 border-t border-[var(--auth-divider)] pt-2.5">
                       {history.map((action) => (
                         <li key={action.id} className="text-[11px] text-[var(--auth-text-muted)]">
-                          <span className={cn("font-semibold", action.status === "failed" ? "text-[#991b1b]" : "text-[#1f5c40]")}>
+                          <span className={cn("font-semibold", action.status === "failed" ? "text-danger-fg" : "text-ok-fg")}>
                             {t(`status.${action.status as "applied" | "failed" | "dismissed"}`)}
                           </span>
                           {" · "}
