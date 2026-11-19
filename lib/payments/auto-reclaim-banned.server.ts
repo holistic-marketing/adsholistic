@@ -304,5 +304,23 @@ export async function runAutoReclaimBanned(): Promise<AutoReclaimRunResult> {
       console.error("[auto-reclaim] account failed", account.id, error);
     }
   }
+  // Rastro de cada corrida (también cuando no hay nada que hacer).
+  await createAdminClient()
+    .from("audit_logs")
+    .insert({
+      action: "ad_account.auto_reclaim.run",
+      entity_type: "auto_reclaim",
+      metadata: {
+        scanned: result.scanned,
+        recovered: result.recovered.length,
+        held: result.held.length,
+        retained: result.retained.length,
+        skipped: result.skipped,
+      },
+    })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
   return result;
 }
