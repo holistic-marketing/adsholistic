@@ -1,5 +1,6 @@
 {
   "installCommand": "npm ci",
+  "regions": ["pdx1"],
   "crons": [
     {
       "path": "/api/jobs/yape-mailbox",

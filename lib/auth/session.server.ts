@@ -30,6 +30,9 @@ export const getSession = cache(async (): Promise<SessionUser | null> => {
 
   const emailConfirmed = Boolean(user.email_confirmed_at);
 
+  // El chequeo de staff solo depende del correo de Auth: va en paralelo.
+  const staffPromise = user.email ? sessionIsGerente(user.email) : null;
+
   const [{ data: profile }, { data: membership }] = await Promise.all([
     supabase
       .from("profiles")
@@ -68,7 +71,7 @@ export const getSession = cache(async (): Promise<SessionUser | null> => {
   // lo puede editar el propio usuario, así que no decide quién es gerente.
   const email = user.email ?? profile?.email ?? "";
   // staff_members (con caché) o, para el tester, la cookie de modo.
-  const isStaff = await sessionIsGerente(email);
+  const isStaff = await (staffPromise ?? sessionIsGerente(email));
 
   return {
     id: user.id,
