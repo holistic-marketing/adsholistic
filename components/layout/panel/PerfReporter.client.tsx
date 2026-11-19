@@ -17,9 +17,25 @@ function send(event: Record<string, unknown>) {
   void fetch("/api/perf", { method: "POST", body, keepalive: true, credentials: "include" }).catch(() => undefined);
 }
 
+// Tareas largas (>50 ms) del navegador: es lo que se siente como "lag".
+let longTaskMs = 0;
+let longTaskCount = 0;
+if (typeof window !== "undefined" && typeof PerformanceObserver !== "undefined") {
+  try {
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        longTaskMs += e.duration;
+        longTaskCount += 1;
+      }
+    }).observe({ type: "longtask", buffered: true });
+  } catch {
+    // navegador sin longtask
+  }
+}
+
 export function PerfReporter() {
   const pathname = usePathname();
-  const pending = useRef<{ from: string; to: string; at: number } | null>(null);
+  const pending = useRef<{ from: string; to: string; at: number; lt: number } | null>(null);
   const firstPath = useRef(pathname);
 
   // Carga completa (F5 / primera entrada).
@@ -43,6 +59,8 @@ export function PerfReporter() {
         download_ms: r(nav.responseEnd - nav.responseStart),
         browser_ms: r(nav.domContentLoadedEventEnd - nav.responseEnd),
         transfer_kb: r((nav.transferSize || 0) / 1024),
+        long_tasks: longTaskCount,
+        long_task_ms: r(longTaskMs),
         js_kb: r(
           performance
             .getEntriesByType("resource")
@@ -65,7 +83,7 @@ export function PerfReporter() {
       if (!anchor || anchor.target === "_blank") return;
       const url = new URL(anchor.href, location.href);
       if (url.origin !== location.origin || url.pathname === location.pathname) return;
-      pending.current = { from: location.pathname, to: url.pathname, at: performance.now() };
+      pending.current = { from: location.pathname, to: url.pathname, at: performance.now(), lt: longTaskMs };
     }
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
@@ -88,7 +106,7 @@ export function PerfReporter() {
       requestAnimationFrame(() => {
         const ms = Math.round(performance.now() - p.at);
         console.info(`[perf] ${p.from} → ${p.to}: ${ms} ms (esqueleto ${skeletonMs ?? "-"} ms)`);
-        send({ kind: "client_nav", path: p.to, from: p.from, ms, meta: { skeleton_ms: skeletonMs } });
+        send({ kind: "client_nav", path: p.to, from: p.from, ms, meta: { skeleton_ms: skeletonMs, long_task_ms: Math.round(longTaskMs - p.lt) } });
       });
     };
     const check = () => {

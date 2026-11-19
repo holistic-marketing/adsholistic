@@ -195,9 +195,11 @@ html[data-ui-theme="dark"][data-ui-contrast="alto"] {
 
 /* 3. COMPATIBILIDAD -------------------------------------------------------- */
 /* Las pantallas que todavía usan --auth-* o --admin-* toman los colores v3.
-   `body:has(...)` cubre también los diálogos que se abren fuera del lienzo. */
+   `body.panel-body` cubre también los diálogos que se abren fuera del lienzo.
+   No usar `body:has(...)`: obliga al navegador a recalcular los estilos de
+   toda la página en cada cambio del DOM y el panel se pone lento. */
 .dashboard-canvas,
-body:has(.dashboard-canvas) {
+body.panel-body {
   --auth-bg: var(--ui-field);
   --auth-bg-elevated: var(--ui-surface);
   --auth-surface: var(--ui-surface);
@@ -284,7 +286,7 @@ body:has(.dashboard-canvas) {
 /* 4. BASE DEL PANEL -------------------------------------------------------- */
 /* El body también, para que menús y diálogos (que se abren fuera del lienzo)
    usen la misma letra y colores. */
-body:has(.dashboard-canvas) {
+body.panel-body {
   background: var(--ui-rail);
   color: var(--ui-text);
   font-family: var(--font-panel);
@@ -310,12 +312,12 @@ html[data-ui-theme="dark"] .dashboard-canvas {
 }
 
 @layer base {
-  :where(body:has(.dashboard-canvas)) :focus-visible {
+  :where(body.panel-body) :focus-visible {
     outline: 2px solid var(--ui-focus);
     outline-offset: 2px;
   }
 
-  :where(body:has(.dashboard-canvas)) ::selection {
+  :where(body.panel-body) ::selection {
     background: color-mix(in srgb, var(--ui-accent) 26%, transparent);
     color: var(--ui-text);
   }
@@ -336,7 +338,7 @@ html[data-ui-theme="dark"] .dashboard-canvas {
     color: var(--ui-text-3);
   }
 
-  :where(body:has(.dashboard-canvas)) kbd {
+  :where(body.panel-body) kbd {
     font: 500 0.6875rem/1 var(--font-mono);
     padding: 3px 5px;
     border-radius: 5px;

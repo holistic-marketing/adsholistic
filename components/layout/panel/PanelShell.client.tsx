@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, useTransition, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState, useTransition, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { routes } from "@/config/routes";
 import { flattenNavigation, navigationFor } from "@/config/navigation";
@@ -80,6 +80,12 @@ export function PanelShell({
     setLastPath(pathname);
     setDrawerOpen(false);
   }
+
+  // Marca el body para que menús y diálogos (fuera del lienzo) tomen el tema v3.
+  useLayoutEffect(() => {
+    document.body.classList.add("panel-body");
+    return () => document.body.classList.remove("panel-body");
+  }, []);
 
   useEffect(() => {
     if (!drawerOpen) return;
