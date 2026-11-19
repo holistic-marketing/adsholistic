@@ -39,6 +39,7 @@ type Candidate = {
   id: string;
   organization_id: string;
   name: string;
+  advertiser_id: string | null;
   metadata: Record<string, unknown>;
   available_cents: number;
 };
@@ -102,7 +103,7 @@ async function loadCandidates(): Promise<Candidate[]> {
 
   const { data: accounts, error: accErr } = await admin
     .from("ad_accounts")
-    .select("id, organization_id, name, metadata, platform, status")
+    .select("id, organization_id, name, external_account_id, metadata, platform, status")
     .in("id", [...byId.keys()])
     .eq("status", "disabled");
   if (accErr) throw new Error(accErr.message);
@@ -113,6 +114,7 @@ async function loadCandidates(): Promise<Candidate[]> {
       id: a.id,
       organization_id: a.organization_id,
       name: a.name,
+      advertiser_id: a.external_account_id ?? null,
       metadata: isRecord(a.metadata) ? a.metadata : {},
       available_cents: byId.get(a.id) ?? 0,
     }));
@@ -145,6 +147,65 @@ async function notifyRetained(account: Candidate, cents: number) {
     type: "ad_account_balance_retained",
     data: { ad_account_id: account.id, amount_cents: cents, url: "/support" },
   });
+}
+
+function escapeHtml(v: string): string {
+  return v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
+/** Correo a gerentes (los mismos de vouchers): saldo que TikTok no soltó. */
+async function emailStaffRetained(account: Candidate, cents: number, reason: string, error: string) {
+  try {
+    const { resolveManualPaymentManagerEmails } = await import("@/lib/email/manual-payment-notify.server");
+    const { sendTransactionalEmail } = await import("@/lib/email/email.server");
+    const managers = await resolveManualPaymentManagerEmails();
+    const meta = account.metadata;
+    const cliente = String(meta.hecom_cliente_name ?? "").trim() || "Cliente sin nombre";
+    const advertiserId = account.advertiser_id ?? "";
+    const motivo = reason === "tiktok_punished" ? "Cuenta castigada por TikTok (estado anormal)" : "TikTok no dejó sacar el saldo tras varios intentos";
+    const subject = `Saldo retenido por TikTok: ${cliente} · ${usd(cents)}`;
+    const rows: Array<[string, string]> = [
+      ["Cliente", cliente],
+      ["Cuenta", account.name],
+      ["Saldo retenido", usd(cents)],
+      ["Motivo", motivo],
+      ["Detalle TikTok", error.slice(0, 200)],
+    ];
+    if (advertiserId) rows.splice(2, 0, ["ID TikTok", advertiserId]);
+    const html = `<div style="font-family:system-ui,sans-serif;color:#1c1917;max-width:560px">
+<h2 style="margin:0 0 8px;font-size:18px">Saldo retenido por TikTok</h2>
+<p style="margin:0 0 16px;color:#57534e;font-size:14px">La cuenta se baneó y TikTok no soltó el saldo sin gastar. No se acreditó nada en la cartera del cliente; ya se le avisó que soporte lo atiende.</p>
+<table style="border-collapse:collapse;font-size:14px;width:100%">${rows
+      .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#78716c;white-space:nowrap">${k}</td><td style="padding:6px 0;font-weight:600">${escapeHtml(v)}</td></tr>`)
+      .join("")}</table>
+<p style="margin:16px 0 0;font-size:14px"><b>Qué hacer:</b> gestionar con TikTok (apelación o soporte). Cuando lo liberen, recuperar el saldo desde Pagos → "Recuperar a saldo disponible".</p>
+</div>`;
+    const text = [
+      "Saldo retenido por TikTok",
+      ...rows.map(([k, v]) => `${k}: ${v}`),
+      "Qué hacer: gestionar con TikTok; cuando lo liberen, recuperar desde Pagos.",
+    ].join("\n");
+    // Un correo por gerente, de a dos por segundo (límite de Resend).
+    for (let i = 0; i < managers.length; i += 2) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 1000));
+      await Promise.allSettled(
+        managers.slice(i, i + 2).map((to) =>
+          sendTransactionalEmail({
+            to,
+            subject,
+            html,
+            text,
+            templateKey: "ad_account.balance_retained.staff",
+            organizationId: account.organization_id,
+            idempotencyKey: `email:auto_reclaim_retained:${account.id}:${to}`,
+            metadata: { ad_account_id: account.id, amount_cents: cents, reason },
+          }),
+        ),
+      );
+    }
+  } catch (err) {
+    console.error("[auto-reclaim] staff email failed", account.id, err);
+  }
 }
 
 async function processAccount(
@@ -260,6 +321,12 @@ async function processAccount(
         error: message.slice(0, 300),
       });
       await notifyRetained(account, account.available_cents);
+      await emailStaffRetained(
+        account,
+        account.available_cents,
+        punished ? "tiktok_punished" : "repeated_failure",
+        message,
+      );
       result.retained.push(account.id);
       return;
     }
