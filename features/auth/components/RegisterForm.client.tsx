@@ -12,12 +12,14 @@ import type { LandingLocale } from "@/features/landing/i18n/landing-locale";
 import {
   REGISTER_COUNTRIES,
   getRegisterCountry,
+  isRegisterCountry,
   isValidDoc,
   isValidPhone,
+  normalizeDoc,
+  storedPhone,
   type RegisterCountry,
   type RegisterCountryRule,
 } from "@/lib/auth/register-countries.shared";
-import { CountryFlag } from "./CountryFlag";
 import { spanishValidityFormProps } from "@/lib/forms/spanish-validity.client";
 
 interface RegisterFormValues {
@@ -92,7 +94,12 @@ function validateForm(
     return country.docError[lang];
   }
   if (!isValidPhone(country, values.phone)) {
-    return t.errPhone;
+    return {
+      es: `Escribe un teléfono válido de ${country.name.es} (+${country.dial}).`,
+      en: `Enter a valid phone number for ${country.name.en} (+${country.dial}).`,
+      pt: `Escreva um telefone válido de ${country.name.pt} (+${country.dial}).`,
+      zh: `请输入${country.name.zh}的有效电话号码（+${country.dial}）。`,
+    }[lang];
   }
   if (values.address.replace(/\s+/g, " ").trim().length < 8) {
     return t.errAddress;
@@ -203,8 +210,8 @@ export function RegisterForm({ locale = "es" }: { locale?: LandingLocale }) {
         body: JSON.stringify({
           // Mismo payload que antes: Hecom sigue recibiendo un `name` completo.
           name: joinFullName(values),
-          dni: values.dni.trim().replace(/\D/g, ""),
-          phone: values.phone.trim(),
+          dni: normalizeDoc(country, values.dni),
+          phone: storedPhone(country, values.phone),
           address: values.address.replace(/\s+/g, " ").trim(),
           country: country.code,
           email: values.email.trim(),
@@ -263,35 +270,31 @@ export function RegisterForm({ locale = "es" }: { locale?: LandingLocale }) {
           <AuthNotice tone="info">{t.notRegisteredNotice}</AuthNotice>
         )}
 
-        <fieldset className={styles.fieldGroup}>
-          <legend className={styles.fieldLabel}>{lang === "en" ? "Country" : lang === "zh" ? "国家" : "País"}</legend>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup">
-            {REGISTER_COUNTRIES.map((c) => {
-              const selected = c.code === country.code;
-              return (
-                <button
-                  key={c.code}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => {
-                    setCountryCode(c.code);
-                    // El documento y el teléfono cambian de formato con el país.
-                    setValues((v) => ({ ...v, dni: "", phone: "" }));
-                  }}
-                  className={`flex h-11 items-center gap-2 rounded-xl border px-3 text-[13.5px] font-semibold transition ${
-                    selected
-                      ? "border-[#ff781f] bg-[#fff6ef] text-[#1c1917] shadow-[0_0_0_3px_#ffeadb]"
-                      : "border-[var(--auth-input-border)] bg-white text-[var(--auth-text-muted)] hover:border-[var(--auth-input-border-hover)]"
-                  }`}
-                >
-                  <CountryFlag code={c.code} className="h-[15px] w-[22px] shrink-0 overflow-hidden rounded-[3px] ring-1 ring-black/10" />
-                  <span className="truncate">{c.name[lang]}</span>
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
+        <div className={styles.fieldGroup}>
+          <label htmlFor="register-country" className={styles.fieldLabel}>
+            {lang === "en" ? "Country" : lang === "zh" ? "国家" : "País"}
+          </label>
+          <select
+            id="register-country"
+            name="country"
+            autoComplete="country"
+            value={countryCode}
+            onChange={(event) => {
+              const nextCountry = event.target.value;
+              if (!isRegisterCountry(nextCountry)) return;
+              setCountryCode(nextCountry);
+              setError(null);
+            }}
+            className="auth-field"
+            disabled={loading}
+          >
+            {REGISTER_COUNTRIES.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.name[lang]} (+{item.dial})
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className={styles.twoColumns}>
           <div className={styles.fieldGroup}>
@@ -360,16 +363,16 @@ export function RegisterForm({ locale = "es" }: { locale?: LandingLocale }) {
             </FieldIcon>
             <input
               id="dni"
-              inputMode="numeric"
+              inputMode={country.docNumeric ? "numeric" : "text"}
               autoComplete="off"
               required
               maxLength={country.docMax}
-              pattern={`[0-9]{${country.docMin},${country.docMax}}`}
+              pattern={country.docNumeric ? `[0-9]{${country.docMin},${country.docMax}}` : undefined}
               value={values.dni}
               onChange={(event) =>
                 updateField(
                   "dni",
-                  event.target.value.replace(/\D/g, "").slice(0, country.docMax),
+                  normalizeDoc(country, event.target.value).slice(0, country.docMax),
                 )
               }
               placeholder={country.docPlaceholder[lang]}
@@ -400,9 +403,10 @@ export function RegisterForm({ locale = "es" }: { locale?: LandingLocale }) {
               inputMode="tel"
               autoComplete="tel"
               required
+              maxLength={64}
               value={values.phone}
               onChange={(event) => updateField("phone", event.target.value)}
-              placeholder={country.phonePlaceholder}
+              placeholder={country.phonePlaceholder.startsWith("+") ? t.phone : country.phonePlaceholder}
               className={`${inputClassName} auth-field--phone`}
               // +593 es más largo que +51: el texto arranca después del prefijo.
               style={{ paddingLeft: country.dial.length >= 3 ? "5.35rem" : undefined }}

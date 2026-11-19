@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     referralCode?: string;
     /** Código que el cliente escribió (aliado o referido); manda sobre el link. */
     promoCode?: string;
-    /** PE, CO, EC o BR. */
+    /** Código de país ISO de dos letras. */
     country?: string;
   };
   try {
@@ -26,6 +26,11 @@ export async function POST(request: NextRequest) {
   } catch {
     logHecomOtp("warn", "api_register_bad_json", {});
     return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+  }
+
+  const country = body?.country === undefined ? "PE" : body.country;
+  if (!body || typeof body !== "object" || !isRegisterCountry(country)) {
+    return NextResponse.json({ error: "Selecciona un país válido." }, { status: 400 });
   }
 
   const emailMasked = maskEmail(body.email ?? "");
@@ -47,7 +52,7 @@ export async function POST(request: NextRequest) {
     phone: body.phone ?? "",
     email: body.email ?? "",
     address: body.address ?? "",
-    country: isRegisterCountry(body.country) ? body.country : "PE",
+    country,
     // El formulario los manda; las cookies cubren el caso en que no llegaron.
     attribution: {
       partnerSlug:

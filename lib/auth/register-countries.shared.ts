@@ -1,8 +1,12 @@
-/**
- * Países habilitados para registrarse: documento y teléfono de cada uno.
- * Lo usan el formulario (validación y textos) y el servidor (reglas finales).
- */
-export type RegisterCountry = "PE" | "CO" | "EC" | "BR";
+import {
+  getCountries,
+  getCountryCallingCode,
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from "libphonenumber-js/min";
+
+/** Reglas compartidas por el formulario y la validación final del servidor. */
+export type RegisterCountry = CountryCode;
 type Lang = "es" | "en" | "pt" | "zh";
 type L = Record<Lang, string>;
 
@@ -14,6 +18,7 @@ export type RegisterCountryRule = {
   docLabel: L;
   docPlaceholder: L;
   docError: L;
+  docNumeric: boolean;
   docMin: number;
   docMax: number;
   phoneMin: number;
@@ -21,7 +26,7 @@ export type RegisterCountryRule = {
   phonePlaceholder: string;
 };
 
-export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
+const LEGACY_COUNTRIES: RegisterCountryRule[] = [
   {
     code: "PE",
     name: { es: "Perú", en: "Peru", pt: "Peru", zh: "秘鲁" },
@@ -34,6 +39,7 @@ export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
       pt: "O DNI tem 8 dígitos. RUC ou passaporte não são aceitos.",
       zh: "DNI 为 8 位数字，不接受 RUC 或护照号。",
     },
+    docNumeric: true,
     docMin: 8,
     docMax: 8,
     phoneMin: 9,
@@ -52,6 +58,7 @@ export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
       pt: "A cédula tem de 6 a 10 dígitos.",
       zh: "Cédula 为 6–10 位数字。",
     },
+    docNumeric: true,
     docMin: 6,
     docMax: 10,
     phoneMin: 10,
@@ -70,6 +77,7 @@ export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
       pt: "A cédula tem 10 dígitos.",
       zh: "Cédula 为 10 位数字。",
     },
+    docNumeric: true,
     docMin: 10,
     docMax: 10,
     phoneMin: 9,
@@ -88,6 +96,7 @@ export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
       pt: "O CPF tem 11 dígitos.",
       zh: "CPF 为 11 位数字。",
     },
+    docNumeric: true,
     docMin: 11,
     docMax: 11,
     phoneMin: 10,
@@ -96,38 +105,118 @@ export const REGISTER_COUNTRIES: RegisterCountryRule[] = [
   },
 ];
 
+const languages = ["es", "en", "pt", "zh"] as const;
+const countryNames = Object.fromEntries(
+  languages.map((language) => [language, new Intl.DisplayNames([language], { type: "region" })]),
+) as Record<Lang, Intl.DisplayNames>;
+
+const genericDocument = {
+  docLabel: {
+    es: "Documento de identidad o pasaporte",
+    en: "Identity document or passport",
+    pt: "Documento de identidade ou passaporte",
+    zh: "身份证件或护照",
+  },
+  docPlaceholder: {
+    es: "3 a 30 letras o números",
+    en: "3 to 30 letters or numbers",
+    pt: "3 a 30 letras ou números",
+    zh: "3–30 个字母或数字",
+  },
+  docError: {
+    es: "El documento debe tener entre 3 y 30 letras o números.",
+    en: "The document must have 3 to 30 letters or numbers.",
+    pt: "O documento deve ter de 3 a 30 letras ou números.",
+    zh: "证件号码须包含 3–30 个字母或数字。",
+  },
+  docNumeric: false,
+  docMin: 3,
+  docMax: 30,
+};
+
+export const REGISTER_COUNTRIES: RegisterCountryRule[] = getCountries()
+  .map((code) => {
+    const dial = getCountryCallingCode(code);
+    const legacyRule = LEGACY_COUNTRIES.find((country) => country.code === code);
+    return {
+      ...genericDocument,
+      // Retained for presentation; actual phone validation uses the numbering plan.
+      phoneMin: 4,
+      phoneMax: 15 - dial.length,
+      phonePlaceholder: `+${dial} …`,
+      ...legacyRule,
+      code,
+      dial,
+      name: Object.fromEntries(
+        languages.map((language) => [language, countryNames[language].of(code) ?? code]),
+      ) as L,
+    };
+  })
+  .sort((a, b) => {
+    if (a.code === "PE") return -1;
+    if (b.code === "PE") return 1;
+    return a.name.es.localeCompare(b.name.es, "es");
+  });
+
+const rulesByCountry = new Map(REGISTER_COUNTRIES.map((country) => [country.code, country]));
+
 export function getRegisterCountry(code: string | null | undefined): RegisterCountryRule {
-  return REGISTER_COUNTRIES.find((c) => c.code === code) ?? REGISTER_COUNTRIES[0]!;
+  const country = rulesByCountry.get((code ?? "PE") as RegisterCountry);
+  if (!country) throw new Error("Unsupported registration country");
+  return country;
 }
 
 export function isRegisterCountry(code: unknown): code is RegisterCountry {
-  return REGISTER_COUNTRIES.some((c) => c.code === code);
+  return typeof code === "string" && rulesByCountry.has(code as RegisterCountry);
 }
 
 export const onlyDigits = (v: string) => String(v ?? "").replace(/\D/g, "");
 
-/** Teléfono local sin el código de país, aunque la persona lo haya escrito. */
+/** Parse the whole input, never a phone-like substring inside arbitrary text. */
+function parseRegistrationPhone(country: RegisterCountryRule, raw: string) {
+  if (typeof raw !== "string" || !/^\+?[\d\s().-]+$/.test(raw.trim())) return undefined;
+  let input = raw.trim().replace(/[\s().-]/g, "");
+  if (input.startsWith("00")) input = `+${input.slice(2)}`;
+  const phone = parsePhoneNumberFromString(input, { defaultCountry: country.code, extract: false });
+  if (
+    !phone || phone.ext || phone.countryCallingCode !== country.dial ||
+    !/^\+[1-9]\d{1,14}$/.test(phone.number) || !phone.isPossible()
+  ) return undefined;
+  return phone;
+}
+
+/** Número nacional normalizado; conserva ceros significativos como los de Italia. */
 export function localPhoneDigits(country: RegisterCountryRule, raw: string): string {
-  const digits = onlyDigits(raw);
-  return digits.length > country.phoneMax && digits.startsWith(country.dial) ? digits.slice(country.dial.length) : digits;
+  return parseRegistrationPhone(country, raw)?.nationalNumber ?? "";
+}
+
+/** Remove document formatting without silently discarding invalid letters/symbols. */
+export function normalizeDoc(country: RegisterCountryRule, raw: string): string {
+  const document = String(raw ?? "").replace(/[\s./-]/g, "");
+  return country.docNumeric ? document : document.toUpperCase();
 }
 
 export function isValidDoc(country: RegisterCountryRule, raw: string): boolean {
-  const d = onlyDigits(raw);
+  if (typeof raw !== "string") return false;
+  const allowed = country.docNumeric ? /^[\d\s./-]+$/ : /^[a-zA-Z\d\s./-]+$/;
+  if (!allowed.test(raw)) return false;
+  const d = normalizeDoc(country, raw);
   return d.length >= country.docMin && d.length <= country.docMax;
 }
 
 export function isValidPhone(country: RegisterCountryRule, raw: string): boolean {
-  const d = localPhoneDigits(country, raw);
-  return d.length >= country.phoneMin && d.length <= country.phoneMax;
+  return Boolean(parseRegistrationPhone(country, raw));
 }
 
 /** Cómo se guarda el documento en Hecom: Perú sin prefijo; el resto «CO-…». */
 export function storedDoc(country: RegisterCountryRule, raw: string): string {
-  const d = onlyDigits(raw);
+  if (!isValidDoc(country, raw)) throw new Error("Invalid registration document");
+  const d = normalizeDoc(country, raw);
   return country.code === "PE" ? d : `${country.code}-${d}`;
 }
 
 export function storedPhone(country: RegisterCountryRule, raw: string): string {
-  return `+${country.dial}${localPhoneDigits(country, raw)}`;
+  const phone = parseRegistrationPhone(country, raw);
+  if (!phone) throw new Error("Invalid registration phone");
+  return phone.number;
 }

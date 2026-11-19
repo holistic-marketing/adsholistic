@@ -44,7 +44,7 @@ export type ClerkBridgeResult =
 type RegistrationMetadata = {
   fullName: string | null;
   phone: string;
-  country: ReturnType<typeof getRegisterCountry>;
+  country: ReturnType<typeof getRegisterCountry> | null;
 };
 
 function metadataString(value: unknown): string | null {
@@ -54,10 +54,13 @@ function metadataString(value: unknown): string | null {
 function registrationMetadata(clerkUser: ClerkUser): RegistrationMetadata | null {
   const meta = (clerkUser.unsafeMetadata ?? {}) as Record<string, unknown>;
   if (meta.source !== "ah_register") return null;
+  // El registro anterior no siempre incluía país. Un valor explícito inválido
+  // nunca debe convertir el teléfono silenciosamente en uno peruano.
+  const country = meta.country === undefined ? "PE" : meta.country;
   return {
     fullName: metadataString(meta.fullName),
     phone: metadataString(meta.phone) ?? "",
-    country: getRegisterCountry(isRegisterCountry(meta.country) ? meta.country : "PE"),
+    country: isRegisterCountry(country) ? getRegisterCountry(country) : null,
   };
 }
 
@@ -109,7 +112,7 @@ async function assertHecomAccess(input: {
   }
 
   if (!registration) return { ok: false, error: "clerk_not_hecom" };
-  if (!isValidPhone(registration.country, registration.phone)) {
+  if (!registration.country || !isValidPhone(registration.country, registration.phone)) {
     return { ok: false, error: "clerk_phone" };
   }
 

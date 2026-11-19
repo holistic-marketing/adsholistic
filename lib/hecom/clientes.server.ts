@@ -3,6 +3,7 @@ import { cache } from "react";
 import { DEFAULT_DEPOSIT_FEE_PERCENT } from "@/lib/payments/deposit-fee";
 import {
   getRegisterCountry,
+  isRegisterCountry,
   isValidDoc,
   isValidPhone,
   storedDoc,
@@ -506,6 +507,9 @@ export async function createHecomCliente(input: CreateHecomClienteInput): Promis
   | { ok: true; cliente: HecomCliente }
   | { ok: false; message: string; code?: "duplicate_email" | "config" | "insert" }
 > {
+  if (input.country !== undefined && !isRegisterCountry(input.country)) {
+    return { ok: false, message: "Selecciona un país válido.", code: "insert" };
+  }
   const country = getRegisterCountry(input.country);
   const email = String(input.email ?? "").trim().toLowerCase();
 
@@ -524,7 +528,7 @@ export async function createHecomCliente(input: CreateHecomClienteInput): Promis
       code: "insert",
     };
   }
-  // Perú sin prefijo (como siempre); el resto «CO-…», «EC-…», «BR-…». Sin documento → null.
+  // Perú sin prefijo (como siempre); el resto lleva el código de país. Sin documento → null.
   const dni = rawDoc ? storedDoc(country, rawDoc) : null;
 
   const cfg = getHecomSupabaseConfig();

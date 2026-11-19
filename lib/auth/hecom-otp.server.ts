@@ -29,8 +29,10 @@ import { recordSignupAttribution } from "@/lib/partners/partners.server";
 import { saveHecomClienteAddress } from "@/lib/hecom/cliente-direccion.server";
 import {
   getRegisterCountry,
+  isRegisterCountry,
   isValidDoc,
   isValidPhone,
+  normalizeDoc,
   type RegisterCountry,
 } from "@/lib/auth/register-countries.shared";
 
@@ -421,9 +423,12 @@ export async function registerHecomClientOtp(input: {
     return { ok: false, error: "OTP Hecom deshabilitado.", status: 403 };
   }
 
+  if (input.country !== undefined && !isRegisterCountry(input.country)) {
+    return { ok: false, error: "Selecciona un país válido.", status: 400 };
+  }
   const country = getRegisterCountry(input.country);
   const name = String(input.name ?? "").trim();
-  const dni = String(input.dni ?? "").replace(/\D/g, "");
+  const rawDoc = String(input.dni ?? "").trim();
   const phone = String(input.phone ?? "").trim();
   const email = normalizeEmail(input.email);
   const emailMasked = maskEmail(email);
@@ -431,9 +436,10 @@ export async function registerHecomClientOtp(input: {
   if (name.length < 2) {
     return { ok: false, error: "Ingresa tu nombre completo.", status: 400 };
   }
-  if (!isValidDoc(country, dni)) {
+  if (!isValidDoc(country, rawDoc)) {
     return { ok: false, error: country.docError.es, status: 400 };
   }
+  const dni = normalizeDoc(country, rawDoc);
   const phoneDigits = phone.replace(/\D/g, "");
   if (!isValidPhone(country, phone)) {
     return {

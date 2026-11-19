@@ -10,8 +10,13 @@ import {
   clerkSignUpErrorMessage,
 } from "@/lib/auth/clerk-errors";
 import {
+  REGISTER_COUNTRIES,
   getRegisterCountry,
+  isRegisterCountry,
   isValidPhone,
+  storedPhone,
+  type RegisterCountry,
+  type RegisterCountryRule,
 } from "@/lib/auth/register-countries.shared";
 import {
   AuthCodeInput,
@@ -21,7 +26,6 @@ import {
 } from "./AuthFormUi";
 import styles from "./auth.module.css";
 
-const COUNTRY = getRegisterCountry("PE");
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_MS = 30_000;
 
@@ -53,7 +57,7 @@ function toSignUpError(error: unknown): SignUpError {
   };
 }
 
-function validate(fullName: string, email: string, phone: string): FieldErrors {
+function validate(fullName: string, email: string, phone: string, country: RegisterCountryRule): FieldErrors {
   const errors: FieldErrors = {};
   if (fullName.length < 2) {
     errors.fullName = "Escribe tu nombre completo.";
@@ -61,8 +65,8 @@ function validate(fullName: string, email: string, phone: string): FieldErrors {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Escribe un correo válido.";
   }
-  if (!isValidPhone(COUNTRY, phone)) {
-    errors.phone = `Escribe un celular válido de ${COUNTRY.name.es}.`;
+  if (!isValidPhone(country, phone)) {
+    errors.phone = `Escribe un celular válido de ${country.name.es} (+${country.dial}).`;
   }
   return errors;
 }
@@ -78,6 +82,8 @@ export function ClerkPasswordlessSignUp() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState<RegisterCountry>("PE");
+  const country = getRegisterCountry(countryCode);
   const [code, setCode] = useState("");
   const [step, setStep] = useState<Step>("form");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -110,7 +116,7 @@ export function ClerkPasswordlessSignUp() {
     setNotice(null);
 
     const cleanName = fullName.replace(/\s+/g, " ").trim();
-    const nextErrors = validate(cleanName, cleanEmail, phone);
+    const nextErrors = validate(cleanName, cleanEmail, phone, country);
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -120,8 +126,8 @@ export function ClerkPasswordlessSignUp() {
         emailAddress: cleanEmail,
         unsafeMetadata: {
           fullName: cleanName,
-          phone: phone.replace(/\D/g, ""),
-          country: COUNTRY.code,
+          phone: storedPhone(country, phone),
+          country: country.code,
           source: "ah_register",
         },
       });
@@ -322,22 +328,51 @@ export function ClerkPasswordlessSignUp() {
       </div>
 
       <div className={styles.fieldGroup}>
+        <label htmlFor="signup-country" className={styles.fieldLabel}>
+          País del celular
+        </label>
+        <select
+          id="signup-country"
+          name="country"
+          value={countryCode}
+          onChange={(event) => {
+            const nextCountry = event.target.value;
+            if (!isRegisterCountry(nextCountry)) return;
+            setCountryCode(nextCountry);
+            setFieldErrors((current) => ({ ...current, phone: undefined }));
+          }}
+          className="auth-field"
+          disabled={busy}
+        >
+          {REGISTER_COUNTRIES.map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.name.es} (+{item.dial})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className={styles.fieldGroup}>
         <label htmlFor="signup-phone" className={styles.fieldLabel}>
-          Celular ({COUNTRY.name.es}, +{COUNTRY.dial})
+          Celular (+{country.dial})
         </label>
         <input
           id="signup-phone"
           type="tel"
           inputMode="tel"
-          autoComplete="tel-national"
+          autoComplete="tel"
           required
+          maxLength={64}
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
-          placeholder={COUNTRY.phonePlaceholder}
+          placeholder={country.phonePlaceholder}
           className="auth-field"
           aria-invalid={Boolean(fieldErrors.phone)}
-          aria-describedby={fieldErrors.phone ? "signup-phone-error" : undefined}
+          aria-describedby={fieldErrors.phone ? "signup-phone-error signup-phone-hint" : "signup-phone-hint"}
         />
+        <p id="signup-phone-hint" className={styles.helpText}>
+          Escribe tu número local o el número completo con +{country.dial}.
+        </p>
         {fieldErrors.phone ? (
           <p id="signup-phone-error" className={styles.helpText} role="alert">
             {fieldErrors.phone}
