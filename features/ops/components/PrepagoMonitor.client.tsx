@@ -1,6 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/Button";
+import { Textarea } from "@/components/ui/Input";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { PanelDialog } from "@/components/ui/PanelDialog.client";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import {
+  Avatar,
+  EmptyState,
+  FilterBar,
+  FilterButton,
+  FilterChip,
+  Note,
+  SearchField,
+  Segmented,
+  StatCard,
+  ToneBadge,
+  type Tone,
+} from "@/components/ui/PanelKit";
+import { PanelMenu, PanelPopover, usePopover } from "@/components/ui/PanelPopover.client";
 import {
   VERDICT_META,
   VERDICT_ORDER,
@@ -33,38 +53,17 @@ type Row = {
   verdict: Verdict;
 };
 
-const SEVERITY_META: Record<
-  MonitorSeverity,
-  { label: string; dot: string; chip: string; ring: string; text: string }
-> = {
-  critical: {
-    label: "Crítico",
-    dot: "bg-accent",
-    chip: "bg-subtle text-danger-fg",
-    ring: "ring-danger-line",
-    text: "text-danger-fg",
-  },
-  high: {
-    label: "Alto",
-    dot: "bg-accent",
-    chip: "bg-accent-soft text-accent-text",
-    ring: "ring-accent-line",
-    text: "text-accent-text",
-  },
-  medium: {
-    label: "Atención",
-    dot: "bg-warn-solid",
-    chip: "bg-warn-bg text-warn-fg",
-    ring: "ring-warn-line",
-    text: "text-warn-fg",
-  },
-  info: {
-    label: "Info",
-    dot: "bg-line-strong",
-    chip: "bg-subtle text-ink-2",
-    ring: "ring-line",
-    text: "text-ink-2",
-  },
+/** Tono de cada gravedad de alerta o movimiento. */
+const SEVERITY_TONE: Record<MonitorSeverity, Tone> = {
+  critical: "danger",
+  high: "accent",
+  medium: "warn",
+  info: "neutral",
+};
+
+const MODALIDAD_LABEL: Record<ClienteModalidad, string> = {
+  prepago: "Prepago",
+  acuerdo: "Paga después",
 };
 
 const usdFmt = new Intl.NumberFormat("en-US", {
@@ -81,6 +80,10 @@ const usdShort = new Intl.NumberFormat("en-US", {
 
 function usd(value: number | null | undefined): string {
   return usdFmt.format(Number(value) || 0);
+}
+
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
 }
 
 function relativeTime(iso: string, now: number): string {
@@ -102,45 +105,6 @@ function limaDateTime(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(iso));
-}
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
-}
-
-function VerdictChip({ verdict, compact = false }: { verdict: VerdictKey; compact?: boolean }) {
-  const meta = VERDICT_META[verdict];
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full font-semibold ${meta.chip} ${
-        compact ? "px-2 py-0.5 text-[10.5px]" : "px-2.5 py-1 text-[11.5px]"
-      }`}
-    >
-      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dot}`} aria-hidden />
-      {compact ? meta.short : meta.label}
-    </span>
-  );
-}
-
-function ModalidadBadge({ modalidad }: { modalidad: ClienteModalidad }) {
-  return modalidad === "acuerdo" ? (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold text-info-fg">
-      Paga después
-    </span>
-  ) : (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold text-ink-2">
-      Prepago
-    </span>
-  );
-}
-
-function BmBadge({ bm }: { bm: string }) {
-  return (
-    <span className="inline-flex shrink-0 items-center rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-ink-2">
-      BM{bm}
-    </span>
-  );
 }
 
 async function fetchSnapshot(
@@ -299,20 +263,44 @@ export function PrepagoMonitor({
     [],
   );
 
-  if (!snapshot && loading) return <MonitorSkeleton />;
+  const header = (
+    <PageHeader
+      eyebrow="Gerencia"
+      title="Monitoreo prepago"
+      lede="Cada cliente tiene un color que dice qué hacer: quitar saldo, preguntar al gerente, cobrar, solo vigilar o nada. Abre un cliente para ver los pasos."
+      actions={
+        <>
+          <AutoSwitch checked={auto} onChange={setAuto} />
+          <Button variant="outline" onClick={() => void load(true)} disabled={loading}>
+            <PanelIcon name="refresh" className={loading ? "animate-spin motion-reduce:animate-none" : undefined} />
+            {loading ? "Revisando…" : "Actualizar"}
+          </Button>
+        </>
+      }
+    />
+  );
+
+  if (!snapshot && loading) {
+    return (
+      <div className="min-w-0">
+        {header}
+        <MonitorSkeleton />
+      </div>
+    );
+  }
 
   if (!snapshot) {
     return (
-      <div className="rounded-card bg-surface px-5 py-10 text-center ring-1 ring-line">
-        <p className="text-[14px] font-semibold text-ink">No se pudo cargar el monitoreo</p>
-        <p className="mt-1 text-[13px] text-accent-text">{error}</p>
-        <button
-          type="button"
-          onClick={() => void load(true)}
-          className="mt-4 rounded-full bg-accent-btn px-4 py-2 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
-        >
-          Reintentar
-        </button>
+      <div className="min-w-0">
+        {header}
+        <section className="rounded-card border border-line bg-surface shadow-card">
+          <EmptyState
+            icon="alert"
+            title="No se pudo cargar el monitoreo"
+            description={<span className="text-danger-fg">{error}</span>}
+            action={<Button onClick={() => void load(true)}>Reintentar</Button>}
+          />
+        </section>
       </div>
     );
   }
@@ -325,437 +313,338 @@ export function PrepagoMonitor({
     .filter((r) => r.modalidad === "acuerdo")
     .reduce((s, r) => s + r.cliente.exposureUsd, 0);
   const actionable = counts.quitar_saldo + counts.preguntar + counts.cobrar;
+  const openRow = openId ? rows.find((r) => r.cliente.id === openId) ?? null : null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
-      <RefreshBar active={loading} />
+    <div className="min-w-0">
+      {header}
 
-      {/* Barra de estado */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-2">
-          <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
-            {auto ? (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok-solid opacity-50" />
-            ) : null}
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${auto ? "bg-ok-solid" : "bg-line-strong"}`} />
-          </span>
+      <div className="flex min-w-0 flex-col gap-4">
+        <RefreshBar active={loading} />
+
+        <p role="status" className="-mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-ink-2">
+          <span aria-hidden className={cn("size-2 shrink-0 rounded-full", auto ? "bg-ok-solid" : "bg-line-strong")} />
           Actualizado {relativeTime(snapshot.generatedAt, now)} · {limaDateTime(snapshot.generatedAt)}
           <span className="text-ink-3">
-            · {t.clientes} clientes · {t.accounts} cuentas
+            · {plural(t.clientes, "cliente", "clientes")} · {plural(t.accounts, "cuenta", "cuentas")}
           </span>
         </p>
-        <div className="flex items-center gap-2">
-          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-[12px] font-medium text-ink ring-1 ring-line">
-            <input
-              type="checkbox"
-              checked={auto}
-              onChange={(e) => setAuto(e.target.checked)}
-              className="h-3.5 w-3.5 accent-[#d47840]"
-            />
-            Auto cada 5 min
-          </label>
-          <button
-            type="button"
-            onClick={() => void load(true)}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-full bg-accent-btn px-3.5 py-1.5 text-[12px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-60"
-          >
-            <svg viewBox="0 0 20 20" className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} fill="none" aria-hidden>
-              <path
-                d="M16.5 10a6.5 6.5 0 1 1-1.9-4.6M16.5 3.5v3.5H13"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {loading ? "Revisando…" : "Actualizar"}
-          </button>
-        </div>
-      </div>
 
-      {error ? (
-        <p className="rounded-card bg-subtle px-4 py-2.5 text-[12.5px] text-danger-fg ring-1 ring-danger-line">
-          No se pudo actualizar: {error}. Se muestran los datos anteriores.
-        </p>
-      ) : null}
-      {snapshot.warnings.length ? (
-        <p className="rounded-card bg-warn-bg px-4 py-2.5 text-[12.5px] text-warn-fg ring-1 ring-warn-line">
-          Datos incompletos: {snapshot.warnings.join(" · ")}
-        </p>
-      ) : null}
+        {error ? (
+          <Note tone="danger">No se pudo actualizar: {error}. Se muestran los datos anteriores.</Note>
+        ) : null}
+        {snapshot.warnings.length ? (
+          <Note tone="warn">Datos incompletos: {snapshot.warnings.join(" · ")}</Note>
+        ) : null}
 
-      <HowToRead />
+        <HowToRead />
 
-      {/* Resumen: qué hay que hacer hoy */}
-      <section className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-        <div className="relative min-w-0 overflow-hidden rounded-card bg-[#1a1714] p-5 text-white sm:p-6">
-          <div
-            className={`pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full blur-2xl ${
-              actionable ? "bg-accent/30" : "bg-ok-solid/30"
-            }`}
-            aria-hidden
-          />
-          <div className="relative">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Hoy hay que</p>
-            <p className="mt-2 text-[2.1rem] font-semibold leading-none tracking-[-0.03em] tabular-nums">
-              {actionable} cliente{actionable === 1 ? "" : "s"}
-            </p>
-            <p className="mt-1.5 text-[13px] text-white/70">
-              {actionable
-                ? `para revisar. Clientes prepago pueden gastar ${usdShort.format(prepagoExposure)} sin haber pagado.`
-                : "sin pendientes. Todos gastan solo lo que pagaron."}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {VERDICT_ORDER.map((key) => {
-                const active = filter === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      setFilter(active ? "all" : key);
-                      setTab("clientes");
-                    }}
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
-                      active ? "bg-surface text-ink" : "bg-surface/10 text-white hover:bg-surface/15"
-                    }`}
-                  >
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${VERDICT_META[key].dot}`} aria-hidden />
-                    {VERDICT_META[key].short}
-                    <span className="tabular-nums opacity-80">{counts[key]}</span>
-                  </button>
-                );
-              })}
-            </div>
+        {/* Qué hay que hacer hoy */}
+        <section
+          aria-labelledby="monitor-hero"
+          className="rounded-card border border-line bg-surface p-5 shadow-card sm:p-6"
+        >
+          <h2 id="monitor-hero" className="eyebrow">
+            Hoy hay que revisar
+          </h2>
+          <p className="mt-2 text-[2.25rem] font-semibold leading-[1.1] tracking-[-0.035em] text-ink tabular-nums max-sm:text-[1.75rem]">
+            {plural(actionable, "cliente", "clientes")}
+          </p>
+          <p className="mt-1.5 max-w-[56ch] text-sm text-ink-2">
+            {actionable
+              ? `Los clientes prepago pueden gastar ${usdShort.format(prepagoExposure)} sin haber pagado.`
+              : "Sin pendientes. Todos gastan solo lo que pagaron."}
+          </p>
+          <div role="group" aria-label="Filtrar por qué hacer" className="mt-4 flex flex-wrap gap-1.5">
+            {VERDICT_ORDER.map((key) => {
+              const active = filter === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    setFilter(active ? "all" : key);
+                    setTab("clientes");
+                  }}
+                  className={cn(
+                    "inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-ctl border px-3 text-[13px] font-medium shadow-ctl",
+                    active
+                      ? "border-accent-line bg-accent-soft text-accent-text"
+                      : "border-line bg-field text-ink hover:border-line-strong hover:bg-hover",
+                  )}
+                >
+                  <ToneDot tone={VERDICT_META[key].tone} />
+                  {VERDICT_META[key].short}
+                  <b className={cn("font-mono text-xs font-medium", active ? "text-accent-text" : "text-ink-3")}>
+                    {counts[key]}
+                  </b>
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </section>
 
-        <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-4">
-          <Kpi
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4">
+          <StatCard
             label="Deuda del mes"
-            value={usdShort.format(t.monthDebtUsd)}
-            hint={`Gastaron más de lo que pagaron (${snapshot.month})`}
-            tone={t.monthDebtUsd > 0 ? "warn" : "ok"}
+            value={<span className={t.monthDebtUsd > 0 ? "text-danger-fg" : undefined}>{usdShort.format(t.monthDebtUsd)}</span>}
+            sub={`Gastaron más de lo que pagaron (${snapshot.month})`}
           />
-          <Kpi
+          <StatCard
             label="Cargas directas en TikTok"
-            value={usdShort.format(t.manualLoadUsd)}
-            hint={`No pasaron por Ads Holistic · últimas ${snapshot.windows.manualLoadHours} h`}
-            tone={t.manualLoadUsd > 0 ? "bad" : "ok"}
+            value={<span className={t.manualLoadUsd > 0 ? "text-danger-fg" : undefined}>{usdShort.format(t.manualLoadUsd)}</span>}
+            sub={`No pasaron por Ads Holistic · últimas ${snapshot.windows.manualLoadHours} h`}
           />
-          <Kpi
+          <StatCard
             label="Recargas de gerente"
-            value={usdShort.format(t.staffRechargeUsd)}
-            hint={`Sin pago del cliente · últimos ${snapshot.windows.staffMovesDays} días`}
-            tone={t.staffRechargeUsd > 0 ? "warn" : "ok"}
+            value={<span className={t.staffRechargeUsd > 0 ? "text-warn-fg" : undefined}>{usdShort.format(t.staffRechargeUsd)}</span>}
+            sub={`Sin pago del cliente · últimos ${snapshot.windows.staffMovesDays} días`}
           />
-          <Kpi
+          <StatCard
             label="Saldo de clientes con acuerdo"
             value={usdShort.format(acuerdoExposure)}
-            hint="Cargado a clientes que pagan después (es normal)"
-            tone="ok"
+            sub="Cargado a clientes que pagan después (es normal)"
           />
         </div>
-      </section>
 
-      {/* Pestañas y búsqueda */}
-      <section className="min-w-0 overflow-hidden rounded-card bg-surface ring-1 ring-line">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-          <div className="flex rounded-full bg-subtle p-1" role="tablist">
-            {(
-              [
-                ["clientes", "Clientes", visibleRows.length],
-                ["movimientos", "Movimientos raros", events.length],
-              ] as const
-            ).map(([key, label, n]) => (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                aria-selected={tab === key}
-                onClick={() => setTab(key)}
-                className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition ${
-                  tab === key ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink"
-                }`}
-              >
-                {label} <span className="tabular-nums text-ink-3">{n}</span>
-              </button>
-            ))}
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-            {filter !== "all" && tab === "clientes" ? (
-              <button
-                type="button"
-                onClick={() => setFilter("all")}
-                className="inline-flex items-center gap-1 rounded-full bg-subtle px-2.5 py-1 text-[11.5px] font-semibold text-ink-2 hover:bg-hover"
-              >
-                {VERDICT_META[filter].short} ✕
-              </button>
-            ) : null}
-            <div className="relative w-full max-w-[16rem]">
-              <svg
-                viewBox="0 0 20 20"
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3"
-                fill="none"
-                aria-hidden
-              >
-                <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.7" />
-                <path d="m13.2 13.2 3.3 3.3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-              </svg>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar cliente"
-                aria-label="Buscar cliente"
-                className="h-9 w-full rounded-full border border-line bg-field pl-9 pr-4 text-[13px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-accent/30"
+        <Segmented<Tab>
+          label="Qué ver"
+          value={tab}
+          onChange={setTab}
+          className="mt-1 self-start"
+          options={[
+            { value: "clientes", label: <TabLabel label="Clientes" count={visibleRows.length} /> },
+            { value: "movimientos", label: <TabLabel label="Movimientos raros" count={events.length} /> },
+          ]}
+        />
+
+        <FilterBar
+          chips={
+            tab === "clientes" && filter !== "all" ? (
+              <FilterChip
+                name="Qué hacer"
+                value={VERDICT_META[filter].short}
+                removeLabel="Quitar filtro"
+                onRemove={() => setFilter("all")}
               />
-            </div>
-          </div>
-        </div>
+            ) : undefined
+          }
+        >
+          <SearchField label="Buscar cliente" value={query} onChange={(e) => setQuery(e.target.value)} />
+          {tab === "clientes" ? (
+            <VerdictFilterButton filter={filter} counts={counts} total={rows.length} onChange={setFilter} />
+          ) : null}
+        </FilterBar>
 
         {tab === "clientes" ? (
-          <ClientesList
-            rows={visibleRows}
-            openId={openId}
-            onToggle={(id) => setOpenId((prev) => (prev === id ? null : id))}
-            onSaveModalidad={saveModalidad}
-            onChanged={() => void load(true)}
-          />
+          <ClientesTable rows={visibleRows} onOpen={setOpenId} />
         ) : (
           <EventsList events={events} now={now} modalidadById={modalidadById} />
         )}
-      </section>
 
-      <p className="px-1 text-[11.5px] leading-5 text-ink-3">
-        Para quitar saldo o congelar a un cliente, ábrelo y usa «Frenar gasto». Todo queda registrado con
-        motivo y quién lo hizo.
-      </p>
+        <p className="px-1 text-xs leading-5 text-ink-3">
+          Para quitar saldo o congelar a un cliente, ábrelo y usa «Frenar gasto». Todo queda registrado con
+          motivo y quién lo hizo.
+        </p>
+      </div>
+
+      <PanelDialog
+        open={openRow != null}
+        onClose={() => setOpenId(null)}
+        size="drawer"
+        title={openRow?.cliente.name ?? ""}
+        description={
+          openRow
+            ? `${MODALIDAD_LABEL[openRow.modalidad]} · ${plural(openRow.cliente.accounts.length, "cuenta", "cuentas")}`
+            : undefined
+        }
+        closeLabel="Cerrar"
+      >
+        {openRow ? (
+          <ClienteDetail
+            key={openRow.cliente.id}
+            row={openRow}
+            onSaveModalidad={saveModalidad}
+            onChanged={() => void load(true)}
+          />
+        ) : null}
+      </PanelDialog>
     </div>
   );
 }
 
-function HowToRead() {
-  const [open, setOpen] = useState(false);
+/* --- Piezas pequeñas ---------------------------------------------------------- */
+
+function ToneDot({ tone }: { tone: Tone }) {
+  return <span aria-hidden className={cn("size-2 shrink-0 rounded-full bg-[var(--t-solid)]", `tone-${tone}`)} />;
+}
+
+function TabLabel({ label, count }: { label: string; count: number }) {
   return (
-    <section className="rounded-card bg-surface ring-1 ring-line">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
+    <>
+      {label}
+      <span className="font-mono text-ink-3">{count}</span>
+    </>
+  );
+}
+
+/** Interruptor v3: casilla nativa con pista y bolita. */
+function AutoSwitch({ checked, onChange }: { checked: boolean; onChange: (value: boolean) => void }) {
+  return (
+    <label className="relative inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink">
+      <input
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer absolute left-0 top-1/2 m-0 h-5 w-[34px] -translate-y-1/2 cursor-pointer opacity-0"
+      />
+      <span
+        aria-hidden
+        className="relative h-5 w-[34px] shrink-0 rounded-full bg-line-strong transition-colors after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-on-accent after:shadow-ctl after:transition-transform peer-checked:bg-accent-btn peer-checked:after:translate-x-3.5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus motion-reduce:transition-none motion-reduce:after:transition-none"
+      />
+      Actualizar cada 5 min
+    </label>
+  );
+}
+
+function VerdictFilterButton({
+  filter,
+  counts,
+  total,
+  onChange,
+}: {
+  filter: VerdictFilter;
+  counts: Record<VerdictKey, number>;
+  total: number;
+  onChange: (value: VerdictFilter) => void;
+}) {
+  const { anchorRef, open, toggle, close } = usePopover();
+  const pick = (value: VerdictFilter) => {
+    onChange(value);
+    close();
+  };
+  return (
+    <>
+      <FilterButton
+        {...{ ref: anchorRef }}
+        label="Qué hacer"
+        count={filter === "all" ? 0 : 1}
+        aria-haspopup="dialog"
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left"
-      >
-        <span className="flex items-center gap-2.5">
-          <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[13px] font-bold text-accent-text" aria-hidden>
-            ?
-          </span>
-          <span>
-            <span className="block text-[13.5px] font-semibold text-ink">Cómo leer esta pantalla</span>
-            <span className="block text-[12px] text-ink-2">
-              Cada cliente tiene un color que dice qué hacer. Toca un cliente para ver los pasos.
-            </span>
-          </span>
-        </span>
-        <svg
-          viewBox="0 0 20 20"
-          className={`h-4 w-4 shrink-0 text-ink-3 transition ${open ? "rotate-90" : ""}`}
-          fill="none"
-          aria-hidden
-        >
-          <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open ? (
-        <div className="grid gap-4 border-t border-line px-5 py-4 lg:grid-cols-2">
-          <div className="space-y-2.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">La regla</p>
-            <p className="text-[13px] leading-5 text-ink">
-              Un cliente <b>prepago</b> primero paga (recarga) y después gasta. Nunca debería gastar más de
-              lo que pagó. Algunos clientes tienen un <b>acuerdo con gerencia</b> y pagan después: a ellos
-              es normal verles deuda.
-            </p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Palabras</p>
-            <ul className="space-y-1.5 text-[12.5px] leading-5 text-ink">
-              <li>
-                <b>Cartera:</b> plata que el cliente pagó y todavía no gastó.
-              </li>
-              <li>
-                <b>Puede gastar sin pagar:</b> lo que TikTok le deja gastar menos lo que tiene pagado. Si no es
-                $0, puede gastar plata que no pagó.
-              </li>
-              <li>
-                <b>Deuda del mes:</b> lo que gastó (con fee) menos lo que pagó este mes.
-              </li>
-              <li>
-                <b>Carga directa:</b> alguien puso saldo en TikTok sin pasar por Ads Holistic.
-              </li>
-            </ul>
-          </div>
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Los colores</p>
-            {(
-              [
-                ["quitar_saldo", "Puede gastar plata que no pagó. Es un error. Avisar al gerente para quitar ese saldo."],
-                ["preguntar", "Alguien le cargó saldo sin que pagara. Preguntar al gerente si estaba autorizado."],
-                ["cobrar", "Ya gastó más de lo que pagó este mes. Cobrarle y avisar al gerente."],
-                ["acuerdo", "Paga después con acuerdo. Tener deuda es normal. Solo vigilar que pague."],
-                ["ok", "Solo gasta lo que pagó. No hacer nada."],
-              ] as const
-            ).map(([key, text]) => (
-              <div key={key} className={`flex items-start gap-3 rounded-card px-3 py-2.5 ring-1 ${VERDICT_META[key].ring} ${VERDICT_META[key].soft}`}>
-                <VerdictChip verdict={key} />
-                <p className="text-[12.5px] leading-5 text-ink">{text}</p>
-              </div>
-            ))}
-          </div>
+        onClick={toggle}
+      />
+      <PanelPopover anchorRef={anchorRef} open={open} onClose={close} label="Filtrar por qué hacer" minWidth={240}>
+        <PanelMenu
+          label="Qué hacer"
+          items={[
+            { label: "Todos", hint: plural(total, "cliente", "clientes"), checked: filter === "all", onSelect: () => pick("all") },
+            ...VERDICT_ORDER.map((key) => ({
+              label: VERDICT_META[key].label,
+              hint: plural(counts[key], "cliente", "clientes"),
+              checked: filter === key,
+              onSelect: () => pick(key),
+            })),
+          ]}
+        />
+      </PanelPopover>
+    </>
+  );
+}
+
+/* --- Tabla de clientes -------------------------------------------------------- */
+
+/* Tabla v3: en pantallas chicas cada fila se apila y cada celda muestra su
+   rótulo (data-label) a la izquierda. */
+const TH = "h-10 whitespace-nowrap border-b border-line px-2 text-left text-sm font-medium text-ink";
+const TD =
+  "h-[59px] border-b border-line px-2 py-2 align-middle max-md:flex max-md:h-auto max-md:min-h-[30px] max-md:items-center max-md:justify-between max-md:gap-4 max-md:border-0 max-md:px-0 max-md:py-[3px] max-md:text-right max-md:before:flex-none max-md:before:text-left max-md:before:text-xs max-md:before:font-medium max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]";
+const TD_MAIN = "max-md:block max-md:pb-2 max-md:text-left max-md:before:content-none";
+const TD_WIDE = "max-md:block max-md:text-left max-md:before:mb-1 max-md:before:block";
+const TD_NUM = "num text-right font-semibold";
+
+function ClientesTable({ rows, onOpen }: { rows: Row[]; onOpen: (id: string) => void }) {
+  return (
+    <section className="overflow-hidden rounded-card border border-line bg-surface shadow-card md:p-2">
+      {rows.length === 0 ? (
+        <EmptyState icon="search" title="Ningún cliente con ese filtro." />
+      ) : (
+        <div role="region" aria-label="Clientes en monitoreo" tabIndex={0} className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm max-md:block">
+            <caption className="sr-only">Clientes en monitoreo</caption>
+            <thead className="max-md:sr-only">
+              <tr>
+                <th scope="col" className={TH}>Cliente</th>
+                <th scope="col" className={TH}>Qué pasa</th>
+                <th scope="col" className={cn(TH, "text-right")}>Puede gastar sin pagar</th>
+                <th scope="col" className={cn(TH, "text-right")}>Deuda del mes</th>
+                <th scope="col" className={cn(TH, "text-right")}>Cartera</th>
+              </tr>
+            </thead>
+            <tbody className="max-md:block">
+              {rows.map((row) => (
+                <ClienteRow key={row.cliente.id} row={row} onOpen={() => onOpen(row.cliente.id)} />
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
 
-function Kpi({
-  label,
-  value,
-  hint,
-  tone,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  tone: "ok" | "warn" | "bad";
-}) {
-  const color = tone === "bad" ? "text-danger-fg" : tone === "warn" ? "text-accent-text" : "text-ink";
-  return (
-    <div className="flex min-w-0 flex-col justify-between rounded-card bg-surface p-4 ring-1 ring-line">
-      <p className="text-[11.5px] font-semibold leading-4 text-ink-2">{label}</p>
-      <p className={`mt-3 text-[1.45rem] font-semibold leading-none tracking-[-0.02em] tabular-nums ${color}`}>{value}</p>
-      <p className="mt-2 text-[11px] leading-4 text-ink-3">{hint}</p>
-    </div>
-  );
-}
-
-function ClientesList({
-  rows,
-  openId,
-  onToggle,
-  onSaveModalidad,
-  onChanged,
-}: {
-  rows: Row[];
-  openId: string | null;
-  onToggle: (id: string) => void;
-  onSaveModalidad: (clienteId: string, modalidad: ClienteModalidad, nota: string) => Promise<void>;
-  onChanged: () => void;
-}) {
-  if (rows.length === 0) return <EmptyState text="Ningún cliente con ese filtro." />;
-  return (
-    <div>
-      <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] gap-3 border-b border-line bg-field px-4 py-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3 lg:grid">
-        <span>Cliente</span>
-        <span>Qué pasa</span>
-        <span className="text-right">Puede gastar sin pagar</span>
-        <span className="text-right">Deuda del mes</span>
-        <span className="text-right">Cartera</span>
-      </div>
-      <ul className="divide-y divide-[#f3eee8]">
-        {rows.map((row) => (
-          <ClienteRow
-            key={row.cliente.id}
-            row={row}
-            open={openId === row.cliente.id}
-            onToggle={() => onToggle(row.cliente.id)}
-            onSaveModalidad={onSaveModalidad}
-            onChanged={onChanged}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ClienteRow({
-  row,
-  open,
-  onToggle,
-  onSaveModalidad,
-  onChanged,
-}: {
-  row: Row;
-  open: boolean;
-  onToggle: () => void;
-  onSaveModalidad: (clienteId: string, modalidad: ClienteModalidad, nota: string) => Promise<void>;
-  onChanged: () => void;
-}) {
+function ClienteRow({ row, onOpen }: { row: Row; onOpen: () => void }) {
   const { cliente, verdict, modalidad } = row;
   const meta = VERDICT_META[verdict.key];
+  const exposureStrong = cliente.exposureUsd > 1 && modalidad === "prepago";
+  const debtStrong = cliente.month.debtUsd > 1 && modalidad === "prepago";
   return (
-    <li className={open ? meta.soft : undefined}>
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="grid w-full grid-cols-1 gap-2 px-4 py-3 text-left transition hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40 lg:grid-cols-[minmax(0,2fr)_minmax(0,2.6fr)_repeat(3,minmax(0,1fr))] lg:items-center lg:gap-3"
-      >
-        <span className="flex min-w-0 items-center gap-3">
-          <span className="relative shrink-0">
-            <span
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-subtle text-[11px] font-bold text-accent-text"
-              aria-hidden
+    <tr
+      onClick={(event) => {
+        if (!(event.target as HTMLElement).closest("button, a, input")) onOpen();
+      }}
+      className="cursor-pointer hover:bg-field [&:last-child>td]:border-b-0 max-md:block max-md:border-b max-md:border-line max-md:px-4 max-md:py-3 max-md:last:border-b-0"
+    >
+      <td data-label="Cliente" className={cn(TD, TD_MAIN)}>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Avatar name={cliente.name} />
+          <div className="grid min-w-0 leading-snug">
+            <button
+              type="button"
+              onClick={onOpen}
+              className="max-w-[34ch] truncate text-left font-semibold text-ink underline decoration-transparent underline-offset-[3px] hover:decoration-current"
             >
-              {initialsOf(cliente.name)}
-            </span>
-            <span className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full ring-2 ring-white ${meta.dot}`} aria-hidden />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-[14px] font-semibold text-ink">{cliente.name}</span>
-            <span className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-ink-3">
-              <ModalidadBadge modalidad={modalidad} />
-              {cliente.accounts.length} cuenta{cliente.accounts.length === 1 ? "" : "s"}
-            </span>
-          </span>
+              {cliente.name}
+            </button>
+            <small className="truncate text-xs text-ink-3">
+              {MODALIDAD_LABEL[modalidad]} · {plural(cliente.accounts.length, "cuenta", "cuentas")}
+            </small>
+          </div>
+        </div>
+      </td>
+      <td data-label="Qué pasa" className={cn(TD, TD_WIDE)}>
+        <span className="grid max-w-[46ch] justify-items-start gap-1">
+          <ToneBadge tone={meta.tone} dot>
+            {meta.label}
+          </ToneBadge>
+          <span className="line-clamp-2 text-[13px] leading-5 text-ink-2">{verdict.headline}</span>
         </span>
-        <span className="flex min-w-0 items-start gap-2">
-          <span className="min-w-0 flex-1">
-            <VerdictChip verdict={verdict.key} />
-            <span className="mt-1 block text-[12.5px] leading-5 text-ink lg:line-clamp-2">{verdict.headline}</span>
-          </span>
-          <svg
-            viewBox="0 0 20 20"
-            className={`mt-1 h-4 w-4 shrink-0 text-ink-3 transition lg:hidden ${open ? "rotate-90" : ""}`}
-            fill="none"
-            aria-hidden
-          >
-            <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <MetricCell
-          label="Puede gastar sin pagar"
-          value={cliente.exposureUsd}
-          strong={cliente.exposureUsd > 1 && modalidad === "prepago"}
-        />
-        <MetricCell
-          label="Deuda del mes"
-          value={Math.max(0, cliente.month.debtUsd)}
-          strong={cliente.month.debtUsd > 1 && modalidad === "prepago"}
-        />
-        <MetricCell label="Cartera" value={cliente.walletUsd} />
-      </button>
-      {open ? <ClienteDetail row={row} onSaveModalidad={onSaveModalidad} onChanged={onChanged} /> : null}
-    </li>
+      </td>
+      <td data-label="Puede gastar sin pagar" className={cn(TD, TD_NUM, exposureStrong ? "text-danger-fg" : "text-ink")}>
+        {usd(cliente.exposureUsd)}
+      </td>
+      <td data-label="Deuda del mes" className={cn(TD, TD_NUM, debtStrong ? "text-danger-fg" : "text-ink")}>
+        {usd(Math.max(0, cliente.month.debtUsd))}
+      </td>
+      <td data-label="Cartera" className={cn(TD, TD_NUM, "text-ink")}>
+        {usd(cliente.walletUsd)}
+      </td>
+    </tr>
   );
 }
 
-function MetricCell({ label, value, strong = false }: { label: string; value: number; strong?: boolean }) {
-  return (
-    <span className="flex items-baseline justify-between gap-2 lg:block lg:text-right">
-      <span className="text-[11.5px] text-ink-3 lg:hidden">{label}</span>
-      <span className={`text-[13px] tabular-nums ${strong ? "font-semibold text-danger-fg" : "text-ink"}`}>
-        {usd(value)}
-      </span>
-    </span>
-  );
-}
+/* --- Detalle de un cliente (panel lateral) ------------------------------------ */
 
 function ClienteDetail({
   row,
@@ -768,69 +657,94 @@ function ClienteDetail({
 }) {
   const { cliente, verdict } = row;
   const meta = VERDICT_META[verdict.key];
-  const [showTech, setShowTech] = useState(false);
   return (
-    <div className="space-y-4 px-4 pb-5 pt-1">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <div className={`rounded-card bg-surface p-4 ring-1 ${meta.ring}`}>
-          <VerdictChip verdict={verdict.key} />
-          <p className="mt-2 text-[14px] font-semibold leading-6 text-ink">{verdict.headline}</p>
-          {verdict.steps.length ? (
-            <>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Qué hacer</p>
-              <ol className="mt-1.5 space-y-2">
-                {verdict.steps.map((step, i) => (
-                  <li key={step} className="flex gap-2.5 text-[13px] leading-5 text-ink">
-                    <span
-                      className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${meta.dot}`}
-                      aria-hidden
-                    >
-                      {i + 1}
-                    </span>
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </>
-          ) : null}
-        </div>
-        <ModalidadEditor row={row} onSave={onSaveModalidad} />
-      </div>
+    <div className="space-y-5">
+      <Note tone={meta.tone} title={meta.label}>
+        {verdict.headline}
+      </Note>
+
+      <dl className="grid grid-cols-3 gap-2">
+        <MiniStat label="Gastó este mes (con fee)" value={usd(cliente.month.chargeUsd)} />
+        <MiniStat label="Pagó este mes" value={usd(cliente.month.paidUsd)} />
+        <MiniStat
+          label="Diferencia"
+          value={usd(cliente.month.debtUsd)}
+          className={cliente.month.debtUsd > 1 ? "text-danger-fg" : undefined}
+        />
+      </dl>
+
+      {verdict.steps.length ? (
+        <section>
+          <h3 className="mb-2 text-sm font-semibold text-ink">Qué hacer</h3>
+          <ol className="grid gap-2.5">
+            {verdict.steps.map((step, i) => (
+              <li key={step} className="grid grid-cols-[24px_1fr] items-start gap-2.5 text-[13px] leading-5 text-ink-2">
+                <span
+                  aria-hidden
+                  className="grid size-[22px] place-items-center rounded-[6px] bg-subtle font-mono text-[11px] font-semibold text-ink"
+                >
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+
+      <ModalidadEditor row={row} onSave={onSaveModalidad} />
 
       <FrenarGasto cliente={cliente} onDone={onChanged} />
 
-      <div className="grid grid-cols-3 gap-2 rounded-card bg-surface p-3 ring-1 ring-line sm:max-w-md">
-        <MiniStat label="Gastó este mes (con fee)" value={cliente.month.chargeUsd} />
-        <MiniStat label="Pagó este mes" value={cliente.month.paidUsd} />
-        <MiniStat label="Diferencia" value={cliente.month.debtUsd} danger={cliente.month.debtUsd > 1} />
-      </div>
-
-      <div>
-        <button
-          type="button"
-          onClick={() => setShowTech((v) => !v)}
-          aria-expanded={showTech}
-          className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-accent-text hover:text-accent-text"
-        >
-          <svg viewBox="0 0 20 20" className={`h-3.5 w-3.5 transition ${showTech ? "rotate-90" : ""}`} fill="none" aria-hidden>
-            <path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {showTech ? "Ocultar detalle técnico" : "Ver detalle técnico (alertas y cuentas TikTok)"}
-        </button>
-        {showTech ? (
-          <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-            <div className="space-y-2">
-              {cliente.signals.length === 0 ? (
-                <p className="rounded-card bg-subtle px-3.5 py-3 text-[12.5px] text-ok-fg">Sin alertas.</p>
-              ) : (
-                cliente.signals.map((s, i) => <SignalCard key={`${s.kind}-${s.advertiserId ?? i}-${i}`} signal={s} />)
-              )}
-            </div>
-            <AccountsTable accounts={cliente.accounts} />
-          </div>
-        ) : null}
-      </div>
+      <Disclosure summary="Ver detalle técnico (alertas y cuentas TikTok)" icon="activity">
+        <div className="space-y-3">
+          {cliente.signals.length === 0 ? (
+            <Note tone="ok" icon="check-circle">
+              Sin alertas.
+            </Note>
+          ) : (
+            cliente.signals.map((s, i) => <SignalCard key={`${s.kind}-${s.advertiserId ?? i}-${i}`} signal={s} />)
+          )}
+          <AccountsTable accounts={cliente.accounts} />
+        </div>
+      </Disclosure>
     </div>
+  );
+}
+
+function MiniStat({ label, value, className }: { label: string; value: string; className?: string }) {
+  return (
+    <div className="min-w-0 rounded-box border border-line bg-field px-3 py-2.5">
+      <dt className="text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className={cn("mt-0.5 font-mono text-[15px] font-semibold tracking-[-0.02em] text-ink [overflow-wrap:anywhere]", className)}>
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+/** Acordeón v3 («details.acc»). */
+function Disclosure({
+  summary,
+  icon = "info",
+  children,
+}: {
+  summary: string;
+  icon?: "info" | "activity";
+  children: ReactNode;
+}) {
+  return (
+    <details className="group rounded-box border border-line bg-field">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+        <PanelIcon name={icon} className="shrink-0" />
+        {summary}
+        <PanelIcon
+          name="chevron-down"
+          className="ml-auto shrink-0 text-ink-3 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+        />
+      </summary>
+      <div className="px-3 pb-3 pt-0.5">{children}</div>
+    </details>
   );
 }
 
@@ -861,147 +775,150 @@ function ModalidadEditor({
   }
 
   return (
-    <div className="rounded-card bg-surface p-4 ring-1 ring-line">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-text">Tipo de cliente</p>
-      <p className="mt-1 text-[12px] leading-5 text-ink-2">Lo decide gerencia. Cambia lo que esta pantalla recomienda.</p>
-      <div className="mt-2.5 grid grid-cols-2 gap-1 rounded-box bg-subtle p-1" role="radiogroup" aria-label="Tipo de cliente">
+    <section>
+      <h3 className="text-sm font-semibold text-ink">Tipo de cliente</h3>
+      <p className="mt-0.5 text-xs text-ink-2">Lo decide gerencia. Cambia lo que esta pantalla recomienda.</p>
+      <fieldset className="mt-2.5 grid grid-cols-2 gap-2">
+        <legend className="sr-only">Tipo de cliente</legend>
         {(
           [
             ["prepago", "Prepago", "Paga antes de gastar"],
             ["acuerdo", "Paga después", "Tiene acuerdo"],
           ] as const
         ).map(([key, label, hint]) => (
-          <button
-            key={key}
-            type="button"
-            role="radio"
-            aria-checked={modalidad === key}
-            onClick={() => setModalidad(key)}
-            className={`rounded-lg px-2.5 py-2 text-left transition ${
-              modalidad === key ? "bg-surface shadow-sm ring-1 ring-line" : "hover:bg-surface/60"
-            }`}
-          >
-            <span className="block text-[12.5px] font-semibold text-ink">{label}</span>
-            <span className="block text-[11px] text-ink-2">{hint}</span>
-          </button>
+          <label key={key} className="relative block cursor-pointer">
+            <input
+              type="radio"
+              name={`modalidad-${row.cliente.id}`}
+              value={key}
+              checked={modalidad === key}
+              onChange={() => setModalidad(key)}
+              className="peer absolute inset-0 m-0 cursor-pointer opacity-0"
+            />
+            <span className="block h-full rounded-box border border-line bg-surface px-3.5 py-3 peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:ring-1 peer-checked:ring-accent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus">
+              <b className="block text-sm font-semibold text-ink">{label}</b>
+              <small className="mt-0.5 block text-xs leading-snug text-ink-2">{hint}</small>
+            </span>
+          </label>
         ))}
-      </div>
-      <label className="mt-2.5 block">
-        <span className="text-[11.5px] font-medium text-ink-2">
-          Nota {modalidad === "acuerdo" ? "(obligatoria: quién lo autorizó y cuándo paga)" : "(opcional)"}
+      </fieldset>
+      <label className="mt-3 grid gap-1.5">
+        <span className="text-sm font-medium text-ink">
+          Nota{" "}
+          <span className="text-xs font-normal text-ink-3">
+            {modalidad === "acuerdo" ? "(obligatoria: quién lo autorizó y cuándo paga)" : "(opcional)"}
+          </span>
         </span>
-        <textarea
+        <Textarea
           value={nota}
           onChange={(e) => setNota(e.target.value)}
           rows={2}
           maxLength={300}
           placeholder={modalidad === "acuerdo" ? "Ej: Autorizado por gerencia, paga a fin de mes." : ""}
-          className="mt-1 w-full resize-none rounded-box border border-line bg-field px-3 py-2 text-[12.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface"
+          className="resize-none"
         />
       </label>
-      <div className="mt-2 flex items-center justify-between gap-2">
-        <p className="min-w-0 text-[11px] leading-4 text-ink-3">
+      <div className="mt-2.5 flex items-center justify-between gap-3">
+        <p className="min-w-0 text-xs leading-4 text-ink-3">
           {row.modalidadEntry
             ? `Marcado por ${row.modalidadEntry.updatedBy} · ${limaDateTime(row.modalidadEntry.updatedAt)}`
             : "Sin marcar: se trata como prepago."}
         </p>
-        <button
-          type="button"
-          onClick={() => void save()}
-          disabled={!dirty || saving}
-          className="shrink-0 rounded-full bg-accent-btn px-3.5 py-1.5 text-[12px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-40"
-        >
+        <Button size="sm" onClick={() => void save()} disabled={!dirty || saving} className="shrink-0">
           {saving ? "Guardando…" : "Guardar"}
-        </button>
+        </Button>
       </div>
       {message ? (
-        <p className={`mt-1.5 text-[12px] ${message.ok ? "text-ok-fg" : "text-danger-fg"}`}>{message.text}</p>
+        <p role="status" className={cn("mt-1.5 text-xs", message.ok ? "text-ok-fg" : "text-danger-fg")}>
+          {message.text}
+        </p>
       ) : null}
-    </div>
+    </section>
   );
 }
 
 function SignalCard({ signal }: { signal: MonitorSignal }) {
-  const meta = SEVERITY_META[signal.severity];
   return (
-    <div className={`rounded-card bg-surface px-3.5 py-3 ring-1 ${meta.ring}`}>
+    <div
+      className={cn(
+        "rounded-box border border-[var(--t-line)] bg-surface px-3.5 py-3",
+        `tone-${SEVERITY_TONE[signal.severity]}`,
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={`text-[13px] font-semibold ${meta.text}`}>{signal.title}</p>
-          <p className="mt-0.5 text-[12.5px] leading-5 text-ink">{signal.detail}</p>
+          <p className="text-[13px] font-semibold text-[var(--t-fg)]">{signal.title}</p>
+          <p className="mt-0.5 text-[13px] leading-5 text-ink-2">{signal.detail}</p>
         </div>
         {signal.amountUsd != null ? (
-          <span className={`shrink-0 text-[13px] font-semibold tabular-nums ${meta.text}`}>{usd(signal.amountUsd)}</span>
+          <span className="num shrink-0 text-[13px] font-semibold text-[var(--t-fg)]">{usd(signal.amountUsd)}</span>
         ) : null}
       </div>
     </div>
   );
 }
 
-function MiniStat({ label, value, danger = false }: { label: string; value: number; danger?: boolean }) {
+function AccountsTable({ accounts }: { accounts: MonitorAccount[] }) {
+  if (accounts.length === 0) {
+    return <p className="text-[13px] text-ink-2">Sin cuentas vinculadas en TikTok.</p>;
+  }
+  const th = "h-9 whitespace-nowrap border-b border-line px-2 text-xs font-medium text-ink-2";
+  const td = "h-11 border-b border-line px-2 py-1.5 align-middle";
   return (
-    <div>
-      <p className="text-[10.5px] leading-4 text-ink-3">{label}</p>
-      <p className={`mt-0.5 text-[13px] font-semibold tabular-nums ${danger ? "text-danger-fg" : "text-ink"}`}>
-        {usd(value)}
-      </p>
+    <div className="max-h-[22rem] overflow-auto rounded-box border border-line bg-surface">
+      <table className="w-full border-collapse text-[13px]">
+        <caption className="sr-only">Cuentas TikTok del cliente</caption>
+        <thead className="sticky top-0 bg-surface">
+          <tr>
+            <th scope="col" className={cn(th, "text-left")}>Cuenta</th>
+            <th scope="col" className={cn(th, "text-right")}>Puede gastar</th>
+            <th scope="col" className={cn(th, "text-right")}>Cartera</th>
+            <th scope="col" className={cn(th, "text-right")}>Sin pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          {accounts.map((a) => {
+            const risky = a.unlimited || (a.excessUsd ?? 0) > 1;
+            return (
+              <tr
+                key={a.advertiserId}
+                className={cn("[&:last-child>td]:border-b-0", a.status === "banned" && "opacity-55")}
+              >
+                <td className={td}>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span className="panel-badge tone-neutral num shrink-0">BM{a.bm}</span>
+                    <span className="min-w-0 max-w-[14rem] truncate font-medium text-ink" title={a.name}>
+                      {a.name}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-ink-3">
+                    {a.status === "banned" ? "Baneada · " : ""}
+                    {a.kind === "cash" ? "Cash" : "Cupo compartido"} · adv {a.advertiserId}
+                  </p>
+                </td>
+                <td className={cn(td, "num whitespace-nowrap text-right text-ink")}>
+                  {a.unlimited ? <span className="font-semibold text-danger-fg">Sin tope</span> : usd(a.spendableUsd)}
+                </td>
+                <td className={cn(td, "num whitespace-nowrap text-right text-ink")}>{usd(a.walletUsd)}</td>
+                <td
+                  className={cn(
+                    td,
+                    "num whitespace-nowrap text-right",
+                    risky && a.status !== "banned" ? "font-semibold text-danger-fg" : "text-ink-3",
+                  )}
+                >
+                  {a.unlimited ? "∞" : usd(a.excessUsd)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function AccountsTable({ accounts }: { accounts: MonitorAccount[] }) {
-  if (accounts.length === 0) {
-    return <p className="text-[12.5px] text-ink-2">Sin cuentas vinculadas en TikTok.</p>;
-  }
-  return (
-    <div className="overflow-hidden rounded-card ring-1 ring-line">
-      <div className="max-h-[22rem] overflow-auto">
-        <table className="w-full text-[12.5px]">
-          <thead className="sticky top-0 bg-field text-[10.5px] uppercase tracking-[0.06em] text-ink-3">
-            <tr>
-              <th className="px-3 py-2 text-left font-semibold">Cuenta</th>
-              <th className="px-3 py-2 text-right font-semibold">Puede gastar</th>
-              <th className="px-3 py-2 text-right font-semibold">Cartera</th>
-              <th className="px-3 py-2 text-right font-semibold">Sin pago</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-line bg-surface">
-            {accounts.map((a) => {
-              const risky = a.unlimited || (a.excessUsd ?? 0) > 1;
-              return (
-                <tr key={a.advertiserId} className={a.status === "banned" ? "opacity-55" : undefined}>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1.5">
-                      <BmBadge bm={a.bm} />
-                      <span className="min-w-0 max-w-[14rem] truncate font-medium text-ink" title={a.name}>
-                        {a.name}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-[10.5px] text-ink-3">
-                      {a.status === "banned" ? "Baneada · " : ""}
-                      {a.kind === "cash" ? "Cash" : "Cupo compartido"} · adv {a.advertiserId}
-                    </p>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-ink">
-                    {a.unlimited ? <span className="font-semibold text-danger-fg">Sin tope</span> : usd(a.spendableUsd)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-ink">{usd(a.walletUsd)}</td>
-                  <td
-                    className={`whitespace-nowrap px-3 py-2 text-right tabular-nums ${
-                      risky && a.status !== "banned" ? "font-semibold text-danger-fg" : "text-ink-3"
-                    }`}
-                  >
-                    {a.unlimited ? "∞" : usd(a.excessUsd)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+/* --- Movimientos raros -------------------------------------------------------- */
 
 function EventsList({
   events,
@@ -1012,50 +929,112 @@ function EventsList({
   now: number;
   modalidadById: Map<string, ClienteModalidad>;
 }) {
-  if (events.length === 0) return <EmptyState text="Sin movimientos raros en la ventana revisada." />;
+  if (events.length === 0) {
+    return (
+      <section className="rounded-card border border-line bg-surface shadow-card">
+        <EmptyState icon="check-circle" title="Sin movimientos raros en la ventana revisada." />
+      </section>
+    );
+  }
   return (
-    <ol className="relative px-4 py-4">
-      <span className="absolute bottom-6 left-[1.9rem] top-6 w-px bg-subtle" aria-hidden />
-      {events.map((e) => {
-        const acuerdo = modalidadById.get(e.clienteId) === "acuerdo";
-        const meta = acuerdo ? VERDICT_META.acuerdo : SEVERITY_META[e.severity];
-        return (
-          <li key={e.id} className="relative flex gap-4 py-2.5">
-            <span
-              className={`relative z-10 mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface ring-1 ${meta.ring}`}
-              aria-hidden
+    <PanelCard bodyClassName="py-1 sm:py-2">
+      <ul>
+        {events.map((e) => {
+          const acuerdo = modalidadById.get(e.clienteId) === "acuerdo";
+          const tone: Tone = acuerdo ? VERDICT_META.acuerdo.tone : SEVERITY_TONE[e.severity];
+          return (
+            <li
+              key={e.id}
+              className={cn("flex items-start justify-between gap-3 border-b border-line py-3 last:border-b-0", `tone-${tone}`)}
             >
-              <span className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
-            </span>
-            <div className="min-w-0 flex-1 rounded-card bg-field px-3.5 py-2.5 ring-1 ring-line">
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-semibold text-ink">
-                  {e.clienteName}
-                  <ModalidadBadge modalidad={acuerdo ? "acuerdo" : "prepago"} />
-                  <span className={`font-medium ${meta.text}`}>{e.title}</span>
-                </p>
-                <span className="text-[11.5px] tabular-nums text-ink-3" title={limaDateTime(e.at)}>
-                  {relativeTime(e.at, now)}
-                </span>
+              <div className="flex min-w-0 gap-2.5">
+                <span aria-hidden className="mt-1.5 size-2 shrink-0 rounded-full bg-[var(--t-solid)]" />
+                <div className="min-w-0">
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                    <b className="font-semibold text-ink">{e.clienteName}</b>
+                    <ToneBadge tone={acuerdo ? "info" : "neutral"}>{MODALIDAD_LABEL[acuerdo ? "acuerdo" : "prepago"]}</ToneBadge>
+                    <span className="font-medium text-[var(--t-fg)]">{e.title}</span>
+                  </p>
+                  <p className="mt-1 text-[13px] leading-5 text-ink-2">{e.detail}</p>
+                  <p className="mt-1 text-xs text-ink-3">
+                    {e.actor ? `Hecho por ${e.actor}. ` : ""}
+                    {acuerdo
+                      ? "Cliente con acuerdo: es normal, solo vigilar."
+                      : "Cliente prepago: preguntar al gerente si estaba autorizado."}
+                  </p>
+                </div>
               </div>
-              <p className="mt-1 text-[12.5px] leading-5 text-ink">{e.detail}</p>
-              <p className="mt-1 text-[11.5px] text-ink-2">
-                {e.actor ? `Hecho por ${e.actor}. ` : ""}
-                {acuerdo
-                  ? "Cliente con acuerdo: es normal, solo vigilar."
-                  : "Cliente prepago: preguntar al gerente si estaba autorizado."}
-              </p>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
+              <span className="num shrink-0 whitespace-nowrap text-xs text-ink-3" title={limaDateTime(e.at)}>
+                {relativeTime(e.at, now)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </PanelCard>
   );
 }
 
-function EmptyState({ text }: { text: string }) {
-  return <p className="px-4 py-10 text-center text-[13px] text-ink-2">{text}</p>;
+/* --- Cómo leer esta pantalla -------------------------------------------------- */
+
+const VERDICT_HELP: Array<[VerdictKey, string]> = [
+  ["quitar_saldo", "Puede gastar plata que no pagó. Es un error. Avisar al gerente para quitar ese saldo."],
+  ["preguntar", "Alguien le cargó saldo sin que pagara. Preguntar al gerente si estaba autorizado."],
+  ["cobrar", "Ya gastó más de lo que pagó este mes. Cobrarle y avisar al gerente."],
+  ["acuerdo", "Paga después con acuerdo. Tener deuda es normal. Solo vigilar que pague."],
+  ["ok", "Solo gasta lo que pagó. No hacer nada."],
+];
+
+function HowToRead() {
+  return (
+    <Disclosure summary="Cómo leer esta pantalla">
+      <div className="grid gap-5 pt-1 lg:grid-cols-2">
+        <div className="space-y-2.5">
+          <p className="eyebrow">La regla</p>
+          <p className="text-[13px] leading-5 text-ink">
+            Un cliente <b>prepago</b> primero paga (recarga) y después gasta. Nunca debería gastar más de
+            lo que pagó. Algunos clientes tienen un <b>acuerdo con gerencia</b> y pagan después: a ellos
+            es normal verles deuda.
+          </p>
+          <p className="eyebrow pt-1">Palabras</p>
+          <ul className="space-y-1.5 text-[13px] leading-5 text-ink">
+            <li>
+              <b>Cartera:</b> plata que el cliente pagó y todavía no gastó.
+            </li>
+            <li>
+              <b>Puede gastar sin pagar:</b> lo que TikTok le deja gastar menos lo que tiene pagado. Si no es
+              $0, puede gastar plata que no pagó.
+            </li>
+            <li>
+              <b>Deuda del mes:</b> lo que gastó (con fee) menos lo que pagó este mes.
+            </li>
+            <li>
+              <b>Carga directa:</b> alguien puso saldo en TikTok sin pasar por Ads Holistic.
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p className="eyebrow">Los colores</p>
+          <ul className="mt-1">
+            {VERDICT_HELP.map(([key, text]) => (
+              <li
+                key={key}
+                className="flex items-start justify-between gap-3 border-b border-line py-2.5 last:border-b-0"
+              >
+                <ToneBadge tone={VERDICT_META[key].tone} dot className="shrink-0">
+                  {VERDICT_META[key].label}
+                </ToneBadge>
+                <span className="text-right text-[13px] leading-5 text-ink-2">{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Disclosure>
+  );
 }
+
+/* --- Carga -------------------------------------------------------------------- */
 
 /** Pasos que sigue el servidor, en el orden en que suelen terminar (~15 s en total). */
 const LOADING_STEPS: Array<{ at: number; label: string; short: string }> = [
@@ -1085,84 +1064,75 @@ function useLoadingProgress(active: boolean) {
   return { percent, step: step.label, stepIndex: LOADING_STEPS.indexOf(step), slow: elapsed > EXPECTED_MS + 8_000 };
 }
 
-/** Barra fina animada mientras se actualiza con datos ya en pantalla. */
-function RefreshBar({ active }: { active: boolean }) {
-  const { percent } = useLoadingProgress(active);
-  if (!active) return null;
+function ProgressBar({ percent, label, min, thin = false }: { percent: number; label: string; min: number; thin?: boolean }) {
   return (
     <div
-      className="h-1 w-full overflow-hidden rounded-full bg-subtle"
+      className={cn("w-full overflow-hidden rounded-full bg-subtle", thin ? "h-1" : "h-2")}
       role="progressbar"
-      aria-label="Actualizando monitoreo"
+      aria-label={label}
       aria-valuenow={percent}
       aria-valuemin={0}
       aria-valuemax={100}
     >
       <div
-        className="h-full rounded-full bg-gradient-to-r from-accent to-accent transition-[width] duration-300 ease-out"
-        style={{ width: `${Math.max(6, percent)}%` }}
+        className="h-full rounded-full bg-accent transition-[width] duration-300 ease-out motion-reduce:transition-none"
+        style={{ width: `${Math.max(min, percent)}%` }}
       />
     </div>
   );
+}
+
+/** Barra fina mientras se actualiza con datos ya en pantalla. */
+function RefreshBar({ active }: { active: boolean }) {
+  const { percent } = useLoadingProgress(active);
+  if (!active) return null;
+  return <ProgressBar percent={percent} label="Actualizando monitoreo" min={6} thin />;
 }
 
 function MonitorSkeleton() {
   const { percent, step, stepIndex, slow } = useLoadingProgress(true);
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Cargando monitoreo">
-      <div className="rounded-card bg-surface p-5 ring-1 ring-line sm:p-6">
+      <section className="rounded-card border border-line bg-surface p-5 shadow-card sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-[13px] font-semibold text-ink">Revisando el sistema</p>
-          <span className="text-[12px] font-semibold tabular-nums text-accent-text">{percent}%</span>
+          <p className="font-semibold text-ink">Revisando el sistema</p>
+          <span className="num text-[13px] font-semibold text-accent-text">{percent} %</span>
         </div>
-        <div
-          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-subtle"
-          role="progressbar"
-          aria-valuenow={percent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Progreso de la revisión"
-        >
-          <div
-            className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-accent to-accent transition-[width] duration-300 ease-out"
-            style={{ width: `${Math.max(4, percent)}%` }}
-          >
-            <span className="absolute inset-0 animate-pulse bg-surface/25" aria-hidden />
-          </div>
+        <div className="mt-3">
+          <ProgressBar percent={percent} label="Progreso de la revisión" min={4} />
         </div>
-        <p className="mt-2.5 text-[12.5px] text-ink-2" aria-live="polite">
+        <p className="mt-2.5 text-[13px] text-ink-2" aria-live="polite">
           {slow ? "Está tardando más de lo normal, TikTok responde lento. Sigue revisando…" : step}
         </p>
         <ol className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
           {LOADING_STEPS.map((s, i) => (
-            <li key={s.label} className="flex items-center gap-1.5 text-[11.5px]">
+            <li key={s.label} className="flex items-center gap-1.5 text-xs">
               <span
-                className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
+                className={cn(
+                  "inline-grid size-4 shrink-0 place-items-center rounded-full font-mono text-[9px] font-semibold",
                   i < stepIndex
-                    ? "bg-ok-solid text-white"
+                    ? "bg-ok-solid text-on-accent"
                     : i === stepIndex
                       ? "bg-accent-btn text-on-accent"
-                      : "bg-subtle text-ink-3"
-                }`}
+                      : "bg-subtle text-ink-3",
+                )}
                 aria-hidden
               >
-                {i < stepIndex ? "✓" : i + 1}
+                {i < stepIndex ? <PanelIcon name="check" className="size-2.5" /> : i + 1}
               </span>
               <span className={i <= stepIndex ? "text-ink" : "text-ink-3"}>{s.short}</span>
             </li>
           ))}
         </ol>
-      </div>
-      <div className="flex animate-pulse flex-col gap-4">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,2fr)]">
-          <div className="h-44 rounded-card bg-active" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-28 rounded-card bg-surface ring-1 ring-line" />
-            ))}
-          </div>
+      </section>
+      <div className="flex animate-pulse flex-col gap-4 motion-reduce:animate-none" aria-hidden>
+        <div className="h-44 rounded-card bg-subtle" />
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-28 rounded-card border border-line bg-surface" />
+          ))}
         </div>
-        <div className="h-80 rounded-card bg-surface ring-1 ring-line" />
+        <div className="h-80 rounded-card border border-line bg-surface" />
       </div>
     </div>
   );

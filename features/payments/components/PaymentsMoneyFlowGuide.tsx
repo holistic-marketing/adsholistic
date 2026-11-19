@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/cn";
+import { GuideAccordion, GuideFaq, HowToSteps } from "./PaymentsGuide";
 import type { PaymentGatewayId } from "@/types/payment";
 
 /**
@@ -22,95 +24,61 @@ function tabFromGateway(id: PaymentGatewayId | undefined): GuideTab {
 export function PaymentsMoneyFlowGuide({
   selected,
   feePercent = 10,
+  className,
 }: {
   selected?: PaymentGatewayId;
   feePercent?: number;
+  className?: string;
 }) {
   const t = useTranslations("payments.guide");
   const [picked, setPicked] = useState<GuideTab | null>(null);
   const tab = picked ?? tabFromGateway(selected);
 
   return (
-    <details className="group mt-3">
-      <summary className="-ml-2 inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-2 text-[13px] font-semibold text-accent-text outline-none transition-colors hover:bg-[var(--auth-surface-muted)] focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/30 [&::-webkit-details-marker]:hidden">
-        <InfoIcon />
-        <span>{t("summary")}</span>
-        <ChevronIcon />
-      </summary>
+    <GuideAccordion summary={t("summary")} className={className}>
+      <p className="text-[13px] text-ink-2">{t("intro")}</p>
 
-      <div className="mt-2 overflow-hidden rounded-card bg-field ring-1 ring-line">
-        <p className="px-4 pt-3.5 text-[12.5px] leading-5 text-ink-2 sm:px-5">{t("intro")}</p>
-
-        <div role="tablist" aria-label={t("tabsLabel")} className="flex flex-wrap gap-1.5 px-4 pb-1 pt-3 sm:px-5">
-          {(["yape", "manual", "crypto", "abroad"] as const).map((id) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setPicked(id)}
-              className={`inline-flex h-8 shrink-0 items-center rounded-full px-3 text-[12px] font-semibold transition ${
-                tab === id ? "bg-accent-soft text-accent-text" : "bg-surface text-ink-2 ring-1 ring-line hover:text-ink"
-              }`}
-            >
-              {t(`tabs.${id}`)}
-            </button>
-          ))}
-        </div>
-
-        <div role="tabpanel" className="px-4 pb-4 pt-3 sm:px-5">
-          <ol className="space-y-2.5">
-            {Array.from({ length: STEPS[tab] }, (_, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-btn text-[11px] font-bold text-on-accent">
-                  {i + 1}
-                </span>
-                <p className="text-[13px] leading-5 text-ink">
-                  {t(`${tab}.step${i + 1}` as Parameters<typeof t>[0], { fee: feePercent })}
-                </p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-[11.5px] font-semibold text-ok-fg ring-1 ring-line">
-            <span className="h-1.5 w-1.5 rounded-full bg-ok-solid" aria-hidden />
-            {t(`${tab}.time`)}
-          </p>
-          <p className="mt-2 text-[12px] leading-5 text-ink-3">{t(`${tab}.tip`)}</p>
-        </div>
-
-        <div className="border-t border-line px-4 py-3 sm:px-5">
-          <p className="text-[12px] font-semibold text-ink-2">{t("faqTitle")}</p>
-          <div className="mt-1.5 divide-y divide-[#ece4da]">
-            {FAQ.map((id) => (
-              <details key={id} className="group/faq py-2">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13px] font-medium text-ink [&::-webkit-details-marker]:hidden">
-                  {t(`faq.${id}.q`, { fee: feePercent })}
-                  <span aria-hidden className="text-accent-text transition group-open/faq:rotate-180">⌄</span>
-                </summary>
-                <p className="mt-1.5 text-[12.5px] leading-5 text-ink-2">{t(`faq.${id}.a`, { fee: feePercent })}</p>
-              </details>
-            ))}
-          </div>
-        </div>
+      <div role="tablist" aria-label={t("tabsLabel")} className="mt-3 flex flex-wrap gap-1.5">
+        {(["yape", "manual", "crypto", "abroad"] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setPicked(id)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-ctl border px-3 text-[13px] font-medium shadow-ctl",
+              tab === id
+                ? "border-accent-line bg-accent-soft text-accent-text"
+                : "border-line bg-surface text-ink hover:bg-hover",
+            )}
+          >
+            {t(`tabs.${id}`)}
+          </button>
+        ))}
       </div>
-    </details>
-  );
-}
 
-function InfoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-      <circle cx="12" cy="12" r="9" />
-      <path strokeLinecap="round" d="M12 10.75v5" />
-      <circle cx="12" cy="7.6" r="0.8" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
+      <div role="tabpanel" className="mt-4">
+        <HowToSteps
+          steps={Array.from({ length: STEPS[tab] }, (_, i) =>
+            t(`${tab}.step${i + 1}` as Parameters<typeof t>[0], { fee: feePercent }),
+          )}
+        />
+        {/* Insignia que puede partir línea: el tiempo de algunos métodos es largo. */}
+        <p className="mt-3 inline-flex items-center gap-1.5 rounded-[11px] border border-ok-line bg-ok-bg px-2 py-0.5 text-xs font-medium text-ok-fg">
+          <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-ok-solid" />
+          {t(`${tab}.time`)}
+        </p>
+        <p className="mt-2 text-xs leading-snug text-ink-3">{t(`${tab}.tip`)}</p>
+      </div>
 
-function ChevronIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-      <path d="m6.5 8 3.5 3.5L13.5 8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+      <GuideFaq
+        title={t("faqTitle")}
+        items={FAQ.map((id) => ({
+          q: t(`faq.${id}.q`, { fee: feePercent }),
+          a: t(`faq.${id}.a`, { fee: feePercent }),
+        }))}
+      />
+    </GuideAccordion>
   );
 }

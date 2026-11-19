@@ -1,8 +1,9 @@
-import Link from "next/link";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
-import { Table, TableWrap, Td, Th } from "@/components/ui/Table";
+import { Button } from "@/components/ui/Button";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { Note, PropList, StatCard, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { routes } from "@/config/routes";
 import {
   getHecomCliente,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/hecom/clientes.server";
 import { getHecomSupabaseConfig } from "@/lib/hecom/supabase.server";
 import { requireSession } from "@/lib/auth/guards.server";
+import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { SelectHecomClienteOnMount } from "@/features/clientes/components/SelectHecomClienteOnMount.client";
@@ -28,6 +30,36 @@ function moneyUsd(value: unknown): string {
     currency: "USD",
     maximumFractionDigits: 2,
   }).format(n);
+}
+
+/* Tabla v3 dentro de una tarjeta: encabezados sin mayúsculas y filas de 59 px. */
+const TH_BASE = "h-10 whitespace-nowrap border-b border-line px-2 text-sm font-medium text-ink";
+const TH = `${TH_BASE} text-left`;
+const TH_R = `${TH_BASE} text-right`;
+const TD = "h-[59px] border-b border-line px-2 py-2 align-middle";
+const TR = "hover:bg-field [&:last-child>td]:border-b-0";
+
+function DataTable({ label, head, children }: { label: string; head: ReactNode; children: ReactNode }) {
+  return (
+    <div className="-mx-2 overflow-x-auto" role="region" aria-label={label} tabIndex={0}>
+      <table className="w-full border-collapse text-sm">
+        <caption className="sr-only">{label}</caption>
+        <thead>
+          <tr>{head}</tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Nombre de la tabla de origen, discreto, para quien soporta la integración. */
+function SourceTag({ children }: { children: ReactNode }) {
+  return (
+    <ToneBadge tone="neutral" className="font-mono text-[11px]">
+      {children}
+    </ToneBadge>
+  );
 }
 
 export default async function ClienteVistaPage({
@@ -70,16 +102,13 @@ export default async function ClienteVistaPage({
   if (loadError || !cliente) {
     return (
       <div className={dashboardClasses.page}>
-        <Card className="border-danger-line bg-danger-bg p-5 text-sm text-danger-fg">
-          <p className="font-semibold">No se pudo abrir este cliente Hecom</p>
-          <p className="mt-2">{loadError}</p>
-          <Link
-            href={routes.clientes}
-            className="mt-4 inline-flex text-sm font-semibold text-[var(--brand-primary)]"
-          >
-            ← Volver a Clientes
-          </Link>
-        </Card>
+        <Note tone="danger" title="No se pudo abrir este cliente Hecom">
+          {loadError}
+        </Note>
+        <Button asChild variant="outline" href={routes.clientes}>
+          <PanelIcon name="arrow-left" />
+          Volver a Clientes
+        </Button>
       </div>
     );
   }
@@ -106,267 +135,217 @@ export default async function ClienteVistaPage({
     return acc + (Number.isFinite(n) ? n : 0);
   }, 0);
 
+  const spendSource =
+    spend.kind === "snapshots"
+      ? "tiktok_spend_snapshots"
+      : spend.kind === "gastos"
+        ? "gastos"
+        : "sin datos";
+
   return (
-    <div className={dashboardClasses.page}>
+    <div className="min-w-0">
       <SelectHecomClienteOnMount clienteId={cliente.id} name={cliente.name} />
-      <div className="dashboard-surface-card rounded-card p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-4">
-            <HecomClienteAvatar
-              name={cliente.name}
-              avatarUrl={cliente.avatarUrl}
-              size="xl"
-              className="ring-2 ring-[var(--brand-primary)]/20"
-            />
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary-deep)]">
-                Hecom Club · Cliente
-              </p>
-              <h1 className="font-display mt-1 text-2xl font-medium tracking-tight text-ink sm:text-[1.85rem]">
-                {cliente.name}
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-ink-2">
-                {cliente.biz ? `${cliente.biz} · ` : ""}
-                {primaryEmail ?? "Sin email"}
-                {cliente.dni ? ` · DNI ${cliente.dni}` : ""}
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Link
-              href={routes.clientes}
-              className="text-sm font-semibold text-[var(--brand-primary-deep)] hover:text-[var(--brand-primary)]"
-            >
-              ← Elegir otro cliente
-            </Link>
-            <Link
-              href={routes.adAccounts}
-              className="inline-flex h-10 items-center justify-center rounded-box bg-[var(--brand-primary)] px-4 text-[13px] font-semibold text-white shadow-[0_10px_28px_rgb(255_120_31_/_0.32)] hover:bg-[var(--brand-primary-deep)]"
-            >
-              Ver sus cuentas publicitarias
-            </Link>
-          </div>
-        </div>
+
+      <div className="flex items-start gap-4">
+        <HecomClienteAvatar
+          name={cliente.name}
+          avatarUrl={cliente.avatarUrl}
+          size="md"
+          className="mt-0.5 max-sm:hidden"
+        />
+        <PageHeader
+          className="min-w-0 flex-1"
+          eyebrow="Hecom Club · Cliente"
+          title={cliente.name}
+          lede={
+            <>
+              {cliente.biz ? `${cliente.biz} · ` : ""}
+              {primaryEmail ?? "Sin email"}
+              {cliente.dni ? ` · DNI ${cliente.dni}` : ""}
+            </>
+          }
+          actions={
+            <>
+              <Button asChild variant="outline" href={routes.clientes}>
+                <PanelIcon name="arrow-left" />
+                Elegir otro cliente
+              </Button>
+              <Button asChild href={routes.adAccounts}>
+                Ver sus cuentas publicitarias
+              </Button>
+            </>
+          }
+        />
       </div>
 
-      <div className="dashboard-surface-card rounded-card border border-[var(--brand-primary)]/20 bg-[linear-gradient(135deg,rgb(255_120_31_/_0.1),rgb(255_255_255_/_0.9))] px-4 py-3 text-sm text-ink">
-        <p className="font-semibold">Cliente seleccionado</p>
-        <p className="mt-1 text-ink-2">
+      <div className="space-y-4">
+        <Note tone="info" title="Cliente seleccionado">
           {hecomCfg.configured
             ? "Fuente live: Supabase Hecom Club."
             : "Fuente: backup Holistic local (sin HECOM_SUPABASE_SERVICE_ROLE_KEY aún)."}{" "}
-          En <strong className="text-ink">Mis cuentas publicitarias</strong> solo
-          vas a ver lo de {cliente.name}.
-        </p>
-      </div>
+          En <strong className="font-semibold">Mis cuentas publicitarias</strong> solo vas a ver lo de {cliente.name}.
+        </Note>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="dashboard-kpi rounded-card p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
-            Cuentas TikTok
-          </p>
-          <p className="mt-1 font-display text-xl font-medium text-ink">
-            {accounts.length}
-          </p>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Cuentas TikTok" value={accounts.length} />
+          <StatCard label="Emails CRM" value={cliente.emails.length} />
+          <StatCard label="Filas gasto (vista)" value={spend.rows.length} />
+          <StatCard label="Suma en lista" value={moneyUsd(spendTotal)} />
         </div>
-        <div className="dashboard-kpi rounded-card p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
-            Emails CRM
-          </p>
-          <p className="mt-1 font-display text-xl font-medium text-ink">
-            {cliente.emails.length}
-          </p>
-        </div>
-        <div className="dashboard-kpi rounded-card p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
-            Filas gasto (vista)
-          </p>
-          <p className="mt-1 font-display text-xl font-medium text-ink">
-            {spend.rows.length}
-          </p>
-        </div>
-        <div className="dashboard-kpi rounded-card p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2">
-            Suma en lista
-          </p>
-          <p className="mt-1 font-display text-xl font-medium text-ink">
-            {moneyUsd(spendTotal)}
-          </p>
-        </div>
-      </div>
 
-      {isStaff ? (
-        <div id="comision" className="scroll-mt-24">
-          <ClienteFeeCard clienteId={cliente.id} currentFee={cliente.tiktokDefaultFee} />
-        </div>
-      ) : null}
+        {isStaff ? (
+          <div id="comision" className="scroll-mt-24">
+            <ClienteFeeCard clienteId={cliente.id} currentFee={cliente.tiktokDefaultFee} />
+          </div>
+        ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-6">
-          <Card className="p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">
-                Cuentas TikTok Ads
-              </h2>
-              <Badge variant="info">cliente_tiktok_cuentas</Badge>
-            </div>
-            {accounts.length === 0 ? (
-              <p className="mt-4 text-sm text-[var(--admin-text-muted,#64748b)]">
-                Este cliente aún no tiene advertiser_id mapeado en Hecom.
-              </p>
-            ) : (
-              <TableWrap className="mt-4">
-                <Table>
-                  <thead>
-                    <tr>
-                      <Th>Advertiser</Th>
-                      <Th>BM</Th>
-                      <Th>Fee</Th>
-                      <Th>Sync</Th>
+        <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+          <div className="min-w-0 space-y-4">
+            <PanelCard
+              title="Cuentas TikTok Ads"
+              description={`${accounts.length} ${accounts.length === 1 ? "cuenta" : "cuentas"}`}
+              action={<SourceTag>cliente_tiktok_cuentas</SourceTag>}
+            >
+              {accounts.length === 0 ? (
+                <p className="text-sm text-ink-3">Este cliente aún no tiene advertiser_id mapeado en Hecom.</p>
+              ) : (
+                <DataTable
+                  label="Cuentas TikTok Ads"
+                  head={
+                    <>
+                      <th scope="col" className={TH}>Advertiser</th>
+                      <th scope="col" className={TH}>BM</th>
+                      <th scope="col" className={TH_R}>Fee</th>
+                      <th scope="col" className={TH}>Sync</th>
+                    </>
+                  }
+                >
+                  {accounts.map((account) => (
+                    <tr key={account.advertiserId} className={TR}>
+                      <td className={TD}>
+                        <p className="font-semibold text-ink">{account.advertiserName ?? "TikTok Ads"}</p>
+                        <p className="font-mono text-xs text-ink-3">{account.advertiserId}</p>
+                      </td>
+                      <td className={cn(TD, "text-ink-2")}>{account.bmBucket ?? "—"}</td>
+                      <td className={cn(TD, "num text-right font-semibold")}>
+                        {account.fee != null ? `${account.fee}%` : "—"}
+                      </td>
+                      <td className={TD}>
+                        <ToneBadge tone={account.syncEnabled ? "ok" : "neutral"} dot>
+                          {account.syncEnabled ? "on" : "off"}
+                        </ToneBadge>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]">
-                    {accounts.map((account) => (
-                      <tr key={account.advertiserId}>
-                        <Td>
-                          <p className="font-semibold text-[var(--foreground)]">
-                            {account.advertiserName ?? "TikTok Ads"}
-                          </p>
-                          <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-                            {account.advertiserId}
-                          </p>
-                        </Td>
-                        <Td>{account.bmBucket ?? "—"}</Td>
-                        <Td>
-                          {account.fee != null ? `${account.fee}%` : "—"}
-                        </Td>
-                        <Td>
-                          <Badge variant={account.syncEnabled ? "info" : "neutral"}>
-                            {account.syncEnabled ? "on" : "off"}
-                          </Badge>
-                        </Td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </TableWrap>
-            )}
-          </Card>
+                  ))}
+                </DataTable>
+              )}
+            </PanelCard>
 
-          <Card className="p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">
-                Gastos / snapshots
-              </h2>
-              <Badge variant="neutral">
-                {spend.kind === "snapshots"
-                  ? "tiktok_spend_snapshots"
-                  : spend.kind === "gastos"
-                    ? "gastos"
-                    : "sin datos"}
-              </Badge>
-            </div>
-            {spend.rows.length === 0 ? (
-              <p className="mt-4 text-sm text-[var(--admin-text-muted,#64748b)]">
-                No hay filas de gasto para este cliente en Hecom (o la sync aún no corrió).
-              </p>
-            ) : (
-              <TableWrap className="mt-4">
-                <Table>
-                  <thead>
-                    <tr>
-                      <Th>Fecha</Th>
-                      <Th>Detalle</Th>
-                      <Th>Monto</Th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]">
-                    {spend.rows.map((row, idx) => {
-                      const rowId = String(row.id ?? `spend-row-${idx}`);
-                      if (spend.kind === "gastos") {
-                        return (
-                          <tr key={rowId}>
-                            <Td>{String(row.fecha_movimiento ?? row.mes ?? "—")}</Td>
-                            <Td>
-                              <p className="font-semibold">{String(row.camp ?? "Gasto")}</p>
-                              <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-                                {String(row.source ?? "")}
-                              </p>
-                            </Td>
-                            <Td className="font-semibold">
-                              {moneyUsd(row.gasto ?? row.monto)}
-                            </Td>
-                          </tr>
-                        );
-                      }
+            <PanelCard
+              title="Gastos / snapshots"
+              action={<SourceTag>{spendSource}</SourceTag>}
+            >
+              {spend.rows.length === 0 ? (
+                <p className="text-sm text-ink-3">
+                  No hay filas de gasto para este cliente en Hecom (o la sync aún no corrió).
+                </p>
+              ) : (
+                <DataTable
+                  label="Gastos / snapshots"
+                  head={
+                    <>
+                      <th scope="col" className={TH}>Fecha</th>
+                      <th scope="col" className={TH}>Detalle</th>
+                      <th scope="col" className={TH_R}>Monto</th>
+                    </>
+                  }
+                >
+                  {spend.rows.map((row, idx) => {
+                    const rowId = String(row.id ?? `spend-row-${idx}`);
+                    if (spend.kind === "gastos") {
                       return (
-                        <tr key={rowId}>
-                          <Td>{String(row.stat_date ?? "—")}</Td>
-                          <Td>
-                            <p className="font-semibold">
-                              {String(row.campaign_name ?? row.advertiser_id ?? "Spend")}
-                            </p>
-                            <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-                              {row.created_at
-                                ? formatDateTime(String(row.created_at))
-                                : ""}
-                            </p>
-                          </Td>
-                          <Td className="font-semibold">{moneyUsd(row.spend)}</Td>
+                        <tr key={rowId} className={TR}>
+                          <td className={cn(TD, "num whitespace-nowrap text-ink-2")}>
+                            {String(row.fecha_movimiento ?? row.mes ?? "—")}
+                          </td>
+                          <td className={TD}>
+                            <p className="font-semibold text-ink">{String(row.camp ?? "Gasto")}</p>
+                            <p className="text-xs text-ink-3">{String(row.source ?? "")}</p>
+                          </td>
+                          <td className={cn(TD, "num whitespace-nowrap text-right font-semibold")}>
+                            {moneyUsd(row.gasto ?? row.monto)}
+                          </td>
                         </tr>
                       );
-                    })}
-                  </tbody>
-                </Table>
-              </TableWrap>
-            )}
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="p-5">
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Contacto CRM</h2>
-            <ul className="mt-4 space-y-2 text-sm">
-              {cliente.emails.length === 0 ? (
-                <li className="text-[var(--admin-text-muted,#64748b)]">Sin emails</li>
-              ) : (
-                cliente.emails.map((email) => (
-                  <li key={email} className="break-all font-medium text-[var(--foreground)]">
-                    {email}
-                  </li>
-                ))
+                    }
+                    return (
+                      <tr key={rowId} className={TR}>
+                        <td className={cn(TD, "num whitespace-nowrap text-ink-2")}>{String(row.stat_date ?? "—")}</td>
+                        <td className={TD}>
+                          <p className="font-semibold text-ink">
+                            {String(row.campaign_name ?? row.advertiser_id ?? "Spend")}
+                          </p>
+                          <p className="text-xs text-ink-3">
+                            {row.created_at ? formatDateTime(String(row.created_at)) : ""}
+                          </p>
+                        </td>
+                        <td className={cn(TD, "num whitespace-nowrap text-right font-semibold")}>
+                          {moneyUsd(row.spend)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </DataTable>
               )}
-            </ul>
-            {cliente.phones.length > 0 ? (
-              <ul className="mt-4 space-y-1 text-sm text-[var(--admin-text-muted,#64748b)]">
-                {cliente.phones.map((phone) => (
-                  <li key={phone}>{phone}</li>
-                ))}
-              </ul>
-            ) : null}
-            {cliente.notes ? (
-              <p className="mt-4 text-sm text-[var(--admin-text-muted,#64748b)]">
-                {cliente.notes}
-              </p>
-            ) : null}
-          </Card>
+            </PanelCard>
+          </div>
 
-          <Card className="p-5">
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Cómo se jala el gasto</h2>
-            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-[var(--admin-text-muted,#64748b)]">
-              <li>
-                En Hecom hay un solo token de agencia:{" "}
-                <code className="rounded bg-[var(--surface-soft)] px-1">TIKTOK_ACCESS_TOKEN</code>.
-              </li>
-              <li>
-                Cada cliente tiene uno o más{" "}
-                <code className="rounded bg-[var(--surface-soft)] px-1">advertiser_id</code>.
-              </li>
-              <li>Sync escribe snapshots / gastos; acá solo leemos lo ya guardado.</li>
-            </ol>
-          </Card>
+          <div className="min-w-0 space-y-4">
+            <PanelCard title="Contacto CRM">
+              <PropList
+                items={[
+                  ...(cliente.emails.length === 0
+                    ? [{ label: "Email", value: <span className="font-normal text-ink-3">Sin emails</span> }]
+                    : cliente.emails.map((email) => ({ label: "Email", value: email }))),
+                  ...cliente.phones.map((phone) => ({
+                    label: "Teléfono",
+                    value: <span className="num">{phone}</span>,
+                  })),
+                ]}
+              />
+              {cliente.notes ? <p className="mt-4 text-[13px] leading-relaxed text-ink-2">{cliente.notes}</p> : null}
+            </PanelCard>
+
+            <PanelCard title="Cómo se jala el gasto">
+              <ol className="grid gap-2.5">
+                {[
+                  <>
+                    En Hecom hay un solo token de agencia: <Code>TIKTOK_ACCESS_TOKEN</Code>.
+                  </>,
+                  <>
+                    Cada cliente tiene uno o más <Code>advertiser_id</Code>.
+                  </>,
+                  <>Sync escribe snapshots / gastos; acá solo leemos lo ya guardado.</>,
+                ].map((step, i) => (
+                  <li key={i} className="grid grid-cols-[24px_1fr] items-start gap-2.5 text-[13px] text-ink-2">
+                    <span
+                      aria-hidden
+                      className="grid size-[22px] place-items-center rounded-[6px] bg-subtle font-mono text-[11px] font-semibold text-ink"
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </PanelCard>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+function Code({ children }: { children: ReactNode }) {
+  return <code className="rounded bg-subtle px-1 font-mono text-[12px] text-ink">{children}</code>;
 }

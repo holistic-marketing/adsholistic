@@ -1,6 +1,13 @@
-import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note } from "@/components/ui/PanelKit";
 import { requireContractsStaff } from "@/features/contracts/lib/access.server";
-import { refreshRegistrationSignaturesAction, reviewMembershipCaptureAction } from "@/features/contracts/actions";
+import { refreshRegistrationSignaturesAction } from "@/features/contracts/actions";
+import {
+  RegistrationContractsTable,
+  type RegistrationContractView,
+} from "@/features/contracts/components/RegistrationContractsTable.client";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +30,13 @@ interface RegistrationContractRow {
   created_at: string;
 }
 
+const createdFormat = new Intl.DateTimeFormat("es-PE", {
+  timeZone: "America/Lima",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
 export default async function RegistrationContractsPage() {
   await requireContractsStaff();
   const admin = createAdminClient();
@@ -34,119 +48,58 @@ export default async function RegistrationContractsPage() {
     .order("created_at", { ascending: false })
     .limit(80);
 
+  const rows: RegistrationContractView[] = loaded.error
+    ? []
+    : await Promise.all(
+        ((loaded.data ?? []) as RegistrationContractRow[]).map(async (row) => ({
+          id: row.id,
+          legalName: row.legal_name,
+          email: row.email,
+          company: row.party_type === "company",
+          document: `${row.doc_type.toUpperCase()} ${row.doc_number}`,
+          createdLabel: createdFormat.format(new Date(row.created_at)),
+          sent: Boolean(row.external_ref),
+          status: row.status,
+          signedPdfUrl: row.signed_storage_path ? await signedPdfUrl(row.signed_storage_path) : null,
+          proofStatus: row.payment_proof_status,
+          proofReason: row.payment_proof_reason,
+          proofUrl: row.payment_proof_path ? await signedPdfUrl(row.payment_proof_path) : null,
+          returnedFromCheckout: Boolean(row.checkout_returned_at),
+        })),
+      );
+
   return (
     <>
-      <AdminPageHeader
+      <PageHeader
         eyebrow="Registro"
         title="Contratos de registro"
-        description="Contrato de registro y contrato de reunión usan el mismo FirmEasy. Aquí ves si avisó, si firmó, y si la captura del pago ya abre el panel."
+        lede="El contrato de registro y el de reunión usan el mismo FirmEasy. Aquí ves si se avisó, si firmó y si la captura del pago ya abre el panel."
         actions={
           <form action={refreshRegistrationSignaturesAction}>
-            <button
-              type="submit"
-              className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2 text-sm font-medium"
-            >
+            <button type="submit" className={buttonClass("outline")}>
+              <PanelIcon name="refresh" />
               Actualizar firmas
             </button>
           </form>
         }
       />
       {loaded.error ? (
-        <div className="rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
-          No se pudo cargar la lista. Aplica las migraciones 046, 047, 048 y 049.
-        </div>
-      ) : (loaded.data ?? []).length === 0 ? (
-        <div className="rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-text-muted)]">
-          Todavía no hay contratos de registro.
-        </div>
+        <Note tone="danger" title="No se pudo cargar la lista">
+          Aplica las migraciones 046, 047, 048 y 049.
+        </Note>
+      ) : rows.length === 0 ? (
+        <PanelCard>
+          <EmptyState
+            icon="contract"
+            title="Todavía no hay contratos de registro"
+            description="Cuando un cliente nuevo reciba su contrato, aparecerá aquí con el estado de su firma."
+          />
+        </PanelCard>
       ) : (
-        <div className="overflow-x-auto rounded-box border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-          <table className="min-w-full text-left text-sm">
-            <thead className="text-[var(--admin-text-muted)]">
-              <tr>
-                <th className="px-4 py-3 font-medium">Cliente</th>
-                <th className="px-4 py-3 font-medium">Documento</th>
-                <th className="px-4 py-3 font-medium">FirmEasy</th>
-                <th className="px-4 py-3 font-medium">Firma</th>
-                <th className="px-4 py-3 font-medium">Captura del pago</th>
-              </tr>
-            </thead>
-            <tbody>
-              {await Promise.all(
-                ((loaded.data ?? []) as RegistrationContractRow[]).map(async (row) => (
-                  <tr key={row.id} className="border-t border-[var(--admin-border)]">
-                    <td className="px-4 py-3">
-                      <div className="font-medium">{row.legal_name}</div>
-                      <div className="text-[var(--admin-text-muted)]">{row.email}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {row.party_type === "company" ? "Empresa" : "Persona natural"}
-                      <div className="text-[var(--admin-text-muted)]">
-                        {row.doc_type.toUpperCase()} {row.doc_number}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">{firmEasyLabel(row)}</td>
-                    <td className="px-4 py-3">
-                      {statusLabel(row.status)}
-                      {row.signed_storage_path ? (
-                        <div>
-                          <a className="underline" href={await signedPdfUrl(row.signed_storage_path)}>
-                            PDF firmado
-                          </a>
-                        </div>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3">
-                      {proofLabel(row.payment_proof_status)}
-                      {row.checkout_returned_at ? <div className="text-[var(--admin-text-muted)]">Volvió de NAS</div> : null}
-                      {row.payment_proof_reason ? <div className="text-[var(--admin-text-muted)]">{row.payment_proof_reason}</div> : null}
-                      {row.payment_proof_path ? (
-                        <div>
-                          <a className="underline" href={await signedPdfUrl(row.payment_proof_path)}>
-                            Ver captura
-                          </a>
-                        </div>
-                      ) : null}
-                      {row.payment_proof_status === "pending_review" ? (
-                        <form action={reviewMembershipCaptureAction} className="mt-2 flex gap-2">
-                          <input type="hidden" name="id" value={row.id} />
-                          <button name="decision" value="approved" className="underline" type="submit">
-                            Aceptar
-                          </button>
-                          <button name="decision" value="rejected" className="underline" type="submit">
-                            Rechazar
-                          </button>
-                        </form>
-                      ) : null}
-                    </td>
-                  </tr>
-                )),
-              )}
-            </tbody>
-          </table>
-        </div>
+        <RegistrationContractsTable rows={rows} />
       )}
     </>
   );
-}
-
-function firmEasyLabel(row: RegistrationContractRow): string {
-  if (row.external_ref) return "Enviado";
-  return "Sin envío";
-}
-
-function statusLabel(status: string): string {
-  if (status === "signed") return "Firmado";
-  if (status === "rejected") return "Rechazado";
-  if (status === "pending_signature") return "Pendiente";
-  return "Borrador";
-}
-
-function proofLabel(status: string | null): string {
-  if (status === "approved") return "Aceptada";
-  if (status === "pending_review") return "En revisión";
-  if (status === "rejected") return "Rechazada";
-  return "Sin captura";
 }
 
 async function signedPdfUrl(path: string): Promise<string> {

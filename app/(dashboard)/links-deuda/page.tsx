@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { routes } from "@/config/routes";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Note } from "@/components/ui/PanelKit";
 import { LinksDeudaPanel } from "@/features/clientes/components/LinksDeudaPanel.client";
 import { requirePermission } from "@/lib/auth/guards.server";
 import { listDebtLinkClients } from "@/lib/hecom/lo-pagado-staff-links.server";
@@ -35,28 +37,17 @@ export default async function LinksDeudaPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">
-          Gerente
-        </p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">
-          Links deuda
-        </h1>
-        <p className="mt-1 max-w-xl text-[13px] leading-5 text-ink-2">
-          Elige un cliente y copia su link. Ve lo que debe, sus pagos y gastos,
-          y puede abonar o subir comprobante.
-        </p>
-      </header>
+    <div className="min-w-0">
+      <PageHeader
+        eyebrow="Gerencia"
+        title="Links de deuda"
+        lede="Elige un cliente y copia su link. Ahí ve lo que debe, sus pagos y gastos, y puede abonar o subir un comprobante."
+      />
 
       {loadError ? (
-        <p className="rounded-card bg-surface px-4 py-6 text-[13px] text-accent-text ring-1 ring-line">
-          {loadError}
-        </p>
+        <Note tone="danger">{loadError}</Note>
       ) : !ready ? (
-        <p className="rounded-card bg-surface px-4 py-6 text-[13px] text-ink-2 ring-1 ring-line">
-          En este ambiente todavía no se pueden armar los links.
-        </p>
+        <Note tone="info">En este ambiente todavía no se pueden armar los links.</Note>
       ) : (
         <LinksDeudaPanel clients={clients} />
       )}

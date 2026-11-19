@@ -1163,7 +1163,8 @@
     },
     "modalChrome": {
       "progressAria": "Payment progress"
-    }
+    },
+    "historyToggle": "View transactions and history"
   },
   "adAccounts": {
     "title": "Ad accounts",
@@ -1193,7 +1194,9 @@
       "pendingMany": "{count} pending",
       "metaAccounts": "Meta ad accounts",
       "metaScopedMeta": "Meta · under maintenance",
-      "metaNoAccounts": "No Meta accounts yet"
+      "metaNoAccounts": "No Meta accounts yet",
+      "lede": "{name}'s TikTok accounts: live balance, status and fee for each one.",
+      "activeOfTotal": "{active} of {total, plural, one {# account active} other {# accounts active}}"
     },
     "summary": {
       "aria": "Accounts summary",
@@ -1420,7 +1423,7 @@
   "cobros": {
     "module": "Paid",
     "title": "Paid · {name}",
-    "goPayments": "Go to top-ups →",
+    "goPayments": "Go to top-ups",
     "pageIntro": "Pick a month at the top: it updates What you owe, the chart, and the payment history together.",
     "monthScopeEyebrow": "Account month",
     "monthScopeHint": "One tap updates debt, day-by-day, and payments below.",
@@ -1621,7 +1624,9 @@
       "metaCsvStep3": "Export as .csv and upload it here. Repeat whenever you want to refresh.",
       "metaCsvUpload": "Upload Meta CSV",
       "metaCsvApply": "Import spend",
-      "metaCsvSummary": "{days} day(s) · {campaigns} campaign(s) · {spend}"
+      "metaCsvSummary": "{days} day(s) · {campaigns} campaign(s) · {spend}",
+      "sourcesTitle": "Data sources",
+      "step": "Step {n}"
     },
     "pilot": {
       "title": "Pilot",
@@ -3327,6 +3332,11 @@
     "valueGrid": {
       "title": "Core values",
       "subtitle": "Capabilities designed for performance and creative teams."
+    },
+    "hub": {
+      "lede": "Upload a video, get a score with recommendations and send it to TikTok as a paused campaign.",
+      "uploads": "Uploaded videos",
+      "scoreAvg": "Average score"
     }
   },
   "onboarding": {

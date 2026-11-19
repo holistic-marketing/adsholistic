@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
-import { dashboardClasses } from "@/lib/ui/dashboard-classes";
+import { buttonClass } from "@/components/ui/Button";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon, type PanelIconName } from "@/components/ui/PanelIcon";
+import { Note, SquareIcon } from "@/components/ui/PanelKit";
 import { cn } from "@/lib/cn";
 import { supportMock } from "@/features/support/mocks/support.mock";
 import { supportFaqForPersona } from "@/features/support/lib/support-faq-for-persona";
@@ -380,57 +383,60 @@ export function SupportPageClient({
     switch (panel) {
       case "faqCategories":
         return (
-          <div className="dashboard-surface-card overflow-hidden rounded-card">
-            <div className="border-b border-[var(--auth-divider)] bg-[linear-gradient(135deg,#1a1008_0%,#2a1810_55%,#e8451a_160%)] px-4 py-3">
+          <PanelCard
+            title={t("faqTitle")}
+            description={t("faqSubtitle")}
+            action={
               <button
                 type="button"
                 onClick={() => {
                   setPanel("chat");
                   setMobileShowChat(true);
                 }}
-                className="mb-2 flex items-center gap-1 text-xs text-white/80 hover:text-white"
+                className={buttonClass("ghost", "sm")}
               >
                 {t("backToChat")}
               </button>
-              <p className="text-sm font-bold text-white">{t("faqTitle")}</p>
-              <p className="text-xs text-white/70">{t("faqSubtitle")}</p>
-            </div>
-            <div className="p-4">
+            }
+          >
+            <label className="panel-search">
+              <span className="sr-only">{t("searchFaq")}</span>
+              <PanelIcon name="search" />
               <input
                 type="search"
                 value={faqQuery}
                 onChange={(e) => setFaqQuery(e.target.value)}
                 placeholder={t("searchFaq")}
-                className="mb-3 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
+                autoComplete="off"
               />
-              <ul className="space-y-1">
-                {filteredFaqCategories.map((category) => (
-                  <li key={category.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategoryId(category.id);
-                        setPanel("faqCategoryDetail");
-                      }}
-                      className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-[14px] font-medium text-[var(--auth-text)] transition-colors hover:bg-[var(--surface-soft)]"
-                    >
-                      <span>{category.title}</span>
-                      <span className="text-[var(--auth-text-soft)]">→</span>
-                    </button>
-                  </li>
-                ))}
-                {filteredFaqCategories.length === 0 ? (
-                  <li className="px-3 py-6 text-center text-[13px] text-[var(--auth-text-muted)]">
-                    {t("noFaqResults", { q: faqQuery })}
-                  </li>
-                ) : null}
-              </ul>
-            </div>
-          </div>
+            </label>
+            <ul className="mt-2 overflow-hidden rounded-box border border-line">
+              {filteredFaqCategories.map((category) => (
+                <li key={category.id} className="border-b border-line last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategoryId(category.id);
+                      setPanel("faqCategoryDetail");
+                    }}
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left font-medium text-ink hover:bg-hover"
+                  >
+                    <span>{category.title}</span>
+                    <PanelIcon name="chevron-right" className="text-ink-3" />
+                  </button>
+                </li>
+              ))}
+              {filteredFaqCategories.length === 0 ? (
+                <li className="px-3 py-6 text-center text-[13px] text-ink-2">
+                  {t("noFaqResults", { q: faqQuery })}
+                </li>
+              ) : null}
+            </ul>
+          </PanelCard>
         );
       case "faqCategoryDetail":
         return selectedCategory ? (
-          <div className="overflow-hidden rounded-card ring-1 ring-[var(--border-subtle)]">
+          <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
             <ChatFaqCategoryDetail
               categoryTitle={selectedCategory.title}
               articles={categoryArticles}
@@ -444,7 +450,7 @@ export function SupportPageClient({
         ) : null;
       case "faqArticleDetail":
         return selectedArticle ? (
-          <div className="overflow-hidden rounded-card ring-1 ring-[var(--border-subtle)]">
+          <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
             <ChatFaqArticleDetail
               article={selectedArticle}
               onBack={() => setPanel("faqCategoryDetail")}
@@ -463,116 +469,60 @@ export function SupportPageClient({
   const meetingsMode = panel === "meetings";
 
   const leftColumn = (
-    <div className="space-y-4">
-      <div className="dashboard-surface-card rounded-card p-4 sm:p-5">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-text">
-          {t("chats")}
-        </p>
-        <h2 className="mt-1 text-[1.05rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-          {t("conversation")}
-        </h2>
+    <div className="grid gap-4">
+      <PanelCard>
+        <p className="eyebrow">{t("chats")}</p>
+        <h2 className="mt-0.5 text-base font-semibold tracking-[-0.01em] text-ink">{t("conversation")}</h2>
 
         {bootError ? (
-          <p
-            className="mt-4 rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg"
-            role="alert"
-          >
+          <Note tone="danger" className="mt-3">
             {bootError}
-          </p>
+          </Note>
         ) : null}
 
-        <button
-          type="button"
-          onClick={() => {
-            setPanel("chat");
-            setMobileShowChat(true);
-          }}
-          className={cn(
-            "mt-4 flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors",
-            panel === "chat"
-              ? "border-[var(--auth-accent)]/50 bg-[rgb(255_120_31_/_0.06)]"
-              : "border-[var(--auth-input-border)] bg-surface hover:border-[var(--auth-accent)]/35",
-          )}
-        >
-          <span
-            aria-hidden
-            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1a1008_0%,#e8451a_130%)] text-[12px] font-bold text-white"
-          >
-            SH
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-semibold text-[var(--auth-text)]">
-              {supportName}
-            </span>
-            <span className="mt-0.5 block truncate text-[12px] text-[var(--auth-text-muted)]">
-              {t("teamHint")}
-            </span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setPanel("meetings");
-            setMobileShowChat(false);
-          }}
-          className={cn(
-            "mt-2 flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors",
-            panel === "meetings"
-              ? "border-[var(--auth-accent)]/50 bg-[rgb(255_120_31_/_0.06)]"
-              : "border-[var(--auth-input-border)] bg-surface hover:border-[var(--auth-accent)]/35",
-          )}
-        >
-          <span
-            aria-hidden
-            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-soft)] text-accent-text"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[14px] font-semibold text-[var(--auth-text)]">{t("meetings.nav")}</span>
-            <span className="mt-0.5 block text-[12px] text-[var(--auth-text-muted)]">{t("meetings.navHint")}</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setFaqQuery("");
-            setPanel("faqCategories");
-            setMobileShowChat(false);
-          }}
-          className="mt-2 flex w-full items-center justify-between rounded-lg border border-[var(--auth-input-border)] bg-surface px-3.5 py-3 text-left transition-colors hover:border-[var(--auth-accent)]/40"
-        >
-          <div>
-            <p className="text-[14px] font-semibold text-[var(--auth-text)]">
-              {t("faqTitle")}
-            </p>
-            <p className="mt-0.5 text-[12px] text-[var(--auth-text-muted)]">
-              {t("faqGuides")}
-            </p>
-          </div>
-          <svg
-            className="h-4 w-4 shrink-0 text-[var(--auth-text-soft)]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
-      </div>
+        <nav className="mt-3 grid gap-2" aria-label={t("conversation")}>
+          <SupportOption
+            active={panel === "chat"}
+            icon="chat"
+            title={supportName}
+            hint={t("teamHint")}
+            onClick={() => {
+              setPanel("chat");
+              setMobileShowChat(true);
+            }}
+          />
+          <SupportOption
+            active={meetingsMode}
+            icon="calendar"
+            title={t("meetings.nav")}
+            hint={t("meetings.navHint")}
+            onClick={() => {
+              setPanel("meetings");
+              setMobileShowChat(false);
+            }}
+          />
+          <SupportOption
+            active={faqMode}
+            icon="info"
+            title={t("faqTitle")}
+            hint={t("faqGuides")}
+            onClick={() => {
+              setFaqQuery("");
+              setPanel("faqCategories");
+              setMobileShowChat(false);
+            }}
+          />
+        </nav>
+      </PanelCard>
 
       {faqMode ? renderFaqPanel() : null}
     </div>
   );
 
   const chatColumn = (
-    <div className="dashboard-surface-card h-full min-h-[560px] overflow-hidden rounded-card shadow-[0_16px_40px_rgb(15_23_42_/_0.06)]">
+    <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
       <ChatConversation
+        appearance="panel"
         messages={displayMessages}
         inputValue={inputValue}
         sending={sending}
@@ -592,20 +542,10 @@ export function SupportPageClient({
   );
 
   return (
-    <div className={dashboardClasses.page}>
-      <header className="border-b border-[var(--auth-divider)] pb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-text-soft)]">
-          {tNav("support")}
-        </p>
-        <h1 className="mt-1 text-[1.125rem] font-bold leading-snug tracking-[-0.02em] text-[var(--auth-text)] sm:text-[1.25rem]">
-          {supportName}
-        </h1>
-        <p className="mt-1 max-w-2xl text-[13px] text-[var(--auth-text-muted)]">
-          {t("pageSubtitle")}
-        </p>
-      </header>
+    <div>
+      <PageHeader eyebrow={tNav("support")} title={supportName} lede={t("pageSubtitle")} />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
         <div className={cn(((mobileShowChat && !faqMode) || meetingsMode) && "hidden lg:block")}>
           {leftColumn}
         </div>
@@ -628,5 +568,40 @@ export function SupportPageClient({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Opción del menú de soporte (v3 «opt»): marcada con borde y fondo naranja suave. */
+function SupportOption({
+  active,
+  icon,
+  title,
+  hint,
+  onClick,
+}: {
+  active: boolean;
+  icon: PanelIconName;
+  title: string;
+  hint: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-box border px-3 py-2.5 text-left transition-colors",
+        active
+          ? "border-accent bg-accent-soft shadow-[0_0_0_1px_var(--ui-accent)]"
+          : "border-line bg-surface hover:border-line-strong",
+      )}
+    >
+      <SquareIcon icon={icon} tone={active ? "accent" : undefined} />
+      <span className="grid min-w-0 flex-1 leading-snug">
+        <b className="truncate font-semibold text-ink">{title}</b>
+        <small className="truncate text-xs text-ink-3">{hint}</small>
+      </span>
+    </button>
   );
 }

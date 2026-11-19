@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { routes } from "@/config/routes";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { BroadcastComposer } from "@/features/push/BroadcastComposer.client";
 import { requireSession } from "@/lib/auth/guards.server";
 import { getActingAsCliente } from "@/lib/hecom/selected-cliente.server";
@@ -22,21 +23,17 @@ export default async function AvisosPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Gerente</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Avisos</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
-          Manda un aviso a todos los clientes. Le llega al celular o a la PC a quien tenga los avisos activos, y
-          queda en la campanita de todos.
-        </p>
-      </header>
-
+    <>
+      <PageHeader
+        eyebrow="Gerencia"
+        title="Avisos"
+        lede="Manda un aviso a todos los clientes. Les llega al celular o a la computadora si tienen los avisos activos, y queda en su campanita."
+      />
       <BroadcastComposer
         destinations={BROADCAST_DESTINATIONS.map((d) => ({ url: d.url, label: d.label }))}
         titleMax={BROADCAST_TITLE_MAX}
         bodyMax={BROADCAST_BODY_MAX}
       />
-    </div>
+    </>
   );
 }

@@ -22,7 +22,7 @@ export default async function ClientesPage() {
   return (
     <Suspense
       fallback={
-        <div className="dashboard-surface-card rounded-card p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
+        <div className="rounded-card border border-line bg-surface p-8 text-center text-sm font-medium text-ink-2 shadow-card">
           Cargando clientes…
         </div>
       }

@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { cn } from "@/lib/cn";
 
 function parseYmd(ymd: string): { y: number; m: number; d: number } | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
@@ -84,6 +86,10 @@ type ProfitDateRangeFieldProps = {
   max?: string;
   onChange: (next: { from: string; to: string }) => void;
 };
+
+const footBtn = "inline-flex h-8 items-center rounded-ctl px-2.5 text-[13px] font-medium hover:bg-hover";
+const navBtn =
+  "inline-flex size-10 items-center justify-center rounded-ctl text-ink-2 hover:bg-hover hover:text-ink sm:size-8";
 
 export function ProfitDateRangeField({
   from,
@@ -225,18 +231,18 @@ export function ProfitDateRangeField({
     const isEdge = isStart || isEnd;
 
     if (cell.disabled) {
-      return "cursor-not-allowed text-[#d4cbc2] opacity-40";
+      return "cursor-not-allowed text-ink-3 opacity-40";
     }
     if (isEdge) {
-      return "bg-accent-btn text-on-accent hover:brightness-[1.05]";
+      return "rounded-ctl bg-accent-btn text-on-accent hover:bg-accent-btn-hover";
     }
     if (inRange) {
-      return "bg-accent-soft text-ink hover:bg-accent-soft";
+      return "bg-accent-soft text-ink";
     }
     if (cell.inMonth) {
-      return "text-ink hover:bg-field";
+      return "rounded-ctl text-ink hover:bg-hover";
     }
-    return "text-ink-3 hover:bg-field";
+    return "rounded-ctl text-ink-3 hover:bg-hover";
   }
 
   function renderMonthGrid(
@@ -245,15 +251,15 @@ export function ProfitDateRangeField({
     cells: ReturnType<typeof monthCells>,
   ) {
     return (
-      <div className="min-w-[15.5rem]">
-        <p className="px-1 pb-2 text-center text-[12px] font-semibold text-ink">
+      <div className="min-w-0 flex-1 sm:min-w-[15.5rem]">
+        <p className="px-1 pb-2 text-center text-[13px] font-semibold text-ink">
           {t("yearMonth", { year: y, month: monthsShort[m - 1] })}
         </p>
         <div className="grid grid-cols-7 gap-y-0.5">
           {weekdays.map((d) => (
             <span
               key={`${y}-${m}-${d}`}
-              className="py-1 text-center text-[10px] font-bold uppercase tracking-wide text-ink-3"
+              className="py-1 text-center text-[10px] font-semibold uppercase tracking-wide text-ink-3"
             >
               {d}.
             </span>
@@ -267,7 +273,7 @@ export function ProfitDateRangeField({
               onMouseEnter={() => {
                 if (draftStart && !cell.disabled) setHoverYmd(cell.ymd);
               }}
-              className={`h-10 text-[12px] font-semibold tabular-nums transition sm:h-8 ${dayClass(cell)}`}
+              className={cn("num h-10 text-xs font-medium sm:h-8", dayClass(cell))}
             >
               {cell.day}
             </button>
@@ -280,85 +286,52 @@ export function ProfitDateRangeField({
   const selecting = Boolean(draftStart);
 
   return (
-    <div ref={rootRef} className="relative block w-full max-w-md">
-      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
-        {t("label")}
-      </span>
+    <div ref={rootRef} className="relative min-w-0 max-w-full">
+      {/* Botón de filtro v3 con su rótulo adentro: «Rango 01/10/2026 ~ 31/10/2026». */}
       <button
         type="button"
         id={id}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={toggleOpen}
-        className={`mt-1.5 flex h-11 w-full items-center justify-between gap-2 rounded-xl border bg-[#faf8f5] px-3.5 text-left text-[13px] font-medium tabular-nums text-[#1c1917] outline-none transition hover:bg-white focus:bg-white focus:ring-2 focus:ring-[var(--auth-accent)]/25 ${
-          open
-            ? "border-[var(--auth-accent)] bg-surface"
-            : "border-line hover:border-line-strong"
-        }`}
+        className={cn(
+          "inline-flex h-9 max-w-full items-center gap-2 rounded-ctl border bg-field px-3 text-left text-[13px] font-medium text-ink shadow-ctl hover:bg-hover",
+          open ? "border-accent ring-[3px] ring-[var(--ui-ring)]" : "border-line hover:border-line-strong",
+        )}
       >
-        <span className="min-w-0 truncate">
+        <PanelIcon name="calendar" className="text-ink-3" />
+        <span className="text-ink-3">{t("label")}</span>
+        <span className="num min-w-0 truncate">
           {from && to
             ? `${formatDisplay(from)} ~ ${formatDisplay(to)}`
             : t("placeholder")}
         </span>
-        <svg
-          aria-hidden
-          viewBox="0 0 20 20"
-          className="h-4 w-4 shrink-0 text-ink-3"
-          fill="none"
-        >
-          <path
-            d="M6 2.5v2M14 2.5v2M3.5 7h13M4.5 4.5h11A1.5 1.5 0 0 1 17 6v9.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 15.5V6a1.5 1.5 0 0 1 1.5-1.5Z"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-          />
-        </svg>
+        <PanelIcon name="chevron-down" className="size-3.5 text-ink-3" />
       </button>
 
       {open ? (
         <div
           role="dialog"
           aria-label={t("dialogAria")}
-          className="absolute left-0 z-40 mt-2 w-full rounded-card sm:w-[min(100vw-2rem,36rem)] border border-line bg-surface p-3 shadow-[0_18px_40px_-24px_rgb(28_25_23_/_0.55)] sm:p-4"
+          className="absolute left-0 z-40 mt-2 w-[min(calc(100vw-5rem),36rem)] rounded-box border border-line bg-surface p-3 shadow-pop sm:p-4"
         >
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-0.5">
-              <button
-                type="button"
-                aria-label={t("prevYear")}
-                onClick={() => shiftLeft(-12)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-2 sm:h-8 sm:w-8 transition hover:bg-hover"
-              >
+              <button type="button" aria-label={t("prevYear")} onClick={() => shiftLeft(-12)} className={navBtn}>
                 «
               </button>
-              <button
-                type="button"
-                aria-label={t("prevMonth")}
-                onClick={() => shiftLeft(-1)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-2 sm:h-8 sm:w-8 transition hover:bg-hover"
-              >
-                ‹
+              <button type="button" aria-label={t("prevMonth")} onClick={() => shiftLeft(-1)} className={navBtn}>
+                <PanelIcon name="chevron-left" />
               </button>
             </div>
-            <p className="text-[11px] font-medium text-ink-3">
+            <p className="text-center text-xs text-ink-3">
               {selecting ? t("pickEnd") : t("pickStartEnd")}
             </p>
             <div className="flex items-center gap-0.5">
-              <button
-                type="button"
-                aria-label={t("nextMonth")}
-                onClick={() => shiftLeft(1)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-2 sm:h-8 sm:w-8 transition hover:bg-hover"
-              >
-                ›
+              <button type="button" aria-label={t("nextMonth")} onClick={() => shiftLeft(1)} className={navBtn}>
+                <PanelIcon name="chevron-right" />
               </button>
-              <button
-                type="button"
-                aria-label={t("nextYear")}
-                onClick={() => shiftLeft(12)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-2 sm:h-8 sm:w-8 transition hover:bg-hover"
-              >
+              <button type="button" aria-label={t("nextYear")} onClick={() => shiftLeft(12)} className={navBtn}>
                 »
               </button>
             </div>
@@ -366,23 +339,15 @@ export function ProfitDateRangeField({
 
           <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
             {renderMonthGrid(leftY, leftM, leftCells)}
-            <div className="hidden w-px self-stretch bg-subtle sm:block" />
+            <div className="hidden w-px self-stretch bg-line sm:block" />
             {renderMonthGrid(right.y, right.m, rightCells)}
           </div>
 
           <div className="mt-3 flex items-center justify-between border-t border-line pt-2">
-            <button
-              type="button"
-              onClick={clearRange}
-              className="rounded-lg px-2 py-2.5 text-[12px] font-semibold text-ink-3 sm:py-1.5 transition hover:bg-field hover:text-ink"
-            >
+            <button type="button" onClick={clearRange} className={`${footBtn} text-ink-2 hover:text-ink`}>
               {t("clear")}
             </button>
-            <button
-              type="button"
-              onClick={goToday}
-              className="rounded-lg px-2 py-2.5 text-[12px] font-semibold text-accent-text sm:py-1.5 transition hover:bg-field"
-            >
+            <button type="button" onClick={goToday} className={`${footBtn} text-accent-text`}>
               {t("today")}
             </button>
           </div>

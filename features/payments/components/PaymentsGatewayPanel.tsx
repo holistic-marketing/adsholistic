@@ -30,6 +30,10 @@ import type { PaymentAccountAllocation } from "@/types/payment";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { routes } from "@/config/routes";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { EmptyState, Note } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 
 interface PaymentsGatewayPanelProps {
   session: SessionUser;
@@ -449,40 +453,39 @@ export async function PaymentsGatewayPanel({
         {creditSlot}
 
         {syncNote ? (
-          <p
-            className="rounded-box border border-warn-line bg-warn-bg px-4 py-3 text-[13px] text-warn-fg"
-            role="status"
-          >
-            {syncNote}
-          </p>
+          <div role="status">
+            <Note tone="warn">{syncNote}</Note>
+          </div>
         ) : null}
 
         {hasClienteScope && scopedAccounts.length === 0 ? (
-          <section
-            id="asignar-saldo"
-            className="dashboard-surface-card scroll-mt-20 rounded-card px-5 py-5 sm:px-6 sm:py-6"
-          >
-            <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-accent-text">
+          <section id="asignar-saldo" className="scroll-mt-20">
+            <p className="eyebrow mb-1">
               {t("emptyAllocate.eyebrow", {
                 name: clienteName ?? t("emptyAllocate.thisClient"),
               })}
             </p>
-            <h2 className="mt-1.5 text-[1.1rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-              {t("emptyAllocate.title")}
-            </h2>
-            <p className="mt-1.5 max-w-2xl text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">
-              {t("emptyAllocate.bodyBefore")}{" "}
-              <span className="font-semibold text-[var(--auth-text)]">
-                {t("emptyAllocate.adAccounts")}
-              </span>
-              .
-            </p>
-            <Link
-              href={routes.adAccounts}
-              className="mt-4 inline-flex h-10 items-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05]"
-            >
-              {t("emptyAllocate.cta")}
-            </Link>
+            <PanelCard>
+              <EmptyState
+                icon="layers"
+                title={t("emptyAllocate.title")}
+                description={
+                  <>
+                    {t("emptyAllocate.bodyBefore")}{" "}
+                    <span className="font-semibold text-ink">
+                      {t("emptyAllocate.adAccounts")}
+                    </span>
+                    .
+                  </>
+                }
+                action={
+                  <Link href={routes.adAccounts} className={buttonClass("primary")}>
+                    {t("emptyAllocate.cta")}
+                    <PanelIcon name="arrow-right" />
+                  </Link>
+                }
+              />
+            </PanelCard>
           </section>
         ) : (
           <PaymentsAllocateSection

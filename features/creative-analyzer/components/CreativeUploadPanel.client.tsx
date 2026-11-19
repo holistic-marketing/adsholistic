@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState, type DragEvent } from "react";
+import { useCallback, useId, useRef, useState, type DragEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Input";
+import { Note, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { cn } from "@/lib/cn";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
@@ -45,6 +47,7 @@ export function CreativeUploadPanel({
   const t = useTranslations("creatives.upload");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const fieldId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [name, setName] = useState("");
   const [adAccountId, setAdAccountId] = useState(
@@ -232,293 +235,204 @@ export function CreativeUploadPanel({
           ? t("kindPdf")
           : t("kindFile");
 
+  const flowSteps = parentDraftId
+    ? [t("flowFixStep1"), t("flowFixStep2"), t("flowFixStep3"), t("flowFixStep4")]
+    : [t("flowStep1"), t("flowStep2"), t("flowStep3"), t("flowStep4")];
+
   return (
     <section
       id="creative-upload"
-      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      aria-labelledby={`${fieldId}-title`}
+      className="min-w-0 scroll-mt-4 overflow-hidden rounded-card border border-line bg-surface shadow-card"
     >
-      <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">
-          {parentDraftId ? t("step1Fix") : t("step1")}
-        </p>
-        <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
+      <div className="border-b border-line px-4 pb-4 pt-4 sm:px-6 sm:pt-5">
+        <p className="eyebrow">{parentDraftId ? t("step1Fix") : t("step1")}</p>
+        <h2 id={`${fieldId}-title`} className="mt-1 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
           {parentDraftId ? t("subtitleFix") : t("subtitle")}
         </h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">
+        <p className="mt-0.5 max-w-[78ch] text-[13px] text-ink-2">
           {parentDraftId
             ? t("instructionsFix")
             : t.rich("instructions", {
-                approved: (chunks) => (
-                  <span className="font-semibold text-[var(--auth-text)]">
-                    {chunks}
-                  </span>
-                ),
+                approved: (chunks) => <span className="font-semibold text-ink">{chunks}</span>,
                 clientSuffix: clienteName ? ` · ${clienteName}` : "",
               })}
         </p>
       </div>
 
-      {!parentDraftId && repeatRejectKind ? (
-        <div className="mx-5 mt-4 rounded-card border border-warn-line bg-warn-bg px-3.5 py-3 sm:mx-6">
-          <p className="text-[13px] font-semibold text-warn-fg">
-            {t(
-              repeatRejectKind === "policy"
-                ? "repeatWarnPolicy"
-                : "repeatWarnClaims",
+      <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.8fr)]">
+        <div className="grid content-start gap-4 px-4 py-4 sm:px-6 sm:py-5">
+          {!parentDraftId && repeatRejectKind ? (
+            <Note tone="warn">{t(repeatRejectKind === "policy" ? "repeatWarnPolicy" : "repeatWarnClaims")}</Note>
+          ) : null}
+
+          {parentDraftId ? (
+            <Note tone="warn" title={t("fixBannerTitle")}>
+              <p className="[overflow-wrap:anywhere]">
+                {fixKind === "claims" || fixKind === "policy"
+                  ? t("fixBannerHook")
+                  : t("fixBannerBody", { name: fixLabel || t("fixBannerFallback") })}
+              </p>
+              <button
+                type="button"
+                onClick={clearFixMode}
+                className="mt-1.5 text-xs font-semibold underline-offset-[3px] hover:underline"
+              >
+                {t("fixBannerCancel")}
+              </button>
+            </Note>
+          ) : null}
+
+          <div className="grid gap-1.5">
+            <label htmlFor={`${fieldId}-account`} className="text-sm font-medium text-ink">
+              {t("accountLabel")}
+            </label>
+            {accountChoices.length === 0 ? (
+              <Note tone="warn">{t("noAccounts")}</Note>
+            ) : (
+              <Select id={`${fieldId}-account`} value={adAccountId} onChange={(e) => setAdAccountId(e.target.value)}>
+                <option value="">{t("chooseApprovedAccount")}</option>
+                {accountChoices.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                    {account.bmLabel ? ` · ${account.bmLabel}` : ""}
+                    {account.status !== "active" ? ` · ${account.status}` : ""}
+                  </option>
+                ))}
+              </Select>
             )}
-          </p>
-        </div>
-      ) : null}
-
-      {parentDraftId ? (
-        <div className="mx-5 mt-4 flex flex-col gap-2 rounded-card border border-danger-line bg-field px-3.5 py-3 sm:mx-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-[12px] font-bold text-danger-fg">
-              {t("fixBannerTitle")}
-            </p>
-            <p className="mt-0.5 truncate text-[12px] text-danger-fg">
-              {fixKind === "claims" || fixKind === "policy"
-                ? t("fixBannerHook")
-                : t("fixBannerBody", {
-                    name: fixLabel || t("fixBannerFallback"),
-                  })}
-            </p>
           </div>
-          <button
-            type="button"
-            onClick={clearFixMode}
-            className="shrink-0 text-[11px] font-semibold text-danger-fg hover:underline"
-          >
-            {t("fixBannerCancel")}
-          </button>
-        </div>
-      ) : null}
 
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(240px,0.8fr)]">
-        <div className="px-5 py-4 sm:px-6 sm:py-5">
-          <div className="grid gap-4">
-            <div>
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">
-                {t("accountLabel")}
-              </label>
-              {accountChoices.length === 0 ? (
-                <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
-                  {t("noAccounts")}
-                </p>
+          <div className="grid gap-1.5">
+            <label htmlFor={`${fieldId}-name`} className="text-sm font-medium text-ink">
+              {t("visibleName")}
+            </label>
+            <Input
+              id={`${fieldId}-name`}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder={
+                clienteName ? t("namePlaceholderWithClient", { name: clienteName }) : t("namePlaceholder")
+              }
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <p className="text-sm font-medium text-ink">{t("file")}</p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPT}
+              className="sr-only"
+              tabIndex={-1}
+              onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
+            />
+
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              onDragOver={onDragOver}
+              onDragEnter={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              className={cn(
+                "group relative cursor-pointer rounded-box border border-dashed px-4 py-5 transition-colors",
+                dragging
+                  ? "border-accent bg-accent-soft"
+                  : file
+                    ? "border-line bg-surface"
+                    : "border-line-strong bg-field hover:border-accent-line hover:bg-accent-soft",
+              )}
+            >
+              {file ? (
+                <div className="flex items-start gap-3">
+                  {previewUrl && (kind === "video" || kind === "image") ? (
+                    <div
+                      className="h-28 w-[4.6rem] shrink-0 overflow-hidden rounded-box border border-line bg-subtle"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {kind === "video" ? (
+                        <video src={previewUrl} className="h-full w-full object-cover" muted playsInline controls />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                  ) : null}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-ink">{file.name}</p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <ToneBadge>{kindLabel}</ToneBadge>
+                      <ToneBadge className="num">{formatBytes(file.size)}</ToneBadge>
+                    </div>
+                    <p className="mt-2 text-xs text-ink-3">{t("changeFile")}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={buttonClass("ghost", "sm", "shrink-0")}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      pickFile(null);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                  >
+                    {t("remove")}
+                  </button>
+                </div>
               ) : (
-                <select
-                  value={adAccountId}
-                  onChange={(e) => setAdAccountId(e.target.value)}
-                  className="h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]"
-                >
-                  <option value="">{t("chooseApprovedAccount")}</option>
-                  {accountChoices.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name}
-                      {account.bmLabel ? ` · ${account.bmLabel}` : ""}
-                      {account.status !== "active" ? ` · ${account.status}` : ""}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <span aria-hidden className="mb-1.5 grid size-10 place-items-center rounded-box bg-subtle text-ink">
+                    <PanelIcon name="upload" className="size-[18px]" />
+                  </span>
+                  <p className="font-semibold text-ink">{dragging ? t("dropHere") : t("dragOrChoose")}</p>
+                  <p className="text-xs text-ink-3">{t("fileHints", { max: MAX_MB })}</p>
+                  <span className={buttonClass("outline", "sm", "mt-2.5 pointer-events-none")}>{t("chooseFile")}</span>
+                </div>
               )}
             </div>
-
-            <div>
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">
-                {t("visibleName")}
-              </label>
-              <Input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder={
-                  clienteName
-                    ? t("namePlaceholderWithClient", { name: clienteName })
-                    : t("namePlaceholder")
-                }
-                className="h-10 border-[rgb(20_18_16_/_0.1)] text-[13px]"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">
-                {t("file")}
-              </label>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ACCEPT}
-                className="sr-only"
-                tabIndex={-1}
-                onChange={(event) =>
-                  pickFile(event.target.files?.[0] ?? null)
-                }
-              />
-
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => fileInputRef.current?.click()}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    fileInputRef.current?.click();
-                  }
-                }}
-                onDragOver={onDragOver}
-                onDragEnter={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                className={cn(
-                  "group relative cursor-pointer rounded-[1.1rem] border border-dashed px-4 py-5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35",
-                  dragging
-                    ? "border-[var(--auth-accent)] bg-[rgb(255_248_243_/_0.9)]"
-                    : file
-                      ? "border-[rgb(20_18_16_/_0.12)] bg-surface"
-                      : "border-[rgb(20_18_16_/_0.14)] bg-[rgb(255_248_243_/_0.55)] hover:border-[rgb(255_120_31_/_0.35)] hover:bg-[rgb(255_248_243_/_0.85)]",
-                )}
-              >
-                {file ? (
-                  <div className="flex items-start gap-3">
-                    {previewUrl && (kind === "video" || kind === "image") ? (
-                      <div
-                        className="h-28 w-[4.6rem] shrink-0 overflow-hidden rounded-box bg-black/80"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        {kind === "video" ? (
-                          <video
-                            src={previewUrl}
-                            className="h-full w-full object-cover"
-                            muted
-                            playsInline
-                            controls
-                          />
-                        ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={previewUrl}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        )}
-                      </div>
-                    ) : null}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
-                        {file.name}
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <span className="rounded bg-[rgb(20_18_16_/_0.05)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--auth-text-muted)]">
-                          {kindLabel}
-                        </span>
-                        <span className="rounded bg-[rgb(20_18_16_/_0.05)] px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-[var(--auth-text-muted)]">
-                          {formatBytes(file.size)}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-[12px] text-[var(--auth-text-muted)]">
-                        {t("changeFile")}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className="shrink-0 rounded-md px-2 py-1 text-[11px] font-semibold text-[var(--auth-text-soft)] transition-colors hover:bg-[rgb(20_18_16_/_0.05)] hover:text-[var(--auth-text)]"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        pickFile(null);
-                        if (fileInputRef.current)
-                          fileInputRef.current.value = "";
-                      }}
-                    >
-                      {t("remove")}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center text-center sm:flex-row sm:items-center sm:gap-4 sm:text-left">
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
-                        {dragging ? t("dropHere") : t("dragOrChoose")}
-                      </p>
-                      <p className="mt-1 text-[12px] leading-5 text-[var(--auth-text-muted)]">
-                        {t("fileHints", { max: MAX_MB })}
-                      </p>
-                      <span className="mt-3 inline-flex h-8 items-center rounded-lg bg-accent-btn px-3 text-[12px] font-bold text-on-accent transition-[filter] group-hover:brightness-[1.05]">
-                        {t("chooseFile")}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
-          {error ? (
-            <p
-              className="mt-3 rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg"
-              role="alert"
-            >
-              {error}
-            </p>
-          ) : null}
+          {error ? <Note tone="danger">{error}</Note> : null}
           {success ? (
-            <p className="mt-3 rounded-lg bg-subtle px-3 py-2 text-[13px] text-ok-fg">
+            <Note tone="ok" icon="check-circle">
               {success}
-            </p>
+            </Note>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              onClick={handleUpload}
-              disabled={loading}
-              className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
-            >
-              {loading
-                ? t("uploading")
-                : parentDraftId
-                  ? t("uploadAnalyzeFix")
-                  : t("uploadAnalyze")}
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={handleUpload} disabled={loading}>
+              <PanelIcon name="upload" />
+              {loading ? t("uploading") : parentDraftId ? t("uploadAnalyzeFix") : t("uploadAnalyze")}
             </Button>
-            <Button
-              variant="outline"
-              onClick={clearForm}
-              disabled={loading}
-              className="h-11 rounded-box border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
-            >
+            <Button variant="outline" onClick={clearForm} disabled={loading}>
               {t("clear")}
             </Button>
           </div>
         </div>
 
-        <aside className="border-t border-[rgb(20_18_16_/_0.06)] bg-[rgb(255_248_243_/_0.65)] px-5 py-4 sm:px-6 sm:py-5 lg:border-l lg:border-t-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-text-soft)]">
-            {parentDraftId ? t("flowTitleFix") : t("flowTitle")}
-          </p>
-          <ul className="mt-3 space-y-2.5">
-            {(parentDraftId
-              ? [
-                  t("flowFixStep1"),
-                  t("flowFixStep2"),
-                  t("flowFixStep3"),
-                  t("flowFixStep4"),
-                ]
-              : [
-                  t("flowStep1"),
-                  t("flowStep2"),
-                  t("flowStep3"),
-                  t("flowStep4"),
-                ]
-            ).map((item) => (
-              <li
-                key={item}
-                className="flex items-start gap-2 text-[12px] font-medium leading-4 text-[var(--auth-text-muted)]"
-              >
+        <aside className="border-t border-line bg-field px-4 py-4 sm:px-6 sm:py-5 lg:border-l lg:border-t-0">
+          <h3 className="text-sm font-semibold text-ink">{parentDraftId ? t("flowTitleFix") : t("flowTitle")}</h3>
+          <ol className="mt-3 grid gap-2.5">
+            {flowSteps.map((item, index) => (
+              <li key={item} className="grid grid-cols-[22px_1fr] items-start gap-2.5 text-[13px] text-ink-2">
                 <span
                   aria-hidden
-                  className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-btn"
-                />
-                {item}
+                  className="num grid size-[22px] place-items-center rounded-[6px] bg-subtle text-[11px] font-semibold text-ink"
+                >
+                  {index + 1}
+                </span>
+                <span className="pt-0.5">{item}</span>
               </li>
             ))}
-          </ul>
+          </ol>
         </aside>
       </div>
     </section>

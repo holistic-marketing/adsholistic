@@ -1,43 +1,23 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { useCallback, useState } from "react";
+import { buttonClass } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { FilterBar, SearchField } from "@/components/ui/PanelKit";
 import { routes } from "@/config/routes";
-import { AD_ACCOUNTS_OPEN_CREATE_MODAL } from "@/lib/events/modal-events";
 import type { AdAccountStatus } from "@/types/ad-account";
-
-const CreateTikTokAccountModal = dynamic(
-  () =>
-    import("./CreateTikTokAccountModal.client").then(
-      (m) => m.CreateTikTokAccountModal,
-    ),
-  { ssr: false },
-);
 
 interface AdAccountsToolbarProps {
   initialSearch?: string;
   initialStatus?: string;
-  initialIncludeArchived?: boolean;
-  /** Mostrar CTA create TikTok (Hecom scoped). */
-  enableTikTokCreate?: boolean;
-  clienteName?: string;
-  currentAccountCount?: number;
-  accountLimit?: number;
 }
 
-export function AdAccountsToolbar({
-  initialSearch = "",
-  initialStatus = "all",
-  initialIncludeArchived = false,
-  enableTikTokCreate = false,
-  clienteName = "",
-  currentAccountCount = 0,
-  accountLimit,
-}: AdAccountsToolbarProps) {
+/* Barra de filtros v3 sobre la tabla de cuentas: búsqueda y estado viven en la URL. */
+export function AdAccountsToolbar({ initialSearch = "", initialStatus = "all" }: AdAccountsToolbarProps) {
   const t = useTranslations("adAccounts");
   const tPayments = useTranslations("payments");
   const router = useRouter();
@@ -45,8 +25,6 @@ export function AdAccountsToolbar({
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(initialSearch);
   const [status, setStatus] = useState(initialStatus);
-  const [includeArchived, setIncludeArchived] = useState(initialIncludeArchived);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const statusOptions: { value: AdAccountStatus | "all"; label: string }[] = [
     { value: "all", label: t("toolbar.statusAll") },
@@ -72,93 +50,41 @@ export function AdAccountsToolbar({
     [pathname, router, searchParams],
   );
 
-  useEffect(() => {
-    function handleOpenModal() {
-      if (enableTikTokCreate) setModalOpen(true);
-    }
-    window.addEventListener(AD_ACCOUNTS_OPEN_CREATE_MODAL, handleOpenModal);
-    return () =>
-      window.removeEventListener(AD_ACCOUNTS_OPEN_CREATE_MODAL, handleOpenModal);
-  }, [enableTikTokCreate]);
-
   return (
-    <>
-      <div className="border-b border-[var(--auth-border)] bg-[var(--auth-bg)] px-4 py-3.5 sm:px-5">
-        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="relative min-w-0 flex-1 sm:max-w-xs">
-              <svg
-                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--auth-text-soft)]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-              <Input
-                placeholder={t("toolbar.search")}
-                aria-label={t("toolbar.search")}
-                value={search}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSearch(value);
-                  updateParams({ q: value || null });
-                }}
-                className="h-9 w-full border-[var(--auth-border)] bg-surface pl-9 text-[13px] font-normal"
-              />
-            </div>
-            <select
-              aria-label={tPayments("toolbar.filterStatus")}
-              value={status}
-              onChange={(e) => {
-                const value = e.target.value;
-                setStatus(value);
-                updateParams({ status: value === "all" ? null : value });
-              }}
-              className="h-9 w-full rounded-lg border border-[var(--auth-border)] bg-surface px-3 text-[13px] font-normal text-[var(--auth-text)] focus:border-[var(--auth-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15 sm:w-auto"
-            >
-              {statusOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <Button
-              asChild
-              href={routes.creativeAnalyzer}
-              variant="outline"
-              className="h-9 shrink-0 rounded-lg border-[var(--auth-border)] bg-surface px-3 text-[12px] font-semibold text-[var(--auth-text)] hover:bg-[var(--auth-bg)]"
-            >
-              {t("toolbar.creativeAnalyzer")}
-            </Button>
-            {enableTikTokCreate ? (
-              <Button
-                onClick={() => setModalOpen(true)}
-                className="hidden h-9 rounded-lg bg-accent-btn px-3.5 text-[12px] font-semibold text-on-accent hover:brightness-[1.05] md:inline-flex"
-              >
-                {t("toolbar.createTikTok")}
-              </Button>
-            ) : null}
-          </div>
-        </div>
+    <FilterBar
+      tools={
+        <Link href={routes.creativeAnalyzer} className={buttonClass("outline", "md", "max-sm:w-full")}>
+          <PanelIcon name="sparkle" />
+          {t("toolbar.creativeAnalyzer")}
+        </Link>
+      }
+    >
+      <SearchField
+        label={t("toolbar.search").replace(/…$/, "")}
+        value={search}
+        onChange={(e) => {
+          const value = e.target.value;
+          setSearch(value);
+          updateParams({ q: value || null });
+        }}
+      />
+      <div className="shrink-0 max-sm:flex-1">
+        <Select
+          aria-label={tPayments("toolbar.filterStatus")}
+          value={status}
+          onChange={(e) => {
+            const value = e.target.value;
+            setStatus(value);
+            updateParams({ status: value === "all" ? null : value });
+          }}
+        >
+          {statusOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </Select>
       </div>
-
-      {modalOpen && enableTikTokCreate ? (
-        <CreateTikTokAccountModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          clienteName={clienteName}
-          currentAccountCount={currentAccountCount}
-          accountLimit={accountLimit}
-        />
-      ) : null}
-    </>
+    </FilterBar>
   );
 }

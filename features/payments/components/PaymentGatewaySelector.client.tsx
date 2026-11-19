@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
+import { Note } from "@/components/ui/PanelKit";
 import { GatewayLogo } from "./GatewayLogo";
 import { PaymentAppIcon } from "./PaymentAppIcon";
 import type { PaymentGateway, PaymentGatewayId } from "@/types/payment";
@@ -12,6 +13,7 @@ interface PaymentGatewaySelectorProps {
   onSelect: (id: PaymentGatewayId) => void;
 }
 
+/* Métodos de pago como tarjetas elegibles (v3 «opts methods»). */
 export function PaymentGatewaySelector({
   gateways,
   selected,
@@ -25,29 +27,16 @@ export function PaymentGatewaySelector({
   return (
     <>
       {inMaintenanceGateways.map((gateway) => (
-        <div
-          key={gateway.id}
-          role="status"
-          className="mb-3 flex items-start gap-2.5 rounded-box border border-warn-line bg-warn-bg px-3.5 py-3 text-[12px] leading-5 text-warn-fg"
-        >
-          <span
-            aria-hidden
-            className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-warn-solid text-[10px] font-bold text-white"
-          >
-            !
-          </span>
-          <p>
-            <span className="font-semibold">
-              {t("gatewaySelector.maintenanceNoticeTitle", { name: gateway.name })}
-            </span>{" "}
+        <div key={gateway.id} role="status" className="mb-3">
+          <Note tone="warn" title={t("gatewaySelector.maintenanceNoticeTitle", { name: gateway.name })}>
             {t("gatewaySelector.maintenanceNoticeBody")}
-          </p>
+          </Note>
         </div>
       ))}
       <div
         role="radiogroup"
         aria-label={t("gatewaySelector.aria")}
-        className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+        className="grid grid-cols-1 gap-2 min-[561px]:grid-cols-2 min-[1241px]:grid-cols-4"
       >
         {gateways.map((gateway) => {
           const inMaintenance = Boolean(gateway.maintenance);
@@ -81,38 +70,38 @@ export function PaymentGatewaySelector({
                 onSelect(gateway.id);
               }}
               className={cn(
-                "relative flex min-h-20 w-full min-w-0 items-start gap-3 rounded-box border px-3.5 py-3.5 text-left transition-[border-color,background-color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/30 focus-visible:ring-offset-2 active:scale-[0.99] sm:px-4",
+                "flex min-h-[92px] w-full min-w-0 items-start gap-3 rounded-box border p-3.5 text-left transition-[border-color,background-color,box-shadow]",
                 inMaintenance
-                  ? "cursor-not-allowed border-[var(--auth-border)] bg-field opacity-80"
+                  ? "cursor-not-allowed border-line bg-field opacity-70"
                   : isSelected
-                    ? "border-[var(--auth-accent)] bg-[var(--auth-accent-soft)]"
-                    : "border-[var(--auth-border)] bg-surface hover:border-[var(--auth-accent)]/40 hover:bg-[var(--auth-bg)]",
+                    ? "border-accent bg-accent-soft shadow-[0_0_0_1px_var(--ui-accent)]"
+                    : "border-line bg-surface hover:border-line-strong",
               )}
             >
               <GatewayLogo gatewayId={gateway.id} size="sm" />
-  
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-[13px] font-semibold text-[var(--auth-text)]">
+
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2">
+                  <b className="truncate text-sm font-semibold text-ink">
                     {localizedName}
-                  </p>
+                  </b>
                   {inMaintenance ? (
-                    <span className="shrink-0 rounded-full bg-active px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-ink-2">
+                    <span className="panel-badge tone-neutral shrink-0">
                       {t("gatewaySelector.maintenance")}
                     </span>
                   ) : null}
-                </div>
-                <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-[var(--auth-text-muted)]">
+                </span>
+                <small className="mt-0.5 line-clamp-2 block text-xs leading-snug text-ink-2">
                   {localizedDescription}
-                </p>
+                </small>
                 {gateway.id === "stripe" || gateway.id === "whop" ? (
-                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="mt-2 flex flex-wrap items-center gap-1.5">
                     {(["visa", "mastercard"] as const).map((app) => (
                       <PaymentAppIcon key={app} app={app} size="sm" />
                     ))}
-                  </div>
+                  </span>
                 ) : gateway.id === "cobrana" ? (
-                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="mt-2 flex flex-wrap items-center gap-1.5">
                     {(
                       [
                         "yape",
@@ -125,9 +114,9 @@ export function PaymentGatewaySelector({
                     ).map((app) => (
                       <PaymentAppIcon key={app} app={app} size="sm" />
                     ))}
-                  </div>
+                  </span>
                 ) : null}
-              </div>
+              </span>
             </button>
           );
         })}

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 
 interface ComprobanteLightboxProps {
   open: boolean;
@@ -14,6 +16,9 @@ interface ComprobanteLightboxProps {
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 const ZOOM_STEP = 0.25;
+
+const ZOOM_BTN =
+  "inline-grid size-7 place-items-center rounded-ctl text-ink-2 hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent";
 
 export function ComprobanteLightbox({ open, ...props }: ComprobanteLightboxProps) {
   if (!open || typeof document === "undefined") return null;
@@ -80,35 +85,34 @@ function ComprobanteLightboxBody({
     >
       <button
         type="button"
-        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-[6px]"
+        className="absolute inset-0 bg-[var(--ui-scrim)]"
         aria-label="Cerrar vista ampliada"
         onClick={onClose}
       />
 
-      <div className="relative flex max-h-[min(94vh,calc(100dvh-1.5rem))] w-full max-w-5xl flex-col overflow-hidden rounded-card border border-white/12 bg-[#161412] shadow-[0_24px_80px_-24px_rgb(0_0_0_/_0.65)]">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2.5 sm:px-5 sm:py-3">
-          <p className="min-w-0 truncate text-[13px] font-semibold text-white sm:text-sm">
-            {title}
-          </p>
-          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+      {/* Diálogo v3: superficie clara, borde fino y la imagen sobre el lienzo. */}
+      <div className="relative flex max-h-[min(94vh,calc(100dvh-1.5rem))] w-full max-w-5xl flex-col overflow-hidden rounded-card border border-line bg-surface text-ink shadow-dlg">
+        <div className="flex items-center justify-between gap-3 border-b border-line py-2.5 pl-4 pr-2.5 sm:pl-5">
+          <p className="min-w-0 truncate text-sm font-semibold">{title}</p>
+          <div className="flex shrink-0 items-center gap-1.5">
             {isImage ? (
-              <div className="mr-1 flex items-center gap-0.5 rounded-lg bg-surface/8 p-0.5 ring-1 ring-white/10">
+              <div className="flex items-center gap-0.5 rounded-box bg-subtle p-[3px]">
                 <button
                   type="button"
                   onClick={zoomOut}
                   disabled={zoom <= ZOOM_MIN}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-surface/10 disabled:opacity-35"
+                  className={ZOOM_BTN}
                   aria-label="Alejar"
                   title="Alejar (−)"
                 >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" d="M5 12h14" />
+                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden>
+                    <path d="M5 12h14" />
                   </svg>
                 </button>
                 <button
                   type="button"
                   onClick={zoomReset}
-                  className="min-w-[3rem] px-1 text-center text-[11px] font-semibold tabular-nums text-white/75 transition hover:text-white"
+                  className="h-7 min-w-[3rem] rounded-ctl px-1 text-center font-mono text-xs font-medium text-ink-2 hover:bg-surface hover:text-ink"
                   title="Restablecer zoom (0)"
                 >
                   {Math.round(zoom * 100)}%
@@ -117,13 +121,11 @@ function ComprobanteLightboxBody({
                   type="button"
                   onClick={zoomIn}
                   disabled={zoom >= ZOOM_MAX}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-white/85 transition hover:bg-surface/10 disabled:opacity-35"
+                  className={ZOOM_BTN}
                   aria-label="Acercar"
                   title="Acercar (+)"
                 >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" d="M12 5v14M5 12h14" />
-                  </svg>
+                  <PanelIcon name="plus" />
                 </button>
               </div>
             ) : null}
@@ -131,29 +133,28 @@ function ComprobanteLightboxBody({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/70 transition hover:bg-surface/10 hover:text-white sm:inline-flex"
+              className={buttonClass("ghost", "sm", "hidden sm:inline-flex")}
             >
+              <PanelIcon name="external" />
               Abrir archivo
             </a>
             <button
               type="button"
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition hover:bg-surface/10 hover:text-white"
+              className="inline-grid size-8 place-items-center rounded-ctl text-ink hover:bg-hover"
               aria-label="Cerrar"
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              <PanelIcon name="x" />
             </button>
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[#0c0b0a] p-3 sm:p-5">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-canvas p-3 sm:p-5">
           {kind === "pdf" ? (
             <iframe
               src={url}
               title={title}
-              className="h-[min(78vh,760px)] w-full rounded-box bg-surface"
+              className="h-[min(78vh,760px)] w-full rounded-box border border-line bg-surface"
             />
           ) : (
             <div className="flex min-h-full w-full items-center justify-center">
@@ -165,14 +166,14 @@ function ComprobanteLightboxBody({
                   setZoom((z) => (z >= 1.5 ? 1 : Math.min(ZOOM_MAX, z + 0.5)))
                 }
                 style={{ transform: `scale(${zoom})` }}
-                className="max-h-[min(78vh,760px)] max-w-full origin-center rounded-box object-contain shadow-[0_16px_48px_-12px_rgb(0_0_0_/_0.55)] transition-transform duration-200 ease-out"
+                className="max-h-[min(78vh,760px)] max-w-full origin-center rounded-box object-contain shadow-card transition-transform duration-200 ease-out motion-reduce:transition-none"
               />
             </div>
           )}
         </div>
 
         {isImage ? (
-          <p className="border-t border-white/8 px-4 py-2 text-center text-[10px] text-white/40 sm:text-[11px]">
+          <p className="border-t border-line px-4 py-2 text-center text-[11px] text-ink-3">
             Clic fuera o Esc para cerrar · + / − para zoom · doble clic acerca
           </p>
         ) : null}

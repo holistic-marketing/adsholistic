@@ -1,5 +1,6 @@
 import { listManualVoucherReviewsForStaff } from "@/services/payments.service";
 import { ManualVoucherReviewSection } from "@/features/payments/components/ManualVoucherReviewSection.client";
+import { ReviewQueueEmpty } from "./ReviewQueueEmpty";
 
 interface ManualVoucherReviewHostProps {
   staffMode: boolean;
@@ -28,20 +29,16 @@ export async function ManualVoucherReviewHost({
 
   if (pending.length === 0) {
     return (
-      <section
+      <ReviewQueueEmpty
         id="comprobantes"
-        className="rounded-card border border-dashed border-[var(--auth-divider)] px-4 py-10 text-center"
-        aria-label="Sin boletas"
-      >
-        <p className="text-sm font-medium text-[var(--auth-text)]">
-          {scope === "cliente"
+        label="Sin boletas"
+        title={
+          scope === "cliente"
             ? `Sin pagos manuales pendientes de ${clienteName?.trim() || "este cliente"}`
-            : "Sin pagos manuales pendientes"}
-        </p>
-        <p className="mt-1 text-sm text-[var(--auth-text-muted)]">
-          Solo aparecen boletas BCP nuevas por aceptar o rechazar.
-        </p>
-      </section>
+            : "Sin pagos manuales pendientes"
+        }
+        description="Solo aparecen boletas BCP nuevas por aceptar o rechazar."
+      />
     );
   }
 

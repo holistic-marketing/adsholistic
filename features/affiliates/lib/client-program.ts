@@ -112,14 +112,6 @@ export function referralDisplayPath(shareUrl: string): string {
   }
 }
 
-export function referralInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const first = parts[0]?.[0] ?? "?";
-  const second =
-    parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : (parts[0]?.[1] ?? "");
-  return `${first}${second}`.toUpperCase();
-}
-
 export function summarizeClientReferrals(
   referrals: ClientAffiliateReferral[],
 ): ClientAffiliateStats {

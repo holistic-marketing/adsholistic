@@ -1,7 +1,9 @@
 ﻿"use client";
 
 import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { SearchField } from "@/components/ui/PanelKit";
 import type { PaymentAccountSortKey } from "@/lib/sort/payment-accounts";
 
 interface PaymentToolbarProps {
@@ -14,6 +16,8 @@ interface PaymentToolbarProps {
   agencyBmFunding?: boolean;
 }
 
+/* Filtros de la tabla de cuentas (v3 «fbar»), como franja superior de la
+   tarjeta que contiene la tabla. */
 export function PaymentToolbar({
   search,
   status,
@@ -26,66 +30,59 @@ export function PaymentToolbar({
   const t = useTranslations("payments");
 
   return (
-    <div className="border-b border-[var(--auth-border)] bg-[var(--auth-bg)] px-3 py-3 sm:flex sm:flex-row sm:items-center sm:gap-3 sm:px-5 sm:py-3.5">
-      <p className="mb-2.5 text-[12px] leading-5 text-[var(--auth-text-muted)] sm:hidden">
+    <div className="border-b border-line px-4 py-3 sm:px-5">
+      <p className="mb-2.5 text-xs text-ink-2 sm:hidden">
         {t("toolbar.hintBefore")}{" "}
-        <span className="font-semibold text-[var(--auth-text)]">
+        <span className="font-semibold text-ink">
           {agencyBmFunding
             ? t("assignmentTable.reload")
             : t("assignmentTable.assignBalance")}
         </span>{" "}
         {t("toolbar.hintAfter")}
       </p>
-      <div className="flex flex-col gap-2 sm:flex-1 sm:flex-row sm:items-center sm:gap-3">
-        <div className="w-full sm:max-w-xs sm:flex-1">
-          <label htmlFor="payment-account-search" className="sr-only">
-            {t("toolbar.search")}
-          </label>
-          <Input
-            id="payment-account-search"
-            placeholder={t("toolbar.search")}
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 w-full border-[var(--auth-border)] bg-surface text-[13px]"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:contents">
+      <div className="flex flex-wrap items-center gap-2">
+        <PanelIcon name="filter" className="mx-1 size-[18px] text-ink max-sm:hidden" />
+        <SearchField
+          id="payment-account-search"
+          label={t("toolbar.search")}
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        <div className="min-w-0 flex-[1_1_150px] sm:flex-none">
           <label htmlFor="payment-account-status" className="sr-only">
             {t("toolbar.filterStatus")}
           </label>
-          <select
+          <Select
             id="payment-account-status"
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="h-11 w-full min-w-0 rounded-box border border-[var(--auth-border)] bg-surface px-2.5 text-[12px] text-[var(--auth-text)] focus:border-[var(--auth-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15 sm:w-auto sm:px-3 sm:text-[13px]"
           >
             <option value="all">{t("toolbar.statusAll")}</option>
             <option value="active">{t("toolbar.statusActive")}</option>
             <option value="pending">{t("toolbar.statusPending")}</option>
             <option value="disabled">{t("toolbar.statusDisabled")}</option>
-          </select>
-          {onSortChange ? (
-            <>
-              <label htmlFor="payment-account-sort" className="sr-only">
-                {t("toolbar.sortLabel")}
-              </label>
-              <select
-                id="payment-account-sort"
-                value={sort}
-                onChange={(e) =>
-                  onSortChange(e.target.value as PaymentAccountSortKey)
-                }
-                className="h-11 w-full min-w-0 rounded-box border border-[var(--auth-border)] bg-surface px-2.5 text-[12px] text-[var(--auth-text)] focus:border-[var(--auth-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15 sm:w-auto sm:px-3 sm:text-[13px]"
-              >
-                <option value="recommended">{t("toolbar.sortRecommended")}</option>
-                <option value="bm">{t("toolbar.sortBm")}</option>
-                <option value="name">{t("toolbar.sortName")}</option>
-                <option value="ledger_desc">{t("toolbar.sortLedgerDesc")}</option>
-                <option value="ledger_asc">{t("toolbar.sortLedgerAsc")}</option>
-              </select>
-            </>
-          ) : null}
+          </Select>
         </div>
+        {onSortChange ? (
+          <div className="min-w-0 flex-[1_1_150px] sm:flex-none">
+            <label htmlFor="payment-account-sort" className="sr-only">
+              {t("toolbar.sortLabel")}
+            </label>
+            <Select
+              id="payment-account-sort"
+              value={sort}
+              onChange={(e) =>
+                onSortChange(e.target.value as PaymentAccountSortKey)
+              }
+            >
+              <option value="recommended">{t("toolbar.sortRecommended")}</option>
+              <option value="bm">{t("toolbar.sortBm")}</option>
+              <option value="name">{t("toolbar.sortName")}</option>
+              <option value="ledger_desc">{t("toolbar.sortLedgerDesc")}</option>
+              <option value="ledger_asc">{t("toolbar.sortLedgerAsc")}</option>
+            </Select>
+          </div>
+        ) : null}
       </div>
     </div>
   );

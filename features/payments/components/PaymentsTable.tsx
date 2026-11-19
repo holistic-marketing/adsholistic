@@ -3,15 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/Table";
+import { cn } from "@/lib/cn";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { Note, ToneBadge, type Tone } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import { PaymentsEmptyState } from "./PaymentsEmptyState";
@@ -63,25 +58,25 @@ function hasTransferableBalance(
   return Number(account.balance) > 0;
 }
 
-const APPEAL_CHIP: Record<AppealStatus, string> = {
-  pending:
-    "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line",
-  sent: "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line",
-  approved:
-    "rounded-full bg-ok-bg px-2 py-0.5 text-[10px] font-bold text-ok-fg ring-1 ring-ok-solid",
-  rejected:
-    "rounded-full bg-field px-2 py-0.5 text-[10px] font-semibold text-danger-fg ring-1 ring-danger-line",
+const APPEAL_TONE: Record<AppealStatus, Tone> = {
+  pending: "ok",
+  sent: "ok",
+  approved: "ok",
+  rejected: "danger",
 };
 
-function statusBadgeClass(status: string): string {
-  if (status === "disabled") {
-    return "rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-danger-fg ring-1 ring-danger-line";
-  }
-  if (status === "active") {
-    return "rounded-md bg-subtle px-1.5 py-0.5 text-[10px] font-semibold text-ok-fg ring-1 ring-ok-line";
-  }
-  return "rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-accent-text ring-1 ring-warn-line";
+function statusTone(status: string): Tone {
+  if (status === "disabled") return "danger";
+  if (status === "active") return "ok";
+  return "warn";
 }
+
+/* Celdas de la tabla v3: 59 px de alto, línea fina entre filas. */
+const TH = "h-10 whitespace-nowrap border-b border-line px-2 text-left text-sm font-medium text-ink";
+const TD = "h-[59px] border-b border-line px-2 py-2 align-middle text-sm text-ink";
+/* Enlace secundario de la fila (cambiar el ID de TikTok). */
+const LINK_BTN =
+  "text-xs font-medium text-ink-3 underline decoration-transparent underline-offset-2 hover:text-ink hover:decoration-current";
 
 export function PaymentsTable({
   accounts,
@@ -201,12 +196,9 @@ export function PaymentsTable({
     const status = appealStatusOf(account);
     if (!status) return null;
     return (
-      <span className={`inline-flex items-center gap-1 ${APPEAL_CHIP[status]}`}>
-        {status !== "rejected" ? (
-          <span aria-hidden className="size-1.5 rounded-full bg-current" />
-        ) : null}
+      <ToneBadge tone={APPEAL_TONE[status]} dot={status !== "rejected"}>
         {tAppeal(`chip.${status}`)}
-      </span>
+      </ToneBadge>
     );
   }
 
@@ -214,31 +206,41 @@ export function PaymentsTable({
     if (!onAppeal || account.status !== "disabled") return null;
     const status = appealStatusOf(account);
     if (appealIsOpen(status) || status === "approved") return null;
-    const label = status === "rejected" ? tAppeal("appealAgain") : tAppeal("appealCta");
-    if (mobile) {
-      return (
-        <button
-          type="button"
-          className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-ink/25 bg-surface text-[13px] font-semibold text-ink transition hover:bg-hover"
-          onClick={() => onAppeal(account)}
-        >
-          {label}
-        </button>
-      );
-    }
     return (
       <Button
-        className={
-          mobile
-            ? "h-10 w-full rounded-lg border border-ink/25 bg-surface text-[13px] font-semibold text-ink hover:bg-hover"
-            : "font-semibold text-ink"
-        }
-        variant={mobile ? undefined : "ghost"}
-        size={mobile ? undefined : "sm"}
+        variant="outline"
+        size={mobile ? "md" : "sm"}
+        className={mobile ? "w-full" : undefined}
         onClick={() => onAppeal(account)}
       >
         {status === "rejected" ? tAppeal("appealAgain") : tAppeal("appealCta")}
       </Button>
+    );
+  }
+
+  function renderStatus(account: PaymentAccountAllocation) {
+    return (
+      <ToneBadge tone={statusTone(account.status)} dot>
+        {statusLabel(account.status)}
+      </ToneBadge>
+    );
+  }
+
+  function renderBmLabel(account: PaymentAccountAllocation) {
+    return account.bmLabel ? (
+      <ToneBadge tone="info" className="h-5 px-1.5 text-[11px]">
+        {account.bmLabel}
+      </ToneBadge>
+    ) : null;
+  }
+
+  function renderAdvertiserId(account: PaymentAccountAllocation, className?: string) {
+    return (
+      <span className={cn("font-mono text-[11px] text-ink-3", className)}>
+        adv{" "}
+        {account.externalAccountId?.trim() ||
+          t("assignmentTable.noTikTokId")}
+      </span>
     );
   }
 
@@ -249,11 +251,6 @@ export function PaymentsTable({
       ? liveMetricsByAdvertiser?.[advertiserId]?.balanceUsd
       : undefined;
     const transferable = hasTransferableBalance(account, liveUsd) && Boolean(onTransfer);
-    // Botón nativo: <Button> primary agrega text-white y dejaba el texto invisible.
-    const secondary =
-      "inline-flex h-10 items-center justify-center rounded-lg border border-[var(--brand-primary-deep)]/40 bg-surface text-[13px] font-semibold text-[var(--brand-primary-deep)] transition hover:bg-field";
-    const primary =
-      "h-10 rounded-lg bg-[var(--brand-primary)] text-[13px] font-semibold hover:bg-[var(--brand-primary-deep)]";
     const hint = reclaimable
       ? transferable
         ? clientSelfService
@@ -269,17 +266,25 @@ export function PaymentsTable({
         {renderAppealAction(account, true)}
         <div className={transferable ? "grid grid-cols-2 gap-2" : "grid grid-cols-1"}>
           {transferable ? (
-            <button type="button" className={secondary} onClick={() => runTransfer(account)}>
+            <button
+              type="button"
+              className={buttonClass("outline", "md", "w-full whitespace-normal")}
+              onClick={() => runTransfer(account)}
+            >
               {t("assignmentTable.transfer")}
             </button>
           ) : null}
           {reclaimable ? (
-            <button type="button" className={secondary} onClick={() => runReclaim(account)}>
+            <button
+              type="button"
+              className={buttonClass("outline", "md", "w-full whitespace-normal")}
+              onClick={() => runReclaim(account)}
+            >
               {t("assignmentTable.reclaim")}
             </button>
           ) : (
             <Button
-              className={primary}
+              className="w-full"
               disabled={loadingAccountId === account.id}
               onClick={() => runAllocate(account)}
             >
@@ -291,11 +296,11 @@ export function PaymentsTable({
             </Button>
           )}
         </div>
-        {hint ? <p className="text-[11px] leading-4 text-ink-2">{hint}</p> : null}
+        {hint ? <p className="text-xs leading-snug text-ink-3">{hint}</p> : null}
         {onEditTikTokIds ? (
           <button
             type="button"
-            className="inline-flex min-h-9 items-center text-[12px] font-medium text-[var(--brand-primary-deep)] underline-offset-2 hover:underline"
+            className={cn(LINK_BTN, "inline-flex min-h-9 items-center")}
             onClick={() => onEditTikTokIds(account)}
           >
             {t("assignmentTable.editTikTokId")}
@@ -305,7 +310,7 @@ export function PaymentsTable({
     );
   }
 
-  function renderActions(account: PaymentAccountAllocation, mobile: boolean) {
+  function renderActions(account: PaymentAccountAllocation) {
     const reclaimable = isReclaimableSuspended(account);
     const advertiserId = account.externalAccountId?.trim();
     const liveUsd = advertiserId
@@ -314,93 +319,47 @@ export function PaymentsTable({
     const transferable = hasTransferableBalance(account, liveUsd);
 
     return (
-      <div className={mobile ? "mt-4 space-y-2" : "flex flex-col items-start gap-1"}>
-        {renderAppealAction(account, mobile)}
-        {transferable && onTransfer ? (
-          <Button
-            className={
-              mobile
-                ? "h-11 w-full rounded-lg bg-[var(--brand-primary)] text-[13px] font-semibold hover:bg-[var(--brand-primary-deep)]"
-                : "font-semibold text-[var(--brand-primary-deep)]"
-            }
-            variant={mobile ? undefined : "ghost"}
-            size={mobile ? undefined : "sm"}
-            onClick={() => runTransfer(account)}
-          >
-            {t("assignmentTable.transfer")}
-          </Button>
-        ) : onTransfer && !reclaimable ? (
-          <p
-            className={
-              mobile
-                ? "text-[11px] leading-snug text-ink-2"
-                : "max-w-[13rem] text-[10px] leading-[1.45] text-ink-2"
-            }
-          >
-            {mobile
-              ? t("assignmentHints.noBalanceMobile")
-              : t("assignmentHints.noBalance")}
+      <div className="flex flex-col items-end gap-1.5">
+        <div className="flex flex-wrap justify-end gap-1.5">
+          {renderAppealAction(account, false)}
+          {transferable && onTransfer ? (
+            <Button variant="outline" size="sm" onClick={() => runTransfer(account)}>
+              {t("assignmentTable.transfer")}
+            </Button>
+          ) : null}
+          {reclaimable ? (
+            <Button variant="outline" size="sm" onClick={() => runReclaim(account)}>
+              {t("assignmentTable.reclaim")}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={loadingAccountId === account.id}
+              onClick={() => runAllocate(account)}
+            >
+              <PanelIcon name="plus" />
+              {loadingAccountId === account.id ? actionLoading : actionLabel}
+            </Button>
+          )}
+        </div>
+
+        {reclaimable ? (
+          <p className="max-w-[16rem] text-right text-xs leading-snug text-ink-3">
+            {transferable
+              ? clientSelfService
+                ? t("assignmentHints.transferClient")
+                : t("assignmentHints.transferStaff")
+              : t("assignmentHints.suspended")}
+          </p>
+        ) : !transferable && onTransfer ? (
+          <p className="max-w-[16rem] text-right text-xs leading-snug text-ink-3">
+            {t("assignmentHints.noBalance")}
           </p>
         ) : null}
 
-        {reclaimable ? (
-          <>
-            <Button
-              className={
-                mobile
-                  ? "h-11 w-full rounded-lg border border-[var(--brand-primary-deep)] bg-surface text-[13px] font-semibold text-[var(--brand-primary-deep)] hover:bg-[var(--admin-accent-soft)]"
-                  : "font-semibold text-ink-3"
-              }
-              variant={mobile ? undefined : "ghost"}
-              size={mobile ? undefined : "sm"}
-              onClick={() => runReclaim(account)}
-            >
-              {t("assignmentTable.reclaim")}
-            </Button>
-            <p
-              className={
-                mobile
-                  ? "text-[11px] leading-4 text-ink-2"
-                  : "max-w-[11rem] px-2 text-[10px] leading-3.5 text-ink-2"
-              }
-            >
-              {transferable
-                ? clientSelfService
-                  ? t("assignmentHints.transferClient")
-                  : t("assignmentHints.transferStaff")
-                : t("assignmentHints.suspended")}
-            </p>
-          </>
-        ) : (
-          <Button
-            className={
-              mobile
-                ? "h-11 w-full rounded-lg bg-[var(--brand-primary)] text-[13px] font-semibold hover:bg-[var(--brand-primary-deep)]"
-                : "font-semibold text-[var(--brand-primary-deep)]"
-            }
-            variant={mobile ? undefined : "ghost"}
-            size={mobile ? undefined : "sm"}
-            disabled={loadingAccountId === account.id}
-            onClick={() => runAllocate(account)}
-          >
-            {loadingAccountId === account.id
-              ? actionLoading
-              : mobile
-                ? actionLabelLong
-                : actionLabel}
-          </Button>
-        )}
-
         {onEditTikTokIds ? (
-          <button
-            type="button"
-            className={
-              mobile
-                ? "inline-flex min-h-10 w-full items-center justify-center text-center text-[12px] font-medium text-[var(--brand-primary-deep)] underline-offset-2 hover:underline"
-                : "px-2 text-[11px] font-medium text-ink-3 underline-offset-2 hover:text-[var(--brand-primary-deep)] hover:underline"
-            }
-            onClick={() => onEditTikTokIds(account)}
-          >
+          <button type="button" className={LINK_BTN} onClick={() => onEditTikTokIds(account)}>
             {t("assignmentTable.editTikTokId")}
           </button>
         ) : null}
@@ -410,118 +369,91 @@ export function PaymentsTable({
 
   return (
     <div>
-      {(message || error) && (
-        <div
-          className={`mx-4 mb-3 rounded-xl border px-4 py-3 text-[13px] ${
-            error
-              ? "border-danger-line bg-danger-bg text-danger-fg"
-              : "border-ok-line bg-ok-bg text-ok-fg"
-          }`}
-          role="status"
-        >
-          {error ?? message}
-        </div>
-      )}
-
-      {!isEmpty ? (
-        <div className="space-y-2.5 px-3 pb-4 pt-1 sm:px-4 md:hidden">
-          {accounts.map((account) => (
-            <article
-              key={account.id}
-              className={
-                isReclaimableSuspended(account)
-                  ? "rounded-box border border-accent-line bg-field p-3.5"
-                  : "rounded-box border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5"
-              }
-            >
-              <div className="min-w-0">
-                <p className="break-words text-[14px] font-semibold leading-snug tracking-[-0.02em] text-ink">
-                  {account.name}
-                </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  {account.bmLabel ? (
-                    <span className="rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
-                      {account.bmLabel}
-                    </span>
-                  ) : null}
-                  <span className={statusBadgeClass(account.status)}>
-                    {statusLabel(account.status)}
-                  </span>
-                  {renderAppealChip(account)}
-                  {/* Débito apagado ya lo dice la línea de auto-recarga: solo marcar cuando está activo. */}
-                  {!agencyBmFunding && account.autoRecharge ? (
-                    <span className="rounded bg-subtle px-1.5 py-0.5 text-[10px] font-semibold text-ok-fg">
-                      {t("assignmentTable.autoDebitOn")}
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-1 break-all font-mono text-[10px] leading-4 text-ink-3">
-                  adv{" "}
-                  {account.externalAccountId?.trim() ||
-                    t("assignmentTable.noTikTokId")}
-                </p>
-              </div>
-
-              <div className="mt-3 rounded-lg bg-field px-3 py-2.5">
-                {renderBalanceCell(account, true)}
-                {!agencyBmFunding && account.thresholdInfo ? (
-                  <p className="mt-1 text-[11px] leading-4 text-ink-3">
-                    {account.thresholdInfo}
-                  </p>
-                ) : null}
-              </div>
-              {renderMobileActions(account)}
-            </article>
-          ))}
+      {message || error ? (
+        <div className="px-4 pt-3 sm:px-5" role="status">
+          <Note tone={error ? "danger" : "ok"} icon={error ? "alert" : "check-circle"}>
+            {error ?? message}
+          </Note>
         </div>
       ) : null}
 
       {!isEmpty ? (
+        <ul className="md:hidden">
+          {accounts.map((account) => (
+            <li
+              key={account.id}
+              className={cn(
+                "border-b border-line px-4 py-3.5 last:border-b-0",
+                isReclaimableSuspended(account) && "bg-accent-soft",
+              )}
+            >
+              <p className="break-words font-semibold leading-snug text-ink">
+                {account.name}
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {renderBmLabel(account)}
+                {renderStatus(account)}
+                {renderAppealChip(account)}
+                {/* Débito apagado ya lo dice la línea de auto-recarga: solo marcar cuando está activo. */}
+                {!agencyBmFunding && account.autoRecharge ? (
+                  <ToneBadge tone="ok">{t("assignmentTable.autoDebitOn")}</ToneBadge>
+                ) : null}
+              </div>
+              {renderAdvertiserId(account, "mt-1 block break-all")}
+
+              <div className="mt-3 rounded-box border border-line bg-field px-3 py-2.5">
+                {renderBalanceCell(account, true)}
+                {!agencyBmFunding && account.thresholdInfo ? (
+                  <p className="mt-1 text-xs text-ink-3">{account.thresholdInfo}</p>
+                ) : null}
+              </div>
+              {renderMobileActions(account)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {!isEmpty ? (
         <div className="hidden overflow-x-auto md:block">
-          <Table embedded className="rounded-none">
-            <TableHeader>
-              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-field hover:bg-field">
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
+            <thead>
+              <tr>
+                <th scope="col" className={cn(TH, "pl-4 sm:pl-5")}>
                   {t("assignmentTable.account")}
-                </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+                </th>
+                <th scope="col" className={TH}>
                   {t("assignmentTable.status")}
-                </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+                </th>
+                <th scope="col" className={cn(TH, "text-right")}>
                   {balanceColumnLabel}
-                </TableHead>
-                <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+                </th>
+                <th scope="col" className={cn(TH, "pr-4 text-right sm:pr-5")}>
                   {t("assignmentTable.action")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
               {accounts.map((account) => (
-                <TableRow
+                <tr
                   key={account.id}
-                  className={
+                  className={cn(
+                    "transition-colors [&:last-child>td]:border-b-0",
                     isReclaimableSuspended(account)
-                      ? "border-b border-accent-line bg-field transition-colors hover:bg-accent-soft"
-                      : "border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-field"
-                  }
+                      ? "bg-accent-soft"
+                      : "hover:bg-field",
+                  )}
                 >
-                  <TableCell className="text-[14px] font-semibold tracking-[-0.02em] text-ink">
+                  <td className={cn(TD, "pl-4 sm:pl-5")}>
                     <div className="min-w-0 max-w-[18rem]">
-                      <p className="truncate" title={account.name}>{account.name}</p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                        {account.bmLabel ? (
-                          <span className="rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
-                            {account.bmLabel}
-                          </span>
-                        ) : null}
-                        <p className="min-w-0 truncate font-mono text-[10px] font-normal text-ink-3">
-                          adv{" "}
-                          {account.externalAccountId?.trim() ||
-                            t("assignmentTable.noTikTokId")}
-                        </p>
+                      <p className="truncate font-semibold" title={account.name}>
+                        {account.name}
+                      </p>
+                      <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-1.5">
+                        {renderBmLabel(account)}
+                        {renderAdvertiserId(account, "min-w-0 truncate")}
                       </div>
                       {!agencyBmFunding ? (
-                        <p className="mt-1 whitespace-normal text-[10px] font-normal text-ink-3">
+                        <p className="mt-1 text-xs text-ink-3">
                           {account.autoRecharge
                             ? t("assignmentTable.autoDebitOn")
                             : t("assignmentTable.autoDebitOff")}
@@ -531,23 +463,19 @@ export function PaymentsTable({
                         </p>
                       ) : null}
                     </div>
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className={TD}>
                     <div className="flex flex-col items-start gap-1">
-                      <span className={statusBadgeClass(account.status)}>
-                        {statusLabel(account.status)}
-                      </span>
+                      {renderStatus(account)}
                       {renderAppealChip(account)}
                     </div>
-                  </TableCell>
-                  <TableCell>{renderBalanceCell(account)}</TableCell>
-                  <TableCell className="w-[15rem] whitespace-normal align-top sm:whitespace-normal">
-                    {renderActions(account, false)}
-                  </TableCell>
-                </TableRow>
+                  </td>
+                  <td className={cn(TD, "text-right")}>{renderBalanceCell(account)}</td>
+                  <td className={cn(TD, "pr-4 sm:pr-5")}>{renderActions(account)}</td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       ) : null}
 

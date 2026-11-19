@@ -23,6 +23,8 @@ import {
 } from "@/lib/payments/funding-roles.server";
 import { resolveHecomBillingModality } from "@/lib/hecom/clientes.server";
 import { requirePermission } from "@/lib/auth/guards.server";
+import { Note } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 
 async function StripeReturnBanner({ status }: { status?: string }) {
   if (
@@ -36,52 +38,25 @@ async function StripeReturnBanner({ status }: { status?: string }) {
 
   const t = await getTranslations("payments");
 
-  if (status === "pending_crypto") {
-    return (
-      <div
-        className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
-        role="status"
-      >
-        {t("stripe.cryptoPending")}
-      </div>
-    );
-  }
-
-  if (status === "whop_return") {
-    return (
-      <div
-        className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
-        role="status"
-      >
-        {t("stripe.whopPending")}
-      </div>
-    );
-  }
-
-  if (status === "success") {
-    return (
-      <div
-        className="rounded-card border border-ok-line bg-ok-bg px-4 py-3 text-[13px] font-medium text-ok-fg"
-        role="status"
-      >
-        {t("stripe.successBefore")}{" "}
-        <a
-          href="#asignar-saldo"
-          className="font-bold text-ok-fg underline underline-offset-2"
-        >
-          {t("stripe.successLink")}
-        </a>{" "}
-        {t("stripe.successAfter")}
-      </div>
-    );
-  }
-
   return (
-    <div
-      className="rounded-card border border-warn-line bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
-      role="status"
-    >
-      {t("stripe.cancelled")}
+    <div role="status">
+      {status === "success" ? (
+        <Note tone="ok" icon="check-circle">
+          {t("stripe.successBefore")}{" "}
+          <a href="#asignar-saldo" className="font-semibold underline underline-offset-2">
+            {t("stripe.successLink")}
+          </a>{" "}
+          {t("stripe.successAfter")}
+        </Note>
+      ) : (
+        <Note tone="warn" icon={status === "cancelled" ? "info" : "clock"}>
+          {status === "pending_crypto"
+            ? t("stripe.cryptoPending")
+            : status === "whop_return"
+              ? t("stripe.whopPending")
+              : t("stripe.cancelled")}
+        </Note>
+      )}
     </div>
   );
 }
@@ -254,20 +229,16 @@ export default async function PaymentsPage({
         <WalletAgreementMovements userId={session.id} />
       </Suspense>
 
-      <details className="group overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface">
-        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 px-5 py-3.5 text-[13px] font-semibold text-[var(--auth-text)] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--auth-accent)]/30 sm:px-6">
-          <span>Ver movimientos e historial</span>
-          <span
-            aria-hidden
-            className="text-[var(--auth-text-soft)] transition-transform group-open:rotate-180"
-          >
-            ↓
-          </span>
+      <details className="group overflow-hidden rounded-card border border-line bg-surface shadow-card">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2.5 px-4 py-3.5 text-base font-semibold tracking-[-0.01em] text-ink sm:px-6 [&::-webkit-details-marker]:hidden">
+          <PanelIcon name="ledger" className="text-ink-2" />
+          <span className="min-w-0">{t("historyToggle")}</span>
+          <PanelIcon
+            name="chevron-down"
+            className="ml-auto text-ink-3 transition-transform duration-150 group-open:rotate-180"
+          />
         </summary>
-        <div
-          className="border-t border-[var(--auth-divider)] p-4 sm:p-6"
-          aria-label={`Historial Hecom de ${cliente.name}`}
-        >
+        <div className="border-t border-line p-4 sm:p-6">
           <ClienteScopedPayments
             data={data}
             staffMode={capabilities.isStaff || capabilities.canAgencyBmFund}

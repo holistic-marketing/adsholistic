@@ -25,9 +25,9 @@ export function TikTokIcon({ name }: { name: keyof typeof iconPaths }) {
 }
 
 export function TikTokFailureNotice({ failure, retry, retryLabel = "Reintentar" }: { failure: TikTokFailure; retry?: () => void; retryLabel?: string }) {
-  return <div role="alert" className="mt-4 rounded-lg border border-danger-line bg-danger-bg p-4 text-sm text-danger-fg">
-    <p className="max-w-2xl leading-6">{failure.error}</p>
-    {retry ? <button type="button" className="mt-2 min-h-10 rounded-lg px-2 font-semibold underline underline-offset-4 focus-visible:outline-2" onClick={retry}>{retryLabel}</button> : null}
-    {failure.endpoint || failure.detail || failure.code ? <details className="mt-2 text-xs"><summary className="min-h-8 cursor-pointer font-medium">Detalle para soporte</summary><p className="mt-2 break-words">{failure.detail}</p>{failure.required ? <p className="mt-2">{failure.required}</p> : null}<p className="mt-2 break-all">{[failure.endpoint, failure.code, failure.providerCode != null ? `Código ${failure.providerCode}` : null, failure.requestId ? `Referencia ${failure.requestId}` : null].filter(Boolean).join(" · ")}</p></details> : null}
+  return <div role="alert" className="mt-4 rounded-box border border-danger-line bg-danger-bg px-3 py-2.5 text-[13px] leading-5 text-danger-fg">
+    <p className="max-w-2xl">{failure.error}</p>
+    {retry ? <button type="button" className="-mx-2 mt-1 inline-flex min-h-8 items-center rounded-ctl px-2 font-semibold underline underline-offset-4 hover:bg-danger-bg" onClick={retry}>{retryLabel}</button> : null}
+    {failure.endpoint || failure.detail || failure.code ? <details className="mt-1 text-xs"><summary className="flex min-h-8 cursor-pointer items-center font-medium">Detalle para soporte</summary><p className="mt-2 break-words">{failure.detail}</p>{failure.required ? <p className="mt-2">{failure.required}</p> : null}<p className="mt-2 break-all">{[failure.endpoint, failure.code, failure.providerCode != null ? `Código ${failure.providerCode}` : null, failure.requestId ? `Referencia ${failure.requestId}` : null].filter(Boolean).join(" · ")}</p></details> : null}
   </div>;
 }

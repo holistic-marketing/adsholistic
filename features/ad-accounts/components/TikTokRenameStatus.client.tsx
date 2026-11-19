@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { routes } from "@/config/routes";
-import { CopyNameButton, tiktokAccountUrl } from "./PendingTikTokNames.client";
+import { cn } from "@/lib/cn";
+import { CopyNameButton, miniButton, tiktokAccountUrl } from "./PendingTikTokNames.client";
 
 type Row = {
   advertiserId: string;
@@ -79,7 +81,12 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
   const anyManual = rows.some((r) => state[r.advertiserId] === "manual");
 
   return (
-    <div className="space-y-2 rounded-box bg-field px-3 py-2.5 text-[12px] leading-5 text-accent-text ring-1 ring-warn-line">
+    <div
+      className={cn(
+        "space-y-2 rounded-box border px-3 py-2.5 text-[13px] leading-5",
+        allApplied ? "border-ok-line bg-ok-bg text-ok-fg" : "border-warn-line bg-warn-bg text-warn-fg",
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-semibold">
           {allApplied
@@ -93,18 +100,19 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
             type="button"
             onClick={() => void verify()}
             disabled={checking}
-            className="rounded-lg bg-surface px-3 py-1 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-50"
+            className={miniButton}
           >
+            <PanelIcon name="refresh" className="size-3.5" />
             {checking ? "Leyendo TikTok…" : "Verificar nombre"}
           </button>
         )}
       </div>
-      <ul className="space-y-1">
+      <ul className="space-y-1 text-xs">
         {rows.map((r) => {
           const s = state[r.advertiserId];
           return (
             <li key={r.advertiserId} className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="font-mono text-[11px]">{r.advertiserId}</span>
+              <span className="font-mono">{r.advertiserId}</span>
               <span>
                 {s === "applied"
                   ? "✓ ya se llama así"
@@ -125,19 +133,16 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
                     href={tiktokAccountUrl(r.advertiserId)}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
+                    className={miniButton}
                   >
-                    Abrir en TikTok ↗
+                    Abrir en TikTok
+                    <PanelIcon name="external" className="size-3.5" />
                   </a>
                 </>
               ) : null}
               {s === "notyet" || s === "failed" ? <CopyNameButton text={r.advertiserName} /> : null}
               {s === "notyet" || s === "failed" ? (
-                <button
-                  type="button"
-                  onClick={() => void retry(r)}
-                  className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
-                >
+                <button type="button" onClick={() => void retry(r)} className={miniButton}>
                   Reintentar
                 </button>
               ) : null}
@@ -145,15 +150,15 @@ export function TikTokRenameStatus({ accounts }: { accounts: Row[] }) {
           );
         })}
       </ul>
-      {note ? <p className="text-warn-fg">{note}</p> : null}
+      {note ? <p className="font-medium">{note}</p> : null}
       {anyManual ? (
-        <p className="text-[11px] text-accent-text">
+        <p className="text-xs">
           Las cuentas del BM 10 son de un Business Center directo y TikTok no deja cambiarles el nombre por API. Copia el nombre, abre la
           cuenta y pégalo en Información de la cuenta. Queda en «Nombres pendientes» (Cuentas libres → BM 10) hasta que coincida.
         </p>
       ) : null}
       {allApplied || !anyAuto ? null : (
-        <p className="text-[11px] text-accent-text">
+        <p className="text-xs">
           En cuentas recién creadas TikTok a veces no lo aplica. Si tras reintentar sigue igual, usa «Copiar nombre» y cámbialo en TikTok.
         </p>
       )}

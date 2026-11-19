@@ -1,6 +1,10 @@
 ﻿import { getTranslations } from "next-intl/server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState } from "@/components/ui/PanelKit";
 import { AdAccountsPageHeader } from "@/features/ad-accounts/components/AdAccountsPageHeader";
+import { AdAccountsCreateModalHost } from "@/features/ad-accounts/components/AdAccountsCreateModalHost.client";
 import { AdAccountsOpenCreateModalButton } from "@/features/ad-accounts/components/AdAccountsOpenCreateModalButton.client";
 import { AdAccountsTable } from "@/features/ad-accounts/components/AdAccountsTable";
 import { AdAccountsToolbar } from "@/features/ad-accounts/components/AdAccountsToolbar.client";
@@ -17,7 +21,6 @@ import { getSearchParam } from "@/lib/search-params";
 import { resolveTikTokSelfServeAccountLimit } from "@/lib/integrations/tiktok/bc-create-profiles";
 import { countHecomTikTokAccountsForQuota } from "@/lib/hecom/link-tiktok-cuenta.server";
 import type { AdAccountStatus } from "@/types/ad-account";
-import { CrmPanel } from "@/components/dashboard/crm-ui";
 import { Suspense } from "react";
 import { StaffCreateTikTokAccountsPanel } from "@/features/ad-accounts/components/StaffCreateTikTokAccountsPanel.client";
 import { isStaffUser } from "@/lib/auth/staff.server";
@@ -75,7 +78,6 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
       summary={EMPTY_SUMMARY}
       hecomScoped={Boolean(selected)}
       clienteName={selected?.name}
-      clienteId={selected?.id}
       platform="meta"
     />
   );
@@ -123,6 +125,7 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
   // Correo real de gerencia: el panel de crear sin límite no se muestra a clientes.
   const isStaff =
     (await isStaffUser(session.email ?? "")) || isPaymentsSuperAdminEmail(session.email ?? "");
+  const panelTitle = t("panel.title", { name: clienteName });
 
   return (
     <div className={pageClass}>
@@ -136,8 +139,6 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
             summary={data.summary}
             hecomScoped
             clienteName={clienteName}
-            clienteId={selected.id}
-            avatarUrl={data.cliente?.avatarUrl}
             enableTikTokCreate
           />
         }
@@ -147,42 +148,37 @@ export default async function AdAccountsPage({ searchParams }: AdAccountsPagePro
 
             <TikTokConnectionPanel key={selected.id} />
 
-            <CrmPanel
-              title={t("panel.title", { name: clienteName })}
-              subtitle={data.accounts.length ? t("panel.subtitle") : undefined}
-              className="overflow-hidden"
-            >
-              {data.accounts.length ? <Suspense fallback={null}>
-                <AdAccountsToolbar
-                  initialSearch={search}
-                  initialStatus={status}
-                  initialIncludeArchived={false}
-                  enableTikTokCreate
-                  clienteName={clienteName}
-                  currentAccountCount={accountCount}
-                  accountLimit={accountLimit}
-                />
-              </Suspense> : null}
+            {/* Escucha «Crear cuenta» del encabezado, del estado vacío y de perfiles. */}
+            <AdAccountsCreateModalHost
+              clienteName={clienteName}
+              currentAccountCount={accountCount}
+              accountLimit={accountLimit}
+            />
+
+            <section aria-label={panelTitle} className="space-y-4">
+              {data.accounts.length ? (
+                <Suspense fallback={null}>
+                  <AdAccountsToolbar initialSearch={search} initialStatus={status} />
+                </Suspense>
+              ) : null}
               {filteredAccounts.length === 0 && data.accounts.length === 0 ? (
-                <div className="px-6 py-12 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-box bg-[#16161a] text-[9px] font-bold tracking-wide">
-                    <span className="text-[#25f4ee]">T</span>
-                    <span className="text-[#fe2c55]">T</span>
-                  </div>
-                  <p className="mt-4 text-[14px] font-medium tracking-[-0.01em] text-[var(--auth-text)]">
-                    {t("panel.emptyTitle", { name: clienteName })}
-                  </p>
-                  <p className="mx-auto mt-2 max-w-lg text-[13px] leading-5 text-[var(--auth-text-muted)]">
-                    {t("panel.emptyBodyCreate", { name: clienteName })}
-                  </p>
-                  <AdAccountsOpenCreateModalButton className="mt-5 inline-flex h-10 items-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05]">
-                    {t("panel.emptyCtaCreate")}
-                  </AdAccountsOpenCreateModalButton>
+                <div className="rounded-card border border-line bg-surface shadow-card">
+                  <EmptyState
+                    icon="layers"
+                    title={t("panel.emptyTitle", { name: clienteName })}
+                    description={t("panel.emptyBodyCreate", { name: clienteName })}
+                    action={
+                      <AdAccountsOpenCreateModalButton className={buttonClass("primary")}>
+                        <PanelIcon name="plus" />
+                        {t("panel.emptyCtaCreate")}
+                      </AdAccountsOpenCreateModalButton>
+                    }
+                  />
                 </div>
               ) : (
-                <AdAccountsTable accounts={filteredAccounts} readOnly />
+                <AdAccountsTable accounts={filteredAccounts} readOnly caption={panelTitle} />
               )}
-            </CrmPanel>
+            </section>
           </>
         }
       />

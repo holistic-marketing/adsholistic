@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 /**
  * Cliente con más de una ficha vinculada (ej. un negocio en Perú y otro en México)
@@ -37,20 +38,22 @@ export function PickOwnCliente({
   }
 
   return (
-    <div className="mt-5 flex w-full max-w-sm flex-col gap-2">
+    <div className="mx-auto mt-5 flex w-full max-w-sm flex-col gap-2">
       {clientes.map((c) => (
-        <button
+        <Button
           key={c.id}
-          type="button"
+          size="lg"
+          className="w-full"
           disabled={busy !== null}
           onClick={() => void pick(c)}
-          className="inline-flex h-11 items-center justify-center rounded-lg bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition-[filter] hover:brightness-[1.05] disabled:opacity-60"
         >
           {busy === c.id ? "…" : c.name}
-        </button>
+        </Button>
       ))}
       {error ? (
-        <p className="text-[13px] font-medium text-[var(--auth-danger,#b42318)]">{errorLabel}</p>
+        <p role="alert" className="text-[13px] font-medium text-danger-fg">
+          {errorLabel}
+        </p>
       ) : null}
     </div>
   );

@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { DashboardModalShell } from "@/components/ui/DashboardModalShell.client";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import type { AdAccount, AdAccountPlatform, AdAccountStatus } from "@/types/ad-account";
@@ -95,58 +95,56 @@ export function ConfigureAdAccountModal({
 
   return (
     <DashboardModalShell open onClose={onClose} maxWidthClassName="max-w-lg">
-      <h2 className="text-lg font-semibold text-[var(--foreground)]">
+      <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink">
         {t("configureModal.title")}
       </h2>
-      <p className="mt-1 text-sm text-[var(--admin-text-muted,#64748b)]">
+      <p className="mt-1 text-[13px] text-ink-2">
         {t("configureModal.subtitle")}
       </p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label htmlFor={`${fieldId}-1`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-1`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("configureModal.name")}
           </label>
           <Input id={`${fieldId}-1`} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-2`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-2`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.platform")}
           </label>
-          <select
+          <Select
             id={`${fieldId}-2`}
             value={platform}
             onChange={(e) => setPlatform(e.target.value as AdAccountPlatform)}
-            className="h-10 w-full rounded-box border border-[var(--border-subtle)] bg-surface/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
           >
             {platforms.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor={`${fieldId}-3`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-3`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("configureModal.status")}
           </label>
-          <select
+          <Select
             id={`${fieldId}-3`}
             value={status}
             onChange={(e) =>
               setStatus(e.target.value as Exclude<AdAccountStatus, "archived">)
             }
-            className="h-10 w-full rounded-box border border-[var(--border-subtle)] bg-surface/90 px-3.5 text-sm focus:border-[var(--brand-primary)]/55 focus:outline-none focus:ring-4 focus:ring-[var(--brand-primary)]/10"
           >
             {statuses.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor={`${fieldId}-4`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-4`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.bcId")}
           </label>
           <Input
@@ -157,7 +155,7 @@ export function ConfigureAdAccountModal({
           />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-5`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-5`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("configureModal.advertiserId")}
           </label>
           <Input
@@ -168,7 +166,7 @@ export function ConfigureAdAccountModal({
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${fieldId}-6`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-6`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.externalName")}
           </label>
           <Input
@@ -178,13 +176,13 @@ export function ConfigureAdAccountModal({
           />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-7`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-7`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.timezone")}
           </label>
           <Input id={`${fieldId}-7`} value={timezone} onChange={(e) => setTimezone(e.target.value)} />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-8`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-8`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.dailyBudget")}
           </label>
           <Input
@@ -197,7 +195,7 @@ export function ConfigureAdAccountModal({
           />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-9`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-9`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.monthlyLimit")}
           </label>
           <Input
@@ -210,7 +208,7 @@ export function ConfigureAdAccountModal({
           />
         </div>
         <div>
-          <label htmlFor={`${fieldId}-10`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <label htmlFor={`${fieldId}-10`} className="mb-1.5 block text-sm font-medium text-ink">
             {t("createModal.threshold")}
           </label>
           <Input
@@ -222,11 +220,12 @@ export function ConfigureAdAccountModal({
             onChange={(e) => setRechargeThreshold(e.target.value)}
           />
         </div>
-        <label className="flex items-center gap-2 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] p-3 text-sm font-medium text-[var(--foreground)] sm:col-span-2">
+        <label className="flex items-center gap-2 rounded-box border border-line bg-field p-3 text-sm font-medium text-ink sm:col-span-2">
           <input
             type="checkbox"
             checked={autoRechargeEnabled}
             onChange={(e) => setAutoRechargeEnabled(e.target.checked)}
+            className="size-4 accent-accent-btn"
           />
           {t("configureModal.autoRecharge")}
         </label>

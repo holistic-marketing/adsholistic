@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { DashboardModalShell } from "@/components/ui/DashboardModalShell.client";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { Note, ToneBadge } from "@/components/ui/PanelKit";
 import { routes } from "@/config/routes";
 import { dispatchAdAccountsUpdated } from "@/lib/events/modal-events";
 import {
@@ -12,6 +14,7 @@ import {
   TIKTOK_SELF_SERVE_ACCOUNT_LIMIT,
   TIKTOK_SELF_SERVE_CREATE_MAINTENANCE,
 } from "@/lib/integrations/tiktok/bc-create-profiles";
+import { TikTokMark } from "./platform-marks";
 
 interface CreateTikTokAccountModalProps {
   open: boolean;
@@ -161,7 +164,7 @@ function CreateTikTokAccountModalContent({
         <div>
           <h2
             id="create-tiktok-account-title"
-            className="text-[17px] font-semibold tracking-tight text-ink"
+            className="text-lg font-semibold tracking-[-0.015em] text-ink"
           >
             {maintenance ? t("maintenanceTitle") : t("title")}
           </h2>
@@ -173,32 +176,24 @@ function CreateTikTokAccountModalContent({
         </div>
 
         {maintenance ? (
-          <div className="rounded-box border border-line bg-field px-4 py-3 text-sm leading-6 text-ink">
-            <p className="font-semibold text-ink">
-              {t("maintenanceBadge")}
-            </p>
-            <p className="mt-1.5">{t("maintenanceBody")}</p>
-          </div>
+          <Note tone="warn" icon="clock" title={t("maintenanceBadge")}>
+            {t("maintenanceBody")}
+          </Note>
         ) : (
           <>
-            <div className="rounded-card border border-line bg-field p-4">
+            <div className="rounded-box border border-line bg-field p-4">
               <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium uppercase tracking-wide text-ink-3">
-                    {t("bmLabel")}
-                  </p>
-                  <p className="mt-1 text-[15px] font-semibold text-ink">
-                    {t("bmName")}
-                  </p>
-                  <p className="mt-0.5 text-[12px] text-ink-2">
-                    {t("bmHint")}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <TikTokMark />
+                  <div className="min-w-0">
+                    <p className="text-xs text-ink-3">{t("bmLabel")}</p>
+                    <p className="text-sm font-semibold text-ink">{t("bmName")}</p>
+                    <p className="text-xs text-ink-2">{t("bmHint")}</p>
+                  </div>
                 </div>
-                <span className="inline-flex shrink-0 items-center rounded-md bg-field px-2 py-1 text-[10px] font-bold text-ok-fg">
-                  USD
-                </span>
+                <ToneBadge tone="ok">USD</ToneBadge>
               </div>
-              <div className="mt-4 border-t border-line pt-3 text-[12px] text-ink-2">
+              <p className="mt-3 border-t border-line pt-3 text-xs text-ink-2 tabular-nums">
                 {quotaLoading
                   ? tCommon("loading")
                   : t("quota", {
@@ -206,37 +201,23 @@ function CreateTikTokAccountModalContent({
                       limit: liveLimit,
                       remaining,
                     })}
-              </div>
+              </p>
             </div>
 
             {success ? (
-              <div className="rounded-box border border-ok-line bg-ok-bg px-4 py-3 text-sm text-ok-fg">
-                <p className="font-semibold">{t("successTitle")}</p>
-                <p className="mt-1">{success.advertiserName}</p>
-                <p className="mt-1 break-all font-mono text-[12px]">
-                  {success.advertiserId}
-                </p>
-                <p className="mt-2 text-[12px] text-ok-fg">
-                  {t("successHint")}
-                </p>
-              </div>
+              <Note tone="ok" icon="check-circle" title={t("successTitle")}>
+                <p>{success.advertiserName}</p>
+                <p className="break-all font-mono text-xs">{success.advertiserId}</p>
+                <p className="mt-1.5 text-xs">{t("successHint")}</p>
+              </Note>
             ) : null}
 
-            {error ? (
-              <div className="rounded-box border border-warn-line bg-warn-bg px-4 py-3 text-sm text-warn-fg">
-                {error}
-              </div>
-            ) : null}
+            {error ? <Note tone="warn">{error}</Note> : null}
           </>
         )}
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            className="h-11 rounded-box"
-          >
+          <Button type="button" variant="outline" onClick={handleClose}>
             {maintenance || success ? tCommon("close") : tCommon("cancel")}
           </Button>
           {maintenance ? null : !success && (whatsappUrl || atLimit) ? (
@@ -249,8 +230,9 @@ function CreateTikTokAccountModalContent({
               }
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-11 items-center justify-center rounded-box bg-[#25D366] px-5 text-[13px] font-semibold text-white transition hover:brightness-105"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-ctl bg-[#25D366] px-3.5 text-sm font-medium text-white shadow-ctl hover:brightness-105"
             >
+              <PanelIcon name="chat" />
               {t("whatsappCta")}
             </a>
           ) : success ? (
@@ -260,8 +242,8 @@ function CreateTikTokAccountModalContent({
                 handleClose();
                 router.push(routes.payments);
               }}
-              className="h-11 rounded-box bg-accent px-5 hover:bg-accent-btn-hover"
             >
+              <PanelIcon name="send" />
               {t("goPayments")}
             </Button>
           ) : (
@@ -269,8 +251,8 @@ function CreateTikTokAccountModalContent({
               type="button"
               disabled={loading || quotaLoading}
               onClick={() => void handleCreate()}
-              className="h-11 rounded-box bg-accent px-5 hover:bg-accent-btn-hover"
             >
+              <PanelIcon name="plus" />
               {loading ? t("creating") : t("confirm")}
             </Button>
           )}

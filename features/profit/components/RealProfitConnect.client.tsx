@@ -3,6 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { SquareIcon, ToneBadge, type Tone } from "@/components/ui/PanelKit";
 
 const COURIER_TEMPLATE =
   "pedido;estado;monto_cobrado;costo_envio;courier\n#1001;entregado;89.90;12;Olva\n#1002;rechazado;;15;Shalom\n#1003;en ruta;;;Urbaner\n";
@@ -57,86 +62,82 @@ function withShop(installUrl: string | null, shop: string): string | null {
   return url.toString();
 }
 
-const inputClass =
-  "h-10 w-full min-w-0 rounded-box sm:flex-1 border border-line bg-field px-3 text-[13px] font-medium text-ink outline-none transition placeholder:text-ink-3 focus:border-accent/50 focus:bg-surface focus:ring-2 focus:ring-accent/15";
-const primaryBtn =
-  "inline-flex h-10 shrink-0 items-center justify-center rounded-box bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] disabled:opacity-50";
-const ghostBtn =
-  "inline-flex h-10 shrink-0 items-center justify-center rounded-box border border-line bg-surface px-4 text-[13px] font-semibold text-ink transition hover:bg-field disabled:opacity-50";
+/* Enlace en texto naranja (v3 «linkish»). */
+const linkish =
+  "self-start text-[13px] font-medium text-accent-text underline-offset-[3px] hover:underline disabled:opacity-50";
+const linkishMuted =
+  "self-start text-[13px] font-medium text-ink-2 underline-offset-[3px] hover:text-ink hover:underline";
+/* Botón de marca de Meta: conserva el azul de Facebook. */
+const metaBrandBtn =
+  "inline-flex h-8 items-center justify-center gap-1.5 self-start whitespace-nowrap rounded-ctl border border-[#1877f2] bg-[#1877f2] px-2.5 text-[13px] font-medium text-white shadow-ctl hover:brightness-95";
 
-function StatusPill({ tone, children }: { tone: "ok" | "auto" | "todo" | "locked"; children: ReactNode }) {
-  const cls = {
-    ok: "bg-ok-bg text-ok-fg ring-ok-line",
-    auto: "bg-info-bg text-info-fg ring-info-line",
-    todo: "bg-field text-accent-text ring-accent-line",
-    locked: "bg-subtle text-ink-3 ring-line",
-  }[tone];
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ${cls}`}>
-      {tone === "ok" || tone === "auto" ? <span aria-hidden>✓</span> : null}
-      {children}
-    </span>
-  );
+/** Mensaje corto tras una acción (vinculado, error…). */
+function ResultLine({ ok, children }: { ok: boolean; children: ReactNode }) {
+  return <p className={`text-xs font-medium ${ok ? "text-ok-fg" : "text-danger-fg"}`}>{children}</p>;
 }
 
-function SourceCard({
-  step,
+/** Fuente de datos (v3 «tile»): ícono, paso, nombre, estado y su contenido. */
+function SourceTile({
+  stepLabel,
   logo,
   title,
   status,
   children,
 }: {
-  step: number;
+  stepLabel: string;
   logo: ReactNode;
   title: string;
   status: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col rounded-card border border-line bg-surface p-4 sm:p-5">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-box bg-field ring-1 ring-line">
-          {logo}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-3">
-            {step}
-          </p>
-          <h3 className="truncate text-[15px] font-bold tracking-[-0.01em] text-ink">
-            {title}
-          </h3>
+    <li className="flex min-w-0 flex-col gap-3 rounded-box border border-line bg-surface p-4">
+      <div className="flex items-start justify-between gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <SquareIcon>{logo}</SquareIcon>
+          <div className="min-w-0">
+            <p className="text-xs text-ink-3">{stepLabel}</p>
+            <h3 className="truncate text-sm font-semibold text-ink">{title}</h3>
+          </div>
         </div>
         {status}
       </div>
-      <div className="mt-3 flex flex-1 flex-col text-[12.5px] leading-5 text-ink-2">
-        {children}
-      </div>
-    </div>
+      <div className="flex flex-1 flex-col gap-2.5 text-[13px] leading-5 text-ink-2">{children}</div>
+    </li>
   );
 }
 
+function StatusBadge({ tone, children }: { tone: Extract<Tone, "ok" | "warn" | "neutral">; children: ReactNode }) {
+  return (
+    <ToneBadge tone={tone} dot className="shrink-0">
+      {children}
+    </ToneBadge>
+  );
+}
+
+/* Logos de marca: conservan sus colores. */
 const logos = {
   shopify: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+    <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden>
       <path fill="#95BF47" d="M15.3 3.4c-.1 0-.2 0-.3.1l-.6.2C14 2.6 13.4 2 12.4 2h-.1c-.3-.4-.7-.5-1-.5-2.4 0-3.6 3-4 4.6l-1.7.5c-.5.2-.5.2-.6.7L3.7 19.4 14.5 21.4l5.8-1.3S15.4 3.5 15.3 3.4zM12.6 4.1l-.9.3V4.2c0-.6-.1-1-.2-1.4.5.1.9.6 1.1 1.3zm-1.8-1.2c.2.4.3.9.3 1.6v.1l-1.9.6c.4-1.4 1-2.1 1.6-2.3zm-.7-.7c.1 0 .2 0 .3.1-.8.4-1.7 1.4-2.1 3.3l-1.5.5c.4-1.4 1.4-3.9 3.3-3.9z" />
       <path fill="#5E8E3E" d="M15 3.5l-.6.2-.6 17.7 6.5-1.3S15.4 3.5 15.3 3.4c-.1 0-.2 0-.3.1z" />
       <path fill="#fff" d="M11.3 7.7l-.7 2.1s-.6-.3-1.4-.3c-1.1 0-1.2.7-1.2.9 0 1 2.6 1.4 2.6 3.7 0 1.8-1.2 3-2.7 3-1.8 0-2.8-1.1-2.8-1.1l.5-1.6s1 .8 1.8.8c.5 0 .8-.4.8-.7 0-1.3-2.1-1.4-2.1-3.5 0-1.8 1.3-3.5 3.9-3.5 1 0 1.3.2 1.3.2z" />
     </svg>
   ),
   tiktok: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+    <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden>
       <path fill="#25F4EE" d="M9.4 9.4v-.9a6.9 6.9 0 0 0-.9-.1 6.6 6.6 0 0 0-3.8 12 6.6 6.6 0 0 1 4.7-11z" />
       <path fill="#FE2C55" d="M9.6 19.5a3 3 0 0 0 3-2.9V2.5h2.6a5 5 0 0 1-.1-.9h-3.5v14.1a3 3 0 0 1-3 2.9 3 3 0 0 1-1.4-.3 3 3 0 0 0 2.4 1.2zM19.9 7.3v-.9a4.9 4.9 0 0 1-2.7-.8 5 5 0 0 0 2.7 1.7z" />
       <path fill="#000" d="M17.2 5.6a5 5 0 0 1-1.2-3.1h-.9a5 5 0 0 0 2.1 3.1zM8.5 12.5a3 3 0 0 0-1.4 5.7 3 3 0 0 1 2.3-4.8 3 3 0 0 1 .9.1V9.9a6.5 6.5 0 0 0-.9-.1h-.2v2.8a3 3 0 0 0-.7-.1zM19.9 7.3v2.7a8.5 8.5 0 0 1-5-1.6v7.2a6.6 6.6 0 0 1-10.2 5.5A6.6 6.6 0 0 0 16 16.4V9.2a8.5 8.5 0 0 0 5 1.6V7.4a5 5 0 0 1-1.1-.1z" />
     </svg>
   ),
   meta: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+    <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden>
       <path fill="#0866FF" d="M6.9 5C4.2 5 2 8.9 2 13c0 2.5 1.1 4.2 3.1 4.2 1.6 0 2.7-.8 4.6-4l1.1-1.9.4.7 1.3 2.2c1.8 2.9 2.9 3.6 4.5 3.6 2 0 3-1.7 3-4.1C20 9 17.9 5 15.2 5c-1.5 0-2.7 1-4 2.8C9.9 6 8.6 5 6.9 5zm8.2 2.3c1.6 0 2.9 2.4 2.9 5.6 0 1.2-.4 1.9-1.1 1.9-.7 0-1.1-.4-2.4-2.5l-1.4-2.4-.6-1c.9-1.1 1.6-1.6 2.6-1.6zm-8.3.2c1 0 1.7.5 2.9 2.4l-.9 1.5c-1.5 2.3-2 2.9-2.8 2.9-.8 0-1.2-.7-1.2-1.9 0-2.5 1-4.9 2-4.9z" />
     </svg>
   ),
   courier: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 text-accent-text" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" />
       <circle cx="7" cy="17.5" r="1.8" />
       <circle cx="17" cy="17.5" r="1.8" />
@@ -147,7 +148,6 @@ const logos = {
 export function RealProfitConnect({
   connections,
   installUrl,
-  realProfitUrl,
   metaOAuth = false,
   metaBusinessId,
   onChanged,
@@ -156,7 +156,6 @@ export function RealProfitConnect({
 }: {
   connections: RpConnections | null;
   installUrl: string | null;
-  realProfitUrl: string;
   /** Muestra «Conectar con Facebook» (OAuth). Público cuando Meta apruebe ads_read. */
   metaOAuth?: boolean;
   /** Business de Real Profit con el que el cliente comparte su cuenta de Meta (modo socio). */
@@ -362,60 +361,33 @@ export function RealProfitConnect({
     URL.revokeObjectURL(url);
   }
 
-  const lockedNote = <p className="mt-auto pt-2 text-[12px] text-ink-3">{t("needsShopify")}</p>;
+  const lockedNote = <p className="mt-auto text-xs text-ink-3">{t("needsShopify")}</p>;
+  const courierCount = c?.courier.ordersFromCourier ?? 0;
 
   return (
-    <section
+    <PanelCard
       id="profit-shopify-connect"
-      aria-labelledby="rp-connect-title"
-      className="scroll-mt-6 overflow-hidden rounded-card border border-line bg-[linear-gradient(160deg,#fffaf6_0%,#ffffff_50%,#faf8f5_100%)]"
+      className="scroll-mt-6"
+      title={t("sourcesTitle")}
+      action={
+        <ToneBadge tone={connectedCount === 4 ? "ok" : "neutral"} className="num">
+          {t("progress", { done: connectedCount, total: 4 })}
+        </ToneBadge>
+      }
     >
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-5 sm:px-6">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <a
-              id="rp-connect-title"
-              href={realProfitUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-1.5 text-[1.35rem] font-bold tracking-[-0.03em] text-ink hover:text-accent-text"
-            >
-              Real Profit COD
-              <svg viewBox="0 0 20 20" className="h-4 w-4 opacity-50 transition group-hover:opacity-100" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M7 13 13 7M8 7h5v5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-            <span className="rounded-full bg-ok-bg px-2 py-0.5 text-[11px] font-bold text-ok-fg ring-1 ring-ok-line">
-              {t("free")}
-            </span>
-          </div>
-          <p className="mt-1 max-w-xl text-[13px] leading-5 text-ink-2">{t("subtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2" aria-label={t("progress", { done: connectedCount, total: 4 })}>
-          <div className="flex gap-1" aria-hidden>
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={`h-1.5 w-6 rounded-full ${i < connectedCount ? "bg-accent" : "bg-subtle"}`} />
-            ))}
-          </div>
-          <span className="text-[12px] font-semibold tabular-nums text-ink-2">
-            {t("progress", { done: connectedCount, total: 4 })}
-          </span>
-        </div>
-      </div>
-
-      <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {/* 1 · TikTok Ads */}
-        <SourceCard
-          step={1}
+        <SourceTile
+          stepLabel={t("step", { n: 1 })}
           logo={logos.tiktok}
           title={t("tiktokTitle")}
           status={
             !c?.tiktok.connected ? (
-              <StatusPill tone="locked">{t("noAccounts")}</StatusPill>
+              <StatusBadge tone="neutral">{t("noAccounts")}</StatusBadge>
             ) : tiktokLinked ? (
-              <StatusPill tone="ok">{t("connected")}</StatusPill>
+              <StatusBadge tone="ok">{t("connected")}</StatusBadge>
             ) : (
-              <StatusPill tone="todo">{t("pending")}</StatusPill>
+              <StatusBadge tone="warn">{t("pending")}</StatusBadge>
             )
           }
         >
@@ -427,7 +399,7 @@ export function RealProfitConnect({
               <button
                 type="button"
                 onClick={() => onTikTokLinkedChange(false)}
-                className="mt-2 self-start text-[12px] font-semibold text-ink-3 underline-offset-2 hover:underline"
+                className={linkishMuted}
               >
                 {t("tiktokHide")}
               </button>
@@ -438,24 +410,24 @@ export function RealProfitConnect({
               <button
                 type="button"
                 onClick={() => onTikTokLinkedChange(true)}
-                className={`${primaryBtn} mt-3 self-start`}
+                className={buttonClass("primary", "sm", "self-start")}
               >
                 {t("tiktokConnect")}
               </button>
             </>
           )}
-        </SourceCard>
+        </SourceTile>
 
         {/* 2 · Meta Ads (no exige Shopify) */}
-        <SourceCard
-          step={2}
+        <SourceTile
+          stepLabel={t("step", { n: 2 })}
           logo={logos.meta}
           title={t("metaTitle")}
           status={
             c?.meta.connected ? (
-              <StatusPill tone="ok">{t("connected")}</StatusPill>
+              <StatusBadge tone="ok">{t("connected")}</StatusBadge>
             ) : (
-              <StatusPill tone="todo">{t("pending")}</StatusPill>
+              <StatusBadge tone="warn">{t("pending")}</StatusBadge>
             )
           }
         >
@@ -470,7 +442,7 @@ export function RealProfitConnect({
                   t("metaOnBody")
                 )}
               </p>
-              <button type="button" onClick={() => setMetaEditing(true)} className="mt-2 self-start text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline">
+              <button type="button" onClick={() => setMetaEditing(true)} className={linkish}>
                 {t("metaChange")}
               </button>
             </>
@@ -478,17 +450,17 @@ export function RealProfitConnect({
             <>
               {metaOAuth ? (
                 <>
-                  <a href="/api/profit/meta-oauth" className={`${primaryBtn} gap-2 self-start bg-[#1877f2]`}>
+                  <a href="/api/profit/meta-oauth" className={metaBrandBtn}>
                     {t("metaOAuthButton")}
                   </a>
-                  <p className="mt-2 text-[12px] text-ink-3">{t("metaOAuthOr")}</p>
+                  <p className="text-xs text-ink-3">{t("metaOAuthOr")}</p>
                 </>
               ) : null}
-              <ol className="list-decimal space-y-1.5 pl-4">
+              <ol className="list-decimal space-y-2 pl-4 marker:text-ink-3">
                 <li>
                   {t("metaStep1")}
-                  <span className="mt-1.5 flex items-center gap-2">
-                    <code className="rounded-lg bg-field px-2 py-1 text-[12.5px] font-bold tabular-nums text-ink ring-1 ring-line">
+                  <span className="mt-1.5 flex max-w-full items-center gap-2 rounded-ctl border border-line bg-field py-1 pl-3 pr-1">
+                    <code className="num min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
                       {metaBusinessId}
                     </code>
                     <button
@@ -498,17 +470,18 @@ export function RealProfitConnect({
                         setCopied(true);
                         window.setTimeout(() => setCopied(false), 1800);
                       }}
-                      className="text-[12px] font-semibold text-accent-text hover:underline"
+                      className={buttonClass("ghost", "sm")}
                     >
+                      <PanelIcon name={copied ? "check" : "copy"} />
                       {copied ? t("copied") : t("copy")}
                     </button>
                   </span>
                 </li>
                 <li>{t("metaStep2")}</li>
               </ol>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <input
-                  className={inputClass}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  className="min-w-0 sm:flex-1"
                   placeholder={t("metaPlaceholder")}
                   value={adAccount}
                   onChange={(e) => setAdAccount(e.target.value)}
@@ -516,82 +489,107 @@ export function RealProfitConnect({
                   autoComplete="off"
                   aria-label={t("metaPlaceholder")}
                 />
-                <button type="button" onClick={() => void connectMeta()} disabled={metaBusy || adAccount.replace(/\D/g, "").length < 5} className={primaryBtn}>
+                <button
+                  type="button"
+                  onClick={() => void connectMeta()}
+                  disabled={metaBusy || adAccount.replace(/\D/g, "").length < 5}
+                  className={buttonClass("primary", "md", "shrink-0")}
+                >
                   {metaBusy ? t("checking") : t("metaConnect")}
                 </button>
               </div>
-              {metaMsg ? (
-                <p className={`mt-2 text-[12px] font-medium ${metaMsg.ok ? "text-ok-fg" : "text-danger-fg"}`}>{metaMsg.text}</p>
-              ) : null}
+              {metaMsg ? <ResultLine ok={metaMsg.ok}>{metaMsg.text}</ResultLine> : null}
               {metaRequestsUrl ? (
-                <a
-                  href={metaRequestsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 self-start text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline"
-                >
+                <a href={metaRequestsUrl} target="_blank" rel="noreferrer" className={linkish}>
                   {t("metaOpenRequests")}
                 </a>
               ) : null}
-              <details className="mt-4 rounded-box border border-dashed border-line bg-surface/60 p-3">
-                <summary className="cursor-pointer text-[12.5px] font-semibold text-ink">{t("metaCsvTitle")}</summary>
-                <ol className="mt-2 list-decimal space-y-1 pl-4 text-[12px] text-ink-2">
-                  <li>{t("metaCsvStep1")}</li>
-                  <li>{t("metaCsvStep2")}</li>
-                  <li>{t("metaCsvStep3")}</li>
-                </ol>
-                <input
-                  ref={metaFileRef}
-                  type="file"
-                  accept=".csv,.txt,text/csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    void onMetaFile(e.target.files?.[0]);
-                    e.target.value = "";
-                  }}
-                />
-                <button type="button" onClick={() => metaFileRef.current?.click()} disabled={metaCsvBusy} className={`${ghostBtn} mt-2`}>
-                  {metaCsvBusy && !metaCsvPreview ? t("reading") : t("metaCsvUpload")}
-                </button>
-                {metaCsvPreview ? (
-                  metaCsvPreview.error ? (
-                    <p className="mt-2 text-[12px] font-medium text-danger-fg">{metaCsvPreview.error}</p>
-                  ) : (
-                    <div className="mt-2 rounded-box bg-field p-3">
-                      <p className="text-[12.5px] font-semibold text-ink">
-                        {t("metaCsvSummary", {
-                          days: metaCsvPreview.days ?? 0,
-                          campaigns: metaCsvPreview.campaigns ?? 0,
-                          spend: `${metaCsvPreview.currency ?? ""} ${(metaCsvPreview.totalSpend ?? 0).toLocaleString()}`,
-                        })}
-                      </p>
-                      <div className="mt-2 flex gap-2">
-                        <button type="button" onClick={() => metaCsv && void sendMetaCsv(metaCsv, true)} disabled={metaCsvBusy || !metaCsvPreview.days} className={primaryBtn}>
-                          {metaCsvBusy ? t("applying") : t("metaCsvApply")}
-                        </button>
-                        <button type="button" onClick={() => { setMetaCsvPreview(null); setMetaCsv(null); }} className={ghostBtn}>
-                          {t("cancel")}
-                        </button>
+              <details className="group mt-1 rounded-box border border-line bg-field">
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0 flex-1">{t("metaCsvTitle")}</span>
+                  <PanelIcon name="chevron-down" className="size-3.5 text-ink-3 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="flex flex-col gap-2.5 px-3 pb-3">
+                  <ol className="list-decimal space-y-1 pl-4 text-xs text-ink-2 marker:text-ink-3">
+                    <li>{t("metaCsvStep1")}</li>
+                    <li>{t("metaCsvStep2")}</li>
+                    <li>{t("metaCsvStep3")}</li>
+                  </ol>
+                  <input
+                    ref={metaFileRef}
+                    type="file"
+                    accept=".csv,.txt,text/csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      void onMetaFile(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => metaFileRef.current?.click()}
+                    disabled={metaCsvBusy}
+                    className={buttonClass("outline", "sm", "self-start")}
+                  >
+                    <PanelIcon name="upload" />
+                    {metaCsvBusy && !metaCsvPreview ? t("reading") : t("metaCsvUpload")}
+                  </button>
+                  {metaCsvPreview ? (
+                    metaCsvPreview.error ? (
+                      <ResultLine ok={false}>{metaCsvPreview.error}</ResultLine>
+                    ) : (
+                      <div className="rounded-box border border-line bg-surface p-3">
+                        <p className="num text-[13px] font-semibold text-ink">
+                          {t("metaCsvSummary", {
+                            days: metaCsvPreview.days ?? 0,
+                            campaigns: metaCsvPreview.campaigns ?? 0,
+                            spend: `${metaCsvPreview.currency ?? ""} ${(metaCsvPreview.totalSpend ?? 0).toLocaleString()}`,
+                          })}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => metaCsv && void sendMetaCsv(metaCsv, true)}
+                            disabled={metaCsvBusy || !metaCsvPreview.days}
+                            className={buttonClass("primary", "sm")}
+                          >
+                            {metaCsvBusy ? t("applying") : t("metaCsvApply")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMetaCsvPreview(null);
+                              setMetaCsv(null);
+                            }}
+                            className={buttonClass("outline", "sm")}
+                          >
+                            {t("cancel")}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )
-                ) : null}
-                {metaCsvDone ? (
-                  <p className={`mt-2 text-[12px] font-medium ${metaCsvDone.error ? "text-danger-fg" : "text-ok-fg"}`}>
-                    {metaCsvDone.error ?? metaCsvDone.message}
-                  </p>
-                ) : null}
+                    )
+                  ) : null}
+                  {metaCsvDone ? (
+                    <ResultLine ok={!metaCsvDone.error}>{metaCsvDone.error ?? metaCsvDone.message}</ResultLine>
+                  ) : null}
+                </div>
               </details>
             </>
           )}
-        </SourceCard>
+        </SourceTile>
 
         {/* 3 · Shopify */}
-        <SourceCard
-          step={3}
+        <SourceTile
+          stepLabel={t("step", { n: 3 })}
           logo={logos.shopify}
           title={t("shopifyTitle")}
-          status={shopifyOn ? <StatusPill tone="ok">{t("connected")}</StatusPill> : <StatusPill tone="todo">{t("pending")}</StatusPill>}
+          status={
+            shopifyOn ? (
+              <StatusBadge tone="ok">{t("connected")}</StatusBadge>
+            ) : (
+              <StatusBadge tone="warn">{t("pending")}</StatusBadge>
+            )
+          }
         >
           {shopifyOn ? (
             <p>
@@ -603,9 +601,9 @@ export function RealProfitConnect({
           ) : (
             <>
               <p>{t("shopifyBody")}</p>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <input
-                  className={inputClass}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  className="min-w-0 sm:flex-1"
                   placeholder={t("shopifyPlaceholder")}
                   value={shop}
                   onChange={(e) => setShop(e.target.value)}
@@ -614,35 +612,31 @@ export function RealProfitConnect({
                   aria-label={t("shopifyPlaceholder")}
                 />
                 {installHref ? (
-                  <a href={installHref} target="_blank" rel="noreferrer" className={primaryBtn}>
+                  <a href={installHref} target="_blank" rel="noreferrer" className={buttonClass("primary", "md", "shrink-0")}>
                     {t("shopifyInstall")}
                   </a>
                 ) : null}
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => void retryLink()} disabled={linkBusy} className="text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline disabled:opacity-50">
-                  {linkBusy ? t("checking") : t("shopifyAlready")}
-                </button>
-              </div>
-              {linkMsg ? (
-                <p className={`mt-2 text-[12px] font-medium ${linkMsg.ok ? "text-ok-fg" : "text-danger-fg"}`}>{linkMsg.text}</p>
-              ) : null}
+              <button type="button" onClick={() => void retryLink()} disabled={linkBusy} className={linkish}>
+                {linkBusy ? t("checking") : t("shopifyAlready")}
+              </button>
+              {linkMsg ? <ResultLine ok={linkMsg.ok}>{linkMsg.text}</ResultLine> : null}
             </>
           )}
-        </SourceCard>
+        </SourceTile>
 
         {/* 4 · Courier CSV */}
-        <SourceCard
-          step={4}
+        <SourceTile
+          stepLabel={t("step", { n: 4 })}
           logo={logos.courier}
           title={t("courierTitle")}
           status={
-            (c?.courier.ordersFromCourier ?? 0) > 0 ? (
-              <StatusPill tone="ok">{t("courierCount", { count: c!.courier.ordersFromCourier })}</StatusPill>
+            courierCount > 0 ? (
+              <StatusBadge tone="ok">{t("courierCount", { count: courierCount })}</StatusBadge>
             ) : shopifyOn ? (
-              <StatusPill tone="todo">{t("pending")}</StatusPill>
+              <StatusBadge tone="warn">{t("pending")}</StatusBadge>
             ) : (
-              <StatusPill tone="locked">{t("locked")}</StatusPill>
+              <StatusBadge tone="neutral">{t("locked")}</StatusBadge>
             )
           }
         >
@@ -661,19 +655,26 @@ export function RealProfitConnect({
                   e.target.value = "";
                 }}
               />
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => fileRef.current?.click()} disabled={csvBusy} className={primaryBtn}>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={csvBusy}
+                  className={buttonClass("primary", "sm")}
+                >
+                  <PanelIcon name="upload" />
                   {csvBusy && !preview ? t("reading") : t("courierUpload")}
                 </button>
-                <button type="button" onClick={downloadTemplate} className={ghostBtn}>
+                <button type="button" onClick={downloadTemplate} className={buttonClass("outline", "sm")}>
+                  <PanelIcon name="download" />
                   {t("courierTemplate")}
                 </button>
               </div>
 
               {preview ? (
-                <div className="mt-3 rounded-box border border-line bg-field p-3">
+                <div className="rounded-box border border-line bg-field p-3">
                   {preview.error && !preview.matched ? (
-                    <p className="font-medium text-danger-fg">{preview.error}</p>
+                    <ResultLine ok={false}>{preview.error}</ResultLine>
                   ) : (
                     <>
                       <p className="font-semibold text-ink">
@@ -681,25 +682,33 @@ export function RealProfitConnect({
                         {t("courierMatched", { matched: preview.matched ?? 0, total: preview.totalRows ?? 0 })}
                       </p>
                       {preview.byStatus ? (
-                        <p className="mt-1 text-[12px] text-ink-2">
+                        <p className="mt-1 text-xs text-ink-2">
                           {Object.entries(preview.byStatus)
                             .map(([k, v]) => `${t(`status.${k}` as never)}: ${v}`)
                             .join(" · ")}
                         </p>
                       ) : null}
                       {preview.notFound ? (
-                        <p className="mt-1 text-[12px] text-ink-3">{t("courierNotFound", { count: preview.notFound })}</p>
+                        <p className="mt-1 text-xs text-ink-3">{t("courierNotFound", { count: preview.notFound })}</p>
                       ) : null}
-                      <div className="mt-2 flex gap-2">
+                      <div className="mt-2 flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={() => csv && void sendCsv(csv, true)}
                           disabled={csvBusy || !preview.matched}
-                          className={primaryBtn}
+                          className={buttonClass("primary", "sm")}
                         >
                           {csvBusy ? t("applying") : t("courierApply")}
                         </button>
-                        <button type="button" onClick={() => { setPreview(null); setCsv(null); setFileName(""); }} className={ghostBtn}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPreview(null);
+                            setCsv(null);
+                            setFileName("");
+                          }}
+                          className={buttonClass("outline", "sm")}
+                        >
                           {t("cancel")}
                         </button>
                       </div>
@@ -707,15 +716,11 @@ export function RealProfitConnect({
                   )}
                 </div>
               ) : null}
-              {applied ? (
-                <p className={`mt-2 text-[12px] font-medium ${applied.error ? "text-danger-fg" : "text-ok-fg"}`}>
-                  {applied.error ?? applied.message}
-                </p>
-              ) : null}
+              {applied ? <ResultLine ok={!applied.error}>{applied.error ?? applied.message}</ResultLine> : null}
             </>
           )}
-        </SourceCard>
-      </div>
-    </section>
+        </SourceTile>
+      </ul>
+    </PanelCard>
   );
 }

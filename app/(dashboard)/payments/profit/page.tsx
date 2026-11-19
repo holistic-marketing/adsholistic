@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
+import { ReviewQueueHeader } from "@/features/payments/components/ReviewQueueHeader";
 import { RealProfitVoucherReviewHost } from "@/features/payments/components/RealProfitVoucherReviewHost";
 import { requirePermission } from "@/lib/auth/guards.server";
 import { getHecomCliente } from "@/lib/hecom/clientes.server";
@@ -50,53 +50,23 @@ export default async function RealProfitPaymentsReviewPage({
 
   return (
     <div className={dashboardClasses.page}>
-      <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--auth-text-muted)]">
-          Gerente · Profit COD
-          {hecomClienteId ? " · Filtro cliente" : " · Todos los clientes"}
-        </p>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--auth-text)] sm:text-2xl">
-          Pagos Profit
-        </h1>
-        <p className="max-w-3xl text-sm text-[var(--auth-text-muted)]">
-          Depósitos{" "}
-          <strong className="font-semibold text-[var(--auth-text)]">
-            Real Profit COD · $20
-          </strong>{" "}
-          pendientes. Al aceptar se activa el extra y se vincula la tienda
-          Shopify si ya está instalada — no acredita cartera ads.
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          {hecomClienteId ? (
-            <>
-              <span className="rounded-full bg-warn-bg px-3 py-1 text-xs font-semibold text-warn-fg ring-1 ring-warn-line/80">
-                Filtrado
-                {clienteName ? `: ${clienteName}` : ""}
-              </span>
-              <Link
-                href={routes.paymentsProfit}
-                className="text-xs font-semibold text-[var(--brand-primary)] underline-offset-2 hover:underline"
-              >
-                Ver todos los clientes
-              </Link>
-            </>
-          ) : selected?.id ? (
-            <Link
-              href={`${routes.paymentsProfit}?cliente=${encodeURIComponent(selected.id)}`}
-              className="text-xs font-medium text-[var(--auth-text-muted)] underline-offset-2 hover:text-[var(--auth-text)] hover:underline"
-            >
-              Filtrar solo {selected.name}
-            </Link>
-          ) : null}
-          <Link
-            href={routes.paymentsManual}
-            className="text-xs font-medium text-[var(--auth-text-muted)] underline-offset-2 hover:text-[var(--auth-text)] hover:underline"
-          >
-            Ir a Pagos manuales (cartera)
-          </Link>
-        </div>
-      </header>
+      <ReviewQueueHeader
+        area="Profit COD"
+        title="Pagos Profit"
+        lede={
+          <>
+            Depósitos{" "}
+            <strong className="font-semibold text-ink">Real Profit COD · $20</strong>{" "}
+            pendientes. Al aceptar se activa el extra y se vincula la tienda
+            Shopify si ya está instalada — no acredita cartera ads.
+          </>
+        }
+        links={[{ label: "Pagos manuales (cartera)", href: routes.paymentsManual }]}
+        baseHref={routes.paymentsProfit}
+        filteredId={hecomClienteId}
+        filteredName={clienteName}
+        selected={selected}
+      />
 
       <RealProfitVoucherReviewHost
         staffMode

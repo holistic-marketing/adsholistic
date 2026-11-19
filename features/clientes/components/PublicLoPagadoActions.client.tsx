@@ -1,6 +1,8 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { PublicDebtCardPay } from "@/features/clientes/components/PublicDebtCardPay.client";
 import { MissingCobroClaimPanel } from "@/features/clientes/components/MissingCobroClaimPanel.client";
 import { ManualPaymentModal } from "@/features/payments/components/ManualPaymentModal.client";
@@ -37,45 +39,25 @@ export function PublicLoPagadoActions({
 
   return (
     <div className="space-y-4">
-      <section className="relative overflow-hidden rounded-card bg-gradient-to-br from-field via-white to-subtle p-5 ring-1 ring-accent-line sm:p-6">
-        <svg
-          viewBox="0 0 120 120"
-          className="pointer-events-none absolute -right-5 -top-5 h-24 w-24 text-accent-text sm:-right-6 sm:-top-6 sm:h-48 sm:w-48"
-          fill="currentColor"
-          aria-hidden
-        >
-          <path d="M60 0 66 48 104 16 72 54 120 60 72 66 104 104 66 72 60 120 54 72 16 104 48 66 0 60 48 54 16 16 54 48Z" />
-        </svg>
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <section className="rounded-card border border-line bg-surface p-5 shadow-card sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">
-              Pagos
-            </p>
-            <h2 className="mt-1 text-[1.35rem] font-semibold leading-tight tracking-[-0.03em] text-ink sm:text-[1.5rem]">
-              Pago manual
-            </h2>
-            <p className="mt-2 text-[13px] leading-5 text-ink">
+            <p className="eyebrow">Pagos</p>
+            <h2 className="mt-1 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">Pago manual</h2>
+            <p className="mt-1.5 text-ink-2">
               Paga lo que debes de este mes. Eliges el monto, transfieres y subes
               el voucher. Gerencia lo ve en Pagos manuales como pago de deuda: baja
               lo que debes y no recarga cartera.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            size="lg"
+            className="shrink-0 self-start sm:self-auto pointer-coarse:h-11"
             onClick={() => setPayOpen(true)}
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-full bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:self-auto"
           >
             Pagar y subir voucher
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-              <path
-                d="M5 10h10m-4-4 4 4-4 4"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+            <PanelIcon name="arrow-right" />
+          </Button>
         </div>
       </section>
 

@@ -1,13 +1,17 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { formatMoney } from "@/lib/format-money";
 import { PaymentGatewaySelector } from "./PaymentGatewaySelector.client";
 import { PaymentsMoneyFlowGuide } from "./PaymentsMoneyFlowGuide";
 import {
   PaymentsFundingModeSwitch,
   type PaymentsFundingMode,
 } from "./PaymentsFundingModeSwitch.client";
-import { WalletSummaryActions } from "./WalletSummaryActions.client";
 import type {
   PaymentGateway,
   PaymentGatewayId,
@@ -57,112 +61,104 @@ export function PaymentsGatewaySection({
       />
 
       {showClientDeposit ? (
-        <section
+        <PanelCard
           id="recargar-saldo"
-          className="scroll-mt-20 overflow-hidden rounded-card border border-[var(--auth-border)] bg-surface"
+          className="scroll-mt-20"
+          title={t("reloadSection.title")}
+          description={t("reloadSection.body")}
         >
-          <div className="border-b border-[var(--auth-divider)] px-5 py-5 sm:px-6">
-            {/*
-             * El saldo ya está fijo en la barra lateral y otra vez en “Asignar
-             * saldo”, donde sí aporta (compara contra TikTok). Repetirlo acá
-             * era la tercera copia del mismo número.
-             */}
-            <div className="min-w-0">
-              <h2 className="text-[1.25rem] font-semibold tracking-[-0.025em] text-[var(--auth-text)]">
-                {t("reloadSection.title")}
-              </h2>
-              <p className="mt-1 max-w-xl text-[13px] leading-5 text-[var(--auth-text-muted)]">
-                {t("reloadSection.body")}
-              </p>
-            </div>
-            <PaymentsMoneyFlowGuide selected={selected} feePercent={depositFeePercent} />
+          <fieldset>
+            <legend className="sr-only">{t("reloadSection.method")}</legend>
+            <PaymentGatewaySelector
+              gateways={gateways}
+              selected={selected}
+              onSelect={onSelect}
+            />
+          </fieldset>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button
+              onClick={onContinue}
+              disabled={selectedInMaintenance || !selectedGateway}
+              className="max-sm:w-full"
+            >
+              {selectedInMaintenance
+                ? t("reloadSection.unavailable")
+                : selectedGateway
+                  ? t("reloadSection.reloadWith", {
+                      name: selectedGateway.name,
+                    })
+                  : t("reloadSection.title")}
+            </Button>
           </div>
 
-          <div className="px-5 py-5 sm:px-6 sm:py-6">
-            <fieldset>
-              <legend className="mb-3 text-[13px] font-semibold text-[var(--auth-text)]">
-                {t("reloadSection.method")}
-              </legend>
-              <PaymentGatewaySelector
-                gateways={gateways}
-                selected={selected}
-                onSelect={onSelect}
-              />
-            </fieldset>
+          <PaymentsMoneyFlowGuide
+            selected={selected}
+            feePercent={depositFeePercent}
+            className="mt-4"
+          />
 
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={onContinue}
-                disabled={selectedInMaintenance || !selectedGateway}
-                className="inline-flex h-11 w-full shrink-0 items-center justify-center rounded-box bg-accent-btn px-5 text-[14px] font-semibold text-on-accent shadow-[0_8px_20px_rgb(212_120_64_/_0.2)] transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-              >
-                {selectedInMaintenance
-                  ? t("reloadSection.unavailable")
-                  : selectedGateway
-                    ? t("reloadSection.reloadWith", {
-                        name: selectedGateway.name,
-                      })
-                    : t("reloadSection.title")}
-              </button>
-              <WalletSummaryActions
-                availableBalance={wallet.balance}
-                currency={wallet.currency}
-                showAddBalance={false}
-              />
-            </div>
-
-            <details className="mt-5 border-t border-[var(--auth-divider)] pt-4 text-[12px] text-[var(--auth-text-muted)]">
-              <summary className="cursor-pointer font-medium outline-none hover:text-[var(--auth-text)] focus-visible:text-[var(--auth-text)]">
-                {t("reloadSection.walletDetails")}
-              </summary>
-              <dl className="mt-3 grid gap-3 sm:grid-cols-3">
-                <div>
-                  <dt className="text-[var(--auth-text-soft)]">
-                    {t("reloadSection.wallet")}
-                  </dt>
-                  <dd className="mt-0.5 font-medium text-[var(--auth-text)]">
-                    {wallet.name}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[var(--auth-text-soft)]">
-                    {t("reloadSection.lastTopUp")}
-                  </dt>
-                  <dd className="mt-0.5 font-medium text-[var(--auth-text)]">
-                    {wallet.lastTopUp ?? t("walletCard.noRecords")}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[var(--auth-text-soft)]">
-                    {t("reloadSection.feeHolistic")}
-                  </dt>
-                  <dd className="mt-0.5 font-medium text-[var(--auth-text)]">
-                    {t("reloadSection.feeOnNet", {
-                      percent: depositFeePercent,
-                    })}
-                  </dd>
-                </div>
-              </dl>
-            </details>
-          </div>
-        </section>
-      ) : (
-        <section className="rounded-card border border-[var(--auth-border)] bg-surface px-5 py-5 sm:px-6 sm:py-6">
-          <h2 className="text-[1.25rem] font-semibold tracking-[-0.025em] text-[var(--auth-text)]">
-            {t("reloadSection.bmTitle")}
-          </h2>
-          <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-[var(--auth-text-muted)]">
-            {t("reloadSection.bmBody")}
-          </p>
-          <a
-            href="#asignar-saldo"
-            className="mt-4 inline-flex h-11 items-center rounded-box bg-accent-btn px-5 text-[14px] font-semibold text-on-accent transition-[filter,transform] hover:brightness-[1.05] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--auth-accent)]/35 focus-visible:ring-offset-2"
+          <dl
+            aria-label={t("reloadSection.walletDetails")}
+            className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2"
           >
+            <MiniStat
+              label={t("reloadSection.wallet")}
+              value={formatMoney(wallet.balance, wallet.currency)}
+              sub={t("balanceCompare.holisticHint")}
+            />
+            <MiniStat
+              label={t("reloadSection.lastTopUp")}
+              value={wallet.lastTopUp ?? t("walletCard.noRecords")}
+              small
+            />
+            <MiniStat
+              label={t("reloadSection.feeHolistic")}
+              value={t("reloadSection.feeOnNet", { percent: depositFeePercent })}
+              small
+            />
+          </dl>
+        </PanelCard>
+      ) : (
+        <PanelCard
+          title={t("reloadSection.bmTitle")}
+          description={t("reloadSection.bmBody")}
+        >
+          <a href="#asignar-saldo" className={buttonClass("primary")}>
             {t("reloadSection.pickAccount")}
+            <PanelIcon name="arrow-right" />
           </a>
-        </section>
+        </PanelCard>
       )}
+    </div>
+  );
+}
+
+/** Dato chico de la cartera (v3 «mini»). */
+function MiniStat({
+  label,
+  value,
+  sub,
+  small = false,
+}: {
+  label: string;
+  value: ReactNode;
+  sub?: string;
+  small?: boolean;
+}) {
+  return (
+    <div className="min-w-0 rounded-box border border-line bg-field px-3 py-2.5">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd
+        className={
+          small
+            ? "mt-0.5 text-sm font-semibold text-ink [overflow-wrap:anywhere]"
+            : "num mt-0.5 text-[15px] font-semibold text-ink"
+        }
+      >
+        {value}
+      </dd>
+      {sub ? <dd className="text-xs text-ink-3">{sub}</dd> : null}
     </div>
   );
 }

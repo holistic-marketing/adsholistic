@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { overrideClasses } from "@/lib/ui/override-classes";
 
 /* Encabezado de página (sistema visual v3): título de 24 px, bajada en gris,
    un dato al costado si hace falta y las acciones a la derecha. */
@@ -20,7 +21,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3", className)}>
+    <div className={overrideClasses("mb-5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3", className)}>
       <div className="min-w-0 flex-[1_1_320px]">
         {eyebrow ? <p className="eyebrow mb-1">{eyebrow}</p> : null}
         <h1 tabIndex={-1} className="text-2xl font-semibold leading-8 tracking-[-0.025em] text-ink outline-none">
@@ -57,7 +58,7 @@ export function PanelCard({
   children?: ReactNode;
 } & Omit<React.HTMLAttributes<HTMLElement>, "title">) {
   return (
-    <section className={cn("min-w-0 rounded-card border border-line bg-surface shadow-card", className)} {...rest}>
+    <section className={overrideClasses("min-w-0 rounded-card border border-line bg-surface shadow-card", className)} {...rest}>
       {title ? (
         <div
           className={cn(
@@ -72,7 +73,7 @@ export function PanelCard({
           {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
         </div>
       ) : null}
-      <div className={cn("px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4", bodyClassName)}>{children}</div>
+      <div className={overrideClasses("px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4", bodyClassName)}>{children}</div>
     </section>
   );
 }

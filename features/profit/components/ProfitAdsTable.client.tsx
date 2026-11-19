@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { ToneBadge, type Tone } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 import { moneyUsd } from "@/lib/format/money-usd";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import type { AdPerformance, AdPerformanceSummary } from "@/lib/radar/ad-performance";
@@ -16,18 +21,15 @@ type SortKey = "spend" | "ctr" | "results" | "costPerResult" | "hold2s" | "hold6
 
 const TOP = 10;
 
-const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-1";
-
 function pct(value: number | null) {
   return value == null ? "—" : `${Math.round(value * 100)}%`;
 }
 
-function vsTone(vs: number | null): string {
-  if (vs == null) return "";
-  if (vs <= 0.85) return "bg-subtle text-ok-fg";
-  if (vs >= 1.4) return "bg-field text-danger-fg";
-  return "bg-subtle text-ink-2";
+/** Costo por resultado frente al promedio: más barato es bueno. */
+function vsTone(vs: number): Tone {
+  if (vs <= 0.85) return "ok";
+  if (vs >= 1.4) return "danger";
+  return "neutral";
 }
 
 type LoadState = { key: string; data: (AdPerformanceSummary & { from: string; to: string }) | null; error: boolean };
@@ -94,50 +96,46 @@ export function ProfitAdsTable({ from, to }: { from: string; to: string }) {
     new Intl.DateTimeFormat(bcp47, { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${ymd}T12:00:00Z`));
 
   return (
-    <section className="overflow-hidden rounded-card bg-surface ring-1 ring-line" aria-busy={loading}>
-      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
-        <div className="min-w-0 max-w-[62ch]">
-          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">{t("title")}</h2>
-          <p className="mt-0.5 text-[12px] leading-[1.5] text-ink-2">{t("subtitle")}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {data?.totals.costPerResult != null ? (
-            <span className="rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium text-ink-2">
-              {t("average", { amount: moneyUsd(data.totals.costPerResult) })}
-            </span>
-          ) : null}
-          {data?.dataThrough ? (
-            <span className="text-[11px] font-medium text-ink-3">{t("dataThrough", { date: dateLabel(data.dataThrough) })}</span>
-          ) : null}
-        </div>
-      </div>
-
+    <PanelCard
+      aria-busy={loading}
+      title={t("title")}
+      description={t("subtitle")}
+      action={
+        data?.totals.costPerResult != null || data?.dataThrough ? (
+          <div className="flex flex-col items-end gap-1">
+            {data?.totals.costPerResult != null ? (
+              <ToneBadge className="num">{t("average", { amount: moneyUsd(data.totals.costPerResult) })}</ToneBadge>
+            ) : null}
+            {data?.dataThrough ? (
+              <span className="text-xs text-ink-3">{t("dataThrough", { date: dateLabel(data.dataThrough) })}</span>
+            ) : null}
+          </div>
+        ) : null
+      }
+    >
       {loading && !data ? (
-        <div className="space-y-2 px-4 pb-5 sm:px-5" aria-hidden>
+        <div className="space-y-2" aria-hidden>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-9 animate-pulse rounded-lg bg-subtle motion-reduce:animate-none" />
+            <div key={i} className="h-10 animate-pulse rounded-ctl bg-subtle motion-reduce:animate-none" />
           ))}
         </div>
       ) : state.error ? (
-        <div role="alert" className="flex flex-wrap items-center gap-3 px-4 pb-5 text-[13px] text-ink-2 sm:px-5">
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-[13px] text-ink-2">
           {t("error")}
-          <button
-            type="button"
-            onClick={() => setReloadToken((n) => n + 1)}
-            className={`rounded-lg border border-line px-3 py-1.5 text-[12.5px] font-semibold text-ink hover:border-line-strong ${focusRing}`}
-          >
+          <button type="button" onClick={() => setReloadToken((n) => n + 1)} className={buttonClass("outline", "sm")}>
+            <PanelIcon name="refresh" />
             {t("retry")}
           </button>
         </div>
       ) : sorted.length === 0 ? (
-        <p className="px-4 pb-5 text-[13px] text-ink-2 sm:px-5">{t("empty")}</p>
+        <p className="text-[13px] text-ink-2">{t("empty")}</p>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="-mx-2 overflow-x-auto">
             <table className="w-full min-w-[860px] border-collapse text-left text-[13px]">
               <thead>
-                <tr className="border-y border-line bg-field text-[11.5px] text-ink-3">
-                  <th scope="col" className="py-2.5 pl-4 pr-3 font-semibold sm:pl-5">
+                <tr className="border-b border-line">
+                  <th scope="col" className="h-10 whitespace-nowrap px-2 font-medium text-ink">
                     {t("columns.ad")}
                   </th>
                   {columns.map((col) => {
@@ -147,28 +145,24 @@ export function ProfitAdsTable({ from, to }: { from: string; to: string }) {
                         key={col.key}
                         scope="col"
                         aria-sort={active ? (sortAsc ? "ascending" : "descending") : "none"}
-                        className="py-2.5 pr-3 text-right font-semibold last:pr-4 sm:last:pr-5"
+                        className="h-10 whitespace-nowrap px-2 text-right font-medium text-ink"
                         title={col.key === "hold2s" || col.key === "hold6s" ? t("holdHint") : undefined}
                       >
                         <button
                           type="button"
                           onClick={() => sortBy(col.key, col.ascByDefault)}
                           aria-label={t("sortBy", { column: col.label })}
-                          className={`inline-flex items-center gap-1 rounded ${active ? "text-ink" : "hover:text-ink"} ${focusRing}`}
+                          className="inline-flex flex-row-reverse items-center gap-1 py-1"
                         >
                           {col.label}
-                          <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden
-                            className={`h-3 w-3 transition-transform duration-200 ${active ? "opacity-100" : "opacity-0"} ${sortAsc ? "rotate-180" : ""}`}
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={2.4}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="m6 9 6 6 6-6" />
-                          </svg>
+                          <PanelIcon
+                            name="chevron-down"
+                            className={cn(
+                              "size-3 transition-transform",
+                              active ? "text-accent-text" : "text-ink-3 opacity-0",
+                              active && sortAsc && "rotate-180",
+                            )}
+                          />
                         </button>
                       </th>
                     );
@@ -180,32 +174,34 @@ export function ProfitAdsTable({ from, to }: { from: string; to: string }) {
                   const diff = ad.vsAverage != null ? Math.round(Math.abs(1 - ad.vsAverage) * 100) : null;
                   return (
                     <tr key={`${ad.advertiserId}:${ad.adId}`} className="border-b border-line align-top last:border-0 hover:bg-field">
-                      <td className="max-w-[280px] py-2.5 pl-4 pr-3 sm:pl-5">
+                      <td className="max-w-[280px] p-2">
                         <p className="truncate font-semibold text-ink" title={ad.adName}>
                           {ad.adName}
                         </p>
                         {ad.campaignName ? (
-                          <p className="truncate text-[11.5px] text-ink-3" title={ad.campaignName}>
+                          <p className="truncate text-xs text-ink-3" title={ad.campaignName}>
                             {ad.campaignName}
                           </p>
                         ) : null}
                       </td>
-                      <td className="py-2.5 pr-3 text-right font-semibold tabular-nums text-ink">{moneyUsd(ad.spend)}</td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums text-ink-2">{ad.ctr == null ? "—" : `${ad.ctr.toFixed(2)}%`}</td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums text-ink-2">
+                      <td className="num p-2 text-right font-semibold text-ink">{moneyUsd(ad.spend)}</td>
+                      <td className="num p-2 text-right text-ink-2">{ad.ctr == null ? "—" : `${ad.ctr.toFixed(2)}%`}</td>
+                      <td className="num p-2 text-right text-ink-2">
                         {ad.results > 0 ? ad.results.toLocaleString(bcp47) : "—"}
                       </td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums">
-                        <span className="font-semibold text-ink">{ad.costPerResult == null ? "—" : moneyUsd(ad.costPerResult)}</span>
-                        {diff != null ? (
-                          <span className={`mt-1 block w-fit justify-self-end rounded-full px-2 py-0.5 text-[10.5px] font-medium ${vsTone(ad.vsAverage)} ml-auto`}>
-                            {diff < 5 ? t("vs.same") : ad.vsAverage! < 1 ? t("vs.better", { pct: diff }) : t("vs.worse", { pct: diff })}
+                      <td className="p-2 text-right">
+                        <span className="num font-semibold text-ink">{ad.costPerResult == null ? "—" : moneyUsd(ad.costPerResult)}</span>
+                        {diff != null && ad.vsAverage != null ? (
+                          <span className="mt-1 flex justify-end">
+                            <ToneBadge tone={vsTone(ad.vsAverage)}>
+                              {diff < 5 ? t("vs.same") : ad.vsAverage < 1 ? t("vs.better", { pct: diff }) : t("vs.worse", { pct: diff })}
+                            </ToneBadge>
                           </span>
                         ) : null}
                       </td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums text-ink-2">{pct(ad.hold2s)}</td>
-                      <td className="py-2.5 pr-3 text-right tabular-nums text-ink-2">{pct(ad.hold6s)}</td>
-                      <td className="py-2.5 pr-4 text-right tabular-nums text-ink-3 sm:pr-5">{ad.daysActive}</td>
+                      <td className="num p-2 text-right text-ink-2">{pct(ad.hold2s)}</td>
+                      <td className="num p-2 text-right text-ink-2">{pct(ad.hold6s)}</td>
+                      <td className="num p-2 text-right text-ink-3">{ad.daysActive}</td>
                     </tr>
                   );
                 })}
@@ -213,11 +209,11 @@ export function ProfitAdsTable({ from, to }: { from: string; to: string }) {
             </table>
           </div>
           {sorted.length > TOP ? (
-            <div className="border-t border-line px-4 py-2.5 sm:px-5">
+            <div className="mt-1 border-t border-line pt-3">
               <button
                 type="button"
                 onClick={() => setShowAll((v) => !v)}
-                className={`rounded text-[12.5px] font-semibold text-ink-2 hover:text-ink ${focusRing}`}
+                className="text-[13px] font-medium text-accent-text underline-offset-[3px] hover:underline"
               >
                 {showAll ? t("showLess") : t("showAll", { count: sorted.length })}
               </button>
@@ -225,6 +221,6 @@ export function ProfitAdsTable({ from, to }: { from: string; to: string }) {
           ) : null}
         </>
       )}
-    </section>
+    </PanelCard>
   );
 }

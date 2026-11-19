@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { Input, Select, Textarea } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { Note, SquareIcon, ToneBadge, type Tone } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { cn } from "@/lib/cn";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import type { ManualPaymentIntentItem } from "@/services/payments.service";
 import { listRecentPeriodos } from "@/lib/payments/missing-cobro.shared";
@@ -20,6 +24,15 @@ type ClaimForm = {
 };
 
 const METODOS = ["Interbank", "BCP", "Yape", "Plin", "Otro"] as const;
+
+/** Campos más altos en pantallas táctiles (el link público se abre en el celular). */
+const TOUCH = "pointer-coarse:h-11";
+
+const REVIEW_TONE: Partial<Record<ManualPaymentIntentItem["reviewStatus"], Tone>> = {
+  approved: "ok",
+  rejected: "neutral",
+  pending_review: "info",
+};
 
 function todayLimaYmd(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -66,6 +79,7 @@ export function MissingCobroClaimPanel({
 }) {
   const t = useTranslations("cobros");
   const router = useRouter();
+  const uid = useId();
   const periodos = useMemo(
     () => (periodosProp?.length ? periodosProp : listRecentPeriodos(6)),
     [periodosProp],
@@ -193,200 +207,144 @@ export function MissingCobroClaimPanel({
   }
 
   return (
-    <section className="space-y-3">
-      <div
-        className={[
-          "relative overflow-hidden rounded-card border border-[var(--auth-divider)]",
-          "bg-surface",
-          "p-4 sm:p-5",
-        ].join(" ")}
-      >
-        <div
-          className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-[var(--auth-accent-soft)] blur-2xl"
-          aria-hidden
-        />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <section aria-labelledby={`${uid}-title`} className="space-y-4">
+      {/* v3 «card soft»: fondo de campo, sin sombra. */}
+      <div className="rounded-card border border-line bg-field p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accent-text">
-              {t("missingCobro.eyebrow")}
-            </p>
-            <h3 className="mt-1 text-[1.05rem] font-bold tracking-[-0.02em] text-[var(--auth-text)] sm:text-[1.125rem]">
+            <p className="eyebrow">{t("missingCobro.eyebrow")}</p>
+            <h2 id={`${uid}-title`} className="mt-1 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
               {t("missingCobro.title")}
-            </h3>
-            <p className="mt-1.5 text-[13px] leading-5 text-[var(--auth-text-muted)]">
-              {t("missingCobro.body")}
-            </p>
-            <p className="mt-2 text-[11px] leading-4 text-[var(--auth-text-soft)]">
-              {t("missingCobro.noWalletHint")}
-            </p>
+            </h2>
+            <p className="mt-1.5 text-ink-2">{t("missingCobro.body")}</p>
+            <p className="mt-1.5 text-xs text-ink-3">{t("missingCobro.noWalletHint")}</p>
           </div>
           <Button
-            type="button"
-            size="sm"
-            className="h-10 shrink-0 self-start rounded-full px-4 sm:h-8 sm:self-center"
+            variant={open ? "ghost" : "outline"}
+            className="shrink-0 self-start pointer-coarse:h-11"
+            aria-expanded={open}
             onClick={() => {
               setOpen((v) => !v);
               setError(null);
               setSuccess(null);
             }}
           >
+            <PanelIcon name={open ? "x" : "upload"} />
             {open ? t("missingCobro.cancel") : t("missingCobro.cta")}
           </Button>
         </div>
 
         {success ? (
-          <p className="relative mt-3 rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[12px] text-ok-fg">
+          <Note tone="ok" icon="check-circle" className="mt-4">
             {success}
-          </p>
+          </Note>
         ) : null}
 
         {open ? (
-          <div className="relative mt-4 space-y-3 rounded-box border border-[var(--auth-divider)] bg-surface/90 p-3 shadow-sm sm:p-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.period")}
-                </span>
-                <select
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+          <div className="mt-4 space-y-4 rounded-box border border-line bg-surface p-4 shadow-ctl sm:p-5">
+            <div className="grid gap-x-3 gap-y-4 sm:grid-cols-2">
+              <Field id={`${uid}-period`} label={t("missingCobro.period")}>
+                <Select
+                  id={`${uid}-period`}
+                  className={TOUCH}
                   value={form.periodoResumen}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, periodoResumen: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, periodoResumen: e.target.value }))}
                 >
                   {periodos.map((p) => (
                     <option key={p} value={p}>
                       {p}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.paymentDate")}
-                </span>
-                <input
+                </Select>
+              </Field>
+              <Field id={`${uid}-date`} label={t("missingCobro.paymentDate")}>
+                <Input
+                  id={`${uid}-date`}
                   type="date"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+                  className={TOUCH}
                   value={form.paymentFecha}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, paymentFecha: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, paymentFecha: e.target.value }))}
                 />
-              </label>
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.amountUsd")}
-                </span>
-                <input
+              </Field>
+              <Field id={`${uid}-usd`} label={t("missingCobro.amountUsd")}>
+                <Input
+                  id={`${uid}-usd`}
                   type="number"
                   min="1"
                   step="0.01"
                   inputMode="decimal"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+                  className={cn(TOUCH, "tabular-nums")}
                   value={form.amountUsd}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, amountUsd: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, amountUsd: e.target.value }))}
                   placeholder="188.73"
                 />
-              </label>
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.amountPenOptional")}
-                </span>
-                <input
+              </Field>
+              <Field id={`${uid}-pen`} label={t("missingCobro.amountPenOptional")}>
+                <Input
+                  id={`${uid}-pen`}
                   type="number"
                   min="0"
                   step="0.01"
                   inputMode="decimal"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+                  className={cn(TOUCH, "tabular-nums")}
                   value={form.amountPen}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, amountPen: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, amountPen: e.target.value }))}
                   placeholder="636.38"
                 />
-              </label>
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.method")}
-                </span>
-                <select
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+              </Field>
+              <Field id={`${uid}-method`} label={t("missingCobro.method")}>
+                <Select
+                  id={`${uid}-method`}
+                  className={TOUCH}
                   value={form.metodo}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, metodo: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, metodo: e.target.value }))}
                 >
                   {METODOS.map((m) => (
                     <option key={m} value={m}>
                       {m}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label className="block text-[12px]">
-                <span className="font-medium text-[var(--auth-text)]">
-                  {t("missingCobro.opCode")}
-                </span>
-                <input
+                </Select>
+              </Field>
+              <Field id={`${uid}-op`} label={t("missingCobro.opCode")}>
+                <Input
+                  id={`${uid}-op`}
                   type="text"
-                  className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+                  className={TOUCH}
                   value={form.operationCode}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, operationCode: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, operationCode: e.target.value }))}
                   placeholder="01048566"
                 />
-              </label>
+              </Field>
             </div>
-            <label className="block text-[12px]">
-              <span className="font-medium text-[var(--auth-text)]">
-                {t("missingCobro.notes")}
-              </span>
-              <textarea
-                className="mt-1 min-h-11 w-full rounded-lg border border-[var(--auth-divider)] bg-surface px-3 py-2"
+            <Field id={`${uid}-notes`} label={t("missingCobro.notes")}>
+              <Textarea
+                id={`${uid}-notes`}
                 rows={2}
+                className="min-h-0"
                 value={form.notes}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, notes: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
               />
-            </label>
-            <div className="block text-[12px]">
-              <span className="font-medium text-[var(--auth-text)]">
-                {t("missingCobro.voucher")}
-              </span>
+            </Field>
+            <div className="grid min-w-0 gap-1.5">
+              <span className="text-sm font-medium text-ink">{t("missingCobro.voucher")}</span>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className={[
-                  "mt-1.5 flex w-full items-center gap-3 rounded-box border-2 border-dashed px-3 py-3.5 text-left transition",
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-box border border-dashed px-3 py-3.5 text-left",
                   file
-                    ? "border-ok-solid bg-ok-bg"
-                    : "border-accent/70 bg-field hover:border-accent hover:bg-accent-soft",
-                ].join(" ")}
+                    ? "border-ok-line bg-ok-bg"
+                    : "border-line-strong bg-field hover:border-accent hover:bg-accent-soft",
+                )}
               >
-                <span
-                  className={[
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[18px]",
-                    file
-                      ? "bg-ok-bg text-ok-fg"
-                      : "bg-accent-btn text-on-accent",
-                  ].join(" ")}
-                  aria-hidden
-                >
-                  {file ? "✓" : "↑"}
-                </span>
-                <span className="w-full min-w-0">
-                  <span className="block truncate text-[13px] font-semibold text-[var(--auth-text)]">
+                <SquareIcon icon={file ? "check" : "upload"} tone={file ? "ok" : "accent"} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-semibold text-ink">
                     {file ? file.name : t("missingCobro.voucherPick")}
                   </span>
-                  <span className="mt-0.5 block text-[11px] text-[var(--auth-text-muted)]">
-                    {file
-                      ? t("missingCobro.voucherReady")
-                      : t("missingCobro.voucherHint")}
+                  <span className="mt-0.5 block text-xs text-ink-2">
+                    {file ? t("missingCobro.voucherReady") : t("missingCobro.voucherHint")}
                   </span>
                 </span>
               </button>
@@ -401,17 +359,14 @@ export function MissingCobroClaimPanel({
             </div>
 
             {error ? (
-              <p className="text-[12px] text-danger-fg" role="alert">
+              <p className="flex items-start gap-1.5 text-xs text-danger-fg" role="alert">
+                <PanelIcon name="alert" className="mt-px size-3.5" />
                 {error}
               </p>
             ) : null}
 
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                disabled={busy}
-                onClick={() => void handleCreateAndUpload()}
-              >
+            <div className="flex flex-wrap items-center gap-2">
+              <Button className="pointer-coarse:h-11" disabled={busy} onClick={() => void handleCreateAndUpload()}>
                 {busy
                   ? uploading
                     ? t("missingCobro.uploading")
@@ -419,9 +374,7 @@ export function MissingCobroClaimPanel({
                   : t("missingCobro.submit")}
               </Button>
               {pendingIntentId ? (
-                <span className="self-center font-mono text-[10px] text-[var(--auth-text-muted)]">
-                  {pendingIntentId.slice(0, 8)}
-                </span>
+                <span className="font-mono text-[11px] text-ink-3">{pendingIntentId.slice(0, 8)}</span>
               ) : null}
             </div>
           </div>
@@ -429,48 +382,42 @@ export function MissingCobroClaimPanel({
       </div>
 
       {claims.length > 0 ? (
-        <div className="space-y-2 rounded-card border border-[var(--auth-divider)] bg-surface p-4 sm:p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-            {t("missingCobro.myReports")}
-          </p>
-          <ul className="divide-y divide-[var(--auth-divider)] rounded-box border border-[var(--auth-divider)]">
+        <PanelCard title={t("missingCobro.myReports")} bodyClassName="pt-1 sm:pt-2">
+          <ul>
             {claims.map((c) => (
               <li
                 key={c.id}
-                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-[12px]"
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-line py-2.5 last:border-0"
               >
                 <div className="min-w-0">
-                  <p className="font-semibold tabular-nums text-[var(--auth-text)]">
+                  <p className="num text-[13px] font-semibold text-ink">
                     ${c.amount.toFixed(2)} USD
                     {c.periodoResumen ? ` · ${c.periodoResumen}` : ""}
                   </p>
-                  <p className="text-[11px] text-[var(--auth-text-muted)]">
-                    {c.claimedPaymentFecha ??
-                      new Date(c.createdAt).toLocaleDateString("es-PE")}
+                  <p className="text-xs text-ink-3">
+                    {c.claimedPaymentFecha ?? new Date(c.createdAt).toLocaleDateString("es-PE")}
                     {c.claimedMetodo ? ` · ${c.claimedMetodo}` : ""}
-                    {c.failureReason && c.reviewStatus === "rejected"
-                      ? ` · ${c.failureReason}`
-                      : ""}
+                    {c.failureReason && c.reviewStatus === "rejected" ? ` · ${c.failureReason}` : ""}
                   </p>
                 </div>
-                <Badge
-                  variant={
-                    c.reviewStatus === "approved"
-                      ? "success"
-                      : c.reviewStatus === "rejected"
-                        ? "default"
-                        : c.reviewStatus === "pending_review"
-                          ? "info"
-                          : "warning"
-                  }
-                >
-                  {reviewLabel(c.reviewStatus, t)}
-                </Badge>
+                <ToneBadge tone={REVIEW_TONE[c.reviewStatus] ?? "warn"}>{reviewLabel(c.reviewStatus, t)}</ToneBadge>
               </li>
             ))}
           </ul>
-        </div>
+        </PanelCard>
       ) : null}
     </section>
+  );
+}
+
+/** Campo con su rótulo (v3 «field»). */
+function Field({ id, label, children }: { id: string; label: string; children: ReactNode }) {
+  return (
+    <div className="grid min-w-0 gap-1.5">
+      <label htmlFor={id} className="text-sm font-medium text-ink">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }

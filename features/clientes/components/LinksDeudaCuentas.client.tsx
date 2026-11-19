@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { routes } from "@/config/routes";
+import { Button } from "@/components/ui/Button";
+import { Note } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import type { AdAccountLiveMetricsClient } from "@/features/ad-accounts/hooks/useAdAccountLiveMetrics";
 import { isTikTokBudgetCupoBalance } from "@/features/ad-accounts/lib/classify-tiktok-live-balance";
 import { PaymentsGerenteAccountsSummary } from "@/features/payments/components/PaymentsGerenteAccountsSummary.client";
@@ -48,6 +51,7 @@ export function LinksDeudaCuentas({
   clienteName: string;
 }) {
   const router = useRouter();
+  const uid = useId();
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -160,48 +164,39 @@ export function LinksDeudaCuentas({
   }
 
   return (
-    <div className="overflow-hidden rounded-card bg-surface ring-1 ring-line">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">
+    <section aria-labelledby={`${uid}-title`} className="min-w-0 overflow-hidden rounded-box border border-line">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5">
         <div className="min-w-0">
-          <p className="text-[14px] font-semibold tracking-[-0.01em] text-ink">
+          <h3 id={`${uid}-title`} className="text-sm font-semibold text-ink">
             Cuentas del cliente
-          </p>
-          <p className="mt-0.5 text-[12px] text-ink-3">
-            Recargar y los demás cambios se hacen en Pagos con este cliente.
-          </p>
+          </h3>
+          <p className="mt-0.5 text-xs text-ink-2">Recargar y los demás cambios se hacen en Pagos con este cliente.</p>
         </div>
-        <button
-          type="button"
-          onClick={openInPagos}
-          disabled={opening}
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-accent-line bg-surface px-3.5 text-[12px] font-semibold text-ink transition hover:border-accent hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-60"
-        >
+        <Button variant="outline" size="sm" className="shrink-0" onClick={openInPagos} disabled={opening}>
           {opening ? "Abriendo…" : "Gestionar en Pagos"}
-          <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" aria-hidden>
-            <path d="M5 10h10m-4-4 4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+          <PanelIcon name="arrow-right" />
+        </Button>
       </div>
 
       {openError ? (
-        <p className="mx-4 mt-3 rounded-box bg-danger-bg px-3 py-2 text-[12px] text-danger-fg ring-1 ring-danger-line sm:mx-5" role="alert">
+        <Note tone="danger" className="mx-4 mt-3">
           {openError}
-        </p>
+        </Note>
       ) : null}
 
       {state.status === "loading" ? (
-        <div className="space-y-2 p-4 sm:p-5" aria-busy>
+        <div className="space-y-2 p-4" aria-busy="true">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-16 animate-pulse motion-reduce:animate-none rounded-box bg-subtle" />
+              <div key={i} className="h-16 animate-pulse rounded-box bg-subtle motion-reduce:animate-none" />
             ))}
           </div>
-          <div className="h-24 animate-pulse motion-reduce:animate-none rounded-box bg-field" />
+          <div className="h-24 animate-pulse rounded-box bg-field motion-reduce:animate-none" />
         </div>
       ) : state.status === "error" ? (
-        <p className="m-4 rounded-card bg-field px-4 py-6 text-center text-[13px] text-accent-text ring-1 ring-line sm:m-5">
-          {state.message}
-        </p>
+        <div className="p-4">
+          <Note tone="danger">{state.message}</Note>
+        </div>
       ) : (
         <>
           <PaymentsGerenteAccountsSummary
@@ -233,6 +228,6 @@ export function LinksDeudaCuentas({
           />
         </>
       )}
-    </div>
+    </section>
   );
 }

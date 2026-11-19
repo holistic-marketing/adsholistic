@@ -25,8 +25,8 @@ const QUERY_GROUPS: { title: string; icon: AssistantIconName; queries: Query[] }
 ];
 const QUERIES = QUERY_GROUPS.flatMap((group) => group.queries);
 
-function AssistantMark({ small = false }: { small?: boolean }) {
-  return <span className={small ? styles.markSmall : styles.mark} aria-hidden="true">h</span>;
+function AssistantMark() {
+  return <span className={styles.markSmall} aria-hidden="true">h</span>;
 }
 
 function CopyAnswer({ text }: { text: string }) {
@@ -149,7 +149,7 @@ export function OpsAssistant() {
       }}
       maxLength={500} rows={started ? 1 : 2} placeholder={started ? "Escribe otra consulta sobre tu cartera…" : "¿Qué necesitas saber de tu cartera?"} aria-describedby={`${inputId}-hint`} />
     <div className={styles.composerFooter}>
-      <span className={styles.scope}><AssistantIcon name="briefcase" /> Cartera general</span>
+      <span className={styles.scope}><AssistantIcon name="wallet" />Cartera general</span>
       <div className={styles.sendGroup}>
         <span id={`${inputId}-hint`} className={styles.keyHint} data-warn={draft.length >= 480}>
           {nearLimit ? `${draft.length}/500` : <><kbd>Enter</kbd> enviar <span className={styles.hintExtra}>{started ? <><kbd>↑</kbd> repetir última</> : <><kbd>Shift</kbd>+<kbd>Enter</kbd> nueva línea</>}</span></>}
@@ -161,12 +161,12 @@ export function OpsAssistant() {
 
   return <section className={styles.surface} data-started={started} aria-label="Asistente de gerencia">
     {!started ? <div className={styles.welcome}>
-      <header className={styles.intro}><AssistantMark /><h2>Tu cartera, más clara.</h2><p>Consulta pagos, clientes y alertas con datos de Hecom y Cartera Holistic.</p></header>
+      <header className={styles.intro}><h1 tabIndex={-1}>Tu cartera, más clara.</h1><p>Consulta pagos, clientes y alertas con datos de Hecom y Cartera Holistic.</p></header>
       {composer}
       <p className={styles.shortcutNote}>Pulsa <kbd>/</kbd> desde cualquier parte de la página para escribir.</p>
       <nav className={styles.queryIndex} aria-label="Consultas frecuentes">
         {QUERY_GROUPS.map((group) => <div key={group.title} className={styles.queryGroup} role="group" aria-labelledby={`${inputId}-${group.title}`}>
-          <h3 id={`${inputId}-${group.title}`}><AssistantIcon name={group.icon} />{group.title}</h3>
+          <h2 id={`${inputId}-${group.title}`}><AssistantIcon name={group.icon} />{group.title}</h2>
           <ul>{group.queries.map((item) => <li key={item.title}><button type="button" className={styles.query} onClick={() => void ask(item.question)}>
             <span className={styles.queryCopy}><strong>{item.title}</strong><span>{item.description}</span></span>
             <span className={styles.queryArrow}><AssistantIcon name="arrowUpRight" /></span>
@@ -176,12 +176,12 @@ export function OpsAssistant() {
       <p className={styles.sourceNote}><AssistantIcon name="database" /> Hecom y Cartera Holistic · Fuentes en cada reporte</p>
     </div> : <div className={styles.conversation}>
       <div className={styles.toolbar}>
-        <div className={styles.conversationHeading}><h2>{lastQuestion}</h2><p><AssistantIcon name="briefcase" /> Cartera general · {turns.length} {turns.length === 1 ? "consulta" : "consultas"}</p></div>
+        <div className={styles.conversationHeading}><h1 tabIndex={-1}>{lastQuestion}</h1><p><AssistantIcon name="wallet" /> Cartera general · {turns.length} {turns.length === 1 ? "consulta" : "consultas"}</p></div>
         <button type="button" className={styles.newButton} onClick={reset}><AssistantIcon name="plus" /> Nueva consulta</button>
       </div>
       <div className={styles.turns} aria-label="Conversación">{turns.map((turn, index) => <article key={turn.id} ref={index === turns.length - 1 ? lastTurn : undefined} className={styles.turn} aria-label={`Consulta: ${turn.question}`}>
         <div className={styles.userMessage}><div><p>{turn.question}</p><time dateTime={turn.time}>{new Date(turn.time).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}</time></div><span className={styles.userAvatar} aria-label="Tú">Tú</span></div>
-        <div className={styles.answer}><AssistantMark small /><div className={styles.answerContent}>
+        <div className={styles.answer}><AssistantMark /><div className={styles.answerContent}>
           <div className={styles.answerByline}><strong>Asistente</strong>{turn.answer?.today && <span className={styles.dataStamp}><span className={styles.liveDot} aria-hidden="true" />Datos al {turn.answer.today}</span>}</div>
           {turn.answer && <div className={styles.answerBody}>
             {turn.answer.blocks.length ? turn.answer.blocks.map((block) => <OpsAssistantReport key={block.id} block={block} />) : <p className={styles.plainAnswer}>{turn.answer.reply}</p>}

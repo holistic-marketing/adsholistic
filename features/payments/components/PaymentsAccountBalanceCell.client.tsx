@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTranslations } from "next-intl";
 import { formatMoney } from "@/lib/format-money";
@@ -50,15 +50,15 @@ export function PaymentsAccountBalanceCell({
       <div className={compact ? "min-w-0" : "min-w-[6.5rem]"}>
         {hasLedger ? (
           <>
-            <p className="text-[13px] font-semibold tabular-nums text-ink">
+            <p className="num text-sm font-semibold text-ink">
               {formatMoney(ledger)}
             </p>
-            <p className="mt-0.5 text-[10px] text-ink-3">
+            <p className="mt-0.5 text-[11px] text-ink-3">
               {t("accountBalance.assignedHolistic")}
             </p>
           </>
         ) : (
-          <span className="text-[12px] text-ink-3">
+          <span className="text-xs text-ink-3">
             {t("accountBalance.noTikTokId")}
           </span>
         )}
@@ -68,7 +68,7 @@ export function PaymentsAccountBalanceCell({
 
   if (loading && !metric) {
     return (
-      <span className="animate-pulse motion-reduce:animate-none text-[12px] text-ink-3">
+      <span className="animate-pulse text-xs text-ink-3 motion-reduce:animate-none">
         {t("accountBalance.tiktokLoading")}
       </span>
     );
@@ -93,8 +93,8 @@ export function PaymentsAccountBalanceCell({
       >
         <div className="min-w-0">
           <p
-            className={`font-semibold tabular-nums text-[#1a1612] ${
-              compact ? "text-[16px] tracking-[-0.02em]" : "text-[13px]"
+            className={`num font-semibold text-ink ${
+              compact ? "text-base" : "text-sm"
             }`}
           >
             {creditUsd != null
@@ -103,7 +103,7 @@ export function PaymentsAccountBalanceCell({
                 ? formatMoney(ledger)
                 : "—"}
           </p>
-          <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
+          <p className="mt-0.5 text-[11px] leading-4 text-ink-3">
             {creditUsd != null
               ? balanceLabel
               : t("accountBalance.assignedHolistic")}
@@ -115,10 +115,10 @@ export function PaymentsAccountBalanceCell({
           </p>
         </div>
         {compact && agencyBmFunding && spendToday != null ? (
-          <p className="shrink-0 text-right text-[10px] leading-4 text-ink-3">
+          <p className="shrink-0 text-right text-[11px] leading-4 text-ink-3">
             {t("accountBalance.spendToday")}
             <br />
-            <span className="font-semibold tabular-nums text-accent-text">
+            <span className="num font-semibold text-accent-text">
               {formatMoney(spendToday)}
             </span>
           </p>
@@ -126,33 +126,33 @@ export function PaymentsAccountBalanceCell({
       </div>
 
       {budgetParts?.kind === "unlimited" ? (
-        <p className="mt-1.5 text-[10px] leading-4 text-ink-2">
+        <p className="mt-1.5 text-[11px] leading-4 text-ink-2">
           {t("accountBalance.budgetUnlimited")}
         </p>
       ) : null}
       {budgetParts?.kind === "limited" ? (
-        <div className="mt-1.5 grid grid-cols-3 gap-1 rounded-lg bg-subtle px-2 py-1.5 text-center">
-          <div className="min-w-0">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
+        <div className="mt-1.5 grid grid-cols-3 gap-px overflow-hidden rounded-ctl border border-line bg-line text-center">
+          <div className="min-w-0 bg-surface px-1.5 py-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetCap")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
+            <p className="num mt-0.5 truncate text-[11px] font-semibold text-ink-2">
               {budgetParts.budget}
             </p>
           </div>
-          <div className="min-w-0 border-x border-[rgb(20_18_16_/_0.06)]">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
+          <div className="min-w-0 bg-surface px-1.5 py-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetSpent")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
+            <p className="num mt-0.5 truncate text-[11px] font-semibold text-ink-2">
               {budgetParts.used}
             </p>
           </div>
-          <div className="min-w-0">
-            <p className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">
+          <div className="min-w-0 bg-surface px-1.5 py-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">
               {t("accountBalance.budgetLeft")}
             </p>
-            <p className="mt-0.5 truncate text-[10px] font-semibold tabular-nums text-ink-2">
+            <p className="num mt-0.5 truncate text-[11px] font-semibold text-ink-2">
               {budgetParts.left}
             </p>
           </div>
@@ -160,15 +160,15 @@ export function PaymentsAccountBalanceCell({
       ) : null}
 
       {budgetLimitLine ? (
-        <p className="mt-0.5 text-[10px] leading-4 tabular-nums text-ink-2">
+        <p className="num mt-0.5 text-[11px] leading-4 text-ink-2">
           {budgetLimitLine}
         </p>
       ) : null}
 
       {!compact && agencyBmFunding && spendToday != null ? (
-        <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
+        <p className="mt-0.5 text-[11px] leading-4 text-ink-3">
           {t("accountBalance.spendToday")}{" "}
-          <span className="font-medium tabular-nums text-accent-text">
+          <span className="num font-medium text-accent-text">
             {formatMoney(spendToday)}
           </span>
         </p>
@@ -178,7 +178,7 @@ export function PaymentsAccountBalanceCell({
       creditUsd != null &&
       (agencyBmFunding || ledgerDiffers) ? (
         <p
-          className={`text-[10px] leading-4 tabular-nums text-[#b5aea6] ${
+          className={`num text-[11px] leading-4 text-ink-3 ${
             compact ? "mt-1.5" : "mt-0.5"
           }`}
         >
@@ -189,7 +189,7 @@ export function PaymentsAccountBalanceCell({
       ) : null}
 
       {!compact && metric?.fetchedAt ? (
-        <p className="mt-0.5 text-[10px] leading-4 text-ink-3">
+        <p className="mt-0.5 text-[11px] leading-4 text-ink-3">
           {formatUpdatedAgo(metric.fetchedAt)}
         </p>
       ) : null}

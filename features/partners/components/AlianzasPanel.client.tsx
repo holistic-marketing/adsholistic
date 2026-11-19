@@ -1,7 +1,13 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 import type { PartnerWithStats } from "@/lib/partners/partners-admin.server";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
+import { PanelDialog } from "@/components/ui/PanelDialog.client";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note, StatCard, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelMenu, PanelPopover, usePopover, type PanelMenuItem } from "@/components/ui/PanelPopover.client";
 import {
   assignClientToPartnerAction,
   markPartnerCommissionsPaidAction,
@@ -9,8 +15,10 @@ import {
   setPartnerStatusAction,
   type PartnerInput,
 } from "../actions";
+import { AlianzasHeader } from "./AlianzasHeader";
 
 const SITE = "https://www.adsholistic.com";
+const FORM_ID = "alianza-form";
 const usd = (cents: number) => `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((n / d) * 100)}%` : "—");
 
@@ -102,228 +110,328 @@ export function AlianzasPanel({ partners }: { partners: PartnerWithStats[] }) {
     }
   }
 
+  const openForm = (next: PartnerInput) => {
+    setError(null);
+    setForm(next);
+  };
+
   const update = <K extends keyof PartnerInput>(key: K, value: PartnerInput[K]) =>
     setForm((f) => (f ? { ...f, [key]: value } : f));
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          ["Visitas (30 días)", totals.visits.toLocaleString("es-PE")],
-          ["Registros", totals.signups.toLocaleString("es-PE")],
-          ["Clientes que pagan", totals.paying.toLocaleString("es-PE")],
-          ["Comisión por pagar", usd(totals.pendingCents)],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-card border border-line bg-surface px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">{label}</p>
-            <p className="mt-1 text-[1.35rem] font-bold tabular-nums tracking-[-0.02em] text-ink">{value}</p>
-          </div>
-        ))}
+    <div>
+      <AlianzasHeader
+        actions={
+          <Button onClick={() => openForm({ ...EMPTY })}>
+            <PanelIcon name="plus" />
+            Nuevo aliado
+          </Button>
+        }
+      />
+
+      <div className="grid gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4">
+          <StatCard label="Visitas, últimos 30 días" value={totals.visits.toLocaleString("es-PE")} />
+          <StatCard label="Registros" value={totals.signups.toLocaleString("es-PE")} />
+          <StatCard label="Clientes que pagan" value={totals.paying.toLocaleString("es-PE")} />
+          <StatCard label="Comisión por pagar" value={usd(totals.pendingCents)} />
+        </div>
+
+        {error && !form ? <Note tone="danger">{error}</Note> : null}
+        {notice ? (
+          <Note tone="ok" icon="check-circle">
+            {notice}
+          </Note>
+        ) : null}
+
+        {ranked.length === 0 ? (
+          <section className="rounded-card border border-line bg-surface shadow-card">
+            <EmptyState
+              icon="users"
+              title="Aún no hay aliados"
+              description="Crea el primero y comparte su link."
+              action={
+                <Button onClick={() => openForm({ ...EMPTY })}>
+                  <PanelIcon name="plus" />
+                  Nuevo aliado
+                </Button>
+              }
+            />
+          </section>
+        ) : (
+          <ol className="grid gap-4">
+            {ranked.map((p, i) => {
+              const url = `${SITE}/a/${p.slug}`;
+              const active = p.status === "active";
+              return (
+                <li key={p.id}>
+                  <section aria-label={p.name} className="rounded-card border border-line bg-surface shadow-card">
+                    <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+                      <div className="min-w-0 flex-[1_1_320px]">
+                        <h2 className="flex flex-wrap items-center gap-2 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
+                          <span className="num text-ink-3">#{i + 1}</span>
+                          <span className="min-w-0 [overflow-wrap:anywhere]">{p.name}</span>
+                          <ToneBadge tone={active ? "ok" : "neutral"} dot>
+                            {active ? "Activo" : "Pausado"}
+                          </ToneBadge>
+                        </h2>
+                        <p className="mt-0.5 font-mono text-xs text-ink-2 [overflow-wrap:anywhere]">{url.replace("https://", "")}</p>
+                        <p className="mt-0.5 text-xs text-ink-2">
+                          {p.commissionRate > 0
+                            ? `Comisión ${Math.round(p.commissionRate * 1000) / 10}% del fee · ${p.commissionDays} días por cliente`
+                            : "Sin comisión"}
+                          {p.clientFeePercent != null ? ` · Sus clientes pagan ${p.clientFeePercent}% de fee` : ""}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => void copy(url)}>
+                          <PanelIcon name="copy" />
+                          Copiar link
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => openForm(toInput(p))}>
+                          <PanelIcon name="pencil" />
+                          Editar<span className="sr-only"> {p.name}</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={pending}
+                          onClick={() =>
+                            run(
+                              () => setPartnerStatusAction(p.id, active ? "paused" : "active"),
+                              active ? "Aliado pausado: su landing deja de funcionar." : "Aliado activado.",
+                            )
+                          }
+                        >
+                          {active ? "Pausar" : "Activar"}
+                          <span className="sr-only"> {p.name}</span>
+                        </Button>
+                        <PartnerMenu
+                          name={p.name}
+                          items={[
+                            ...(p.panelUrl
+                              ? [
+                                  {
+                                    label: "Copiar link de su panel",
+                                    hint: "Link privado: el aliado ve sus visitas, clientes y comisiones",
+                                    icon: "link" as const,
+                                    onSelect: () => void copy(p.panelUrl!),
+                                  },
+                                ]
+                              : []),
+                            {
+                              label: "Asignar cliente",
+                              icon: "user-plus",
+                              disabled: pending,
+                              onSelect: () => {
+                                const email = window.prompt(`Correo del cliente que trajo ${p.name}:`);
+                                if (!email) return;
+                                run(() => assignClientToPartnerAction(p.id, email), "Cliente asignado al aliado.");
+                              },
+                            },
+                            {
+                              label: "Abrir su landing",
+                              icon: "external",
+                              onSelect: () => window.open(`/a/${p.slug}`, "_blank", "noreferrer"),
+                            },
+                          ]}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="px-4 pb-4 pt-4 sm:px-6 sm:pb-6">
+                      <dl className="grid grid-cols-[repeat(auto-fit,minmax(110px,1fr))] gap-2">
+                        <Mini label="Visitas 30 d" value={p.stats.visits30d} hint={`${p.stats.uniqueVisitors30d} únicas`} />
+                        <Mini label="Visitas total" value={p.stats.visitsTotal} />
+                        <Mini label="Registros" value={p.stats.signups} hint={`${pct(p.stats.signups, p.stats.uniqueVisitors30d)} de las únicas`} />
+                        <Mini label="Pagan" value={p.stats.payingClients} hint={`${pct(p.stats.payingClients, p.stats.signups)} de registros`} />
+                        <Mini label="Fee generado" value={usd(p.stats.feeCents)} />
+                        <Mini label="Comisión" value={usd(p.stats.commissionPendingCents)} hint={`pagado ${usd(p.stats.commissionPaidCents)}`} />
+                      </dl>
+
+                      {p.stats.commissionPendingCents > 0 ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          disabled={pending}
+                          onClick={() => {
+                            const note = window.prompt(
+                              `¿Marcar como pagados ${usd(p.stats.commissionPendingCents)} a ${p.name}? Escribe la referencia del pago:`,
+                            );
+                            if (note == null) return;
+                            run(() => markPartnerCommissionsPaidAction(p.id, note), "Comisiones marcadas como pagadas.");
+                          }}
+                        >
+                          <PanelIcon name="check" />
+                          Marcar <span className="num">{usd(p.stats.commissionPendingCents)}</span> como pagado
+                        </Button>
+                      ) : null}
+                    </div>
+                  </section>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </div>
 
-      {error ? <p className="rounded-box bg-field px-4 py-3 text-[13px] text-danger-fg">{error}</p> : null}
-      {notice ? <p className="rounded-box bg-field px-4 py-3 text-[13px] text-ok-fg">{notice}</p> : null}
-
-      {form ? (
-        <form
-          className="space-y-4 rounded-card border border-line bg-surface p-4 sm:p-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            run(() => savePartnerAction(form), form.id ? "Aliado actualizado." : "Aliado creado. Ya puedes copiar su link.");
-          }}
-        >
-          <p className="text-[15px] font-bold">{form.id ? `Editar ${form.name}` : "Nuevo aliado"}</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Nombre del aliado *">
-              <input
-                className={inputCls}
-                value={form.name}
-                onChange={(e) => {
-                  const name = e.target.value;
-                  setForm((f) => (f ? { ...f, name, slug: f.id || f.slug !== slugify(f.name) ? f.slug : slugify(name) } : f));
-                }}
-                placeholder="Comunidad Ecom Pro"
-                required
-              />
-            </Field>
-            <Field label="Link (adsholistic.com/a/…) *">
-              <input className={inputCls} value={form.slug} onChange={(e) => update("slug", slugify(e.target.value))} placeholder="ecom-pro" required />
-            </Field>
-            <Field label="Título de la landing">
-              <input className={inputCls} value={form.headline} onChange={(e) => update("headline", e.target.value)} placeholder="Lanza y escala tus campañas de TikTok" />
-            </Field>
-            <Field label="WhatsApp del aliado (opcional)">
-              <input className={inputCls} value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="51999888777" inputMode="tel" />
-            </Field>
-            <Field label="Subtítulo" wide>
-              <textarea className={`${inputCls} min-h-[72px] py-2`} value={form.subheadline} onChange={(e) => update("subheadline", e.target.value)} placeholder="La comunidad Ecom Pro ya anuncia con Ads Holistic…" />
-            </Field>
-            <Field label="Logo (link https)">
-              <input className={inputCls} value={form.logoUrl} onChange={(e) => update("logoUrl", e.target.value)} placeholder="https://…/logo.png" />
-            </Field>
-            <Field label="Foto del aliado (link https)">
-              <input className={inputCls} value={form.photoUrl} onChange={(e) => update("photoUrl", e.target.value)} placeholder="https://…/foto.jpg" />
-            </Field>
-            <Field label="Color de marca">
-              <div className="flex items-center gap-2">
-                <input type="color" className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-line" value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
-                <input className={inputCls} value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
-              </div>
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Comisión (% del fee)">
-                <input type="number" min={0} max={50} step={0.5} className={inputCls} value={form.commissionPercent} onChange={(e) => update("commissionPercent", Number(e.target.value))} />
+      <PanelDialog
+        open={form != null}
+        onClose={() => setForm(null)}
+        title={form?.id ? `Editar ${form.name}` : "Nuevo aliado"}
+        description="Se crea su página de registro con un link propio."
+        closeLabel="Cerrar"
+        size="wide"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setForm(null)} disabled={pending}>
+              Cancelar
+            </Button>
+            <Button type="submit" form={FORM_ID} disabled={pending}>
+              {pending ? "Guardando…" : form?.id ? "Guardar cambios" : "Crear aliado"}
+            </Button>
+          </>
+        }
+      >
+        {form ? (
+          <form
+            id={FORM_ID}
+            className="grid gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              run(() => savePartnerAction(form), form.id ? "Aliado actualizado." : "Aliado creado. Ya puedes copiar su link.");
+            }}
+          >
+            {error ? <Note tone="danger">{error}</Note> : null}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Nombre del aliado *">
+                <Input
+                  value={form.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setForm((f) => (f ? { ...f, name, slug: f.id || f.slug !== slugify(f.name) ? f.slug : slugify(name) } : f));
+                  }}
+                  placeholder="Comunidad Ecom Pro"
+                  required
+                />
               </Field>
-              <Field label="Durante (días)">
-                <input type="number" min={1} max={3650} className={inputCls} value={form.commissionDays} onChange={(e) => update("commissionDays", Number(e.target.value))} />
+              <Field label="Link (adsholistic.com/a/…) *">
+                <Input value={form.slug} onChange={(e) => update("slug", slugify(e.target.value))} placeholder="ecom-pro" required />
+              </Field>
+              <Field label="Título de la landing">
+                <Input value={form.headline} onChange={(e) => update("headline", e.target.value)} placeholder="Lanza y escala tus campañas de TikTok" />
+              </Field>
+              <Field label="WhatsApp del aliado" optional>
+                <Input value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="51999888777" inputMode="tel" />
+              </Field>
+              <Field label="Subtítulo" wide>
+                <Textarea
+                  className="min-h-[72px]"
+                  value={form.subheadline}
+                  onChange={(e) => update("subheadline", e.target.value)}
+                  placeholder="La comunidad Ecom Pro ya anuncia con Ads Holistic…"
+                />
+              </Field>
+              <Field label="Logo (link https)">
+                <Input value={form.logoUrl} onChange={(e) => update("logoUrl", e.target.value)} placeholder="https://…/logo.png" />
+              </Field>
+              <Field label="Foto del aliado (link https)">
+                <Input value={form.photoUrl} onChange={(e) => update("photoUrl", e.target.value)} placeholder="https://…/foto.jpg" />
+              </Field>
+              <Field label="Color de marca">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    aria-label="Elegir color de marca"
+                    className="h-9 w-12 shrink-0 cursor-pointer rounded-ctl border border-line bg-field p-1 shadow-ctl"
+                    value={form.accentColor}
+                    onChange={(e) => update("accentColor", e.target.value)}
+                  />
+                  <Input className="font-mono" value={form.accentColor} onChange={(e) => update("accentColor", e.target.value)} />
+                </div>
+              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Comisión (% del fee)">
+                  <Input type="number" min={0} max={50} step={0.5} value={form.commissionPercent} onChange={(e) => update("commissionPercent", Number(e.target.value))} />
+                </Field>
+                <Field label="Durante (días)">
+                  <Input type="number" min={1} max={3650} value={form.commissionDays} onChange={(e) => update("commissionDays", Number(e.target.value))} />
+                </Field>
+              </div>
+              <Field label="Fee de sus clientes (%)" optional wide>
+                <Input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.5}
+                  value={form.clientFeePercent ?? ""}
+                  placeholder="Vacío = cada cliente con su fee normal"
+                  onChange={(e) => update("clientFeePercent", e.target.value === "" ? null : Number(e.target.value))}
+                />
+              </Field>
+              <Field label="Notas internas" wide>
+                <Input value={form.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Acuerdo, contacto, forma de pago…" />
               </Field>
             </div>
-            <Field label="Fee de sus clientes (%) · opcional" wide>
-              <input
-                type="number"
-                min={0}
-                max={50}
-                step={0.5}
-                className={inputCls}
-                value={form.clientFeePercent ?? ""}
-                placeholder="Vacío = cada cliente con su fee normal"
-                onChange={(e) => update("clientFeePercent", e.target.value === "" ? null : Number(e.target.value))}
-              />
-            </Field>
-            <Field label="Notas internas" wide>
-              <input className={inputCls} value={form.notes} onChange={(e) => update("notes", e.target.value)} placeholder="Acuerdo, contacto, forma de pago…" />
-            </Field>
-          </div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button type="button" className={btnGhost} onClick={() => setForm(null)} disabled={pending}>
-              Cancelar
-            </button>
-            <button type="submit" className={btnPrimary} disabled={pending}>
-              {pending ? "Guardando…" : form.id ? "Guardar cambios" : "Crear aliado"}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <button type="button" className={btnPrimary} onClick={() => setForm({ ...EMPTY })}>
-          + Nuevo aliado
-        </button>
-      )}
-
-      {ranked.length === 0 ? (
-        <p className="rounded-card border border-dashed border-line px-4 py-8 text-center text-[13px] text-ink-3">
-          Aún no hay aliados. Crea el primero y comparte su link.
-        </p>
-      ) : (
-        <ol className="space-y-3">
-          {ranked.map((p, i) => {
-            const url = `${SITE}/a/${p.slug}`;
-            return (
-              <li key={p.id} className="rounded-card border border-line bg-surface p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-2 text-[15px] font-bold">
-                      <span className="shrink-0 tabular-nums text-ink-3">#{i + 1}</span>
-                      <span className="min-w-0 truncate">{p.name}</span>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "active" ? "bg-field text-ok-fg" : "bg-subtle text-ink-2"}`}>
-                        {p.status === "active" ? "Activo" : "Pausado"}
-                      </span>
-                    </p>
-                    <p className="mt-0.5 break-all text-[12px] text-ink-3">{url}</p>
-                    <p className="mt-0.5 text-[12px] text-ink-3">
-                      {p.commissionRate > 0
-                        ? `Comisión ${Math.round(p.commissionRate * 1000) / 10}% del fee · ${p.commissionDays} días por cliente`
-                        : "Sin comisión"}
-                      {p.clientFeePercent != null ? ` · Sus clientes pagan ${p.clientFeePercent}% de fee` : ""}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" className={btnSmall} onClick={() => void copy(url)}>Copiar link</button>
-                    {p.panelUrl ? (
-                      <button type="button" className={btnSmall} onClick={() => void copy(p.panelUrl!)} title="Link privado: el aliado ve sus visitas, clientes y comisiones">
-                        Link de su panel
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className={btnSmall}
-                      disabled={pending}
-                      onClick={() => {
-                        const email = window.prompt(`Correo del cliente que trajo ${p.name}:`);
-                        if (!email) return;
-                        run(() => assignClientToPartnerAction(p.id, email), "Cliente asignado al aliado.");
-                      }}
-                    >
-                      Asignar cliente
-                    </button>
-                    <a className={btnSmall} href={`/a/${p.slug}`} target="_blank" rel="noreferrer">Abrir</a>
-                    <button type="button" className={btnSmall} onClick={() => setForm(toInput(p))}>Editar</button>
-                    <button
-                      type="button"
-                      className={btnSmall}
-                      disabled={pending}
-                      onClick={() => run(() => setPartnerStatusAction(p.id, p.status === "active" ? "paused" : "active"), p.status === "active" ? "Aliado pausado: su landing deja de funcionar." : "Aliado activado.")}
-                    >
-                      {p.status === "active" ? "Pausar" : "Activar"}
-                    </button>
-                  </div>
-                </div>
-
-                <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                  <Stat label="Visitas 30d" value={p.stats.visits30d} hint={`${p.stats.uniqueVisitors30d} únicas`} />
-                  <Stat label="Visitas total" value={p.stats.visitsTotal} />
-                  <Stat label="Registros" value={p.stats.signups} hint={`${pct(p.stats.signups, p.stats.uniqueVisitors30d)} de las únicas`} />
-                  <Stat label="Pagan" value={p.stats.payingClients} hint={`${pct(p.stats.payingClients, p.stats.signups)} de registros`} />
-                  <Stat label="Fee generado" value={usd(p.stats.feeCents)} />
-                  <Stat label="Comisión" value={usd(p.stats.commissionPendingCents)} hint={`pagado ${usd(p.stats.commissionPaidCents)}`} />
-                </dl>
-
-                {p.stats.commissionPendingCents > 0 ? (
-                  <button
-                    type="button"
-                    className={`${btnSmall} mt-3`}
-                    disabled={pending}
-                    onClick={() => {
-                      const note = window.prompt(`¿Marcar como pagados ${usd(p.stats.commissionPendingCents)} a ${p.name}? Escribe la referencia del pago:`);
-                      if (note == null) return;
-                      run(() => markPartnerCommissionsPaidAction(p.id, note), "Comisiones marcadas como pagadas.");
-                    }}
-                  >
-                    Marcar {usd(p.stats.commissionPendingCents)} como pagado
-                  </button>
-                ) : null}
-              </li>
-            );
-          })}
-        </ol>
-      )}
+          </form>
+        ) : null}
+      </PanelDialog>
     </div>
   );
 }
 
-const inputCls =
-  "h-10 w-full rounded-box border border-line bg-surface px-3 text-[14px] outline-none focus:border-accent focus:ring-4 focus:ring-accent-line";
-const btnPrimary =
-  "inline-flex h-10 items-center justify-center rounded-box bg-accent px-5 text-[13px] font-bold text-ink transition hover:bg-accent-btn-hover disabled:opacity-60";
-const btnGhost =
-  "inline-flex h-10 items-center justify-center rounded-box border border-line bg-surface px-5 text-[13px] font-semibold text-ink disabled:opacity-60";
-const btnSmall =
-  "inline-flex min-h-9 items-center justify-center rounded-lg border border-line bg-surface px-3 text-[12px] font-semibold text-ink transition hover:bg-hover disabled:opacity-60";
-
-function Field({ label, children, wide }: { label: string; children: React.ReactNode; wide?: boolean }) {
+/** Menú «más» de cada aliado: acciones de uso menos frecuente. */
+function PartnerMenu({ name, items }: { name: string; items: PanelMenuItem[] }) {
+  const { anchorRef, open, toggle, close } = usePopover();
   return (
-    <label className={`block ${wide ? "sm:col-span-2" : ""}`}>
-      <span className="mb-1 block text-[12px] font-semibold text-ink">{label}</span>
+    <>
+      <button
+        ref={anchorRef}
+        type="button"
+        aria-label={`Más acciones: ${name}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={toggle}
+        className="inline-grid size-8 place-items-center rounded-ctl border border-line bg-field text-ink shadow-ctl hover:border-line-strong hover:bg-hover"
+      >
+        <PanelIcon name="more" />
+      </button>
+      <PanelPopover anchorRef={anchorRef} open={open} onClose={close} label={`Más acciones: ${name}`} align="end" minWidth={220}>
+        <PanelMenu
+          label={`Más acciones: ${name}`}
+          items={items.map((item) => ({
+            ...item,
+            onSelect: () => {
+              close();
+              item.onSelect();
+            },
+          }))}
+        />
+      </PanelPopover>
+    </>
+  );
+}
+
+function Field({ label, optional, wide, children }: { label: string; optional?: boolean; wide?: boolean; children: ReactNode }) {
+  return (
+    <label className={`grid min-w-0 gap-1.5 ${wide ? "sm:col-span-2" : ""}`}>
+      <span className="text-sm font-medium text-ink">
+        {label}
+        {optional ? <span className="ml-1 text-xs font-normal text-ink-3">(opcional)</span> : null}
+      </span>
       {children}
     </label>
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+/** Dato chico (v3 «mini»): rótulo en mayúsculas, cifra en monoespaciada y una nota. */
+function Mini({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
-    <div className="rounded-box bg-field px-3 py-2">
-      <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
-      <dd className="mt-0.5 text-[15px] font-bold tabular-nums text-ink">{value}</dd>
-      {hint ? <dd className="text-[11px] text-ink-3">{hint}</dd> : null}
+    <div className="min-w-0 rounded-box border border-line bg-field px-3 py-2.5">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className="num mt-0.5 text-[15px] font-semibold text-ink">{value}</dd>
+      {hint ? <dd className="text-xs text-ink-3">{hint}</dd> : null}
     </div>
   );
 }

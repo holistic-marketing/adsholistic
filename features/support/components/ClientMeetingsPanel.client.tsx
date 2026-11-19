@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useNow } from "@/hooks/useNow";
+import { buttonClass } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note, PropList, ToneBadge, type Tone } from "@/components/ui/PanelKit";
 import { cn } from "@/lib/cn";
 import {
   MEETING_TYPES,
@@ -65,23 +70,21 @@ function limaDate(ymd: string): Date {
   return limaWallToUtc(year, month, day, 12 * 60);
 }
 
-function statusClass(status: string) {
-  if (status === "confirmed") return "bg-ok-bg text-ok-fg";
-  if (status === "pending") return "bg-warn-bg text-warn-fg";
-  if (status === "rescheduled") return "bg-warn-bg text-warn-fg";
-  if (status === "completed") return "bg-subtle text-ink-2";
-  if (status === "no_show") return "bg-danger-bg text-danger-fg";
-  return "bg-subtle text-ink-3";
+function statusTone(status: string): Tone {
+  if (status === "confirmed") return "ok";
+  if (status === "pending" || status === "rescheduled") return "warn";
+  if (status === "no_show") return "danger";
+  return "neutral";
 }
 
 function cellClass(kind: HourKind, active: boolean) {
   return cn(
-    "flex h-10 items-center justify-center rounded-md text-[10px] font-semibold transition-colors",
+    "flex h-10 items-center justify-center rounded-[6px] text-[10px] font-medium transition-colors",
     kind === "free" && "bg-ok-bg text-ok-fg hover:bg-ok-line",
     kind === "break" && "bg-warn-bg text-warn-fg",
-    kind === "full" && "bg-active/80 text-ink-3",
-    kind === "off" && "bg-[var(--surface-soft)] text-transparent",
-    active && "ring-2 ring-[var(--auth-accent)] ring-offset-1",
+    kind === "full" && "bg-active text-ink-3",
+    kind === "off" && "bg-subtle text-transparent",
+    active && "ring-2 ring-accent ring-offset-1 ring-offset-surface",
   );
 }
 
@@ -326,24 +329,17 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="grid gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <button
-            type="button"
-            onClick={onBack}
-            className="mb-2 text-[12px] font-semibold text-accent-text lg:hidden"
-          >
+          <button type="button" onClick={onBack} className={buttonClass("ghost", "sm", "-ml-2.5 mb-1 lg:hidden")}>
+            <PanelIcon name="chevron-left" />
             {t("meetings.back")}
           </button>
-          <h2 className="text-[1.05rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-            {t("meetings.title")}
-          </h2>
-          <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-[var(--auth-text-muted)]">
-            {t("meetings.subtitle")}
-          </p>
+          <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink">{t("meetings.title")}</h2>
+          <p className="mt-0.5 max-w-xl text-ink-2">{t("meetings.subtitle")}</p>
         </div>
-        <p className="shrink-0 text-[12px] font-semibold capitalize text-[var(--auth-text)]">{rangeLabel}</p>
+        <p className="shrink-0 text-[13px] font-medium capitalize text-ink-2">{rangeLabel}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
@@ -353,83 +349,63 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
         <Metric label={t("meetings.kpis.done")} value={String(doneCount)} />
       </div>
 
-      {error ? (
-        <p className="rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg" role="alert">
-          {error}
-        </p>
-      ) : null}
-      {notice ? (
-        <p className="rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[13px] text-ok-fg">
-          {notice}
-        </p>
-      ) : null}
+      {error ? <Note tone="danger">{error}</Note> : null}
+      {notice ? <Note tone="ok" icon="check-circle">{notice}</Note> : null}
       {rescheduleId ? (
-        <div className="flex items-start justify-between gap-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">
-          <p>{t("meetings.rescheduleHint")}</p>
-          <button
-            type="button"
-            onClick={() => {
-              markReloading();
-              setRescheduleId(null);
-              setSelectedCell(null);
-              setSelectedSlot(null);
-            }}
-            className="shrink-0 font-semibold"
-          >
-            {t("meetings.cancelBook")}
-          </button>
-        </div>
+        <Note tone="warn" icon="calendar">
+          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+            <p>{t("meetings.rescheduleHint")}</p>
+            <button
+              type="button"
+              onClick={() => {
+                markReloading();
+                setRescheduleId(null);
+                setSelectedCell(null);
+                setSelectedSlot(null);
+              }}
+              className="shrink-0 font-semibold underline-offset-4 hover:underline"
+            >
+              {t("meetings.cancelBook")}
+            </button>
+          </div>
+        </Note>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_20.5rem]">
-        <section className="dashboard-surface-card min-w-0 rounded-[1.15rem] p-3 sm:p-4">
-          <div className="mb-3">
-            <p className="mb-2 text-[12px] font-semibold text-[var(--auth-text)]">{t("meetings.withWho")}</p>
-            <div className="flex flex-wrap gap-2">
-              {advisors.map((person) => {
-                const active = advisorEmail === person.email;
-                return (
-                  <button
-                    key={person.email}
-                    type="button"
-                    onClick={() => chooseAdvisor(person.email)}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[13px] font-semibold",
-                      active
-                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-                        : "border-[var(--auth-input-border)] bg-surface text-[var(--auth-text)]",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold",
-                        active ? "bg-surface/20 text-white" : "bg-warn-bg text-warn-fg",
-                      )}
-                    >
-                      {initials(person.displayName)}
-                    </span>
-                    {person.displayName}
-                  </button>
-                );
-              })}
-            </div>
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_20.5rem]">
+        <PanelCard>
+          <p className="mb-2 text-sm font-medium text-ink">{t("meetings.withWho")}</p>
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("meetings.withWho")}>
+            {advisors.map((person) => (
+              <button
+                key={person.email}
+                type="button"
+                aria-pressed={advisorEmail === person.email}
+                onClick={() => chooseAdvisor(person.email)}
+                className={cn(buttonClass("outline", "sm"), pressable)}
+              >
+                <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-subtle text-[10px] font-semibold text-ink-2">
+                  {initials(person.displayName)}
+                </span>
+                {person.displayName}
+              </button>
+            ))}
           </div>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[13px] font-semibold text-[var(--auth-text)]">
+          <div className="my-4 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[13px] font-medium text-ink">
               {advisorEmail ? t("meetings.clickHint") : t("meetings.pickPerson")}
             </p>
-            <div className="flex flex-wrap gap-2 text-[11px] font-medium text-[var(--auth-text-muted)]">
-              <Legend swatch="bg-ok-bg" label={t("meetings.legendFree")} />
-              <Legend swatch="bg-warn-bg" label={t("meetings.legendBreak")} />
-              <Legend swatch="bg-active" label={t("meetings.legendFull")} />
+            <div className="flex flex-wrap gap-3 text-xs text-ink-2">
+              <Legend swatch="bg-ok-bg border-ok-line" label={t("meetings.legendFree")} />
+              <Legend swatch="bg-warn-bg border-warn-line" label={t("meetings.legendBreak")} />
+              <Legend swatch="bg-active border-line" label={t("meetings.legendFull")} />
             </div>
           </div>
           {!advisorEmail ? (
-            <p className="py-16 text-center text-[13px] text-[var(--auth-text-muted)]">{t("meetings.pickPerson")}</p>
+            <EmptyState icon="users" title={t("meetings.pickPerson")} />
           ) : !gridReady ? (
-            <p className="py-16 text-center text-[13px] text-[var(--auth-text-muted)]">{t("meetings.loading")}</p>
+            <p role="status" className="py-16 text-center text-[13px] text-ink-2">{t("meetings.loading")}</p>
           ) : (
-            <div className="space-y-5">
+            <div className="grid gap-5">
               {weeks.map((days, index) => (
                 <WeekGrid
                   key={days[0] ?? index}
@@ -454,12 +430,12 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
               ))}
             </div>
           )}
-        </section>
+        </PanelCard>
 
-        <aside className="dashboard-surface-card min-w-0 rounded-[1.15rem] p-4">
+        <PanelCard>
           {selectedSlot && !rescheduleId ? (
             <form
-              className="space-y-3"
+              className="grid gap-3"
               onSubmit={(event) => {
                 event.preventDefault();
                 void submitBooking();
@@ -467,15 +443,11 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">
-                    {t("meetings.bookTitle")}
-                  </p>
-                  <p className="mt-1 text-[15px] font-bold text-[var(--auth-text)]">
-                    {labelWhen(selectedSlot.startsAt)}
-                  </p>
-                  <p className="text-[12px] text-[var(--auth-text-muted)]">{t("meetings.duration")}</p>
+                  <p className="eyebrow">{t("meetings.bookTitle")}</p>
+                  <p className="mt-0.5 text-base font-semibold capitalize text-ink">{labelWhen(selectedSlot.startsAt)}</p>
+                  <p className="text-xs text-ink-3">{t("meetings.duration")}</p>
                   {selectedAdvisor ? (
-                    <p className="text-[12px] font-semibold text-[var(--auth-text)]">
+                    <p className="text-xs font-medium text-ink">
                       {t("meetings.withAdvisor", { name: selectedAdvisor.displayName })}
                     </p>
                   ) : null}
@@ -486,81 +458,63 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
                     setSelectedCell(null);
                     setSelectedSlot(null);
                   }}
-                  className="shrink-0 text-[12px] font-semibold text-[var(--auth-text-muted)]"
+                  className={buttonClass("ghost", "sm")}
                 >
                   {t("meetings.cancelBook")}
                 </button>
               </div>
               {selectedCell && selectedCell.slots.length > 1 ? (
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   {selectedCell.slots.map((slot) => (
                     <button
                       key={slot.startsAt}
                       type="button"
+                      aria-pressed={selectedSlot.startsAt === slot.startsAt}
                       onClick={() => setSelectedSlot(slot)}
-                      className={cn(
-                        "rounded-full px-3 py-1.5 text-[12px] font-semibold",
-                        selectedSlot.startsAt === slot.startsAt
-                          ? "bg-[var(--brand-primary)] text-white"
-                          : "bg-[var(--surface-soft)] text-[var(--auth-text)]",
-                      )}
+                      className={cn(buttonClass("outline", "sm", "num"), pressable)}
                     >
                       {formatMinute(slot.minute)}
                     </button>
                   ))}
                 </div>
               ) : null}
-              <label className="block text-[12px] font-semibold text-[var(--auth-text)]">
+              <label className={fieldLabel}>
                 {t("meetings.type")}
-                <select
-                  value={meetingType}
-                  onChange={(event) => setMeetingType(event.target.value as MeetingType)}
-                  className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3 text-[14px] font-medium"
-                >
+                <Select value={meetingType} onChange={(event) => setMeetingType(event.target.value as MeetingType)}>
                   {MEETING_TYPES.map((type) => (
                     <option key={type} value={type}>
                       {t(`meetings.types.${type}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
-              <label className="block text-[12px] font-semibold text-[var(--auth-text)]">
+              <label className={fieldLabel}>
                 {t("meetings.subject")}
-                <input
+                <Input
                   required
                   minLength={3}
                   maxLength={160}
                   value={subject}
                   onChange={(event) => setSubject(event.target.value)}
                   placeholder={t("meetings.subjectPh")}
-                  className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] px-3 text-[14px] font-medium placeholder:font-normal"
                 />
               </label>
-              <label className="block text-[12px] font-semibold text-[var(--auth-text)]">
+              <label className={fieldLabel}>
                 {t("meetings.notes")}
-                <textarea
+                <Textarea
                   value={notes}
                   maxLength={2000}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder={t("meetings.notesPh")}
                   rows={3}
-                  className="mt-1 w-full resize-none rounded-lg border border-[var(--auth-input-border)] px-3 py-2 text-[14px] font-medium placeholder:font-normal"
+                  className="resize-none"
                 />
               </label>
-              <label className="block text-[12px] font-semibold text-[var(--auth-text)]">
+              <label className={fieldLabel}>
                 {t("meetings.phone")}
-                <input
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder={t("meetings.phonePh")}
-                  className="mt-1 h-10 w-full rounded-lg border border-[var(--auth-input-border)] px-3 text-[14px] font-medium placeholder:font-normal"
-                />
+                <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder={t("meetings.phonePh")} />
               </label>
-              <button
-                type="submit"
-                disabled={saving || atLimit}
-                className="h-10 w-full rounded-lg bg-[var(--brand-primary)] text-[14px] font-semibold text-white disabled:opacity-60"
-              >
+              <button type="submit" disabled={saving || atLimit} className={buttonClass("primary", "md", "w-full")}>
                 {saving ? t("meetings.submitting") : t("meetings.submit")}
               </button>
             </form>
@@ -598,25 +552,29 @@ export function ClientMeetingsPanel({ onBack }: { onBack: () => void }) {
               onReschedule={startReschedule}
             />
           )}
-        </aside>
+        </PanelCard>
       </div>
     </div>
   );
 }
 
+const pressable =
+  "aria-pressed:border-accent-line aria-pressed:bg-accent-soft aria-pressed:text-accent-text";
+const fieldLabel = "grid gap-1.5 text-sm font-medium text-ink";
+
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <article className="dashboard-surface-card rounded-box px-3 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">{label}</p>
-      <p className="mt-1 truncate text-[14px] font-bold capitalize tabular-nums text-[var(--auth-text)]">{value}</p>
-    </article>
+    <div className="min-w-0 rounded-card border border-line bg-surface px-4 py-3 shadow-card">
+      <p className="text-[13px] font-medium text-ink-2">{label}</p>
+      <p className="mt-1 truncate text-lg font-semibold capitalize tracking-[-0.02em] text-ink tabular-nums">{value}</p>
+    </div>
   );
 }
 
 function Legend({ swatch, label }: { swatch: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={cn("h-2.5 w-2.5 rounded-sm", swatch)} />
+      <span aria-hidden className={cn("size-2.5 rounded-[3px] border", swatch)} />
       {label}
     </span>
   );
@@ -645,13 +603,13 @@ function WeekGrid({
 }) {
   return (
     <div>
-      <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text)]">{title}</p>
-      {note ? <p className="mb-2 text-[12px] leading-relaxed text-[var(--auth-text-muted)]">{note}</p> : null}
-      <div className="overflow-x-auto">
+      <p className="eyebrow mb-2">{title}</p>
+      {note ? <p className="mb-2 text-xs text-ink-2">{note}</p> : null}
+      <div className="ui-scroll overflow-x-auto">
         <div className="grid min-w-[36rem] grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] gap-1">
           <span />
           {days.map((day) => (
-            <span key={day} className="pb-1 text-center text-[11px] font-semibold capitalize text-[var(--auth-text-muted)]">
+            <span key={day} className="pb-1 text-center text-[11px] font-medium capitalize text-ink-3">
               {labelDay(day)}
             </span>
           ))}
@@ -689,7 +647,7 @@ function HourRow({
 }) {
   return (
     <>
-      <span className="flex items-center text-[11px] font-medium tabular-nums text-[var(--auth-text-soft)]">
+      <span className="num flex items-center text-[11px] text-ink-3">
         {formatMinute(hour)}
       </span>
       {days.map((day) => {
@@ -701,6 +659,7 @@ function HourRow({
             key={day}
             type="button"
             disabled={cell.kind !== "free"}
+            aria-pressed={cell.kind === "free" ? active : undefined}
             onClick={() => onChoose(cell)}
             className={cellClass(cell.kind, active)}
           >
@@ -732,32 +691,32 @@ function MeetingGroup({
   const t = useTranslations("support");
   return (
     <div>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{title}</p>
+      <p className="eyebrow">{title}</p>
       {meetings.length === 0 ? (
-        <p className="mt-2 text-[13px] leading-relaxed text-[var(--auth-text-muted)]">{empty}</p>
+        <p className="mt-2 text-[13px] text-ink-2">{empty}</p>
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-2 grid gap-2">
           {meetings.map((meeting) => {
             const canMove = Boolean(onReschedule) && Date.parse(meeting.startsAt) > now;
             return (
-              <li key={meeting.id} className="rounded-box border border-[var(--auth-input-border)] px-3 py-2.5">
+              <li key={meeting.id} className="rounded-box border border-line px-3 py-2.5 hover:border-line-strong">
                 <button type="button" onClick={() => onSelect(meeting.id)} className="flex w-full items-start justify-between gap-3 text-left">
-                  <span className="min-w-0">
-                    <span className="block text-[13px] font-semibold text-[var(--auth-text)] [overflow-wrap:anywhere]">{meeting.subject}</span>
-                    <span className="mt-0.5 block text-[12px] capitalize text-[var(--auth-text-muted)]">
+                  <span className="grid min-w-0 leading-snug">
+                    <b className="font-semibold text-ink [overflow-wrap:anywhere]">{meeting.subject}</b>
+                    <small className="text-xs capitalize text-ink-3">
                       {labelWhen(meeting.startsAt)}
                       {meeting.advisorName ? ` · ${meeting.advisorName}` : ""}
-                    </span>
+                    </small>
                   </span>
-                  <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold", statusClass(meeting.status))}>
+                  <ToneBadge tone={statusTone(meeting.status)} dot>
                     {t(`meetings.statuses.${meeting.status}`)}
-                  </span>
+                  </ToneBadge>
                 </button>
                 {canMove ? (
                   <button
                     type="button"
                     onClick={() => onReschedule?.(meeting)}
-                    className="mt-2 text-[12px] font-semibold text-accent-text"
+                    className="mt-1.5 text-[13px] font-medium text-accent-text underline-offset-4 hover:underline"
                   >
                     {t("meetings.reschedule")}
                   </button>
@@ -792,10 +751,10 @@ function MeetingList({
     .filter((meeting) => !upcoming.some((item) => item.id === meeting.id))
     .sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt));
   if (meetings.length === 0) {
-    return <p className="py-8 text-center text-[13px] leading-relaxed text-[var(--auth-text-muted)]">{t("meetings.empty")}</p>;
+    return <EmptyState icon="calendar" title={t("meetings.empty")} />;
   }
   return (
-    <div className="space-y-4">
+    <div className="grid gap-4">
       <MeetingGroup title={t("meetings.upcoming")} meetings={upcoming} now={now} empty={t("meetings.noUpcoming")} labelWhen={labelWhen} onSelect={onSelect} onReschedule={onReschedule} />
       {history.length > 0 ? (
         <MeetingGroup title={t("meetings.history")} meetings={history} now={now} labelWhen={labelWhen} onSelect={onSelect} />
@@ -833,31 +792,33 @@ function MeetingDetail({
   const open = ACTIVE.has(meeting.status) && Date.parse(meeting.startsAt) > now;
   const canJoin = Boolean(meeting.meetUrl) && (meeting.status === "confirmed" || meeting.status === "rescheduled");
   return (
-    <div className="space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">{t("meetings.detail")}</p>
-        <button type="button" onClick={onClose} className="text-[12px] font-semibold text-[var(--auth-text-muted)]">
+    <div className="grid gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="eyebrow">{t("meetings.detail")}</p>
+        <button type="button" onClick={onClose} className={buttonClass("ghost", "sm")}>
           {t("meetings.cancelBook")}
         </button>
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="min-w-0 text-[16px] font-bold text-[var(--auth-text)] [overflow-wrap:anywhere]">{meeting.subject}</h3>
-        <span className={cn("shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold", statusClass(meeting.status))}>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="min-w-0 text-base font-semibold text-ink [overflow-wrap:anywhere]">{meeting.subject}</h3>
+        <ToneBadge tone={statusTone(meeting.status)} dot>
           {t(`meetings.statuses.${meeting.status}`)}
-        </span>
+        </ToneBadge>
       </div>
-      <dl className="space-y-2 text-[13px]">
-        <Row label={t("meetings.when")} value={when} />
-        <Row label={t("meetings.type")} value={t(`meetings.types.${meeting.meetingType}`)} />
-        <Row label={t("meetings.advisor")} value={meeting.advisorName ?? t("meetings.unassigned")} />
-        <Row label={t("meetings.channel")} value={t("meetings.channelValue")} />
-        <Row
-          label={t("meetings.reminder")}
-          value={meeting.clientReminderSent ? t("meetings.sent") : t("meetings.pendingBadge")}
-        />
-      </dl>
+      <PropList
+        items={[
+          { label: t("meetings.when"), value: <span className="capitalize">{when}</span> },
+          { label: t("meetings.type"), value: t(`meetings.types.${meeting.meetingType}`) },
+          { label: t("meetings.advisor"), value: meeting.advisorName ?? t("meetings.unassigned") },
+          { label: t("meetings.channel"), value: t("meetings.channelValue") },
+          {
+            label: t("meetings.reminder"),
+            value: meeting.clientReminderSent ? t("meetings.sent") : t("meetings.pendingBadge"),
+          },
+        ]}
+      />
       {meeting.notes ? (
-        <p className="whitespace-pre-wrap rounded-lg bg-[var(--surface-soft)] px-3 py-2 text-[13px] text-[var(--auth-text)] [overflow-wrap:anywhere]">
+        <p className="whitespace-pre-wrap rounded-box bg-field px-3 py-2 text-[13px] text-ink [overflow-wrap:anywhere]">
           {meeting.notes}
         </p>
       ) : null}
@@ -866,28 +827,24 @@ function MeetingDetail({
           href={meeting.meetUrl ?? "#"}
           target="_blank"
           rel="noreferrer"
-          className="flex h-10 items-center justify-center rounded-lg bg-ok-solid text-[14px] font-semibold text-white"
+          className={buttonClass("success", "md", "w-full")}
         >
+          <PanelIcon name="video" />
           {t("meetings.join")}
         </a>
       ) : open ? (
-        <p className="text-[12px] leading-relaxed text-[var(--auth-text-muted)]">{t("meetings.pendingLink")}</p>
+        <p className="text-xs text-ink-2">{t("meetings.pendingLink")}</p>
       ) : null}
       {open ? (
         <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={saving}
-            onClick={onReschedule}
-            className="h-10 flex-1 rounded-lg border border-[var(--auth-input-border)] text-[13px] font-semibold text-[var(--auth-text)]"
-          >
+          <button type="button" disabled={saving} onClick={onReschedule} className={buttonClass("outline", "md", "flex-1")}>
             {t("meetings.reschedule")}
           </button>
           <button
             type="button"
             disabled={saving}
             onClick={onCancel}
-            className="h-10 flex-1 rounded-lg border border-danger-line text-[13px] font-semibold text-danger-fg"
+            className="inline-flex h-9 flex-1 items-center justify-center rounded-ctl border border-danger-line bg-field px-3.5 text-sm font-medium text-danger-fg shadow-ctl hover:bg-danger-bg disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t("meetings.cancel")}
           </button>
@@ -898,20 +855,11 @@ function MeetingDetail({
           type="button"
           disabled={saving || !canMove}
           onClick={onMove}
-          className="h-10 w-full rounded-lg bg-[var(--brand-primary)] text-[14px] font-semibold text-white disabled:opacity-50"
+          className={buttonClass("primary", "md", "w-full")}
         >
           {canMove && nextWhen ? t("meetings.moveToWhen", { when: nextWhen }) : t("meetings.moveTo")}
         </button>
       ) : null}
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <dt className="shrink-0 text-[var(--auth-text-muted)]">{label}</dt>
-      <dd className="min-w-0 text-right font-semibold capitalize text-[var(--auth-text)] [overflow-wrap:anywhere]">{value}</dd>
     </div>
   );
 }

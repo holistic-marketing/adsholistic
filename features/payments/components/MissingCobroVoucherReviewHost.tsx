@@ -1,5 +1,6 @@
 import { listMissingCobroReviewsForStaff } from "@/services/payments.service";
 import { ManualVoucherReviewSection } from "@/features/payments/components/ManualVoucherReviewSection.client";
+import { ReviewQueueEmpty } from "./ReviewQueueEmpty";
 
 interface MissingCobroVoucherReviewHostProps {
   staffMode: boolean;
@@ -24,21 +25,16 @@ export async function MissingCobroVoucherReviewHost({
 
   if (pending.length === 0) {
     return (
-      <section
+      <ReviewQueueEmpty
         id="comprobantes-missing-cobro"
-        className="rounded-card border border-dashed border-[var(--auth-divider)] px-4 py-10 text-center"
-        aria-label="Sin cobros faltantes"
-      >
-        <p className="text-sm font-medium text-[var(--auth-text)]">
-          {scope === "cliente"
+        label="Sin cobros faltantes"
+        title={
+          scope === "cliente"
             ? `Sin cobros faltantes pendientes de ${clienteName?.trim() || "este cliente"}`
-            : "Sin cobros faltantes pendientes"}
-        </p>
-        <p className="mt-1 text-sm text-[var(--auth-text-muted)]">
-          Solo aparecen reportes desde Lo pagado con voucher por aceptar o
-          rechazar. No acreditan cartera.
-        </p>
-      </section>
+            : "Sin cobros faltantes pendientes"
+        }
+        description="Solo aparecen reportes desde Lo pagado con voucher por aceptar o rechazar. No acreditan cartera."
+      />
     );
   }
 

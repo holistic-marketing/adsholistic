@@ -60,14 +60,16 @@ export default async function CobrosPage() {
 
   return (
     <div className={dashboardClasses.page}>
-      <Suspense fallback={null}>
-        <WalletAgreementMovements userId={session.id} />
-      </Suspense>
       <ClienteScopedCobros
         data={data}
         // Clientes y «ver como cliente» pueden revisar desde junio de 2026.
         fromMonth={
           capabilities.isStaff || capabilities.isSuperAdmin ? undefined : CLIENT_COBROS_FROM_MONTH
+        }
+        notice={
+          <Suspense fallback={null}>
+            <WalletAgreementMovements userId={session.id} />
+          </Suspense>
         }
       />
     </div>

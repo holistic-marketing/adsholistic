@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Input";
+import { Note } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { cn } from "@/lib/cn";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import type { CreativeAccountOption } from "@/lib/creatives/types";
@@ -70,9 +72,14 @@ const MAX_UPLOAD_BYTES = 4.3 * 1024 * 1024;
 
 const noopSubscribe = () => () => {};
 
-const labelClass =
-  "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]";
-const fieldClass = "h-10 border-[rgb(20_18_16_/_0.1)] text-[13px]";
+const labelClass = "text-sm font-medium text-ink";
+
+/** Opción elegible (v3 «pick»): se marca en naranja suave cuando está activa. */
+const pickClass = (on: boolean) =>
+  cn(
+    "inline-flex h-8 items-center gap-1.5 rounded-ctl border px-3 text-[13px] font-medium shadow-ctl disabled:opacity-60",
+    on ? "border-accent-line bg-accent-soft text-accent-text" : "border-line bg-field text-ink hover:bg-hover",
+  );
 
 /** Arma un video vertical de 15 s con las fotos del producto y lo manda al flujo de Agent Pro. */
 export function VideoStudioPanel({
@@ -84,6 +91,7 @@ export function VideoStudioPanel({
 }) {
   const t = useTranslations("creatives.videoStudio");
   const router = useRouter();
+  const fieldId = useId();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const recordingRef = useRef(false);
@@ -304,27 +312,24 @@ export function VideoStudioPanel({
   return (
     <section
       id="video-studio"
-      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      aria-labelledby={`${fieldId}-title`}
+      className="min-w-0 scroll-mt-4 overflow-hidden rounded-card border border-line bg-surface shadow-card"
     >
-      <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
-        <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
+      <div className="border-b border-line px-4 pb-4 pt-4 sm:px-6 sm:pt-5">
+        <p className="eyebrow">{t("kicker")}</p>
+        <h2 id={`${fieldId}-title`} className="mt-1 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
           {t("title")}
         </h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
+        <p className="mt-0.5 max-w-[78ch] text-[13px] text-ink-2">{t("subtitle")}</p>
       </div>
 
-      {!supported ? (
-        <p className="mx-5 mt-4 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg sm:mx-6">
-          {t("errors.unsupported")}
-        </p>
-      ) : null}
+      <div className="grid lg:grid-cols-[minmax(0,1.3fr)_minmax(260px,0.7fr)]">
+        <div className="grid content-start gap-4 px-4 py-4 sm:px-6 sm:py-5">
+          {!supported ? <Note tone="warn">{t("errors.unsupported")}</Note> : null}
 
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(260px,0.7fr)]">
-        <div className="grid gap-4 px-5 py-4 sm:px-6 sm:py-5">
           {/* Fotos y clips */}
-          <div>
-            <label className={labelClass}>{t("mediaLabel", { max: STUDIO_MAX_MEDIA })}</label>
+          <div className="grid gap-1.5">
+            <p className={labelClass}>{t("mediaLabel", { max: STUDIO_MAX_MEDIA })}</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -338,7 +343,7 @@ export function VideoStudioPanel({
               {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="group relative h-24 w-[3.4rem] overflow-hidden rounded-lg bg-black/80"
+                  className="group relative h-24 w-[3.4rem] overflow-hidden rounded-ctl border border-line bg-subtle"
                   title={item.name}
                 >
                   {item.media.kind === "video" ? (
@@ -347,11 +352,11 @@ export function VideoStudioPanel({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.url} alt="" className="h-full w-full object-cover" />
                   )}
-                  <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] font-bold text-white">
+                  <span className="num absolute left-1 top-1 rounded-[4px] bg-surface/90 px-1 text-[10px] font-semibold text-ink">
                     {index + 1}
                   </span>
                   {isLowResolution(item.media) ? (
-                    <span className="absolute inset-x-0 bottom-0 bg-warn-solid/90 py-0.5 text-center text-[9px] font-bold text-white">
+                    <span className="absolute inset-x-0 bottom-0 bg-warn-bg py-0.5 text-center text-[9px] font-semibold text-warn-fg">
                       {t("lowResBadge")}
                     </span>
                   ) : null}
@@ -360,9 +365,9 @@ export function VideoStudioPanel({
                     disabled={busy}
                     onClick={() => removeItem(item.id)}
                     aria-label={t("remove")}
-                    className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-black/60 text-[11px] font-bold text-white"
+                    className="absolute right-1 top-1 grid size-5 place-items-center rounded-[6px] bg-surface/90 text-ink hover:bg-surface"
                   >
-                    ×
+                    <PanelIcon name="x" className="size-3" />
                   </button>
                 </div>
               ))}
@@ -371,48 +376,51 @@ export function VideoStudioPanel({
                   type="button"
                   disabled={busy}
                   onClick={() => fileInputRef.current?.click()}
-                  className="grid h-24 w-[3.4rem] place-items-center rounded-lg border border-dashed border-[rgb(20_18_16_/_0.18)] bg-[rgb(255_248_243_/_0.6)] text-[22px] font-semibold text-accent-text hover:border-[var(--auth-accent)]"
+                  className="grid h-24 w-[3.4rem] place-items-center rounded-ctl border border-dashed border-line-strong bg-field text-ink-2 hover:border-accent-line hover:bg-accent-soft hover:text-accent-text"
                   aria-label={t("addMedia")}
                 >
-                  +
+                  <PanelIcon name="plus" />
                 </button>
               ) : null}
             </div>
-            <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("mediaHint")}</p>
-            {items.some((i) => isLowResolution(i.media)) ? (
-              <p className="mt-1.5 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
-                {t("lowRes")}
-              </p>
-            ) : null}
+            <p className="text-xs text-ink-3">{t("mediaHint")}</p>
+            {items.some((i) => isLowResolution(i.media)) ? <Note tone="warn">{t("lowRes")}</Note> : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{t("hook")}</label>
+            <div className="grid gap-1.5 sm:col-span-2">
+              <label htmlFor={`${fieldId}-hook`} className={labelClass}>
+                {t("hook")}
+              </label>
               <Input
+                id={`${fieldId}-hook`}
                 value={studio.hook}
                 maxLength={60}
                 disabled={busy}
                 onChange={(e) => update("hook", e.target.value)}
                 placeholder={t("hookPlaceholder")}
-                className={fieldClass}
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{t("product")}</label>
+            <div className="grid gap-1.5 sm:col-span-2">
+              <label htmlFor={`${fieldId}-product`} className={labelClass}>
+                {t("product")}
+              </label>
               <Input
+                id={`${fieldId}-product`}
                 value={studio.productName}
                 maxLength={50}
                 disabled={busy}
                 onChange={(e) => update("productName", e.target.value)}
                 placeholder={t("productPlaceholder")}
-                className={fieldClass}
               />
             </div>
             {Array.from({ length: STUDIO_MAX_BENEFITS }, (_, i) => (
-              <div key={i} className={i === 0 ? "sm:col-span-2" : undefined}>
-                <label className={labelClass}>{t("benefit", { n: i + 1 })}</label>
+              <div key={i} className={cn("grid gap-1.5", i === 0 && "sm:col-span-2")}>
+                <label htmlFor={`${fieldId}-benefit-${i}`} className={labelClass}>
+                  {t("benefit", { n: i + 1 })}
+                </label>
                 <Input
+                  id={`${fieldId}-benefit-${i}`}
                   value={studio.benefits[i] ?? ""}
                   maxLength={32}
                   disabled={busy}
@@ -422,139 +430,142 @@ export function VideoStudioPanel({
                     update("benefits", next);
                   }}
                   placeholder={t(`benefitPlaceholder${i + 1}` as "benefitPlaceholder1")}
-                  className={fieldClass}
                 />
               </div>
             ))}
-            <div>
-              <label className={labelClass}>{t("price")}</label>
+            <div className="grid gap-1.5">
+              <label htmlFor={`${fieldId}-price`} className={labelClass}>
+                {t("price")}
+              </label>
               <div className="flex gap-2">
-                <select
+                <Select
                   value={studio.currency}
                   disabled={busy}
+                  aria-label={t("price")}
                   onChange={(e) => update("currency", e.target.value as StudioCurrency)}
-                  className="h-10 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-2 text-[13px] text-[var(--auth-text)]"
+                  className="w-auto shrink-0"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
                       {t(`currency.${c}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <Input
+                  id={`${fieldId}-price`}
                   value={studio.price}
                   inputMode="decimal"
                   disabled={busy}
                   onChange={(e) => update("price", e.target.value)}
                   placeholder="89"
-                  className={fieldClass}
                 />
               </div>
             </div>
-            <div>
-              <label className={labelClass}>{t("oldPrice")}</label>
+            <div className="grid gap-1.5">
+              <label htmlFor={`${fieldId}-old`} className={labelClass}>
+                {t("oldPrice")}
+              </label>
               <Input
+                id={`${fieldId}-old`}
                 value={studio.oldPrice}
                 inputMode="decimal"
                 disabled={busy}
                 onChange={(e) => update("oldPrice", e.target.value)}
                 placeholder="129"
-                className={fieldClass}
               />
             </div>
-            <div>
-              <label className={labelClass}>{t("promo")}</label>
+            <div className="grid gap-1.5">
+              <label htmlFor={`${fieldId}-promo`} className={labelClass}>
+                {t("promo")}
+              </label>
               <Input
+                id={`${fieldId}-promo`}
                 value={studio.promo}
                 maxLength={24}
                 disabled={busy}
                 onChange={(e) => update("promo", e.target.value)}
                 placeholder={t("promoPlaceholder")}
-                className={fieldClass}
               />
             </div>
-            <div>
-              <label className={labelClass}>{t("cta")}</label>
+            <div className="grid gap-1.5">
+              <label htmlFor={`${fieldId}-cta`} className={labelClass}>
+                {t("cta")}
+              </label>
               <Input
+                id={`${fieldId}-cta`}
                 value={studio.cta}
                 maxLength={40}
                 disabled={busy}
                 onChange={(e) => update("cta", e.target.value)}
-                className={fieldClass}
               />
             </div>
-            <div>
-              <label className={labelClass}>{t("store")}</label>
+            <div className="grid gap-1.5">
+              <label htmlFor={`${fieldId}-store`} className={labelClass}>
+                {t("store")}
+              </label>
               <Input
+                id={`${fieldId}-store`}
                 value={studio.storeName}
                 maxLength={40}
                 disabled={busy}
                 onChange={(e) => update("storeName", e.target.value)}
-                className={fieldClass}
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{t("template")}</label>
-              <div className="flex flex-wrap items-center gap-2">
+            <fieldset className="grid gap-1.5 sm:col-span-2">
+              <legend className={cn(labelClass, "mb-1.5")}>{t("template")}</legend>
+              <div className="flex flex-wrap items-center gap-1.5">
                 {TEMPLATES.map((tpl) => (
                   <button
                     key={tpl}
                     type="button"
                     disabled={busy}
+                    aria-pressed={studio.template === tpl}
                     onClick={() => update("template", tpl)}
-                    className={cn(
-                      "flex h-9 items-center gap-1.5 rounded-box border px-2.5 text-[12px] font-semibold",
-                      studio.template === tpl
-                        ? "border-[var(--auth-accent)] bg-[rgb(255_248_243)] text-[var(--auth-text)]"
-                        : "border-[rgb(20_18_16_/_0.1)] text-[var(--auth-text-muted)]",
-                    )}
+                    className={pickClass(studio.template === tpl)}
                   >
-                    <span className={cn("h-3.5 w-3.5 rounded-full", TEMPLATE_SWATCH[tpl])} />
+                    {/* Muestra del color que tendrá el video. */}
+                    <span aria-hidden className={cn("size-3.5 rounded-full", TEMPLATE_SWATCH[tpl])} />
                     {t(`templates.${tpl}`)}
                   </button>
                 ))}
               </div>
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelClass}>{t("voice")}</label>
-              <div className="flex flex-wrap items-center gap-2">
+            </fieldset>
+            <fieldset className="grid gap-1.5 sm:col-span-2">
+              <legend className={cn(labelClass, "mb-1.5")}>{t("voice")}</legend>
+              <div className="flex flex-wrap items-center gap-1.5">
                 {VOICES.map((v) => (
                   <button
                     key={v}
                     type="button"
                     disabled={busy}
+                    aria-pressed={voice === v}
                     onClick={() => {
                       setVoice(v);
                       setResult(null);
                       if (phase === "ready") setPhase("edit");
                     }}
-                    className={cn(
-                      "flex h-9 items-center rounded-box border px-3 text-[12px] font-semibold",
-                      voice === v
-                        ? "border-[var(--auth-accent)] bg-[rgb(255_248_243)] text-[var(--auth-text)]"
-                        : "border-[rgb(20_18_16_/_0.1)] text-[var(--auth-text-muted)]",
-                    )}
+                    className={pickClass(voice === v)}
                   >
                     {t(`voices.${v}`)}
                   </button>
                 ))}
               </div>
-              <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("voiceHint")}</p>
-            </div>
+              <p className="text-xs text-ink-3">{t("voiceHint")}</p>
+            </fieldset>
           </div>
 
-          <div>
-            <label className={labelClass}>{t("account")}</label>
+          <div className="grid gap-1.5">
+            <label htmlFor={`${fieldId}-account`} className={labelClass}>
+              {t("account")}
+            </label>
             {accountChoices.length === 0 ? (
-              <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
-                {t("errors.noAccount")}
-              </p>
+              <Note tone="warn">{t("errors.noAccount")}</Note>
             ) : (
-              <select
+              <Select
+                id={`${fieldId}-account`}
                 value={adAccountId}
                 disabled={busy}
                 onChange={(e) => setAdAccountId(e.target.value)}
-                className="h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]"
               >
                 {accountChoices.map((account) => (
                   <option key={account.id} value={account.id}>
@@ -563,35 +574,27 @@ export function VideoStudioPanel({
                     {account.status !== "active" ? ` · ${account.status}` : ""}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </div>
 
-          {error ? (
-            <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg" role="alert">
-              {error}
-            </p>
-          ) : null}
+          {error ? <Note tone="danger">{error}</Note> : null}
           {success ? (
-            <p className="rounded-lg bg-subtle px-3 py-2 text-[13px] text-ok-fg">{success}</p>
+            <Note tone="ok" icon="check-circle">
+              {success}
+            </Note>
           ) : null}
 
           <div className="flex flex-wrap gap-2">
             {phase === "ready" || phase === "uploading" ? (
               <>
-                <Button
-                  onClick={handleSend}
-                  disabled={busy}
-                  className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
-                >
+                <Button onClick={handleSend} disabled={busy}>
+                  <PanelIcon name="send" />
                   {phase === "uploading" ? t("sending") : t("send")}
                 </Button>
                 {result ? (
-                  <a
-                    href={result.url}
-                    download={studioFileName(studio.productName)}
-                    className="inline-flex h-11 items-center rounded-box border border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)] hover:bg-[rgb(255_248_243_/_0.7)]"
-                  >
+                  <a href={result.url} download={studioFileName(studio.productName)} className={buttonClass("outline")}>
+                    <PanelIcon name="download" />
                     {t("download")}
                   </a>
                 ) : null}
@@ -602,17 +605,14 @@ export function VideoStudioPanel({
                     setPhase("edit");
                   }}
                   disabled={busy}
-                  className="h-11 rounded-box border-[rgb(20_18_16_/_0.12)] px-4 text-[14px] font-semibold text-[var(--auth-text)]"
                 >
+                  <PanelIcon name="pencil" />
                   {t("edit")}
                 </Button>
               </>
             ) : (
-              <Button
-                onClick={handleRecord}
-                disabled={busy || !supported}
-                className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
-              >
+              <Button onClick={handleRecord} disabled={busy || !supported}>
+                <PanelIcon name="video" />
                 {phase === "voice"
                   ? t("voicing")
                   : phase === "recording"
@@ -621,16 +621,14 @@ export function VideoStudioPanel({
               </Button>
             )}
           </div>
-          {phase === "recording" ? (
-            <p className="text-[12px] text-[var(--auth-text-muted)]">{t("recordingHint")}</p>
-          ) : null}
+          {phase === "recording" ? <p className="text-xs text-ink-3">{t("recordingHint")}</p> : null}
         </div>
 
-        <aside className="flex flex-col items-center gap-3 border-t border-[rgb(20_18_16_/_0.06)] bg-[rgb(255_248_243_/_0.65)] px-5 py-5 lg:border-l lg:border-t-0">
-          <p className="self-start text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-text-soft)]">
+        <aside className="flex flex-col items-center gap-3 border-t border-line bg-field px-4 py-5 sm:px-6 lg:border-l lg:border-t-0">
+          <h3 className="self-start text-sm font-semibold text-ink">
             {phase === "ready" ? t("resultTitle") : t("previewTitle")}
-          </p>
-          <div className="relative w-full max-w-[240px] overflow-hidden rounded-[1.4rem] bg-black shadow-[0_18px_40px_rgb(20_18_16_/_0.18)]">
+          </h3>
+          <div className="relative w-full max-w-[240px] overflow-hidden rounded-card border border-line bg-subtle shadow-card">
             {result && phase !== "recording" ? (
               <video src={result.url} className="aspect-[9/16] w-full" controls playsInline />
             ) : null}
@@ -641,12 +639,12 @@ export function VideoStudioPanel({
               className={cn("aspect-[9/16] w-full", result && phase !== "recording" ? "hidden" : "block")}
             />
             {phase === "recording" ? (
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-surface/20">
-                <div className="h-full bg-accent-btn" style={{ width: `${progress * 100}%` }} />
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-accent-soft">
+                <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
               </div>
             ) : null}
           </div>
-          <p className="text-center text-[11px] leading-4 text-[var(--auth-text-muted)]">{t("previewHint")}</p>
+          <p className="text-center text-xs text-ink-3">{t("previewHint")}</p>
         </aside>
       </div>
     </section>

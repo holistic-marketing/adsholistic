@@ -9,9 +9,12 @@ import {
   type CSSProperties,
 } from "react";
 
-const noopSubscribe = () => () => {};
 import { useTranslations } from "next-intl";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import type { EducationLessonView } from "../lib/types";
+
+const noopSubscribe = () => () => {};
 
 export function EducationPlayerDialog({
   lesson,
@@ -89,13 +92,13 @@ export function EducationPlayerDialog({
       }}
     >
       {lesson ? (
-        <div className="overflow-hidden rounded-card bg-surface shadow-[0_24px_80px_-24px_rgb(28_25_23_/_0.45)]">
+        <div className="overflow-hidden rounded-card border border-line bg-surface text-ink shadow-dlg">
           <div className="flex items-start justify-between gap-3 px-4 py-3 sm:px-5">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent-text">
+              <p className="eyebrow">
                 {t("lessonNumber", { number: lesson.number })}
               </p>
-              <h2 id={titleId} className="truncate text-[1.05rem] font-bold text-[var(--auth-text)]">
+              <h2 id={titleId} className="truncate text-base font-semibold tracking-[-0.01em] text-ink">
                 {lesson.title}
               </h2>
             </div>
@@ -104,16 +107,13 @@ export function EducationPlayerDialog({
                 <button
                   type="button"
                   onClick={() => void toggleFullscreen()}
-                  className="inline-flex h-10 items-center rounded-box bg-accent-btn px-3 text-[13px] font-semibold text-on-accent"
+                  className={buttonClass("outline", "sm")}
                 >
                   {fullscreen ? t("exitFullscreen") : t("fullscreen")}
                 </button>
               ) : null}
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex h-10 items-center rounded-box px-3 text-[13px] font-semibold text-[var(--auth-text-muted)] hover:bg-[var(--auth-bg)]"
-              >
+              <button type="button" onClick={onClose} className={buttonClass("ghost", "sm")}>
+                <PanelIcon name="x" />
                 {t("close")}
               </button>
             </div>
@@ -148,9 +148,9 @@ export function EducationPlayerDialog({
                       alt=""
                       className="h-full w-full object-cover"
                     />
-                    <span className="absolute inset-0 grid place-items-center bg-black/15">
-                      <span className="grid h-16 w-16 place-items-center rounded-full bg-surface text-[var(--auth-text)] shadow-[0_10px_24px_-12px_rgb(0_0_0_/_0.6)] transition-transform group-hover:scale-105">
-                        <svg viewBox="0 0 24 24" className="ml-1 h-7 w-7" fill="currentColor" aria-hidden>
+                    <span className="absolute inset-0 grid place-items-center">
+                      <span className="grid size-14 place-items-center rounded-box bg-accent-btn text-on-accent shadow-pop group-hover:bg-accent-btn-hover">
+                        <svg viewBox="0 0 24 24" className="ml-0.5 size-6" fill="currentColor" aria-hidden>
                           <path d="M8 5.14v13.72a1 1 0 001.5.86l11-6.86a1 1 0 000-1.72l-11-6.86a1 1 0 00-1.5.86z" />
                         </svg>
                       </span>
@@ -170,15 +170,18 @@ export function EducationPlayerDialog({
               </div>
             </div>
           ) : (
-            <div className="mx-4 mb-4 rounded-card border border-[var(--auth-border)] bg-[var(--auth-bg)] px-5 py-8 text-center sm:mx-5">
-              <p className="text-[1.15rem] font-bold text-[var(--auth-text)]">
+            <div className="mx-4 mb-4 grid justify-items-center gap-1 rounded-box border border-line bg-field px-5 py-8 text-center sm:mx-5">
+              <span aria-hidden className="mb-2 grid size-10 place-items-center rounded-box bg-subtle text-ink">
+                <PanelIcon name="video" className="size-[18px]" />
+              </span>
+              <p className="text-lg font-semibold tracking-[-0.015em] text-ink">
                 {t("unavailableTitle")}
               </p>
-              <p className="mx-auto mt-2 max-w-md text-[14px] leading-6 text-[var(--auth-text-muted)]">
+              <p className="max-w-md text-ink-2">
                 {t("unavailableBody")}
               </p>
               {canManage ? (
-                <p className="mx-auto mt-3 max-w-md text-[13px] font-medium text-accent-text">
+                <p className="mt-1 max-w-md text-[13px] font-medium text-accent-text">
                   {t("unavailableManage")}
                 </p>
               ) : null}

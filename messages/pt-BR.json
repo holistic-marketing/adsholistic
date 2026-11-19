@@ -1163,7 +1163,8 @@
     },
     "modalChrome": {
       "progressAria": "Progresso do pagamento"
-    }
+    },
+    "historyToggle": "Ver movimentações e histórico"
   },
   "adAccounts": {
     "title": "Contas de anúncios",
@@ -1193,7 +1194,9 @@
       "pendingMany": "{count} pendentes",
       "metaAccounts": "Contas de anúncios Meta",
       "metaScopedMeta": "Meta · em manutenção",
-      "metaNoAccounts": "Ainda sem contas Meta"
+      "metaNoAccounts": "Ainda sem contas Meta",
+      "lede": "Contas do TikTok de {name}: saldo ao vivo, status e fee de cada uma.",
+      "activeOfTotal": "{active} de {total, plural, one {# conta ativa} other {# contas ativas}}"
     },
     "summary": {
       "aria": "Resumo de contas",
@@ -1420,7 +1423,7 @@
   "cobros": {
     "module": "O pago",
     "title": "O pago · {name}",
-    "goPayments": "Ir para recargas →",
+    "goPayments": "Ir para recargas",
     "pageIntro": "Escolha o mês no topo: atualiza Quanto você deve, o gráfico e o histórico de pagamentos juntos.",
     "monthScopeEyebrow": "Mês da conta",
     "monthScopeHint": "Um toque atualiza a dívida, o dia a dia e os pagamentos abaixo.",
@@ -1621,7 +1624,9 @@
       "metaCsvStep3": "Exporte como .csv e envie aqui. Repita quando quiser atualizar.",
       "metaCsvUpload": "Enviar CSV da Meta",
       "metaCsvApply": "Importar gasto",
-      "metaCsvSummary": "{days} dia(s) · {campaigns} campanha(s) · {spend}"
+      "metaCsvSummary": "{days} dia(s) · {campaigns} campanha(s) · {spend}",
+      "sourcesTitle": "Fontes de dados",
+      "step": "Passo {n}"
     },
     "pilot": {
       "title": "Piloto",
@@ -3327,6 +3332,11 @@
     "valueGrid": {
       "title": "Valores fundamentais",
       "subtitle": "Capacidades pensadas para equipes de performance e criativos."
+    },
+    "hub": {
+      "lede": "Envie um vídeo, receba uma pontuação com recomendações e mande-o ao TikTok como campanha pausada.",
+      "uploads": "Vídeos enviados",
+      "scoreAvg": "Pontuação média"
     }
   },
   "onboarding": {

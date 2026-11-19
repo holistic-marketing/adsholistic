@@ -1,4 +1,8 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { buttonClass } from "@/components/ui/Button";
 import { getHecomMonthlyDebtSettlement } from "@/lib/hecom/debt-settlement.server";
 import { getTranslations } from "next-intl/server";
 import { MissingCobroClaimPanel } from "@/features/clientes/components/MissingCobroClaimPanel.client";
@@ -21,10 +25,13 @@ function monthOf(value: string | null | undefined): string | null {
 export async function ClienteScopedCobros({
   data,
   fromMonth,
+  notice,
 }: {
   data: HecomClienteDashboard;
   /** YYYY-MM: solo se muestra desde ese mes (vista cliente). Sin valor = todo. */
   fromMonth?: string;
+  /** Aviso que va justo debajo del encabezado (abonos por acuerdo). */
+  notice?: ReactNode;
 }) {
   const t = await getTranslations("cobros");
   const { cliente, summary } = data;
@@ -45,26 +52,20 @@ export async function ClienteScopedCobros({
   const periodos = listRecentPeriodos(6).filter((periodo) => visible(periodo));
 
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--auth-divider)] pb-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-text-soft)]">
-            {t("module")}
-          </p>
-          <h2 className="mt-1 text-[1.125rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-            {t("title", { name: cliente.name })}
-          </h2>
-          <p className="mt-1 max-w-3xl text-[12px] leading-5 text-[var(--auth-text-muted)]">
-            {t("pageIntro")}
-          </p>
-        </div>
-        <Link
-          href={routes.payments}
-          className="text-[12px] font-semibold text-accent-text hover:underline"
-        >
-          {t("goPayments")}
-        </Link>
-      </header>
+    <div className="space-y-4">
+      <PageHeader
+        eyebrow={t("module")}
+        title={t("title", { name: cliente.name })}
+        lede={t("pageIntro")}
+        actions={
+          <Link href={routes.payments} className={buttonClass("outline")}>
+            {t("goPayments")}
+            <PanelIcon name="arrow-right" />
+          </Link>
+        }
+      />
+
+      {notice}
 
       <ClienteCobrosMonthView
         pendingByMonth={Object.fromEntries(Object.entries(settlement).filter(([ym]) => !fromMonth || ym >= fromMonth).map(([ym, row]) => [ym, row.pending]))}

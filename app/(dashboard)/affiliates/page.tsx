@@ -38,7 +38,7 @@ export default async function AffiliatesPage() {
 
   return (
     <div className={dashboardClasses.page}>
-      <ClientAffiliateDashboard program={program} />
+      <ClientAffiliateDashboard program={program} clienteName={data.cliente.name} />
     </div>
   );
 }

@@ -32,12 +32,12 @@ export function AdAccountLiveBalanceCell({
   }
 
   if (!advertiserId) {
-    return <span className="text-[12px] text-ink-3">—</span>;
+    return <span className="text-xs text-ink-3">—</span>;
   }
 
   if (loading && !metric) {
     return (
-      <span className="text-[12px] text-ink-3 animate-pulse motion-reduce:animate-none">
+      <span className="text-xs text-ink-3 animate-pulse motion-reduce:animate-none">
         {t("loading")}
       </span>
     );
@@ -45,14 +45,14 @@ export function AdAccountLiveBalanceCell({
 
   if (metric?.error) {
     return (
-      <span className="text-[11px] text-warn-fg" title={metric.error}>
+      <span className="text-xs text-warn-fg" title={metric.error}>
         {t("noData")}
       </span>
     );
   }
 
   if (metric?.balanceUsd == null && metric?.spendTodayUsd == null) {
-    return <span className="text-[12px] text-ink-3">—</span>;
+    return <span className="text-xs text-ink-3">—</span>;
   }
 
   const kind = classifyTikTokLiveBalance(metric);
@@ -80,25 +80,23 @@ export function AdAccountLiveBalanceCell({
   }
 
   return (
-    <div className="min-w-[7rem]">
-      <p className="text-[13px] font-semibold tabular-nums text-ink">
+    <div className="min-w-[7rem] leading-[1.35]">
+      <p className="num text-sm font-semibold text-ink">
         {metric?.balanceUsd != null ? formatMoney(metric.balanceUsd) : "—"}
       </p>
-      <p className="mt-0.5 text-[11px] md:text-[10px] text-ink-3">{balanceLabel}</p>
+      <p className="text-[11px] font-normal text-ink-3">{balanceLabel}</p>
       {budgetLimitLine ? (
-        <p className="mt-0.5 text-[11px] md:text-[10px] leading-4 tabular-nums text-ink-2">
-          {budgetLimitLine}
-        </p>
+        <p className="text-[11px] font-normal tabular-nums text-ink-2">{budgetLimitLine}</p>
       ) : null}
-      <p className="mt-0.5 text-[11px] md:text-[10px] text-ink-3">
+      <p className="text-[11px] font-normal text-ink-3">
         {t("spendToday")}{" "}
-        <span className="font-semibold tabular-nums text-accent-text">
+        <span className="font-medium tabular-nums text-ink-2">
           {metric?.spendTodayUsd != null
             ? formatMoney(metric.spendTodayUsd)
             : "—"}
         </span>
       </p>
-      <p className="mt-0.5 text-[11px] md:text-[10px] text-ink-3">
+      <p className="text-[11px] font-normal text-ink-3">
         {formatUpdatedAgo(metric?.fetchedAt)}
       </p>
     </div>

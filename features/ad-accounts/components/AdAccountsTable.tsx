@@ -4,7 +4,9 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note, ToneBadge, type Tone } from "@/components/ui/PanelKit";
 import {
   Table,
   TableBody,
@@ -13,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/Table";
+import { cn } from "@/lib/cn";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { AdAccountsEmptyState } from "./AdAccountsEmptyState";
@@ -22,57 +25,28 @@ import { useAdAccountLiveMetrics } from "@/features/ad-accounts/hooks/useAdAccou
 import { buildGastosUrlForAdvertiser } from "@/lib/hecom/gastos-url";
 import type { AdAccount, AdAccountStatus } from "@/types/ad-account";
 
-const statusStyles: Record<AdAccountStatus, string> = {
-  active: "bg-subtle text-ok-fg ring-ok-line",
-  pending: "bg-field text-accent-text ring-warn-line",
-  disabled: "bg-subtle text-ink-2 ring-line",
-  review: "bg-field text-info-fg ring-line",
-  archived: "bg-subtle text-ink-2 ring-line",
+const STATUS_TONE: Record<AdAccountStatus, Tone> = {
+  active: "ok",
+  pending: "warn",
+  disabled: "neutral",
+  review: "info",
+  archived: "neutral",
 };
 
-const statusDot: Record<AdAccountStatus, string> = {
-  active: "bg-ok-solid",
-  pending: "bg-accent",
-  disabled: "bg-line-strong",
-  review: "bg-line-strong",
-  archived: "bg-line-strong",
-};
-
-function StatusPill({ status }: { status: AdAccountStatus }) {
+function StatusBadge({ status }: { status: AdAccountStatus }) {
   const t = useTranslations("adAccounts");
   return (
-    <span
-      className={`inline-flex h-6 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-[11px] font-semibold ring-1 ring-inset ${statusStyles[status]}`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
+    <ToneBadge tone={STATUS_TONE[status]} dot>
       {t(`status.${status}`)}
-    </span>
+    </ToneBadge>
   );
 }
 
-function MetaChip({
-  children,
-  tone = "neutral",
-}: {
-  children: ReactNode;
-  tone?: "neutral" | "fee" | "mono";
-}) {
-  const cls =
-    tone === "fee"
-      ? "bg-accent-soft font-semibold text-accent-text"
-      : tone === "mono"
-        ? "bg-subtle font-mono text-ink-2"
-        : "bg-subtle font-medium text-ink-2";
-  return (
-    <span className={`max-w-full break-words rounded px-1.5 py-0.5 text-[11px] md:text-[10px] ${cls}`}>{children}</span>
-  );
-}
-
-/** ID de cuenta abreviado; un clic copia el ID completo para pegarlo. */
+/** ID de cuenta abreviado (v3 «idc») con su botón para copiar el ID completo. */
 function CopyIdChip({ id }: { id: string | null | undefined }) {
   const t = useTranslations("adAccounts");
   const [copied, setCopied] = useState(false);
-  if (!id) return <MetaChip tone="mono">—</MetaChip>;
+  if (!id) return <span className="text-ink-3">—</span>;
 
   async function copy() {
     try {
@@ -93,37 +67,29 @@ function CopyIdChip({ id }: { id: string | null | undefined }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={copy}
-      title={`${t("table.copyId")}: ${id}`}
-      aria-label={`${t("table.copyId")} ${id}`}
-      className={`inline-flex max-w-full items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[11px] transition-colors md:text-[10px] ${
-        copied
-          ? "bg-subtle text-ok-fg"
-          : "bg-subtle text-ink-2 hover:bg-hover hover:text-ink"
-      }`}
-    >
-      <span className="break-all">{copied ? t("table.idCopied") : shortId(id)}</span>
-      <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
-        {copied ? (
-          <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
-        ) : (
-          <>
-            <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" />
-            <path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" />
-          </>
-        )}
-      </svg>
-    </button>
+    <span className="inline-flex items-center gap-1 whitespace-nowrap text-ink-2">
+      <span className={cn("font-mono text-xs tracking-[-0.01em]", copied && "text-ok-fg")} aria-live="polite">
+        {copied ? t("table.idCopied") : shortId(id)}
+      </span>
+      <button
+        type="button"
+        onClick={copy}
+        title={`${t("table.copyId")}: ${id}`}
+        aria-label={`${t("table.copyId")} ${id}`}
+        className="inline-grid size-6 shrink-0 place-items-center rounded-[6px] text-ink-3 hover:bg-hover hover:text-ink"
+      >
+        <PanelIcon name={copied ? "check" : "copy"} className="size-[13px]" />
+      </button>
+    </span>
   );
 }
 
+/** Logo de la plataforma (colores de marca, no de tema). */
 function PlatformMark({ platform }: { platform: AdAccount["platform"] }) {
   if (platform === "tiktok") {
     return (
       <span
-        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#16161a] text-[8px] font-bold tracking-wide text-white"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-ctl bg-[#16161a] text-[9px] font-bold tracking-wide text-white"
         title="TikTok"
       >
         <span className="text-[#25f4ee]">T</span>
@@ -133,21 +99,14 @@ function PlatformMark({ platform }: { platform: AdAccount["platform"] }) {
   }
   if (platform === "meta") {
     return (
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#1877f2] text-[9px] font-bold text-white">
+      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-ctl bg-[#1877f2] text-[10px] font-bold text-white">
         M
       </span>
     );
   }
-  if (platform === "google") {
-    return (
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-subtle text-[9px] font-bold text-ink-2 ring-1 ring-line">
-        G
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-subtle text-[9px] font-bold text-ink-2 ring-1 ring-line">
-      Ad
+    <span className="panel-sqi" aria-hidden>
+      {platform === "google" ? "G" : "Ad"}
     </span>
   );
 }
@@ -190,23 +149,18 @@ function parseAccountDisplay(account: AdAccount, defaultName: string) {
   };
 }
 
-function Head({ children }: { children: ReactNode }) {
-  return (
-    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-3">
-      {children}
-    </TableHead>
-  );
-}
-
 interface AdAccountsTableProps {
   accounts: AdAccount[];
   /** Hecom-scoped accounts: view only (no configure / archive in Ecomdy). */
   readOnly?: boolean;
+  /** Nombre de la tabla para lectores de pantalla. */
+  caption?: string;
 }
 
 export function AdAccountsTable({
   accounts,
   readOnly = false,
+  caption,
 }: AdAccountsTableProps) {
   const t = useTranslations("adAccounts");
   const { formatMoney } = useAppFormatter();
@@ -253,12 +207,10 @@ export function AdAccountsTable({
   function GastosLinkButton({
     account,
     compact = false,
-    inline = false,
   }: {
     account: AdAccount;
+    /** Ancho completo (tarjeta móvil sin saldo en vivo). */
     compact?: boolean;
-    /** Botón chico al lado del saldo (tarjeta móvil). */
-    inline?: boolean;
   }) {
     const advertiserId = account.externalAccountId?.trim();
     if (!advertiserId) return null;
@@ -272,16 +224,8 @@ export function AdAccountsTable({
       days: 14,
     });
     return (
-      <Link
-        href={href}
-        className={
-          inline
-            ? "inline-flex h-9 shrink-0 items-center rounded-lg border border-accent/30 bg-surface px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
-            : compact
-            ? "inline-flex h-10 w-full items-center justify-center rounded-lg border border-accent/30 bg-field px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
-            : "inline-flex h-8 items-center rounded-lg border border-accent/30 bg-field px-3 text-[12px] font-semibold text-accent-text transition hover:bg-accent-soft"
-        }
-      >
+      <Link href={href} className={buttonClass("outline", "sm", compact ? "w-full" : "shrink-0")}>
+        <PanelIcon name="chart" />
         {t("table.viewProfit")}
       </Link>
     );
@@ -295,26 +239,16 @@ export function AdAccountsTable({
     compact?: boolean;
   }) {
     if (readOnly) {
-      return (
-        <div className={compact ? "flex flex-col gap-2" : "flex flex-col items-start gap-2"}>
-          <GastosLinkButton account={account} compact={compact} />
-          <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-ink-3 md:text-[10px]">
-            {t("table.pollHint", { seconds: live.pollSeconds })}
-          </p>
-        </div>
-      );
+      return <GastosLinkButton account={account} compact={compact} />;
     }
 
+    const secondary = compact ? "outline" : "ghost";
     return (
-      <div className={compact ? "flex flex-col gap-2" : "flex flex-wrap gap-1.5"}>
+      <div className={compact ? "grid gap-2" : "flex justify-end gap-1.5"}>
         <Button
-          variant={compact ? undefined : "ghost"}
+          variant={compact ? "primary" : "outline"}
           size="sm"
-          className={
-            compact
-              ? "h-11 w-full rounded-lg bg-accent text-[13px] font-medium hover:bg-accent-btn-hover"
-              : "text-accent-text"
-          }
+          className={compact ? "w-full" : undefined}
           onClick={() => setSelectedAccount(account)}
         >
           {t("table.configure")}
@@ -322,13 +256,8 @@ export function AdAccountsTable({
         <div className={compact ? "grid grid-cols-2 gap-2" : "contents"}>
           {account.status === "active" ? (
             <Button
-              variant="ghost"
+              variant={secondary}
               size="sm"
-              className={
-                compact
-                  ? "h-10 rounded-lg border border-[rgb(20_18_16_/_0.1)]"
-                  : undefined
-              }
               disabled={loadingActionId === `${account.id}:disable`}
               onClick={() => runAccountAction(account, "disable")}
             >
@@ -336,13 +265,8 @@ export function AdAccountsTable({
             </Button>
           ) : account.status !== "archived" ? (
             <Button
-              variant="ghost"
+              variant={secondary}
               size="sm"
-              className={
-                compact
-                  ? "h-10 rounded-lg border border-[rgb(20_18_16_/_0.1)]"
-                  : undefined
-              }
               disabled={loadingActionId === `${account.id}:reactivate`}
               onClick={() => runAccountAction(account, "reactivate")}
             >
@@ -351,13 +275,8 @@ export function AdAccountsTable({
           ) : null}
           {account.status !== "archived" ? (
             <Button
-              variant="ghost"
+              variant={secondary}
               size="sm"
-              className={
-                compact
-                  ? "h-10 rounded-lg border border-[rgb(20_18_16_/_0.1)]"
-                  : undefined
-              }
               disabled={loadingActionId === `${account.id}:archive`}
               onClick={() => runAccountAction(account, "archive")}
             >
@@ -365,13 +284,8 @@ export function AdAccountsTable({
             </Button>
           ) : (
             <Button
-              variant="ghost"
+              variant={secondary}
               size="sm"
-              className={
-                compact
-                  ? "h-10 rounded-lg border border-[rgb(20_18_16_/_0.1)]"
-                  : undefined
-              }
               disabled={loadingActionId === `${account.id}:reactivate`}
               onClick={() => runAccountAction(account, "reactivate")}
             >
@@ -383,122 +297,136 @@ export function AdAccountsTable({
     );
   }
 
+  /** Celda de cuenta (v3 «who-cell»): logo, nombre y una línea con BM, etiqueta y nombre externo. */
   function AccountCell({ account }: { account: AdAccount }) {
     const display = parseAccountDisplay(account, defaultName);
+    const meta: ReactNode[] = [
+      display.bm ? <span key="bm" className="font-mono">{display.bm}</span> : null,
+      display.tag ? <span key="tag">{display.tag}</span> : null,
+      display.balanceHint ? (
+        <span key="usd" className="font-medium text-accent-text">
+          {display.balanceHint}
+        </span>
+      ) : null,
+      display.secondary ? <span key="sec">{display.secondary}</span> : null,
+    ].filter(Boolean);
     return (
-      <div className="flex min-w-0 flex-1 items-start gap-2.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <PlatformMark platform={account.platform} />
-        <div className="min-w-0">
-          <p className="line-clamp-2 break-words text-[14px] font-semibold tracking-[-0.02em] text-ink md:truncate">
-            {display.title}
-          </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            {display.tag ? <MetaChip>{display.tag}</MetaChip> : null}
-            {display.balanceHint ? (
-              <MetaChip tone="fee">{display.balanceHint}</MetaChip>
-            ) : null}
-            {display.secondary ? (
-              <span className="min-w-0 max-w-full truncate text-[11px] text-ink-3">
-                {display.secondary}
-              </span>
-            ) : null}
-          </div>
+        <div className="grid min-w-0 leading-[1.35]">
+          <p className="truncate font-semibold text-ink md:max-w-[34ch]">{display.title}</p>
+          {meta.length ? (
+            <p className="truncate text-[11px] text-ink-3 md:max-w-[38ch]">
+              {meta.map((node, i) => (
+                <span key={i}>
+                  {i ? " · " : null}
+                  {node}
+                </span>
+              ))}
+            </p>
+          ) : null}
         </div>
       </div>
     );
   }
 
+  function FeeValue({ account }: { account: AdAccount }) {
+    const display = parseAccountDisplay(account, defaultName);
+    if (display.fee) return <span className="num font-semibold text-ink">{display.fee}%</span>;
+    return account.thresholdInfo ? (
+      <span className="text-xs font-normal text-ink-2">{account.thresholdInfo}</span>
+    ) : (
+      <span className="text-ink-3">—</span>
+    );
+  }
+
+  function liveMetric(account: AdAccount) {
+    return account.externalAccountId
+      ? live.metricsByAdvertiser[account.externalAccountId]
+      : undefined;
+  }
+
   return (
-    <div>
+    <div className="space-y-4">
       {readOnly && !isEmpty ? (
-        <div className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg border border-[rgb(20_18_16_/_0.08)] bg-field px-3 py-2 text-[12px] leading-5 text-ink-2 md:mx-4 md:mb-3 md:px-4 md:py-3">
-          <p>
-            <span className="font-semibold text-ink">{t("live.title")}</span>
-            {" · "}
-            {t("live.autoRefresh", { seconds: live.pollSeconds })}.
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-box border border-line bg-field px-3 py-2 text-[13px] leading-snug text-ink-2">
+          <p className="flex min-w-0 items-center gap-2">
+            <PanelIcon name="activity" className="text-ink-3" />
+            <span>
+              <span className="font-medium text-ink">{t("live.title")}</span>
+              {" · "}
+              {t("live.autoRefresh", { seconds: live.pollSeconds })}.
+            </span>
           </p>
           {live.error ? (
-            <span className="text-[11px] font-medium text-danger-fg">{live.error}</span>
+            <span className="text-xs font-medium text-danger-fg">{live.error}</span>
           ) : (
             <button
               type="button"
               onClick={() => void live.refresh()}
-              className="-mx-2 inline-flex min-h-9 items-center px-2 text-[12px] font-semibold text-accent-text hover:underline md:min-h-0 md:text-[11px]"
+              className="-my-1 inline-flex min-h-8 items-center gap-1.5 rounded-ctl px-2 font-medium text-accent-text hover:bg-hover"
             >
+              <PanelIcon name="refresh" />
               {t("live.refreshNow")}
             </button>
           )}
         </div>
       ) : null}
 
-      {(message || error) && (
-        <div
-          className={`mx-4 mb-3 rounded-lg border px-4 py-3 text-[13px] ${
-            error
-              ? "border-danger-line bg-danger-bg text-danger-fg"
-              : "border-ok-line bg-ok-bg text-ok-fg"
-          }`}
-          role="status"
-        >
+      {message || error ? (
+        <Note tone={error ? "danger" : "ok"} icon={error ? "alert" : "check-circle"}>
           {error ?? message}
-        </div>
-      )}
+        </Note>
+      ) : null}
 
       {!isEmpty ? (
-        <div className="space-y-2.5 px-3 pb-4 pt-1 md:hidden">
+        <div className="space-y-3 md:hidden">
           {accounts.map((account) => {
             const display = parseAccountDisplay(account, defaultName);
             return (
               <article
                 key={account.id}
-                className="rounded-box border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5"
+                className="rounded-card border border-line bg-surface p-4 shadow-card"
               >
                 <div className="flex items-start justify-between gap-3">
                   <AccountCell account={account} />
-                  <StatusPill status={account.status} />
+                  <StatusBadge status={account.status} />
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px]">
                   <CopyIdChip id={display.accountId} />
-                  {display.bm ? <MetaChip>{display.bm}</MetaChip> : null}
                   {display.fee ? (
-                    <MetaChip tone="fee">
-                      {t("table.fee")} {display.fee}%
-                    </MetaChip>
+                    <span className="text-ink-2">
+                      {t("table.fee")} <FeeValue account={account} />
+                    </span>
                   ) : account.thresholdInfo ? (
-                    <MetaChip>{account.thresholdInfo}</MetaChip>
+                    <FeeValue account={account} />
                   ) : null}
                 </div>
                 {readOnly ? (
-                  // Saldo y "Ver Profit" en una sola fila; el aviso de 45 s ya está arriba.
-                  <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-field px-3 py-2.5">
+                  // Saldo y "Ver Profit" en una sola fila; el aviso de actualización ya está arriba.
+                  <div className="mt-3 flex items-center justify-between gap-3 rounded-box bg-field px-3 py-2.5">
                     <div className="min-w-0">
-                      <p className="text-[11px] text-ink-3">{t("live.mobileLabel")}</p>
+                      <p className="text-xs text-ink-3">{t("live.mobileLabel")}</p>
                       <AdAccountLiveBalanceCell
                         advertiserId={account.externalAccountId}
-                        metric={
-                          account.externalAccountId
-                            ? live.metricsByAdvertiser[account.externalAccountId]
-                            : undefined
-                        }
+                        metric={liveMetric(account)}
                         loading={live.loading}
                       />
                     </div>
-                    <GastosLinkButton account={account} inline />
+                    <GastosLinkButton account={account} />
                   </div>
                 ) : (
                   <>
-                    <dl className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
+                    <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]">
                       <div>
-                        <dt className="text-ink-3">{t("table.balance")}</dt>
-                        <dd className="tabular-nums text-ink">
+                        <dt className="text-xs text-ink-3">{t("table.balance")}</dt>
+                        <dd className="num font-semibold text-ink">
                           {formatMoney(account.balance)}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-ink-3">{t("table.timezone")}</dt>
-                        <dd className="text-ink-2">
-                          {account.timezone || "—"}
-                        </dd>
+                        <dt className="text-xs text-ink-3">{t("table.timezone")}</dt>
+                        <dd className="text-ink-2">{account.timezone || "—"}</dd>
                       </div>
                     </dl>
                     <div className="mt-3">
@@ -513,126 +441,95 @@ export function AdAccountsTable({
       ) : null}
 
       {!isEmpty ? (
-        <div className="hidden md:block overflow-x-auto">
-          <Table embedded className="rounded-none">
+        <div className="hidden md:block">
+          <Table>
+            {caption ? <caption className="sr-only">{caption}</caption> : null}
             <TableHeader>
-              <TableRow className="border-b border-[rgb(20_18_16_/_0.07)] bg-field hover:bg-field">
-                <Head>{t("table.account")}</Head>
-                <Head>{t("table.colId")}</Head>
-                <Head>{t("table.status")}</Head>
+              <tr>
+                <TableHead>{t("table.account")}</TableHead>
+                <TableHead>{t("table.colId")}</TableHead>
+                <TableHead>{t("table.status")}</TableHead>
                 {readOnly ? (
                   <>
-                    <Head>{t("live.column")}</Head>
-                    <Head>{t("table.fee")}</Head>
+                    <TableHead className="text-right">{t("live.column")}</TableHead>
+                    <TableHead className="text-right">{t("table.fee")}</TableHead>
                   </>
                 ) : (
                   <>
-                    <Head>{t("table.budgets")}</Head>
-                    <Head>{t("table.balance")}</Head>
-                    <Head>{t("table.recharge")}</Head>
+                    <TableHead>{t("table.budgets")}</TableHead>
+                    <TableHead className="text-right">{t("table.balance")}</TableHead>
+                    <TableHead>{t("table.recharge")}</TableHead>
+                    <TableHead>{t("table.timezone")}</TableHead>
                   </>
                 )}
-                {!readOnly ? <Head>{t("table.timezone")}</Head> : null}
-                <Head>{t("table.actions")}</Head>
-              </TableRow>
+                <TableHead className="w-px text-right">
+                  <span className="sr-only">{t("table.actions")}</span>
+                </TableHead>
+              </tr>
             </TableHeader>
             <TableBody>
               {accounts.map((account) => {
                 const display = parseAccountDisplay(account, defaultName);
                 return (
-                    <TableRow
-                      key={account.id}
-                      className="border-b border-[rgb(20_18_16_/_0.05)] transition-colors hover:bg-field"
-                    >
-                      <TableCell className="max-w-[280px]">
-                        <AccountCell account={account} />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1.5">
-                          <CopyIdChip id={display.accountId} />
-                          {display.bm ? <MetaChip>{display.bm}</MetaChip> : null}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusPill status={account.status} />
-                      </TableCell>
-                      {readOnly ? (
-                        <>
-                          <TableCell>
-                            <AdAccountLiveBalanceCell
-                              advertiserId={account.externalAccountId}
-                              metric={
-                                account.externalAccountId
-                                  ? live.metricsByAdvertiser[
-                                      account.externalAccountId
-                                    ]
-                                  : undefined
-                              }
-                              loading={live.loading}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {display.fee ? (
-                              <MetaChip tone="fee">
-                                {t("table.fee")} {display.fee}%
-                              </MetaChip>
-                            ) : (
-                              <span className="text-[12px] text-ink-2">
-                                {account.thresholdInfo}
-                              </span>
-                            )}
-                          </TableCell>
-                        </>
-                      ) : (
-                        <>
-                          <TableCell className="text-[12px] tabular-nums text-ink-2">
-                            <div>
-                              {t("table.daily", {
-                                amount: formatMoney(account.dailyBudget),
-                              })}
-                            </div>
-                            <div className="text-ink-3">
-                              {t("table.monthly", {
-                                amount: formatMoney(account.monthlyLimit),
-                              })}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-[14px] font-semibold tabular-nums tracking-[-0.02em] text-ink">
-                            {formatMoney(account.balance)}
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={
-                                account.autoRecharge
-                                  ? "text-[12px] font-semibold text-ok-fg"
-                                  : "text-[12px] text-ink-2"
-                              }
-                            >
-                              {account.autoRecharge
-                                ? t("table.rechargeOn")
-                                : t("table.rechargeOff")}
-                            </span>
-                            <div className="mt-1">
-                              {display.fee ? (
-                                <MetaChip tone="fee">
-                                  {t("table.fee")} {display.fee}%
-                                </MetaChip>
-                              ) : (
-                                <span className="text-[11px] text-ink-3">
-                                  {account.thresholdInfo}
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-[12px] text-ink-2">
-                            {account.timezone || "—"}
-                          </TableCell>
-                        </>
-                      )}
-                      <TableCell>
-                        <AccountActions account={account} />
-                      </TableCell>
-                    </TableRow>
+                  <TableRow key={account.id}>
+                    <TableCell className="max-w-[320px]">
+                      <AccountCell account={account} />
+                    </TableCell>
+                    <TableCell>
+                      <CopyIdChip id={display.accountId} />
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={account.status} />
+                    </TableCell>
+                    {readOnly ? (
+                      <>
+                        <TableCell className="text-right">
+                          <AdAccountLiveBalanceCell
+                            advertiserId={account.externalAccountId}
+                            metric={liveMetric(account)}
+                            loading={live.loading}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <FeeValue account={account} />
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="text-xs text-ink-2">
+                          <div className="num">
+                            {t("table.daily", {
+                              amount: formatMoney(account.dailyBudget),
+                            })}
+                          </div>
+                          <div className="num text-ink-3">
+                            {t("table.monthly", {
+                              amount: formatMoney(account.monthlyLimit),
+                            })}
+                          </div>
+                        </TableCell>
+                        <TableCell className="num text-right font-semibold">
+                          {formatMoney(account.balance)}
+                        </TableCell>
+                        <TableCell>
+                          <ToneBadge tone={account.autoRecharge ? "ok" : "neutral"}>
+                            {account.autoRecharge
+                              ? t("table.rechargeOn")
+                              : t("table.rechargeOff")}
+                          </ToneBadge>
+                          <div className="mt-1 text-xs text-ink-3">
+                            <FeeValue account={account} />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-ink-2">
+                          {account.timezone || "—"}
+                        </TableCell>
+                      </>
+                    )}
+                    <TableCell className="text-right">
+                      <AccountActions account={account} />
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>
@@ -642,14 +539,13 @@ export function AdAccountsTable({
 
       {isEmpty && !readOnly ? <AdAccountsEmptyState /> : null}
       {isEmpty && readOnly ? (
-        <div className="px-6 py-12 text-center">
-          <p className="text-[14px] font-medium text-ink">
-            {t("table.noFilterMatch")}
-          </p>
-          <p className="mt-1 text-[13px] text-ink-2">
-            {t("table.noFilterHint")}
-          </p>
-        </div>
+        <section className="rounded-card border border-line bg-surface shadow-card">
+          <EmptyState
+            icon="search"
+            title={t("table.noFilterMatch")}
+            description={t("table.noFilterHint")}
+          />
+        </section>
       ) : null}
       {selectedAccount && !readOnly ? (
         <ConfigureAdAccountModal

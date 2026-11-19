@@ -2,9 +2,24 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
+import {
+  EmptyState,
+  FilterBar,
+  FilterButton,
+  FilterChip,
+  Note,
+  SearchField,
+  Segmented,
+  ToneBadge,
+} from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { PanelMenu, PanelPopover, usePopover } from "@/components/ui/PanelPopover.client";
 import { routes } from "@/config/routes";
-import { dashboardClasses } from "@/lib/ui/dashboard-classes";
+import { cn } from "@/lib/cn";
 import { HecomClienteAvatar } from "@/features/clientes/components/HecomClienteAvatar.client";
 
 type TiktokAccount = {
@@ -48,6 +63,18 @@ const SORT_LABELS: Record<SortKey, string> = {
   contacts: "Más contactos",
   balance: "Mayor saldo en cartera",
 };
+
+const MODALITY_OPTIONS: Array<[ModalityFilter, string]> = [
+  ["all", "Todas"],
+  ["credito", "Crédito"],
+  ["prepago", "Prepago"],
+];
+
+const TIKTOK_OPTIONS: Array<[TikTokFilter, string]> = [
+  ["all", "Todos"],
+  ["with", "Con cuentas"],
+  ["without", "Sin cuentas"],
+];
 
 /** Preferencias por persona (vista y orden); si el navegador no deja guardar, se usa el default. */
 const PREFS_KEY = "clientes.list.prefs.v1";
@@ -103,6 +130,10 @@ function hasTikTokAccounts(client: ClientRow): boolean {
   return Boolean(client.tiktokAdvertiserId) || (client.tiktokAccounts?.length ?? 0) > 0;
 }
 
+function feeLabel(client: ClientRow): string {
+  return client.defaultFee != null ? `${client.defaultFee} %` : "—";
+}
+
 type ApiPayload = {
   ok: boolean;
   error?: string;
@@ -114,6 +145,15 @@ type ApiPayload = {
   note?: string;
   scopedToEmail?: boolean;
 };
+
+/* Tabla v3: en pantallas angostas cada fila se apila y cada celda muestra su rótulo. */
+const TH_BASE = "h-10 whitespace-nowrap border-b border-line px-2 text-sm font-medium text-ink";
+const TH = `${TH_BASE} text-left`;
+const TH_R = `${TH_BASE} text-right`;
+const TD = "h-[59px] border-b border-line px-2 py-2 align-middle max-md:h-auto max-md:border-0 max-md:px-0";
+/** Celda con rótulo (data-label) a la izquierda cuando la fila se apila. */
+const TD_LABELED =
+  "max-md:flex max-md:min-h-[30px] max-md:items-center max-md:justify-between max-md:gap-4 max-md:py-[3px] max-md:text-right max-md:before:flex-none max-md:before:text-left max-md:before:text-xs max-md:before:font-medium max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]";
 
 export function ClientesPageClient({
   mode = "staff",
@@ -127,6 +167,8 @@ export function ClientesPageClient({
   const [loading, setLoading] = useState(true);
   const [payload, setPayload] = useState<ApiPayload | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
+  // Solo para mostrar «Entrando…» en el botón que se pulsó.
+  const [selectingAsCliente, setSelectingAsCliente] = useState(false);
   const [selectError, setSelectError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const prefsRaw = useSyncExternalStore(subscribePrefs, readPrefsRaw, () => null);
@@ -229,11 +271,17 @@ export function ClientesPageClient({
 
   const filtersActive = modality !== "all" || tiktok !== "all";
 
+  function clearFilters() {
+    setModality("all");
+    setTikTok("all");
+  }
+
   function elegirCliente(client: ClientRow, actAsCliente = false) {
     const contactName =
       client.contactName?.trim() || client.contactEmail || client.name;
     setSelectError(null);
     setSelectingId(client.id);
+    setSelectingAsCliente(actAsCliente);
     startTransition(async () => {
       try {
         const res = await fetch("/api/clientes/seleccionar", {
@@ -268,353 +316,406 @@ export function ClientesPageClient({
   const shown = filtered.length;
   const isStaffPicker = mode === "staff" || !payload?.scopedToEmail;
 
+  function actionsFor(client: ClientRow) {
+    const busy = pending && selectingId === client.id;
+    return (
+      <ClientActions
+        client={client}
+        staffPicker={isStaffPicker}
+        busy={busy ? (selectingAsCliente ? "cliente" : "operar") : null}
+        disabled={busy || pending}
+        onPick={elegirCliente}
+      />
+    );
+  }
+
+  const modalityLabel = MODALITY_OPTIONS.find(([value]) => value === modality)?.[1] ?? "";
+  const tiktokLabel = TIKTOK_OPTIONS.find(([value]) => value === tiktok)?.[1] ?? "";
+  const activeChips = [
+    modality !== "all" ? (
+      <FilterChip key="modality" name="Modalidad" value={modalityLabel} removeLabel="Quitar filtro" onRemove={() => setModality("all")} />
+    ) : null,
+    tiktok !== "all" ? (
+      <FilterChip key="tiktok" name="TikTok" value={tiktokLabel} removeLabel="Quitar filtro" onRemove={() => setTikTok("all")} />
+    ) : null,
+  ].filter(Boolean);
+
   return (
-    <div className={dashboardClasses.page}>
-      <header className="border-b border-[var(--auth-divider)] pb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-text-soft)]">
-          {isStaffPicker ? "CRM Hecom" : "Tu cuenta"}
-        </p>
-        <h1 className="mt-1 text-[1.125rem] font-bold leading-snug tracking-[-0.02em] text-[var(--auth-text)] sm:text-[1.25rem]">
-          {isStaffPicker ? "Elige un cliente" : "Elegir cliente"}
-        </h1>
-        <p className="mt-1 text-[13px] text-[var(--auth-text-muted)]">
-          {isStaffPicker
-            ? "Recargar como gerente (BM) o entrar al panel como esa persona: gastos, cuentas y recarga Stripe."
-            : "Solo ves los clientes de tu cuenta."}
-        </p>
-        {!loading && payload?.ok ? (
-          <p className="mt-2 text-[12px] font-medium tabular-nums text-[var(--auth-text-soft)]">
-            {shown === total
-              ? `${total} cliente${total === 1 ? "" : "s"}`
-              : `${shown} de ${total} clientes`}
-          </p>
-        ) : null}
-      </header>
+    <div className="min-w-0">
+      <PageHeader
+        eyebrow={isStaffPicker ? "CRM Hecom" : "Tu cuenta"}
+        title={isStaffPicker ? "Clientes" : "Elegir cliente"}
+        lede={
+          isStaffPicker
+            ? "Tu cartera de clientes. Opera la cuenta de uno como gerente o entra al panel como esa persona."
+            : "Solo ves los clientes de tu cuenta."
+        }
+      />
 
       {selectError ? (
-        <div
-          className="rounded-card border border-danger-line bg-danger-bg px-4 py-3 text-[14px] font-medium text-danger-fg"
-          role="alert"
-        >
+        <Note tone="danger" className="mb-4">
           {selectError}
-        </div>
+        </Note>
       ) : null}
 
       {!loading && payload && !payload.ok ? (
-        <div
-          className="rounded-card border border-danger-line bg-danger-bg px-4 py-4 text-[14px] text-danger-fg"
-          role="alert"
-        >
-          <p className="font-semibold">No se pudieron cargar los clientes</p>
-          <p className="mt-1 font-medium text-danger-fg/90">
-            {payload.error ?? "Error desconocido. Reintenta en unos segundos."}
-          </p>
-        </div>
+        <Note tone="danger" title="No se pudieron cargar los clientes" className="mb-4">
+          {payload.error ?? "Error desconocido. Reintenta en unos segundos."}
+        </Note>
       ) : null}
 
-      <div className="rounded-lg border border-[var(--auth-border)] bg-surface p-4 sm:p-5">
-        <label className="sr-only" htmlFor="clientes-search">
-          Buscar cliente
-        </label>
-        <input
-          id="clientes-search"
+      <FilterBar
+        tools={
+          <Segmented
+            label="Forma de ver"
+            value={view}
+            onChange={changeView}
+            options={[
+              { value: "list", label: <><PanelIcon name="list" />Lista</> },
+              { value: "cards", label: <><PanelIcon name="grid" />Tarjetas</> },
+            ]}
+          />
+        }
+        chips={
+          activeChips.length ? (
+            <>
+              {activeChips}
+              {activeChips.length > 1 ? (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Quitar filtros
+                </Button>
+              ) : null}
+            </>
+          ) : null
+        }
+      >
+        <SearchField
+          label="Buscar cliente"
+          placeholder="Buscar por nombre, mail o advertiser…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nombre, mail o advertiser…"
-          className="h-11 w-full rounded-lg border border-[var(--auth-input-border)] bg-surface px-3.5 text-[14px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
         />
+        <FilterMenu label="Modalidad" value={modality} options={MODALITY_OPTIONS} onChange={setModality} />
+        <FilterMenu label="TikTok" value={tiktok} options={TIKTOK_OPTIONS} onChange={setTikTok} />
+        <label className="sr-only" htmlFor="clientes-sort">
+          Ordenar por
+        </label>
+        <Select
+          id="clientes-sort"
+          value={sort}
+          onChange={(e) => changeSort(e.target.value as SortKey)}
+          className="w-auto! text-[13px]"
+        >
+          {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+            <option key={key} value={key}>
+              {SORT_LABELS[key]}
+            </option>
+          ))}
+        </Select>
+      </FilterBar>
 
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <div
-            role="radiogroup"
-            aria-label="Vista"
-            className="inline-flex h-9 rounded-lg border border-[var(--auth-input-border)] bg-[var(--auth-bg)] p-0.5"
-          >
-            {(["list", "cards"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={view === option}
-                onClick={() => changeView(option)}
-                className={`rounded-md px-3 text-[12px] font-semibold transition-colors ${
-                  view === option
-                    ? "bg-surface text-[var(--auth-text)] shadow-sm"
-                    : "text-[var(--auth-text-muted)] hover:text-[var(--auth-text)]"
-                }`}
-              >
-                {option === "list" ? "Lista" : "Tarjetas"}
-              </button>
-            ))}
-          </div>
-
-          <ToolbarSelect
-            label="Ordenar"
-            value={sort}
-            onChange={(value) => changeSort(value as SortKey)}
-            options={(Object.keys(SORT_LABELS) as SortKey[]).map((key) => [key, SORT_LABELS[key]])}
-          />
-          <ToolbarSelect
-            label="Modalidad"
-            value={modality}
-            onChange={(value) => setModality(value as ModalityFilter)}
-            options={[
-              ["all", "Todas"],
-              ["credito", "Crédito"],
-              ["prepago", "Prepago"],
-            ]}
-          />
-          <ToolbarSelect
-            label="TikTok"
-            value={tiktok}
-            onChange={(value) => setTikTok(value as TikTokFilter)}
-            options={[
-              ["all", "Todos"],
-              ["with", "Con cuentas"],
-              ["without", "Sin cuentas"],
-            ]}
-          />
-
-          {filtersActive ? (
-            <button
-              type="button"
-              onClick={() => {
-                setModality("all");
-                setTikTok("all");
-              }}
-              className="h-9 px-1.5 text-[12px] font-semibold text-accent-text hover:underline"
-            >
-              Quitar filtros
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="dashboard-surface-card rounded-card p-8 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
-          Cargando clientes…
-        </div>
-      ) : null}
-
-      {!loading && payload?.ok && filtered.length === 0 ? (
-        <div className="dashboard-surface-card rounded-card p-10 text-center text-[14px] font-medium text-[var(--auth-text-muted)]">
-          {q.trim() || filtersActive
-            ? "Ningún cliente coincide con la búsqueda o los filtros."
-            : "No hay clientes Hecom para mostrar."}
-        </div>
-      ) : null}
-
-      {filtered.length > 0 && view === "list" ? (
-        <ul className="divide-y divide-[var(--auth-divider)] overflow-hidden rounded-lg border border-[var(--auth-border)] bg-surface">
-          {filtered.map((client) => (
-            <li
-              key={client.id}
-              className="flex flex-col gap-3 px-4 py-3 transition-colors hover:bg-[var(--auth-bg)] lg:flex-row lg:items-center lg:gap-4 lg:px-5"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <HecomClienteAvatar name={displayName(client)} avatarUrl={client.avatarUrl} size="md" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate text-[14px] font-bold tracking-[-0.01em] text-[var(--auth-text)]">
-                    {displayName(client)}
-                  </h2>
-                  <p className="mt-0.5 truncate text-[12px] font-medium text-[var(--auth-text-muted)]">
-                    {client.biz ? `${client.biz} · ` : ""}
-                    {client.contactEmail ?? client.slug}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:w-[22rem] lg:flex-none">
-                <dl className="flex items-center gap-4 text-[12px]">
-                  <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-                      TikTok
-                    </dt>
-                    <dd className="font-bold tabular-nums text-[var(--auth-text)]">{client.adAccountCount}</dd>
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-                      Contactos
-                    </dt>
-                    <dd className="font-bold tabular-nums text-[var(--auth-text)]">{client.activeMemberCount}</dd>
-                  </div>
-                </dl>
-                <ClientBadges client={client} />
-              </div>
-              <ClientActions
-                client={client}
-                staffPicker={isStaffPicker}
-                busy={pending && selectingId === client.id}
-                pending={pending}
-                onPick={elegirCliente}
-                compact
+      {loading || payload?.ok ? (
+        <div className="mt-4 overflow-hidden rounded-card border border-line bg-surface p-2 shadow-card max-md:p-0">
+          {loading ? (
+            <LoadingRows />
+          ) : filtered.length === 0 ? (
+            q.trim() || filtersActive ? (
+              <EmptyState
+                icon="search"
+                title="Ningún cliente coincide con la búsqueda o los filtros."
+                description="Prueba con otro término o quita algún filtro."
+                action={
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setQ("");
+                      clearFilters();
+                    }}
+                  >
+                    Quitar filtros
+                  </Button>
+                }
               />
-            </li>
-          ))}
-        </ul>
+            ) : (
+              <EmptyState icon="users" title="No hay clientes Hecom para mostrar." />
+            )
+          ) : view === "list" ? (
+            <ClientsTable clients={filtered} staffPicker={isStaffPicker} actionsFor={actionsFor} />
+          ) : (
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-4 p-2 max-md:p-3">
+              {filtered.map((client) => (
+                <ClientTile key={client.id} client={client} staffPicker={isStaffPicker} actions={actionsFor(client)} />
+              ))}
+            </ul>
+          )}
+        </div>
       ) : null}
 
-      {filtered.length > 0 && view === "cards" ? (
-        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {filtered.map((client) => (
-            <article
-              key={client.id}
-              className="flex flex-col rounded-lg border border-[var(--auth-border)] bg-surface p-4 transition-colors hover:border-[var(--auth-text-soft)] sm:p-5"
-            >
-              <div className="flex items-start gap-3">
-                <HecomClienteAvatar name={displayName(client)} avatarUrl={client.avatarUrl} size="md" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate text-[1rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-                    {displayName(client)}
-                  </h2>
-                  <p className="mt-0.5 truncate text-[12px] font-medium text-[var(--auth-text-muted)]">
-                    {client.biz ? `${client.biz} · ` : ""}
-                    {client.contactEmail ?? client.slug}
-                  </p>
-                </div>
-              </div>
-              <dl className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-lg border border-[var(--auth-divider)] bg-[var(--auth-bg)] px-3 py-2">
-                  <dt className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-                    TikTok
-                  </dt>
-                  <dd className="mt-0.5 text-[15px] font-bold tabular-nums text-[var(--auth-text)]">
-                    {client.adAccountCount}
-                  </dd>
-                </div>
-                <div className="rounded-lg border border-[var(--auth-divider)] bg-[var(--auth-bg)] px-3 py-2">
-                  <dt className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-                    Contactos
-                  </dt>
-                  <dd className="mt-0.5 text-[15px] font-bold tabular-nums text-[var(--auth-text)]">
-                    {client.activeMemberCount}
-                  </dd>
-                </div>
-              </dl>
-              <div className="mt-3">
-                <ClientBadges client={client} />
-              </div>
-              <div className="mt-4">
-                <ClientActions
-                  client={client}
-                  staffPicker={isStaffPicker}
-                  busy={pending && selectingId === client.id}
-                  pending={pending}
-                  onPick={elegirCliente}
-                />
-              </div>
-            </article>
-          ))}
-        </div>
+      {!loading && payload?.ok ? (
+        <p role="status" className="pt-4 text-sm text-ink-2">
+          {shown === total ? (
+            <>
+              <b className="num font-normal">{total}</b> cliente{total === 1 ? "" : "s"}
+            </>
+          ) : (
+            <>
+              <b className="num font-normal">{shown}</b> de <b className="num font-normal">{total}</b> clientes
+            </>
+          )}
+        </p>
       ) : null}
     </div>
   );
 }
 
-function ToolbarSelect({
+/** Filtro de una sola opción: botón v3 que abre un menú con las opciones. */
+function FilterMenu<T extends string>({
   label,
   value,
-  onChange,
   options,
+  onChange,
 }: {
   label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<[string, string]>;
+  value: T;
+  options: Array<[T, string]>;
+  onChange: (value: T) => void;
+}) {
+  const { anchorRef, open, toggle, close } = usePopover();
+  const active = value !== options[0]?.[0];
+  return (
+    <>
+      {/* El kit no reenvía `ref`: el ancla es el botón que queda dentro. */}
+      <span
+        className="contents"
+        ref={(node) => {
+          anchorRef.current = node?.querySelector("button") ?? null;
+        }}
+      >
+        <FilterButton label={label} count={active ? 1 : 0} aria-haspopup="dialog" aria-expanded={open} onClick={toggle} />
+      </span>
+      <PanelPopover anchorRef={anchorRef} open={open} onClose={close} label={`Filtrar por ${label}`}>
+        <PanelMenu
+          label={label}
+          items={options.map(([optionValue, optionLabel]) => ({
+            label: optionLabel,
+            checked: optionValue === value,
+            onSelect: () => {
+              onChange(optionValue);
+              close();
+              anchorRef.current?.focus({ preventScroll: true });
+            },
+          }))}
+        />
+      </PanelPopover>
+    </>
+  );
+}
+
+function LoadingRows() {
+  return (
+    <div aria-busy="true" className="max-md:px-4">
+      <span className="sr-only">Cargando clientes…</span>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex h-[59px] items-center gap-2.5 border-b border-line px-2 last:border-0 max-md:px-0">
+          <span className="size-8 shrink-0 animate-pulse rounded-full bg-subtle motion-reduce:animate-none" />
+          <span className="grid gap-1.5">
+            <span className="h-3 w-40 animate-pulse rounded bg-subtle motion-reduce:animate-none" />
+            <span className="h-2.5 w-56 animate-pulse rounded bg-subtle motion-reduce:animate-none max-sm:w-32" />
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ClientsTable({
+  clients,
+  staffPicker,
+  actionsFor,
+}: {
+  clients: ClientRow[];
+  staffPicker: boolean;
+  actionsFor: (client: ClientRow) => ReactNode;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-9 rounded-lg border border-[var(--auth-input-border)] bg-surface px-2.5 text-[13px] font-medium text-[var(--auth-text)] transition-[border-color,box-shadow] hover:border-[var(--auth-input-border-hover)] focus:border-[var(--auth-accent)]/80 focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/20"
-      >
-        {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>
-            {optionLabel}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="overflow-x-auto" role="region" aria-label="Clientes" tabIndex={0}>
+      <table className="w-full border-collapse text-sm max-md:block">
+        <caption className="sr-only">Clientes</caption>
+        <thead className="max-md:sr-only">
+          <tr>
+            <th scope="col" className={TH}>Cliente</th>
+            <th scope="col" className={TH}>Modalidad</th>
+            <th scope="col" className={TH_R}>Cuentas TikTok</th>
+            <th scope="col" className={TH_R}>Contactos</th>
+            {staffPicker ? <th scope="col" className={TH}>Comisión</th> : null}
+            <th scope="col" className={cn(TH, "w-[1%]")}>
+              <span className="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="max-md:block">
+          {clients.map((client) => (
+            <tr
+              key={client.id}
+              className="hover:bg-field max-md:block max-md:border-b max-md:border-line max-md:px-4 max-md:py-3 max-md:last:border-0 [&:last-child>td]:border-b-0"
+            >
+              <td className={cn(TD, "max-md:block max-md:pb-2")}>
+                <ClientIdentity client={client} />
+              </td>
+              <td className={cn(TD, TD_LABELED)} data-label="Modalidad">
+                <ClientBadges client={client} />
+              </td>
+              <td className={cn(TD, TD_LABELED, "num text-right font-semibold")} data-label="Cuentas TikTok">
+                {client.adAccountCount}
+              </td>
+              <td className={cn(TD, TD_LABELED, "num text-right")} data-label="Contactos">
+                {client.activeMemberCount}
+              </td>
+              {staffPicker ? (
+                <td className={cn(TD, TD_LABELED)} data-label="Comisión">
+                  <FeeLink client={client} />
+                </td>
+              ) : null}
+              <td className={cn(TD, "w-[1%] whitespace-nowrap text-right max-md:flex max-md:w-full max-md:justify-end max-md:pt-2.5")}>
+                <div className="inline-flex flex-wrap items-center justify-end gap-1.5">{actionsFor(client)}</div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ClientTile({
+  client,
+  staffPicker,
+  actions,
+}: {
+  client: ClientRow;
+  staffPicker: boolean;
+  actions: ReactNode;
+}) {
+  return (
+    <li className="grid min-w-0 content-start gap-3 rounded-box border border-line bg-surface p-4">
+      <div className="flex items-start justify-between gap-2.5">
+        <ClientIdentity client={client} />
+        <ClientBadges client={client} />
+      </div>
+      <dl className="grid grid-cols-3 gap-2">
+        <MiniStat label="Cuentas TikTok" value={client.adAccountCount} />
+        <MiniStat label="Contactos" value={client.activeMemberCount} />
+        <MiniStat label="Comisión" value={feeLabel(client)} />
+      </dl>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-1.5">{actions}</div>
+        {staffPicker ? <FeeLink client={client} /> : null}
+      </div>
+    </li>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 rounded-box border border-line bg-field px-3 py-2.5">
+      <dt className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className="num mt-0.5 text-[15px] font-semibold leading-snug text-ink">{value}</dd>
+    </div>
+  );
+}
+
+function ClientIdentity({ client }: { client: ClientRow }) {
+  const name = displayName(client);
+  return (
+    <div className="flex min-w-0 items-center gap-2.5 md:min-w-[190px]">
+      <HecomClienteAvatar name={name} avatarUrl={client.avatarUrl} size="sm" />
+      <div className="grid min-w-0 leading-[1.35]">
+        <Link
+          href={`/clientes/${client.id}`}
+          className="max-w-[34ch] truncate font-semibold text-ink underline decoration-transparent underline-offset-[3px] hover:decoration-current"
+        >
+          {name}
+        </Link>
+        <small className="max-w-[38ch] truncate text-xs text-ink-3">
+          {client.biz ? `${client.biz} · ` : ""}
+          {client.contactEmail ?? client.slug}
+        </small>
+      </div>
+    </div>
   );
 }
 
 function ClientBadges({ client }: { client: ClientRow }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <span className="flex flex-wrap gap-1 md:flex-nowrap">
       {client.billingModality === "credito" ? (
-        <span className="rounded-full border border-warn-line bg-warn-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-warn-fg">
-          Crédito
-        </span>
+        <ToneBadge tone="warn">Crédito</ToneBadge>
       ) : client.billingModality === "prepago" ? (
-        <span className="rounded-full border border-[var(--auth-border)] bg-surface px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--auth-text-muted)]">
-          Prepago
-        </span>
+        <ToneBadge tone="neutral">Prepago</ToneBadge>
       ) : null}
-      {hasTikTokAccounts(client) ? (
-        <span className="rounded-full border border-[var(--auth-accent)]/25 bg-[var(--auth-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-accent-text">
-          TikTok
-        </span>
-      ) : null}
-    </div>
+      {hasTikTokAccounts(client) ? <ToneBadge tone="accent">TikTok</ToneBadge> : null}
+    </span>
   );
 }
 
-/** Botones de una fila o tarjeta. `compact`: en línea (lista); si no, a lo ancho (tarjeta). */
+/** Comisión del cliente (v3 «btn-soft»): lleva a su ficha para cambiarla. */
+function FeeLink({ client }: { client: ClientRow }) {
+  return (
+    <Link
+      href={`/clientes/${client.id}#comision`}
+      aria-label={`Comisión de ${displayName(client)}: ${client.defaultFee != null ? `${client.defaultFee} %` : "sin porcentaje propio"}. Cambiar`}
+      title="Cambiar la comisión de este cliente"
+      className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-ctl border border-accent-line bg-accent-soft px-2.5 text-[13px] font-medium text-accent-text shadow-ctl hover:border-accent"
+    >
+      <span className="num">{feeLabel(client)}</span>
+      <PanelIcon name="pencil" />
+    </Link>
+  );
+}
+
+/** Botones de una fila o tarjeta. */
 function ClientActions({
   client,
   staffPicker,
   busy,
-  pending,
+  disabled,
   onPick,
-  compact = false,
 }: {
   client: ClientRow;
   staffPicker: boolean;
-  busy: boolean;
-  pending: boolean;
+  /** Qué botón está esperando la selección. */
+  busy: "operar" | "cliente" | null;
+  disabled: boolean;
   onPick: (client: ClientRow, actAsCliente?: boolean) => void;
-  compact?: boolean;
 }) {
-  const size = compact ? "h-9 px-3.5 text-[12px]" : "h-10 w-full text-[13px]";
-  const primary = `inline-flex ${size} items-center justify-center rounded-lg bg-accent-btn font-semibold text-on-accent transition-[filter,opacity] hover:brightness-[1.05] disabled:opacity-55`;
-  const secondary = `inline-flex ${size} items-center justify-center rounded-lg border border-[var(--auth-control-border)] bg-surface font-semibold text-[var(--auth-text)] transition-colors hover:border-[var(--auth-accent)] hover:text-accent-text disabled:opacity-55`;
+  const name = displayName(client);
+  if (!staffPicker) {
+    return (
+      <Button size="sm" disabled={disabled} onClick={() => onPick(client)}>
+        {busy ? "Eligiendo…" : "Operar este cliente"}
+      </Button>
+    );
+  }
   return (
-    <div className={compact ? "flex flex-wrap items-center gap-2 lg:flex-none" : "flex flex-col gap-2"}>
-      {staffPicker ? (
-        <>
-          <button type="button" disabled={busy || pending} onClick={() => onPick(client, true)} className={primary}>
-            {busy ? "Entrando…" : "Entrar como cliente"}
-          </button>
-          <button type="button" disabled={busy || pending} onClick={() => onPick(client, false)} className={secondary}>
-            Operar como gerente
-          </button>
-        </>
-      ) : (
-        <button type="button" disabled={busy || pending} onClick={() => onPick(client)} className={primary}>
-          {busy ? "Eligiendo…" : "Operar este cliente"}
-        </button>
-      )}
-      {staffPicker ? (
-        <Link
-          href={`/clientes/${client.id}#comision`}
-          title="Cambiar la comisión de este cliente"
-          className={`${compact ? "" : "w-full"} inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[var(--auth-accent)]/30 bg-[var(--auth-accent-soft)] px-3 text-[12px] font-semibold text-accent-text transition-colors hover:border-[var(--auth-accent)]`}
-        >
-          Comisión {client.defaultFee != null ? `${client.defaultFee} %` : "—"}
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-          </svg>
-        </Link>
-      ) : null}
-      <Link
-        href={`/clientes/${client.id}`}
-        className={`${compact ? "px-1.5" : "text-center"} text-[12px] font-semibold text-[var(--auth-text-muted)] transition-colors hover:text-accent-text`}
-      >
-        Ver ficha
-      </Link>
-    </div>
+    <>
+      <Button variant="outline" size="sm" disabled={disabled} onClick={() => onPick(client, false)}>
+        {busy === "operar" ? (
+          "Entrando…"
+        ) : (
+          <>
+            Operar<span className="sr-only"> como gerente: {name}</span>
+          </>
+        )}
+      </Button>
+      <Button variant="outline" size="sm" disabled={disabled} onClick={() => onPick(client, true)}>
+        {busy === "cliente" ? (
+          "Entrando…"
+        ) : (
+          <>
+            Vista de cliente<span className="sr-only">: entrar al panel como {name}</span>
+          </>
+        )}
+      </Button>
+    </>
   );
 }

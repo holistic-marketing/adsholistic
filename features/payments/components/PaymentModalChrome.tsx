@@ -3,6 +3,10 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
+import { PanelIcon, type PanelIconName } from "@/components/ui/PanelIcon";
+import { PaymentDialogHeader, PaymentStepper } from "./PaymentDialog";
+
+/* Piezas comunes a los modales de recarga (AddBalance y ManualPayment). */
 
 interface PaymentModalHeaderProps {
   titleId: string;
@@ -16,6 +20,7 @@ interface PaymentModalHeaderProps {
   onClose: () => void;
 }
 
+/** Cabecera v3 del modal: título, bajada, pasos y el método de pago elegido. */
 export function PaymentModalHeader({
   titleId,
   title,
@@ -31,134 +36,98 @@ export function PaymentModalHeader({
   const tCommon = useTranslations("common");
 
   return (
-    <header className="border-b border-line bg-field px-5 pb-5 pt-5 sm:px-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          {identityIcon}
-          <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-ink">
-              {identityLabel}
-            </p>
-            <p className="mt-0.5 truncate text-[11px] text-ink-2">
-              {identityDescription}
-            </p>
-          </div>
+    <PaymentDialogHeader
+      titleId={titleId}
+      title={title}
+      description={description}
+      onClose={onClose}
+      closeLabel={tCommon("close")}
+    >
+      <PaymentStepper steps={steps} current={currentStep} label={t("modalChrome.progressAria")} />
+      <div className="mt-4 flex items-center gap-3 rounded-box border border-line bg-surface px-3 py-2.5 shadow-ctl">
+        {identityIcon}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-ink">{identityLabel}</p>
+          <p className="truncate text-xs text-ink-3">{identityDescription}</p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-box border border-line bg-surface text-ink-2 transition-colors hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-line"
-          aria-label={tCommon("close")}
-        >
-          <CloseIcon />
-        </button>
       </div>
-
-      <div className="mt-5 max-w-[38rem]">
-        <h2
-          id={titleId}
-          className="text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-ink"
-        >
-          {title}
-        </h2>
-        <p className="mt-1.5 max-w-[62ch] text-[13px] leading-5 text-ink-2">
-          {description}
-        </p>
-      </div>
-
-      <ol
-        className="mt-5 grid grid-cols-3 gap-2"
-        aria-label={t("modalChrome.progressAria")}
-      >
-        {steps.map((step, index) => {
-          const reached = index <= currentStep;
-          const current = index === currentStep;
-          return (
-            <li key={step} aria-current={current ? "step" : undefined}>
-              <span
-                className={cn(
-                  "block h-1 rounded-full transition-colors",
-                  reached ? "bg-accent" : "bg-active",
-                )}
-              />
-              <span
-                className={cn(
-                  "mt-1.5 block text-[10px] font-semibold",
-                  current
-                    ? "text-ink"
-                    : reached
-                      ? "text-accent-text"
-                      : "text-ink-3",
-                )}
-              >
-                {step}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </header>
+    </PaymentDialogHeader>
   );
 }
 
-export function PaymentModalFooter({
+/** Resultado del pago (acreditado, en revisión…): ícono con tono, cifra y texto. */
+export function PaymentOutcome({
+  tone,
+  icon,
+  label,
+  value,
   children,
-  className,
 }: {
-  children: ReactNode;
-  className?: string;
+  tone: "ok" | "warn";
+  icon: PanelIconName;
+  label?: ReactNode;
+  value?: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div
       className={cn(
-        "mt-6 flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end",
-        className,
+        "flex items-start gap-3 rounded-box border border-[var(--t-line)] bg-[var(--t-bg)] p-4",
+        `tone-${tone}`,
       )}
     >
-      {children}
+      <span
+        aria-hidden
+        className="grid size-10 shrink-0 place-items-center rounded-box bg-surface text-[var(--t-fg)] shadow-ctl"
+      >
+        <PanelIcon name={icon} className="size-5!" />
+      </span>
+      <div className="min-w-0 pt-0.5">
+        {label ? <p className="text-xs font-medium text-[var(--t-fg)]">{label}</p> : null}
+        {value ? (
+          <p className="num mt-0.5 text-2xl font-semibold tracking-[-0.03em] text-ink">{value}</p>
+        ) : null}
+        {children ? (
+          <div className={cn("text-[13px] leading-5 text-[var(--t-fg)]", label || value ? "mt-1" : undefined)}>
+            {children}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
 
-export function CheckCircleIcon() {
+/** Opciones excluyentes en bloque (v3 «seg-block»), con aria-pressed. */
+export function PaymentSegmented<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: ReadonlyArray<{ value: T; label: ReactNode }>;
+  onChange: (value: T) => void;
+}) {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden>
-      <path
-        d="m7.5 12.5 3 3 6.5-7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.75" />
-    </svg>
-  );
-}
-
-export function ClockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.75" />
-      <path
-        d="M12 7.5V12l3 2"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
-      <path
-        d="m6 6 8 8m0-8-8 8"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
+    <div role="group" aria-label={label} className="flex rounded-box bg-subtle p-[3px]">
+      {options.map((option) => {
+        const selected = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              "flex h-[30px] flex-1 items-center justify-center whitespace-nowrap rounded-ctl px-3 text-[13px] font-medium transition-colors",
+              selected ? "bg-surface text-ink shadow-card" : "text-ink-2 hover:text-ink",
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }

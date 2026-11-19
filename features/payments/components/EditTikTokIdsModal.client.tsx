@@ -6,8 +6,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DashboardModalShell } from "@/components/ui/DashboardModalShell.client";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { PropList } from "@/components/ui/PanelKit";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import type { PaymentAccountAllocation } from "@/types/payment";
+import {
+  PaymentFieldError,
+  PaymentFieldHint,
+  PaymentFieldLabel,
+} from "./PaymentDialog";
 
 const BRANLYN_206 = "7655330910371594258";
 const BM_200_BC = "7575005779271614480";
@@ -67,46 +74,61 @@ export function EditTikTokIdsModal({
   }
 
   return (
-    <DashboardModalShell open onClose={onClose} maxWidthClassName="max-w-md">
-      <h2 className="text-lg font-semibold text-[var(--foreground)]">
-        {t("editTikTok.title")}
-      </h2>
-      <p className="mt-1 text-sm text-[var(--admin-text-muted,#64748b)]">
-        {t("editTikTok.bodyBefore")}{" "}
-        <span className="font-medium text-[var(--foreground)]">
-          {t("editTikTok.approved")}
-        </span>{" "}
-        {t("editTikTok.bodyAfter")}
-      </p>
-      <p className="mt-2 text-sm font-medium text-[var(--foreground)]">
-        {account.name}
-      </p>
+    // El marco común ya pone el portal, Esc y el bloqueo de scroll; adentro va
+    // la misma cabecera, cuerpo y pie de los diálogos v3.
+    <DashboardModalShell open onClose={onClose} maxWidthClassName="max-w-[512px]">
+      <header className="-mr-2 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold leading-6 tracking-[-0.015em] text-ink">
+            {t("editTikTok.title")}
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-2">
+            {t("editTikTok.bodyBefore")}{" "}
+            <span className="font-medium text-ink">
+              {t("editTikTok.approved")}
+            </span>{" "}
+            {t("editTikTok.bodyAfter")}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={tCommon("close")}
+          className="-mt-2 inline-grid size-8 shrink-0 place-items-center rounded-ctl text-ink hover:bg-hover"
+        >
+          <PanelIcon name="x" />
+        </button>
+      </header>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 space-y-4">
+        <PropList
+          items={[{ label: t("allocateModal.account"), value: account.name }]}
+        />
         <div>
-          <label htmlFor={`${fieldId}-1`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <PaymentFieldLabel htmlFor={`${fieldId}-1`}>
             {t("editTikTok.advertiserLabel")}
-          </label>
+          </PaymentFieldLabel>
           <Input
             id={`${fieldId}-1`}
             value={advertiserId}
             onChange={(e) => setAdvertiserId(e.target.value)}
             placeholder="7655330910371594258"
             className="font-mono text-[13px]"
+            aria-invalid={error ? true : undefined}
             autoFocus
           />
           <button
             type="button"
-            className="mt-2 text-[12px] font-medium text-accent-text underline-offset-2 hover:underline"
+            className="mt-1.5 text-xs font-medium text-accent-text underline-offset-2 hover:underline"
             onClick={() => setAdvertiserId(BRANLYN_206)}
           >
             {t("editTikTok.useBranlyn")}
           </button>
         </div>
         <div>
-          <label htmlFor={`${fieldId}-2`} className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]">
+          <PaymentFieldLabel htmlFor={`${fieldId}-2`}>
             {t("editTikTok.bcLabel")}
-          </label>
+          </PaymentFieldLabel>
           <Input
             id={`${fieldId}-2`}
             value={bcId}
@@ -114,27 +136,18 @@ export function EditTikTokIdsModal({
             placeholder={BM_200_BC}
             className="font-mono text-[13px]"
           />
-          <p className="mt-1 text-[11px] text-[var(--admin-text-muted,#64748b)]">
+          <PaymentFieldHint className="font-mono">
             {t("editTikTok.bmHint", { id: BM_200_BC })}
-          </p>
+          </PaymentFieldHint>
         </div>
+        {error ? <PaymentFieldError>{error}</PaymentFieldError> : null}
       </div>
 
-      {error ? (
-        <p className="mt-3 text-xs text-danger-fg" role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
         <Button variant="outline" onClick={onClose} disabled={loading}>
           {tCommon("cancel")}
         </Button>
-        <Button
-          onClick={() => void handleSave()}
-          disabled={loading}
-          className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-deep)]"
-        >
+        <Button onClick={() => void handleSave()} disabled={loading}>
           {loading ? t("editTikTok.saving") : t("editTikTok.save")}
         </Button>
       </div>

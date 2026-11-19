@@ -27,7 +27,7 @@ export function CopyTextButton({
     <button
       type="button"
       onClick={copy}
-      className="text-[11px] font-medium text-accent-text underline-offset-2 hover:underline"
+      className="text-xs font-medium text-accent-text underline-offset-[3px] hover:underline"
     >
       {copied ? t("copied") : (label ?? t("default"))}
     </button>

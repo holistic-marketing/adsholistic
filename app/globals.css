@@ -992,7 +992,7 @@ html[data-theme-direction="light"]::view-transition-new(root) {
 }
 
 .education-dialog::backdrop {
-  background: rgb(28 25 23 / 0.62);
+  background: var(--ui-scrim);
 }
 
 .education-player-frame {

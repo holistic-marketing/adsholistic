@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import type { SupportArticle } from "../types/support.types";
 
 interface ChatFaqCategoryDetailProps {
@@ -20,49 +22,28 @@ export function ChatFaqCategoryDetail({
 
   return (
     <div className="flex flex-col">
-      <div className="bg-[linear-gradient(135deg,#050505_0%,#1a1008_70%,#e8451a_160%)] px-4 py-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-2 flex items-center gap-1 text-xs text-white/80 hover:text-white"
-          aria-label={t("back")}
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
+      <div className="border-b border-line px-4 pb-3 pt-3 sm:px-5">
+        <button type="button" onClick={onBack} className={buttonClass("ghost", "sm", "-ml-2.5")}>
+          <PanelIcon name="chevron-left" />
           {t("back")}
         </button>
-        <p className="text-sm font-semibold text-white">{categoryTitle}</p>
+        <h3 className="mt-1 text-base font-semibold tracking-[-0.01em] text-ink">{categoryTitle}</h3>
       </div>
 
-      <div className="max-h-[420px] overflow-y-auto bg-surface">
-        <ul className="divide-y divide-[var(--border-subtle)]">
-          {articles.map((article) => (
-            <li key={article.id}>
-              <button
-                type="button"
-                onClick={() => onSelectArticle(article.id)}
-                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-ink transition-colors hover:bg-[var(--surface-soft)]"
-              >
-                <span>{article.title}</span>
-                <svg
-                  className="h-4 w-4 shrink-0 text-ink-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul className="ui-scroll max-h-[420px] overflow-y-auto">
+        {articles.map((article) => (
+          <li key={article.id} className="border-b border-line last:border-b-0">
+            <button
+              type="button"
+              onClick={() => onSelectArticle(article.id)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-ink transition-colors hover:bg-hover sm:px-5"
+            >
+              <span>{article.title}</span>
+              <PanelIcon name="chevron-right" className="text-ink-3" />
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1,45 +1,65 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { DashboardModalShell } from "@/components/ui/DashboardModalShell.client";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { PanelDialog } from "@/components/ui/PanelDialog.client";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import {
+  Avatar,
+  EmptyState,
+  Note,
+  PropList,
+  SearchField,
+  SquareIcon,
+  StatCard,
+  TabBar,
+  ToneBadge,
+  type Tone,
+} from "@/components/ui/PanelKit";
+import { PanelMenu, PanelPopover, usePopover } from "@/components/ui/PanelPopover.client";
 import {
   CLIENT_REFERRAL_STAGES,
   formatAffiliateUsd,
-  referralInitials,
   type ClientAffiliateProgramView,
   type ClientAffiliateReferral,
   type ClientAffiliateTab,
   type ClientReferralStage,
 } from "@/features/affiliates/lib/client-program";
 
-const SCRIPT = { fontFamily: "var(--font-caveat), cursive" } as const;
+type Translator = ReturnType<typeof useTranslations<"affiliates.client">>;
+
 const DATE_ZONE = "America/Lima";
 
 const TABS: ClientAffiliateTab[] = ["referrals", "discounts", "how", "materials"];
 const STEP_KEYS = ["share", "register", "contact", "close", "reward"] as const;
 
-const AVATARS = [
-  "bg-[#efe4ff] text-[#6d28d9]",
-  "bg-[#ffe4ef] text-[#be185d]",
-  "bg-info-bg text-info-fg",
-  "bg-subtle text-ok-fg",
-  "bg-accent-soft text-accent-text",
-];
+const STAGE_TONE: Record<ClientReferralStage, Tone> = {
+  registered: "neutral",
+  negotiating: "warn",
+  contract_sent: "info",
+  closed: "ok",
+  declined: "danger",
+};
 
 export function ClientAffiliateDashboard({
   program,
+  clienteName,
 }: {
   program: ClientAffiliateProgramView;
+  /** Ficha que se está viendo, para el rótulo del encabezado. */
+  clienteName?: string;
 }) {
   const t = useTranslations("affiliates.client");
+  const tModule = useTranslations("affiliates");
   const locale = useLocale();
   const reward = formatAffiliateUsd(program.rewardUsd);
   const [tab, setTab] = useState<ClientAffiliateTab>("referrals");
   const [query, setQuery] = useState("");
   const [stage, setStage] = useState<ClientReferralStage | "all">("all");
   const [copied, setCopied] = useState<"link" | "email" | "text" | null>(null);
-  const [menuId, setMenuId] = useState<string | null>(null);
   const [detail, setDetail] = useState<ClientAffiliateReferral | null>(null);
 
   const shareText = t("shareMessage", { url: program.shareUrl });
@@ -57,22 +77,7 @@ export function ClientAffiliateDashboard({
   }, [program.referrals, query, stage]);
 
   const discounts = program.referrals.filter((row) => row.earned);
-  // La tabla vive en un contenedor con overflow-x-auto, que también recorta en vertical:
-  // en las últimas filas el menú abre hacia arriba y en listas cortas se deja aire abajo.
-  const menuIndex = menuId ? filtered.findIndex((row) => row.id === menuId) : -1;
-  const menuOpensUp = (index: number) => filtered.length > 3 && index >= filtered.length - 2;
   const showDeclined = program.referrals.some((row) => row.stage === "declined");
-
-  useEffect(() => {
-    if (!menuId) return;
-    function close(event: MouseEvent) {
-      const target = event.target;
-      if (target instanceof Element && target.closest("[data-referral-menu]")) return;
-      setMenuId(null);
-    }
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, [menuId]);
 
   async function copyValue(value: string, kind: "link" | "email" | "text") {
     try {
@@ -84,527 +89,415 @@ export function ClientAffiliateDashboard({
     }
   }
 
-  function openDetail(row: ClientAffiliateReferral) {
-    setMenuId(null);
-    setDetail(row);
-  }
-
   return (
-    <div className="space-y-5">
-      <section className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_18px_40px_-32px_rgb(28_25_23_/_0.28)]">
-        <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
-          <div className="px-6 py-7 sm:px-8 sm:py-8">
-            {program.smoke ? (
-              <div className="mb-3 max-w-xl">
-                <p className="inline-flex rounded-full bg-field px-3 py-1 text-xs font-semibold text-accent-text">
-                  {t("smoke")}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-accent-text">{t("smokeHint")}</p>
-              </div>
-            ) : null}
-            <h1 className="font-display text-[1.85rem] font-semibold leading-tight tracking-[-0.03em] text-ink sm:text-[2.15rem]">
-              {t("heroTitle")}
-            </h1>
-            <p className="mt-3 max-w-xl text-[15px] leading-6 text-ink-2">
-              {t("heroLead")}
-            </p>
-            <p className="mt-3 max-w-xl text-[15px] leading-6 text-ink">
-              {t.rich("heroOffer", {
-                reward,
-                amount: (chunks) => (
-                  <span className="font-semibold text-[var(--brand-primary-deep)]">{chunks}</span>
-                ),
-                entry: (chunks) => (
-                  <span className="font-semibold text-ink">{chunks}</span>
-                ),
-              })}
-            </p>
-          </div>
-          <div className="relative min-h-[210px] overflow-hidden bg-[radial-gradient(circle_at_70%_40%,#fff7f1_0%,#ffd7bf_42%,#f3b892_100%)] px-6 py-6">
-            <p
-              className="max-w-[230px] text-[1.85rem] leading-[1.05] text-ink"
-              style={{ ...SCRIPT, transform: "rotate(-4deg)" }}
-            >
-              {t("script")}
-            </p>
-            <div className="absolute bottom-5 right-5 w-[168px] rounded-card bg-surface px-3.5 py-3 shadow-[0_16px_30px_-18px_rgb(120_53_15_/_0.55)]">
-              <div className="flex items-center gap-2">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
-                  <GiftIcon />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-lg font-bold leading-none text-ink">
-                    +{reward}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-4 text-ink-2">
-                    {t("rewardCardHint")}
-                  </p>
-                </div>
-              </div>
+    <div className="grid gap-4">
+      {/* Encabezado (v3 «refhero»): la oferta a la izquierda y el premio al costado. */}
+      <section className="grid overflow-hidden rounded-card border border-line bg-surface shadow-card md:grid-cols-[minmax(0,1.6fr)_minmax(220px,1fr)]">
+        <div className="p-5 sm:p-6">
+          {program.smoke ? (
+            <div className="mb-3">
+              <ToneBadge tone="warn" icon="alert">
+                {t("smoke")}
+              </ToneBadge>
+              <p className="mt-1.5 text-xs text-ink-2">{t("smokeHint")}</p>
             </div>
-            <span className="absolute bottom-6 left-6 grid h-14 w-14 place-items-center rounded-card bg-[#1c1917] text-2xl font-bold text-white shadow-lg">
-              H
+          ) : null}
+          <p className="eyebrow">{clienteName ? `${tModule("module")} · ${clienteName}` : tModule("module")}</p>
+          <h1 tabIndex={-1} className="mt-1.5 text-2xl font-semibold leading-8 tracking-[-0.025em] text-ink outline-none">
+            {t("heroTitle")}
+          </h1>
+          <p className="mt-1 max-w-[78ch] text-ink-2">
+            {t("heroLead")}{" "}
+            {t.rich("heroOffer", {
+              reward,
+              amount: (chunks) => <b className="font-semibold text-accent-text">{chunks}</b>,
+              entry: (chunks) => <b className="font-semibold text-ink">{chunks}</b>,
+            })}
+          </p>
+        </div>
+        <div
+          aria-hidden
+          className="hidden content-center justify-items-center border-l border-line bg-field p-5 md:grid"
+        >
+          <div className="grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-0.5">
+            <SquareIcon icon="gift" tone="accent" />
+            <b className="num text-2xl font-semibold tracking-[-0.03em] text-ink">+{reward}</b>
+            <small className="col-start-2 text-xs text-ink-2">{t("rewardCardHint")}</small>
+          </div>
+        </div>
+      </section>
+
+      <PanelCard title={t("linkLabel")}>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex min-w-0 flex-[1_1_260px] items-center gap-2 rounded-ctl border border-line bg-field py-1 pl-3 pr-1">
+            <span aria-label={t("linkAria")} className="min-w-0 flex-1 truncate font-mono text-xs text-ink">
+              {program.displayPath}
             </span>
+            <Button size="sm" onClick={() => copyValue(program.shareUrl, "link")}>
+              <PanelIcon name={copied === "link" ? "check" : "link"} />
+              {copied === "link" ? t("copied") : t("copy")}
+            </Button>
+          </div>
+          <div role="group" aria-label={t("shareOn")} className="flex items-center gap-1.5">
+            <span aria-hidden className="mr-1 text-xs text-ink-2">
+              {t("shareOn")}
+            </span>
+            {/* Colores de cada red: son marcas ajenas. */}
+            <ShareButton href={whatsappHref(shareText)} label={t("shareWhatsapp")} className="bg-[#25d366] text-white">
+              <WhatsAppIcon />
+            </ShareButton>
+            <ShareButton
+              href={telegramHref(program.shareUrl, shareText)}
+              label={t("shareTelegram")}
+              className="bg-[#2aa1df] text-white"
+            >
+              <TelegramIcon />
+            </ShareButton>
+            <ShareButton href={linkedinHref(program.shareUrl)} label={t("shareLinkedin")} className="bg-[#0a66c2] text-white">
+              <LinkedInIcon />
+            </ShareButton>
+            <ShareButton
+              href={emailHref(t("shareSubject"), shareText)}
+              label={t("shareEmail")}
+              className="border border-line bg-field text-ink shadow-ctl hover:bg-hover"
+            >
+              <MailIcon />
+            </ShareButton>
           </div>
         </div>
-      </section>
+      </PanelCard>
 
-      <section className="rounded-card border border-line bg-surface px-4 py-4 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.3)] sm:px-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-          <div className="min-w-0 flex-1">
-            <p className="mb-2 text-sm font-semibold text-ink">{t("linkLabel")}</p>
-            <div className="flex items-center gap-2 rounded-box border border-line bg-surface px-3 py-2.5">
-              <span className="min-w-0 flex-1 truncate text-sm text-ink">
-                {program.displayPath}
-              </span>
-              <button
-                type="button"
-                onClick={() => copyValue(program.shareUrl, "link")}
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-3 hover:bg-accent-soft hover:text-[var(--brand-primary)]"
-                aria-label={t("copy")}
-              >
-                <CopyIcon />
-              </button>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => copyValue(program.shareUrl, "link")}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-box bg-[var(--brand-primary)] px-5 text-sm font-semibold text-white shadow-[0_10px_20px_-12px_rgb(184_95_46_/_0.9)] transition hover:bg-[var(--brand-primary-deep)]"
-          >
-            <LinkIcon />
-            {copied === "link" ? t("copied") : t("copy")}
-          </button>
-          <div className="lg:pl-2">
-            <p className="mb-2 text-xs font-medium text-ink-2">{t("shareOn")}</p>
-            <div className="flex items-center gap-2">
-              <ShareButton
-                href={whatsappHref(shareText)}
-                label={t("shareWhatsapp")}
-                className="bg-[#25d366] text-white"
-              >
-                <WhatsAppIcon />
-              </ShareButton>
-              <ShareButton
-                href={telegramHref(program.shareUrl, shareText)}
-                label={t("shareTelegram")}
-                className="bg-[#2aa1df] text-white"
-              >
-                <TelegramIcon />
-              </ShareButton>
-              <ShareButton
-                href={linkedinHref(program.shareUrl)}
-                label={t("shareLinkedin")}
-                className="bg-[#0a66c2] text-white"
-              >
-                <LinkedInIcon />
-              </ShareButton>
-              <ShareButton
-                href={emailHref(t("shareSubject"), shareText)}
-                label={t("shareEmail")}
-                className="bg-accent-soft text-[var(--brand-primary-deep)]"
-              >
-                <MailIcon />
-              </ShareButton>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0 space-y-5">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label={t("statsTotal")} value={String(program.stats.total)} icon={<UsersIcon />} />
-            <StatCard label={t("statsClosed")} value={String(program.stats.closed)} icon={<CheckIcon />} />
-            <StatCard label={t("statsNegotiating")} value={String(program.stats.negotiating)} icon={<ClockIcon />} />
-            <StatCard
-              label={t("statsEarned")}
-              value={formatAffiliateUsd(program.stats.discountsEarnedUsd)}
-              icon={<GiftIcon />}
-            />
-          </div>
-
-          <section className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
-            <div className="flex gap-1 overflow-x-auto border-b border-line px-3">
-              {TABS.map((key) => {
-                const active = tab === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setTab(key)}
-                    className={`shrink-0 border-b-2 px-3 py-3 text-sm font-semibold transition ${
-                      active
-                        ? "border-[var(--brand-primary)] text-[var(--brand-primary-deep)]"
-                        : "border-transparent text-ink-2 hover:text-ink"
-                    }`}
-                  >
-                    {t(`tabs.${key}`)}
-                  </button>
-                );
-              })}
-            </div>
-
-            {tab === "referrals" ? (
-              <div className="p-4 sm:p-5">
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="text-base font-semibold text-ink">
-                    {t("listTitle", { count: program.referrals.length })}
-                  </h2>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <select
-                      value={stage}
-                      onChange={(event) =>
-                        setStage(event.target.value as ClientReferralStage | "all")
-                      }
-                      className="h-10 rounded-box border border-line bg-surface px-3 text-sm text-ink"
-                      aria-label={t("filterAll")}
-                    >
-                      <option value="all">{t("filterAll")}</option>
-                      {CLIENT_REFERRAL_STAGES.filter(
-                        (item) => item !== "declined" || showDeclined,
-                      ).map((item) => (
-                        <option key={item} value={item}>
-                          {stageLabel(t, item)}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="relative block">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-3">
-                        <SearchIcon />
-                      </span>
-                      <input
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                        placeholder={t("search")}
-                        aria-label={t("searchAria")}
-                        className="h-10 w-full rounded-box border border-line bg-surface pr-3 pl-9 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-[var(--brand-primary)] sm:w-64"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                {filtered.length === 0 ? (
-                  <EmptyState
-                    title={program.referrals.length === 0 ? t("emptyTitle") : t("emptyFilter")}
-                    body={program.referrals.length === 0 ? t("emptyBody") : undefined}
-                    action={
-                      program.referrals.length > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setQuery("");
-                            setStage("all");
-                          }}
-                          className="text-sm font-semibold text-[var(--brand-primary-deep)]"
-                        >
-                          {t("clearFilter")}
-                        </button>
-                      ) : null
-                    }
-                  />
-                ) : (
-                  <div className={menuIndex >= 0 && filtered.length <= 3 ? "overflow-x-auto pb-24" : "overflow-x-auto"}>
-                    <table className="w-full min-w-[760px] text-left text-sm">
-                      <thead>
-                        <tr className="text-[11px] font-semibold tracking-wide text-ink-3 uppercase">
-                          <th className="px-2 py-2 font-semibold">{t("columns.index")}</th>
-                          <th className="px-2 py-2 font-semibold">{t("columns.name")}</th>
-                          <th className="px-2 py-2 font-semibold">{t("columns.date")}</th>
-                          <th className="px-2 py-2 font-semibold">{t("columns.status")}</th>
-                          <th className="px-2 py-2 font-semibold">{t("columns.benefit")}</th>
-                          <th className="px-2 py-2 text-right font-semibold">{t("columns.actions")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((row, index) => (
-                          <tr key={row.id} className="border-t border-line">
-                            <td className="px-2 py-3 tabular-nums text-ink-3">{index + 1}</td>
-                            <td className="px-2 py-3">
-                              <div className="flex items-center gap-3">
-                                <span
-                                  className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold ${avatarClass(row.id)}`}
-                                >
-                                  {referralInitials(row.name)}
-                                </span>
-                                <div className="min-w-0">
-                                  <p className="truncate font-semibold text-ink">{row.name}</p>
-                                  {row.company && row.company !== row.name ? (
-                                    <p className="truncate text-xs text-ink-2">{row.company}</p>
-                                  ) : null}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-2 py-3 whitespace-nowrap text-ink-2">
-                              {formatReferralDate(row.registeredAt, locale)}
-                            </td>
-                            <td className="px-2 py-3">
-                              <StagePill stage={row.stage} label={stageLabel(t, row.stage)} />
-                            </td>
-                            <td className="px-2 py-3 font-semibold whitespace-nowrap tabular-nums text-ink">
-                              <span className="inline-flex items-center gap-1">
-                                {formatAffiliateUsd(row.benefitUsd)}
-                                {row.earned ? (
-                                  <span className="text-ok-fg" title={t("earnedMark")}>
-                                    <CheckIcon />
-                                  </span>
-                                ) : null}
-                              </span>
-                            </td>
-                            <td className="relative px-2 py-3 text-right" data-referral-menu>
-                              <div className="inline-flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => openDetail(row)}
-                                  className="rounded-lg px-2 py-1 text-sm font-medium text-ink-2 hover:bg-field hover:text-ink"
-                                >
-                                  {t("viewDetails")}
-                                </button>
-                                <button
-                                  type="button"
-                                  aria-label={t("moreActions")}
-                                  aria-expanded={menuId === row.id}
-                                  onClick={() =>
-                                    setMenuId((current) => (current === row.id ? null : row.id))
-                                  }
-                                  className="grid h-8 w-8 place-items-center rounded-lg text-ink-2 hover:bg-field"
-                                >
-                                  <MoreIcon />
-                                </button>
-                              </div>
-                              {menuId === row.id ? (
-                                <div
-                                  className={`absolute right-2 z-20 w-44 rounded-xl border border-[#f0e6df] bg-white p-1 text-left shadow-lg ${
-                                    menuOpensUp(index) ? "bottom-full mb-1" : "mt-1"
-                                  }`}
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={() => openDetail(row)}
-                                    className="block w-full rounded-lg px-3 py-2 text-sm text-ink hover:bg-field"
-                                  >
-                                    {t("viewDetails")}
-                                  </button>
-                                  {row.email ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        void copyValue(row.email ?? "", "email");
-                                        setMenuId(null);
-                                      }}
-                                      className="block w-full rounded-lg px-3 py-2 text-sm text-ink hover:bg-field"
-                                    >
-                                      {copied === "email" ? t("emailCopied") : t("copyEmail")}
-                                    </button>
-                                  ) : null}
-                                </div>
-                              ) : null}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            ) : null}
-
-            {tab === "discounts" ? (
-              <div className="p-5 sm:p-6">
-                <h2 className="text-base font-semibold text-ink">{t("discountsTitle")}</h2>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-2">
-                  {t("discountsLead", { reward })}
-                </p>
-                {discounts.length === 0 ? (
-                  <div className="mt-4">
-                    <EmptyState title={t("discountsEmpty")} />
-                  </div>
-                ) : (
-                  <ul className="mt-4 divide-y divide-[#f6efe9]">
-                    {discounts.map((row) => (
-                      <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-ink [overflow-wrap:anywhere]">{row.name}</p>
-                          <p className="text-xs text-ink-2">
-                            {row.discountStatus === "applied"
-                              ? t("discountApplied")
-                              : t("discountPending")}
-                            {row.appliedAt
-                              ? ` · ${formatReferralDate(row.appliedAt, locale)}`
-                              : ""}
-                          </p>
-                        </div>
-                        <p className="font-semibold tabular-nums text-ink">
-                          {formatAffiliateUsd(row.benefitUsd)}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : null}
-
-            {tab === "how" ? (
-              <div className="space-y-4 p-5 sm:p-6">
-                {STEP_KEYS.map((key, index) => (
-                  <div key={key} className="flex gap-3">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand-primary)] text-sm font-bold text-white">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-ink">{t(`steps.${key}.title`)}</p>
-                      <p className="text-sm text-ink-2">{t(`steps.${key}.body`)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {tab === "materials" ? (
-              <div className="space-y-4 p-5 sm:p-6">
-                <div>
-                  <h2 className="text-base font-semibold text-ink">{t("materialsTitle")}</h2>
-                  <p className="mt-1 text-sm leading-6 text-ink-2">{t("materialsLead")}</p>
-                </div>
-                <MaterialCard
-                  title={t("materialsShort")}
-                  body={t("materialsShortBody", { url: program.shareUrl })}
-                  action={copied === "text" ? t("textCopied") : t("copyText")}
-                  onCopy={() =>
-                    copyValue(t("materialsShortBody", { url: program.shareUrl }), "text")
-                  }
-                />
-                <MaterialCard
-                  title={t("materialsPost")}
-                  body={t("materialsPostBody", { url: program.shareUrl, reward })}
-                  action={copied === "text" ? t("textCopied") : t("copyText")}
-                  onCopy={() =>
-                    copyValue(
-                      t("materialsPostBody", { url: program.shareUrl, reward }),
-                      "text",
-                    )
-                  }
-                />
-              </div>
-            ) : null}
-          </section>
-        </div>
-
-        <aside className="space-y-4">
-          <section className="rounded-card border border-line bg-surface p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
-                <GiftIcon />
-              </span>
-              <h2 className="text-sm font-semibold text-ink">{t("benefitTitle")}</h2>
-            </div>
-            <p className="text-sm leading-6 text-ink">
-              {t("benefitLead", { reward })}
-            </p>
-            <ul className="mt-4 space-y-3">
-              <BenefitItem>{t("benefitEntry")}</BenefitItem>
-              <BenefitItem>{t("benefitInvoice")}</BenefitItem>
-            </ul>
-          </section>
-
-          <section className="rounded-card border border-line bg-surface p-5 shadow-[0_16px_36px_-30px_rgb(28_25_23_/_0.28)]">
-            <h2 className="mb-4 text-sm font-semibold text-ink">{t("howTitle")}</h2>
-            <ol className="space-y-4">
-              {STEP_KEYS.map((key, index) => (
-                <li key={key} className="flex gap-3">
-                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-primary)] text-xs font-bold text-white">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">
-                      {t(`steps.${key}.title`)}
-                    </p>
-                    <p className="text-xs leading-5 text-ink-2">{t(`steps.${key}.body`)}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-        </aside>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label={t("statsTotal")} value={program.stats.total} />
+        <StatCard label={t("statsClosed")} value={program.stats.closed} />
+        <StatCard label={t("statsNegotiating")} value={program.stats.negotiating} />
+        <StatCard label={t("statsEarned")} value={formatAffiliateUsd(program.stats.discountsEarnedUsd)} />
       </div>
 
-      <section className="flex flex-col gap-4 overflow-hidden rounded-card bg-[linear-gradient(90deg,#fff7f1_0%,#ffe7d4_55%,#ffd7bf_100%)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-card bg-surface text-[var(--brand-primary)] shadow-sm">
-            <TrophyIcon />
-          </span>
-          <div>
-            <p className="font-semibold text-ink">{t("footerTitle")}</p>
-            <p className="text-sm text-ink-2">{t("footerBody")}</p>
-          </div>
+      <section className="min-w-0 overflow-hidden rounded-card border border-line bg-surface shadow-card">
+        <TabBar
+          label={tModule("module")}
+          value={tab}
+          onChange={setTab}
+          className="px-4 sm:px-6"
+          tabs={TABS.map((key) => ({
+            value: key,
+            label: t(`tabs.${key}`),
+            count: key === "referrals" ? program.referrals.length : undefined,
+          }))}
+        />
+
+        <div role="tabpanel" aria-label={t(`tabs.${tab}`)}>
+          {tab === "referrals" ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3 sm:px-6">
+                <SearchField
+                  label={t("searchAria")}
+                  placeholder={t("search")}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+                <Select
+                  value={stage}
+                  onChange={(event) => setStage(event.target.value as ClientReferralStage | "all")}
+                  aria-label={t("columns.status")}
+                  className="w-auto"
+                >
+                  <option value="all">{t("filterAll")}</option>
+                  {CLIENT_REFERRAL_STAGES.filter((item) => item !== "declined" || showDeclined).map((item) => (
+                    <option key={item} value={item}>
+                      {stageLabel(t, item)}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              {filtered.length === 0 ? (
+                <EmptyState
+                  icon="gift"
+                  title={program.referrals.length === 0 ? t("emptyTitle") : t("emptyFilter")}
+                  description={program.referrals.length === 0 ? t("emptyBody") : undefined}
+                  action={
+                    program.referrals.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setQuery("");
+                          setStage("all");
+                        }}
+                      >
+                        {t("clearFilter")}
+                      </Button>
+                    ) : null
+                  }
+                />
+              ) : (
+                <div className="overflow-x-auto p-2">
+                  <table className="w-full min-w-[720px] border-collapse text-sm [&_tbody_tr:last-child_td]:border-b-0">
+                    <thead>
+                      <tr>
+                        <Th className="w-10">{t("columns.index")}</Th>
+                        <Th>{t("columns.name")}</Th>
+                        <Th>{t("columns.date")}</Th>
+                        <Th>{t("columns.status")}</Th>
+                        <Th className="text-right">{t("columns.benefit")}</Th>
+                        <Th className="w-px text-right">
+                          <span className="sr-only">{t("columns.actions")}</span>
+                        </Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((row, index) => (
+                        <tr key={row.id} className="hover:bg-field">
+                          <Td className="num text-ink-3">{index + 1}</Td>
+                          <Td>
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <Avatar name={row.name} />
+                              <div className="grid min-w-0 leading-snug">
+                                <b className="truncate font-semibold text-ink">{row.name}</b>
+                                {row.company && row.company !== row.name ? (
+                                  <small className="truncate text-xs text-ink-3">{row.company}</small>
+                                ) : null}
+                              </div>
+                            </div>
+                          </Td>
+                          <Td className="whitespace-nowrap text-ink-2">{formatReferralDate(row.registeredAt, locale)}</Td>
+                          <Td>
+                            <ToneBadge tone={STAGE_TONE[row.stage]} dot>
+                              {stageLabel(t, row.stage)}
+                            </ToneBadge>
+                          </Td>
+                          <Td className="whitespace-nowrap text-right">
+                            <span className="num inline-flex items-center gap-1 font-semibold text-ink">
+                              {formatAffiliateUsd(row.benefitUsd)}
+                              {row.earned ? (
+                                <span className="text-ok-fg" title={t("earnedMark")}>
+                                  <PanelIcon name="check" className="size-3.5" />
+                                  <span className="sr-only">{t("earnedMark")}</span>
+                                </span>
+                              ) : null}
+                            </span>
+                          </Td>
+                          <Td className="whitespace-nowrap text-right">
+                            <RowActions
+                              row={row}
+                              t={t}
+                              emailCopied={copied === "email"}
+                              onDetail={() => setDetail(row)}
+                              onCopyEmail={() => void copyValue(row.email ?? "", "email")}
+                            />
+                          </Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          ) : null}
+
+          {tab === "discounts" ? (
+            <div className="px-4 pb-6 pt-4 sm:px-6">
+              <h2 className="text-base font-semibold text-ink">{t("discountsTitle")}</h2>
+              <p className="mt-0.5 max-w-[78ch] text-[13px] text-ink-2">{t("discountsLead", { reward })}</p>
+              {discounts.length === 0 ? (
+                <p className="mt-4 text-ink-3">{t("discountsEmpty")}</p>
+              ) : (
+                <ul className="mt-3 divide-y divide-line">
+                  {discounts.map((row) => (
+                    <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                      <div className="grid min-w-0 leading-snug">
+                        <b className="font-semibold text-ink [overflow-wrap:anywhere]">{row.name}</b>
+                        <small className="text-xs text-ink-3">
+                          {row.discountStatus === "applied" ? t("discountApplied") : t("discountPending")}
+                          {row.appliedAt ? ` · ${formatReferralDate(row.appliedAt, locale)}` : ""}
+                        </small>
+                      </div>
+                      <b className="num font-semibold text-ok-fg">{formatAffiliateUsd(row.benefitUsd)}</b>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : null}
+
+          {tab === "how" ? (
+            <div className="grid gap-5 px-4 pb-6 pt-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div>
+                <h2 className="text-base font-semibold text-ink">{t("howTitle")}</h2>
+                <ol className="mt-3 grid gap-2.5">
+                  {STEP_KEYS.map((key, index) => (
+                    <li key={key} className="grid grid-cols-[22px_1fr] items-start gap-2.5 text-[13px] text-ink-2">
+                      <StepNumber n={index + 1} />
+                      <span className="pt-0.5">
+                        <b className="font-semibold text-ink">{t(`steps.${key}.title`)}.</b> {t(`steps.${key}.body`)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="rounded-box border border-line bg-field p-4">
+                <div className="flex items-center gap-2.5">
+                  <SquareIcon icon="gift" tone="accent" />
+                  <h3 className="text-sm font-semibold text-ink">{t("benefitTitle")}</h3>
+                </div>
+                <p className="mt-2.5 text-[13px] text-ink">{t("benefitLead", { reward })}</p>
+                <ul className="mt-3 grid gap-2">
+                  <BenefitItem>{t("benefitEntry")}</BenefitItem>
+                  <BenefitItem>{t("benefitInvoice")}</BenefitItem>
+                </ul>
+              </div>
+            </div>
+          ) : null}
+
+          {tab === "materials" ? (
+            <div className="grid gap-3 px-4 pb-6 pt-4 sm:px-6">
+              <div>
+                <h2 className="text-base font-semibold text-ink">{t("materialsTitle")}</h2>
+                <p className="mt-0.5 text-[13px] text-ink-2">{t("materialsLead")}</p>
+              </div>
+              <MaterialCard
+                title={t("materialsShort")}
+                body={t("materialsShortBody", { url: program.shareUrl })}
+                action={copied === "text" ? t("textCopied") : t("copyText")}
+                onCopy={() => copyValue(t("materialsShortBody", { url: program.shareUrl }), "text")}
+              />
+              <MaterialCard
+                title={t("materialsPost")}
+                body={t("materialsPostBody", { url: program.shareUrl, reward })}
+                action={copied === "text" ? t("textCopied") : t("copyText")}
+                onCopy={() => copyValue(t("materialsPostBody", { url: program.shareUrl, reward }), "text")}
+              />
+            </div>
+          ) : null}
         </div>
-        <p
-          className="text-right text-[1.7rem] leading-none text-accent-text"
-          style={{ ...SCRIPT, transform: "rotate(-3deg)" }}
-        >
-          {t("footerScriptA")}
-          <br />
-          {t("footerScriptB")}
-        </p>
       </section>
 
-      <DashboardModalShell
+      <PanelDialog
         open={Boolean(detail)}
         onClose={() => setDetail(null)}
-        maxWidthClassName="max-w-md"
+        title={detail?.name ?? t("detailTitle")}
+        description={t("detailTitle")}
+        closeLabel={t("detailClose")}
       >
         {detail ? (
-          <div className="p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold tracking-wide text-ink-3 uppercase">
-                  {t("detailTitle")}
-                </p>
-                <h3 className="mt-1 text-lg font-semibold text-ink [overflow-wrap:anywhere]">{detail.name}</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDetail(null)}
-                className="shrink-0 rounded-lg px-2 py-1 text-sm text-ink-2 hover:bg-field"
-              >
-                {t("detailClose")}
-              </button>
+          <div className="grid gap-4">
+            {program.smoke ? <Note tone="warn">{t("detailSmoke")}</Note> : null}
+            <PropList
+              items={[
+                { label: t("detailCompany"), value: detail.company ?? "—" },
+                { label: t("detailEmail"), value: detail.email ?? "—" },
+                { label: t("detailRegistered"), value: formatReferralDate(detail.registeredAt, locale) },
+                {
+                  label: t("detailStatus"),
+                  value: (
+                    <ToneBadge tone={STAGE_TONE[detail.stage]} dot>
+                      {stageLabel(t, detail.stage)}
+                    </ToneBadge>
+                  ),
+                },
+                { label: t("detailBenefit"), value: <span className="num">{formatAffiliateUsd(detail.benefitUsd)}</span> },
+              ]}
+            />
+            <div>
+              <p className="eyebrow">{t("detailNext")}</p>
+              <p className="mt-1 text-ink">{nextCopy(t, detail.stage)}</p>
             </div>
-            {program.smoke ? (
-              <p className="mt-3 rounded-box bg-field px-3 py-2 text-xs leading-5 text-accent-text">
-                {t("detailSmoke")}
-              </p>
-            ) : null}
-            <dl className="mt-4 space-y-3 text-sm">
-              <DetailRow label={t("detailCompany")} value={detail.company ?? "—"} />
-              <DetailRow label={t("detailEmail")} value={detail.email ?? "—"} />
-              <DetailRow
-                label={t("detailRegistered")}
-                value={formatReferralDate(detail.registeredAt, locale)}
-              />
-              <DetailRow label={t("detailStatus")} value={stageLabel(t, detail.stage)} />
-              <DetailRow
-                label={t("detailBenefit")}
-                value={formatAffiliateUsd(detail.benefitUsd)}
-              />
-            </dl>
-            <p className="mt-4 text-xs font-semibold tracking-wide text-ink-3 uppercase">
-              {t("detailNext")}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-ink">
-              {nextCopy(t, detail.stage)}
-            </p>
           </div>
         ) : null}
-      </DashboardModalShell>
+      </PanelDialog>
     </div>
   );
 }
 
-function stageLabel(
-  t: ReturnType<typeof useTranslations<"affiliates.client">>,
-  stage: ClientReferralStage,
-) {
+/** «Ver detalles» y un menú con el resto de acciones de la fila. */
+function RowActions({
+  row,
+  t,
+  emailCopied,
+  onDetail,
+  onCopyEmail,
+}: {
+  row: ClientAffiliateReferral;
+  t: Translator;
+  emailCopied: boolean;
+  onDetail: () => void;
+  onCopyEmail: () => void;
+}) {
+  const { anchorRef, open, toggle, close } = usePopover();
+  return (
+    <div className="inline-flex items-center gap-1">
+      <Button variant="ghost" size="sm" onClick={onDetail}>
+        {t("viewDetails")}
+        <span className="sr-only">: {row.name}</span>
+      </Button>
+      <button
+        ref={anchorRef}
+        type="button"
+        aria-label={`${t("moreActions")}: ${row.name}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={toggle}
+        className="inline-grid size-8 place-items-center rounded-ctl text-ink-2 hover:bg-hover hover:text-ink"
+      >
+        <PanelIcon name="more" />
+      </button>
+      <PanelPopover anchorRef={anchorRef} open={open} onClose={close} label={t("moreActions")} align="end">
+        <PanelMenu
+          label={t("moreActions")}
+          items={[
+            {
+              label: t("viewDetails"),
+              icon: "eye",
+              onSelect: () => {
+                close();
+                onDetail();
+              },
+            },
+            ...(row.email
+              ? [
+                  {
+                    label: emailCopied ? t("emailCopied") : t("copyEmail"),
+                    icon: "copy" as const,
+                    onSelect: () => {
+                      onCopyEmail();
+                      close();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </PanelPopover>
+    </div>
+  );
+}
+
+function Th({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <th
+      scope="col"
+      className={`h-10 whitespace-nowrap border-b border-line px-2 text-left text-sm font-medium text-ink ${className ?? ""}`}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({ className, children }: { className?: string; children: ReactNode }) {
+  return <td className={`h-[59px] border-b border-line p-2 align-middle ${className ?? ""}`}>{children}</td>;
+}
+
+function StepNumber({ n }: { n: number }) {
+  return (
+    <span aria-hidden className="num grid size-[22px] place-items-center rounded-[6px] bg-subtle text-[11px] font-semibold text-ink">
+      {n}
+    </span>
+  );
+}
+
+function stageLabel(t: Translator, stage: ClientReferralStage) {
   switch (stage) {
     case "registered":
       return t("stages.registered");
@@ -619,10 +512,7 @@ function stageLabel(
   }
 }
 
-function nextCopy(
-  t: ReturnType<typeof useTranslations<"affiliates.client">>,
-  stage: ClientReferralStage,
-) {
+function nextCopy(t: Translator, stage: ClientReferralStage) {
   switch (stage) {
     case "registered":
       return t("next.registered");
@@ -648,12 +538,6 @@ function formatReferralDate(iso: string, locale: string) {
   }).format(date);
 }
 
-function avatarClass(id: string) {
-  let hash = 0;
-  for (const char of id) hash = (hash + char.charCodeAt(0)) % AVATARS.length;
-  return AVATARS[hash] ?? AVATARS[0];
-}
-
 function whatsappHref(text: string) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
@@ -670,80 +554,12 @@ function emailHref(subject: string, body: string) {
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-function StatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-}) {
-  return (
-    <article className="flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3.5 shadow-[0_12px_28px_-24px_rgb(28_25_23_/_0.35)]">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent-soft text-[var(--brand-primary)]">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-xl font-bold tabular-nums tracking-tight text-ink">{value}</p>
-        <p className="text-xs text-ink-2">{label}</p>
-      </div>
-    </article>
-  );
-}
-
 function BenefitItem({ children }: { children: ReactNode }) {
   return (
-    <li className="flex gap-2 text-sm leading-5 text-ink">
-      <span className="mt-0.5 shrink-0 text-ok-fg">
-        <CheckIcon />
-      </span>
+    <li className="flex gap-2 text-[13px] text-ink">
+      <PanelIcon name="check" className="mt-0.5 shrink-0 text-ok-fg" />
       <span>{children}</span>
     </li>
-  );
-}
-
-function StagePill({ stage, label }: { stage: ClientReferralStage; label: string }) {
-  const tone =
-    stage === "closed"
-      ? "bg-ok-bg text-ok-fg"
-      : stage === "negotiating"
-        ? "bg-warn-bg text-warn-fg"
-        : stage === "contract_sent"
-          ? "bg-info-bg text-info-fg"
-          : stage === "declined"
-            ? "bg-danger-bg text-danger-fg"
-            : "bg-subtle text-ink-2";
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>
-      <StageMark stage={stage} />
-      {label}
-    </span>
-  );
-}
-
-function StageMark({ stage }: { stage: ClientReferralStage }) {
-  if (stage === "closed") return <CheckIcon />;
-  if (stage === "negotiating") return <ClockIcon />;
-  if (stage === "contract_sent") return <SendIcon />;
-  return <DotIcon />;
-}
-
-function EmptyState({
-  title,
-  body,
-  action,
-}: {
-  title: string;
-  body?: string;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="rounded-card border border-dashed border-line bg-surface px-4 py-8 text-center">
-      <p className="font-semibold text-ink">{title}</p>
-      {body ? <p className="mx-auto mt-1 max-w-md text-sm text-ink-2">{body}</p> : null}
-      {action ? <div className="mt-3">{action}</div> : null}
-    </div>
   );
 }
 
@@ -759,26 +575,17 @@ function MaterialCard({
   onCopy: () => void;
 }) {
   return (
-    <article className="rounded-card border border-line bg-surface p-4">
-      <p className="text-sm font-semibold text-ink">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-ink-2 [overflow-wrap:anywhere]">{body}</p>
-      <button
-        type="button"
-        onClick={onCopy}
-        className="mt-3 text-sm font-semibold text-[var(--brand-primary-deep)]"
-      >
-        {action}
-      </button>
+    <article className="flex gap-3 rounded-box border border-line bg-field p-4">
+      <SquareIcon icon="megaphone" />
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold text-ink">{title}</h3>
+        <p className="mt-1 text-[13px] text-ink-2 [overflow-wrap:anywhere]">{body}</p>
+        <button type="button" onClick={onCopy} className={buttonClass("outline", "sm", "mt-3")}>
+          <PanelIcon name="copy" />
+          {action}
+        </button>
+      </div>
     </article>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <dt className="shrink-0 text-ink-2">{label}</dt>
-      <dd className="min-w-0 text-right font-medium text-ink [overflow-wrap:anywhere]">{value}</dd>
-    </div>
   );
 }
 
@@ -800,116 +607,16 @@ function ShareButton({
       rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
       aria-label={label}
       title={label}
-      className={`grid h-10 w-10 place-items-center rounded-box ${className}`}
+      className={`grid size-8 place-items-center rounded-ctl ${className}`}
     >
       {children}
-      <span className="sr-only">{label}</span>
     </a>
-  );
-}
-
-function UsersIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M16 19v-1.2A3.8 3.8 0 0 0 12.2 14H7.8A3.8 3.8 0 0 0 4 17.8V19" strokeLinecap="round" />
-      <circle cx="10" cy="8" r="3" />
-      <path d="M20 19v-1.1A3.2 3.2 0 0 0 17.2 15" strokeLinecap="round" />
-      <path d="M16.2 5.2a2.6 2.6 0 0 1 0 5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-      <path d="M5 12.5 9.2 17 19 7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v4.5L15 15" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function GiftIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="4" y="10" width="16" height="9" rx="1.5" />
-      <path d="M4 14h16M12 10v9M12 10c-2.5 0-4-2.8-2.4-4.2C11.2 4.4 12 7 12 10Zm0 0c2.5 0 4-2.8 2.4-4.2C12.8 4.4 12 7 12 10Z" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="8" y="8" width="11" height="11" rx="2" />
-      <path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  );
-}
-
-function LinkIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M10 14a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" strokeLinecap="round" />
-      <path d="M14 10a5 5 0 0 0-7.1-.1l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="11" cy="11" r="6" />
-      <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="6" cy="12" r="1.4" />
-      <circle cx="12" cy="12" r="1.4" />
-      <circle cx="18" cy="12" r="1.4" />
-    </svg>
-  );
-}
-
-function SendIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="m4 12 16-7-7 16-2-7-7-2Z" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function DotIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function TrophyIcon() {
-  return (
-    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M8 4h8v3a4 4 0 0 1-8 0V4Z" />
-      <path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M9 18h6M12 14v4" strokeLinecap="round" />
-    </svg>
   );
 }
 
 function WhatsAppIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden className="size-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12.04 4.5A7.46 7.46 0 0 0 5.6 15.9L4.5 19.5l3.7-1.05A7.5 7.5 0 1 0 12.04 4.5Zm4.24 10.62c-.18.5-1.04.96-1.45 1.02-.37.06-.84.08-1.36-.08-.31-.1-.72-.23-1.24-.46-2.18-.94-3.6-3.14-3.71-3.29-.11-.14-.89-1.18-.89-2.25s.56-1.6.76-1.82c.2-.22.43-.27.58-.27h.41c.13 0 .31-.05.48.37.18.43.6 1.48.65 1.59.06.11.09.24.02.38-.08.14-.12.23-.23.35-.12.12-.24.27-.35.36-.11.1-.23.22-.1.43.14.2.6.99 1.29 1.6.89.79 1.64 1.04 1.87 1.15.23.12.37.1.5-.06.14-.16.58-.67.74-.9.15-.23.31-.19.52-.11.22.08 1.36.64 1.6.76.23.12.39.18.44.28.06.1.06.58-.12 1.08Z" />
     </svg>
   );
@@ -917,7 +624,7 @@ function WhatsAppIcon() {
 
 function TelegramIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden className="size-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.8 5.4 4.9 11.1c-1 .4-1 .97-.2 1.22l3.82 1.19 1.47 4.5c.18.5.09.7.62.7.32 0 .46-.15.64-.33l2.05-2 4.26 3.15c.78.43 1.34.21 1.53-.73l2.77-13.1c.28-1.14-.44-1.66-1.16-1.3Zm-2.3 3.02-7.2 6.55-.28 2.95-1.1-3.66 8.58-5.84Z" />
     </svg>
   );
@@ -925,7 +632,7 @@ function TelegramIcon() {
 
 function LinkedInIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden className="size-4" viewBox="0 0 24 24" fill="currentColor">
       <path d="M6.5 9.5H4V20h2.5V9.5ZM5.24 4A1.46 1.46 0 1 0 5.26 7a1.46 1.46 0 0 0-.02-3ZM20 20h-2.5v-5.6c0-1.55-.56-2.6-1.95-2.6-1.06 0-1.7.72-1.98 1.41-.1.25-.13.6-.13.95V20H11V9.5h2.4v1.44c.36-.58 1.14-1.64 2.86-1.64 2.09 0 3.74 1.37 3.74 4.32V20Z" />
     </svg>
   );
@@ -933,7 +640,7 @@ function LinkedInIcon() {
 
 function MailIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg aria-hidden className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
       <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
       <path d="m4 7 8 6 8-6" strokeLinecap="round" />
     </svg>

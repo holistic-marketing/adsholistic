@@ -41,7 +41,7 @@ export function HecomClienteAvatar({
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-full bg-[var(--brand-primary)]/10 ring-1 ring-[var(--brand-primary)]/15",
+        "relative shrink-0 overflow-hidden rounded-full bg-subtle",
         sizeClasses[size],
         className,
       )}
@@ -63,7 +63,7 @@ export function HecomClienteAvatar({
           onError={() => setFailed(true)}
         />
       ) : (
-        <span className="grid h-full w-full place-items-center font-bold text-[var(--brand-primary)]">
+        <span className="grid h-full w-full place-items-center font-semibold tracking-[0.02em] text-ink-2">
           {initials(name)}
         </span>
       )}

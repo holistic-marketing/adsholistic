@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { overrideClasses } from "@/lib/ui/override-classes";
 import { PanelIcon, type PanelIconName } from "./PanelIcon";
 
 /* Piezas del sistema visual v3 que se repiten en las pantallas del panel.
@@ -35,7 +36,7 @@ export function KpiCard({
     <section
       aria-label={label}
       aria-busy={busy || undefined}
-      className={cn("grid min-w-0 content-start gap-1 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6", className)}
+      className={overrideClasses("grid min-w-0 content-start gap-1 rounded-card border border-line bg-surface p-5 shadow-card sm:p-6", className)}
     >
       <div className="flex min-h-[26px] items-center justify-between gap-2 font-medium text-ink-2">
         <span>{label}</span>
@@ -209,7 +210,7 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("grid justify-items-center gap-1 px-6 py-12 text-center", className)}>
+    <div className={overrideClasses("grid justify-items-center gap-1 px-6 py-12 text-center", className)}>
       <span aria-hidden className="mb-2.5 grid size-10 place-items-center rounded-box bg-subtle text-ink">
         <PanelIcon name={icon} className="size-[18px]" />
       </span>
@@ -239,8 +240,7 @@ export function FilterBar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-2 rounded-box border border-line bg-surface p-3 shadow-card",
-        className,
+        overrideClasses("flex flex-wrap items-center gap-2 rounded-box border border-line bg-surface p-3 shadow-card", className),
       )}
     >
       <PanelIcon name="filter" className="mx-1 size-[18px] text-ink" />
@@ -279,7 +279,7 @@ export function FilterButton({
   label: string;
   count?: number;
   active?: boolean;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+} & React.ComponentPropsWithRef<"button">) {
   const on = active ?? count > 0;
   return (
     <button

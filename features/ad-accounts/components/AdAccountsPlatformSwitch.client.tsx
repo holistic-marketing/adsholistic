@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { ToneBadge } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 import type { AdAccountsPlatform } from "@/lib/integrations/bluefocus/meta-availability";
 import { MetaMark, TikTokMark } from "./platform-marks";
 
@@ -65,44 +67,53 @@ export function AdAccountsPlatformSwitch({
       <div hidden={active !== "tiktok"}>{tiktokHeader}</div>
       <div hidden={active !== "meta"}>{metaHeader}</div>
 
-      <div role="tablist" aria-label={t("aria")} className="-mx-1 overflow-x-auto px-1">
-        <div className="inline-flex min-w-full gap-1 rounded-box border border-[var(--auth-border)] bg-[var(--auth-surface-muted)] p-1 sm:min-w-0">
-          {tabs.map((tab) => {
-            const isActive = tab.key === active;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => select(tab.key)}
-                className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors sm:flex-none ${
-                  isActive
-                    ? "bg-surface text-[var(--auth-text)] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_0_0_1px_rgba(16,24,40,0.04)]"
-                    : "text-[var(--auth-text-muted)] hover:bg-surface/60 hover:text-[var(--auth-text)]"
-                }`}
-              >
-                {tab.mark}
-                <span>{tab.label}</span>
-                {tab.badge ? (
-                  <span
-                    title={tab.badge}
-                    className="inline-flex items-center gap-1 rounded-full border border-warn-line bg-warn-bg p-1 text-[10px] font-semibold uppercase tracking-[0.04em] text-warn-fg sm:px-2 sm:py-0.5"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-warn-solid" />
-                    <span className="hidden sm:inline">{tab.badge}</span>
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+      {/* Control segmentado v3 con semántica de pestañas. */}
+      <div role="tablist" aria-label={t("aria")} className="flex rounded-box bg-subtle p-[3px] sm:inline-flex">
+        {tabs.map((tab) => {
+          const isActive = tab.key === active;
+          return (
+            <button
+              key={tab.key}
+              id={`ad-accounts-tab-${tab.key}`}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`ad-accounts-panel-${tab.key}`}
+              onClick={() => select(tab.key)}
+              className={cn(
+                "flex h-8 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-ctl px-3 text-[13px] font-medium sm:flex-none",
+                isActive ? "bg-surface text-ink shadow-card" : "text-ink-2 hover:text-ink",
+              )}
+            >
+              {tab.mark}
+              <span>{tab.label}</span>
+              {tab.badge ? (
+                <span title={tab.badge}>
+                  <ToneBadge tone="warn" dot>
+                    <span className="max-sm:sr-only">{tab.badge}</span>
+                  </ToneBadge>
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
       </div>
 
-      <div role="tabpanel" hidden={active !== "tiktok"} className="space-y-5 sm:space-y-6 lg:space-y-8">
+      <div
+        id="ad-accounts-panel-tiktok"
+        role="tabpanel"
+        aria-labelledby="ad-accounts-tab-tiktok"
+        hidden={active !== "tiktok"}
+        className="space-y-4"
+      >
         {tiktokBody}
       </div>
-      <div role="tabpanel" hidden={active !== "meta"}>
+      <div
+        id="ad-accounts-panel-meta"
+        role="tabpanel"
+        aria-labelledby="ad-accounts-tab-meta"
+        hidden={active !== "meta"}
+      >
         {metaBody}
       </div>
     </>

@@ -1163,7 +1163,8 @@
     },
     "modalChrome": {
       "progressAria": "Progreso del pago"
-    }
+    },
+    "historyToggle": "Ver movimientos e historial"
   },
   "adAccounts": {
     "title": "Cuentas ads",
@@ -1193,7 +1194,9 @@
       "pendingMany": "{count} pendientes",
       "metaAccounts": "Cuentas publicitarias Meta",
       "metaScopedMeta": "Meta · en mantenimiento",
-      "metaNoAccounts": "Aún sin cuentas Meta"
+      "metaNoAccounts": "Aún sin cuentas Meta",
+      "lede": "Cuentas de TikTok de {name}: saldo en vivo, estado y fee de cada una.",
+      "activeOfTotal": "{active} de {total, plural, one {# cuenta activa} other {# cuentas activas}}"
     },
     "summary": {
       "aria": "Resumen de cuentas",
@@ -1244,7 +1247,7 @@
       "limitReached": "Llegaste al límite de cuentas disponibles. Solicita una ampliación a Holistic.",
       "whatsappCta": "WhatsApp Holistic",
       "whatsappPrefill": "Hola Holistic, soy {name}. Necesito crear más cuentas publicitarias en Adsholistic.",
-      "errGeneric": "No se pudo crear la cuenta. Intentá de nuevo o contactá a Holistic por WhatsApp.",
+      "errGeneric": "No se pudo crear la cuenta. Intenta de nuevo o escribe a Holistic por WhatsApp.",
       "errUnusualActivity": "TikTok rechazó el alta (API 40002 · unusual activity en el Business Center). No es un fallo de Holistic: el BC está en revisión de riesgo. Escribinos por WhatsApp para escalarlo. Tus cuentas actuales siguen operando."
     },
     "status": {
@@ -1420,8 +1423,8 @@
   "cobros": {
     "module": "Lo pagado",
     "title": "Lo pagado · {name}",
-    "goPayments": "Ir a recargas →",
-    "pageIntro": "Elegí el mes arriba: cambia Cuánto debes, la gráfica y el historial de pagos juntos.",
+    "goPayments": "Ir a recargas",
+    "pageIntro": "Elige el mes: cambian juntos la deuda, la gráfica y el historial de pagos.",
     "monthScopeEyebrow": "Mes de cuenta",
     "monthScopeHint": "Un toque cambia la deuda, el día a día y los pagos de abajo.",
     "monthScopeSynced": "Deuda + pagos",
@@ -1621,7 +1624,9 @@
       "metaCsvStep3": "Exporta como .csv y súbelo aquí. Repítelo cuando quieras actualizar.",
       "metaCsvUpload": "Subir CSV de Meta",
       "metaCsvApply": "Importar gasto",
-      "metaCsvSummary": "{days} día(s) · {campaigns} campaña(s) · {spend}"
+      "metaCsvSummary": "{days} día(s) · {campaigns} campaña(s) · {spend}",
+      "sourcesTitle": "Fuentes de datos",
+      "step": "Paso {n}"
     },
     "pilot": {
       "title": "Piloto",
@@ -1979,8 +1984,8 @@
     "advisorClose": "Cerrar",
     "advisorEyebrow": "Solo gerencia · OpenAI",
     "advisorTitle": "Asesor del cliente",
-    "advisorSubtitle": "Preguntá por rendimiento, cobros, crédito y riesgo de {name}.",
-    "advisorWelcome": "Puedo resumir cómo va {name}: gasto, pacing, cobros Holistic, crédito y semáforo. ¿Qué querés saber?",
+    "advisorSubtitle": "Pregunta por rendimiento, cobros, crédito y riesgo de {name}.",
+    "advisorWelcome": "Puedo resumir cómo va {name}: gasto, pacing, cobros Holistic, crédito y semáforo. ¿Qué quieres saber?",
     "advisorPlaceholder": "Ej. ¿Conviene subir crédito?",
     "advisorSend": "Enviar",
     "advisorThinking": "Revisando datos del cliente…",
@@ -2064,7 +2069,7 @@
     "loadError": "No se pudo cargar Profit.",
     "daysWithActivity": "{count} días con actividad",
     "campaignsHint": "Impresiones / CTR / CPC desde report live. Cobrado COD por campaña = estimado si hay tienda vinculada.",
-    "emptyTryRange": "Probá otro rango o esperá a que sync TikTok escriba snapshots.",
+    "emptyTryRange": "Prueba otro rango o espera a que sync TikTok escriba snapshots.",
     "emptyConnectStore": "Conecta tu tienda Shopify arriba para ver CPA y ganancia neta.",
     "shopifyTitle": "Conectá tu tienda Shopify",
     "shopifyBody": "Jalá pedidos y ventas reales para ver cuánto estás ganando neto — no solo cuánto gastás en ads.",
@@ -3327,6 +3332,11 @@
     "valueGrid": {
       "title": "Valores fundamentales",
       "subtitle": "Capacidades diseñadas para equipos de performance y creativos."
+    },
+    "hub": {
+      "lede": "Sube un video, recibe un puntaje con recomendaciones y envíalo como campaña pausada a TikTok.",
+      "uploads": "Videos subidos",
+      "scoreAvg": "Puntaje promedio"
     }
   },
   "onboarding": {

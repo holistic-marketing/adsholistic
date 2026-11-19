@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { routes } from "@/config/routes";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { Note, ToneBadge, type Tone } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 import { moneyUsd } from "@/lib/format/money-usd";
 import type { PilotProposal } from "@/lib/radar/pilot";
 
@@ -21,21 +26,70 @@ type PilotResponse = {
   canAct: boolean;
 };
 
-const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
-const primaryBtn = `inline-flex h-9 items-center rounded-box bg-accent-btn px-3.5 text-[13px] font-semibold text-on-accent transition-colors hover:bg-accent-btn-hover disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-const secondaryBtn = `inline-flex h-9 items-center rounded-box border border-line bg-surface px-3.5 text-[13px] font-semibold text-ink transition-colors hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-
-const TONE: Record<PilotProposal["kind"], string> = {
-  pause_loser_same_group: "bg-accent",
-  pause_loser: "bg-accent",
-  scale_winner: "bg-ok-solid",
-  refresh_fatigued: "bg-accent",
-  all_losing: "bg-danger-btn",
+/* Punto de color de cada propuesta. */
+const TONE: Record<PilotProposal["kind"], Tone> = {
+  pause_loser_same_group: "accent",
+  pause_loser: "accent",
+  scale_winner: "ok",
+  refresh_fatigued: "accent",
+  all_losing: "danger",
 };
 
 function money(value: number | null) {
   return value == null ? "—" : moneyUsd(value);
+}
+
+type PilotT = ReturnType<typeof useTranslations<"profit.pilot">>;
+
+/** Título, texto y acciones de cada propuesta. */
+function describeProposal(p: PilotProposal, t: PilotT) {
+  const avg = money(p.kind === "all_losing" || p.kind === "refresh_fatigued" ? null : p.averageCostPerResult);
+  let title = "";
+  let body = "";
+  let pauseName: string | null = null;
+  let toRadar = false;
+  switch (p.kind) {
+    case "pause_loser_same_group":
+      pauseName = p.loser.adName;
+      title = t("kinds.pause_loser_same_group.title", { loser: p.loser.adName });
+      body =
+        p.loserCostPerResult == null
+          ? t("kinds.pause_loser_same_group.bodyNoResults", {
+              winner: p.winner.adName,
+              loser: p.loser.adName,
+              winnerCpr: money(p.winnerCostPerResult),
+            })
+          : t("kinds.pause_loser_same_group.body", {
+              winner: p.winner.adName,
+              loser: p.loser.adName,
+              winnerCpr: money(p.winnerCostPerResult),
+              loserCpr: money(p.loserCostPerResult),
+            });
+      break;
+    case "pause_loser":
+      pauseName = p.loser.adName;
+      title = t("kinds.pause_loser.title", { loser: p.loser.adName });
+      body =
+        p.loserCostPerResult == null
+          ? t("kinds.pause_loser.bodyNoResults", { spend: money(p.loserSpend) })
+          : t("kinds.pause_loser.body", { loserCpr: money(p.loserCostPerResult), avg });
+      break;
+    case "scale_winner":
+      title = t("kinds.scale_winner.title", { winner: p.winner.adName });
+      body = t("kinds.scale_winner.body", { pct: p.cheaperPct, max: p.maxIncreasePct });
+      break;
+    case "refresh_fatigued":
+      toRadar = true;
+      title = t("kinds.refresh_fatigued.title", { ad: p.ad.adName });
+      body = t("kinds.refresh_fatigued.body", { pct: p.ctrDropPct });
+      break;
+    case "all_losing":
+      toRadar = true;
+      title = t("kinds.all_losing.title");
+      body = t("kinds.all_losing.body");
+      break;
+  }
+  return { title, body, pauseName, toRadar };
 }
 
 export function ProfitPilotPanel() {
@@ -93,97 +147,52 @@ export function ProfitPilotPanel() {
   if (!loadFailed && data && data.dataThrough == null) return null;
 
   return (
-    <section className="overflow-hidden rounded-card bg-surface ring-1 ring-line" aria-busy={!data && !loadFailed}>
-      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
-        <div className="min-w-0 max-w-[62ch]">
-          <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">{t("title")}</h2>
-          <p className="mt-0.5 text-[12px] leading-[1.5] text-ink-2">{t("subtitle")}</p>
-        </div>
-        {data?.averageCostPerResult != null ? (
-          <span className="rounded-full bg-subtle px-2.5 py-1 text-[11px] font-medium text-ink-2">
-            {t("average", { amount: moneyUsd(data.averageCostPerResult) })}
-          </span>
-        ) : null}
-      </div>
-
+    <PanelCard
+      aria-busy={!data && !loadFailed}
+      title={t("title")}
+      description={t("subtitle")}
+      action={
+        data?.averageCostPerResult != null ? (
+          <ToneBadge className="num">{t("average", { amount: moneyUsd(data.averageCostPerResult) })}</ToneBadge>
+        ) : null
+      }
+    >
       {notice && notice.tone === "ok" ? (
-        <p role="status" className="mx-4 mb-3 rounded-box bg-subtle px-3 py-2 text-[13px] text-ok-fg sm:mx-5">
-          {notice.text}
-        </p>
+        <div role="status" className="mb-3">
+          <Note tone="ok" icon="check-circle">
+            {notice.text}
+          </Note>
+        </div>
       ) : null}
 
       {loadFailed ? (
-        <div role="alert" className="flex flex-wrap items-center gap-3 px-4 pb-5 text-[13px] text-ink-2 sm:px-5">
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-[13px] text-ink-2">
           {t("error")}
-          <button type="button" onClick={() => setReloadToken((n) => n + 1)} className={secondaryBtn}>
+          <button type="button" onClick={() => setReloadToken((n) => n + 1)} className={buttonClass("outline", "sm")}>
+            <PanelIcon name="refresh" />
             {t("retry")}
           </button>
         </div>
       ) : !data ? (
-        <div className="space-y-2 px-4 pb-5 sm:px-5" aria-hidden>
+        <div className="space-y-2" aria-hidden>
           {[0, 1].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-lg bg-subtle motion-reduce:animate-none" />
+            <div key={i} className="h-14 animate-pulse rounded-box bg-subtle motion-reduce:animate-none" />
           ))}
         </div>
       ) : data.proposals.length === 0 ? (
-        <p className="px-4 pb-5 text-[13px] text-ink-2 sm:px-5">{t("empty")}</p>
+        <p className="text-[13px] text-ink-2">{t("empty")}</p>
       ) : (
-        <ul className="border-t border-line">
+        <ul>
           {data.proposals.map((p) => {
-            const avg = money(p.kind === "all_losing" || p.kind === "refresh_fatigued" ? null : p.averageCostPerResult);
-            let title = "";
-            let body = "";
-            let pauseName: string | null = null;
-            let toRadar = false;
-            switch (p.kind) {
-              case "pause_loser_same_group":
-                pauseName = p.loser.adName;
-                title = t("kinds.pause_loser_same_group.title", { loser: p.loser.adName });
-                body =
-                  p.loserCostPerResult == null
-                    ? t("kinds.pause_loser_same_group.bodyNoResults", {
-                        winner: p.winner.adName,
-                        loser: p.loser.adName,
-                        winnerCpr: money(p.winnerCostPerResult),
-                      })
-                    : t("kinds.pause_loser_same_group.body", {
-                        winner: p.winner.adName,
-                        loser: p.loser.adName,
-                        winnerCpr: money(p.winnerCostPerResult),
-                        loserCpr: money(p.loserCostPerResult),
-                      });
-                break;
-              case "pause_loser":
-                pauseName = p.loser.adName;
-                title = t("kinds.pause_loser.title", { loser: p.loser.adName });
-                body =
-                  p.loserCostPerResult == null
-                    ? t("kinds.pause_loser.bodyNoResults", { spend: money(p.loserSpend) })
-                    : t("kinds.pause_loser.body", { loserCpr: money(p.loserCostPerResult), avg });
-                break;
-              case "scale_winner":
-                title = t("kinds.scale_winner.title", { winner: p.winner.adName });
-                body = t("kinds.scale_winner.body", { pct: p.cheaperPct, max: p.maxIncreasePct });
-                break;
-              case "refresh_fatigued":
-                toRadar = true;
-                title = t("kinds.refresh_fatigued.title", { ad: p.ad.adName });
-                body = t("kinds.refresh_fatigued.body", { pct: p.ctrDropPct });
-                break;
-              case "all_losing":
-                toRadar = true;
-                title = t("kinds.all_losing.title");
-                body = t("kinds.all_losing.body");
-                break;
-            }
+            const { title, body, pauseName, toRadar } = describeProposal(p, t);
             const isConfirming = confirming === p.id;
             const isBusy = busy === p.id;
             return (
-              <li key={p.id} className="flex flex-col gap-3 border-b border-line px-4 py-4 last:border-0 sm:px-5">
+              <li key={p.id} className="flex flex-col gap-3 border-t border-line py-4 first:border-t-0 first:pt-1">
                 <div className="flex gap-3">
-                  <span aria-hidden className={`mt-[7px] h-2 w-2 shrink-0 rounded-full ${TONE[p.kind]}`} />
+                  <span aria-hidden className={cn("mt-[7px] size-2 shrink-0 rounded-full bg-[var(--t-solid)]", `tone-${TONE[p.kind]}`)} />
                   <div className="min-w-0">
-                    <h3 className="text-[14px] font-semibold text-ink [overflow-wrap:anywhere]">{title}</h3>
+                    <h3 className="text-sm font-semibold text-ink [overflow-wrap:anywhere]">{title}</h3>
                     <p className="mt-0.5 max-w-[68ch] text-[13px] leading-[1.55] text-ink-2 [overflow-wrap:anywhere]">{body}</p>
                   </div>
                 </div>
@@ -192,39 +201,50 @@ export function ProfitPilotPanel() {
                   {pauseName && data.canAct && data.actionsEnabled ? (
                     isConfirming ? (
                       <>
-                        <span className="text-[12.5px] text-ink-2">{t("actions.confirmText")}</span>
-                        <button type="button" className={primaryBtn} disabled={isBusy} onClick={() => void act(p, "pause", pauseName!)}>
+                        <span className="text-[13px] text-ink-2">{t("actions.confirmText")}</span>
+                        <button
+                          type="button"
+                          className={buttonClass("primary", "sm")}
+                          disabled={isBusy}
+                          onClick={() => void act(p, "pause", pauseName!)}
+                        >
                           {t("actions.confirm")}
                         </button>
-                        <button type="button" className={secondaryBtn} disabled={isBusy} onClick={() => setConfirming(null)}>
+                        <button type="button" className={buttonClass("outline", "sm")} disabled={isBusy} onClick={() => setConfirming(null)}>
                           {t("actions.cancel")}
                         </button>
                       </>
                     ) : (
-                      <button type="button" className={`${primaryBtn} max-w-full`} onClick={() => setConfirming(p.id)} title={t("actions.pause", { name: pauseName })}>
+                      <button
+                        type="button"
+                        className={buttonClass("primary", "sm", "max-w-full")}
+                        onClick={() => setConfirming(p.id)}
+                        title={t("actions.pause", { name: pauseName })}
+                      >
+                        <PanelIcon name="pause-circle" />
                         <span className="truncate">{t("actions.pause", { name: pauseName })}</span>
                       </button>
                     )
                   ) : null}
                   {toRadar ? (
-                    <Link href={`${routes.profit}/radar`} className={secondaryBtn}>
+                    <Link href={`${routes.profit}/radar`} className={buttonClass("outline", "sm")}>
                       {t("actions.toRadar")}
                     </Link>
                   ) : null}
                   {data.canAct && !isConfirming ? (
-                    <button type="button" className={`${secondaryBtn} border-transparent text-ink-2`} disabled={isBusy} onClick={() => void act(p, "dismiss")}>
+                    <button type="button" className={buttonClass("ghost", "sm")} disabled={isBusy} onClick={() => void act(p, "dismiss")}>
                       {t("actions.dismiss")}
                     </button>
                   ) : null}
-                  {pauseName && !data.canAct ? <span className="text-[12px] text-ink-3">{t("actions.viewOnly")}</span> : null}
+                  {pauseName && !data.canAct ? <span className="text-xs text-ink-3">{t("actions.viewOnly")}</span> : null}
                   {pauseName && data.canAct && !data.actionsEnabled ? (
-                    <span className="text-[12px] text-ink-3">{t("actions.actionsOff")}</span>
+                    <span className="text-xs text-ink-3">{t("actions.actionsOff")}</span>
                   ) : null}
                 </div>
                 {notice && notice.id === p.id && notice.tone === "error" ? (
-                  <p role="alert" className="ml-5 rounded-box bg-field px-3 py-2 text-[12.5px] text-danger-fg">
+                  <Note tone="danger" className="ml-5">
                     {notice.text}
-                  </p>
+                  </Note>
                 ) : null}
               </li>
             );
@@ -232,7 +252,7 @@ export function ProfitPilotPanel() {
         </ul>
       )}
 
-      <p className="border-t border-line px-4 py-2.5 text-[11.5px] text-ink-3 sm:px-5">{t("rules")}</p>
-    </section>
+      <p className="mt-3 border-t border-line pt-3 text-xs text-ink-3">{t("rules")}</p>
+    </PanelCard>
   );
 }

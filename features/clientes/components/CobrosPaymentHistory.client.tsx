@@ -4,6 +4,10 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CobroComprobantePreview } from "@/features/clientes/components/CobroComprobantePreview.client";
 import { moneyUsd } from "@/lib/format/money-usd";
+import { SquareIcon } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { cn } from "@/lib/cn";
+import { MONTH_STEP, TD, TH } from "./cobros-ui";
 
 export type CobroHistoryRow = {
   id: string;
@@ -207,20 +211,23 @@ export function CobrosPaymentHistory({
   const showProofs = !hideStaff || Boolean(proofEndpoint);
 
   return (
-    <section className="overflow-hidden rounded-card bg-surface ring-1 ring-line">
-      <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+    <section
+      aria-labelledby="cobros-history-title"
+      className="min-w-0 overflow-hidden rounded-card border border-line bg-surface shadow-card"
+    >
+      <div className="flex flex-col gap-3 px-4 pb-3 pt-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 sm:pt-5">
         <div className="min-w-0">
-          <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-ink">
+          <h2 id="cobros-history-title" className="text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
             {t("historyTitle")}
-          </h3>
-          <p className="mt-0.5 text-[12px] text-ink-2">
+          </h2>
+          <p className="mt-0.5 text-xs text-ink-2">
             {t("historyMonthHint", {
               count: filtered.length,
               total: moneyUsd(monthTotal),
             })}
           </p>
           {hideMonthPicker ? (
-            <p className="mt-1 text-[11px] text-ink-3">
+            <p className="mt-0.5 text-xs text-ink-3">
               {t("historySyncedMonth", {
                 month: formatMonthTitle(month, locale),
               })}
@@ -229,213 +236,135 @@ export function CobrosPaymentHistory({
         </div>
 
         {hideMonthPicker ? null : (
-          <div className="flex items-center gap-1 self-start rounded-full border border-line bg-field p-1 sm:self-auto">
+          <div className="flex items-center gap-1.5 self-start">
             <button
               type="button"
               aria-label={t("prevMonth")}
               disabled={!canPrev}
               onClick={() => setMonth((m) => shiftMonthKey(m, -1))}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent"
+              className={MONTH_STEP}
             >
-              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-                <path
-                  d="M12.5 4.5 7 10l5.5 5.5"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <PanelIcon name="chevron-left" />
             </button>
-            <div className="min-w-[9.5rem] px-2 text-center sm:min-w-[11rem]">
-              <p className="text-[13px] font-semibold capitalize tracking-[-0.01em] text-ink">
-                {formatMonthTitle(month, locale)}
-              </p>
-              {month === currentMonth ? (
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-accent-text">
-                  {t("thisMonth")}
-                </p>
-              ) : null}
+            <div className="min-w-[150px] text-center leading-tight">
+              <p className="font-semibold text-ink first-letter:uppercase">{formatMonthTitle(month, locale)}</p>
+              {month === currentMonth ? <p className="text-xs text-ink-3">{t("thisMonth")}</p> : null}
             </div>
             <button
               type="button"
               aria-label={t("nextMonth")}
               disabled={!canNext}
               onClick={() => setMonth((m) => shiftMonthKey(m, 1))}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-surface hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent"
+              className={MONTH_STEP}
             >
-              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-                <path
-                  d="M7.5 4.5 13 10l-5.5 5.5"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <PanelIcon name="chevron-right" />
             </button>
           </div>
         )}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="px-4 py-10 sm:px-5">
-          <p className="rounded-card bg-field px-4 py-8 text-center text-[13px] font-medium text-ink-2">
-            {t("emptyMonth")}
-          </p>
+        <div className="px-4 pb-5 sm:px-6">
+          <p className="rounded-box bg-field px-4 py-8 text-center text-[13px] text-ink-2">{t("emptyMonth")}</p>
         </div>
       ) : (
         <>
-        <ul className="divide-y divide-[#f3eee8] md:hidden">
-          {filtered.map((row) => (
-            <li key={row.id} className="flex items-start justify-between gap-3 px-4 py-3.5">
-              <div className="flex min-w-0 items-start gap-3">
-                <span
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-box bg-subtle text-ok-fg"
-                  aria-hidden
-                >
-                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
-                    <path
-                      d="m5 10.5 3.2 3L15 6.5"
-                      stroke="currentColor"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-medium text-ink">
-                    {row.metodo ?? "—"}
-                  </p>
-                  <p className="text-[11px] tabular-nums text-ink-3">
-                    {formatHecomFecha(row.fecha, locale)}
-                    {row.hora ? ` · ${formatHora(row.hora)}` : ""}
-                  </p>
-                  {row.codigo ? (
-                    <p className="truncate font-mono text-[10px] text-accent-text">{row.codigo}</p>
-                  ) : null}
-                  {showProofs && row.comprobanteUrls.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      {row.comprobanteUrls.map((_, index) => (
-                        <CobroComprobantePreview
-                          key={`${row.id}-m-${index}`}
-                          cobroId={row.id}
-                          index={index}
-                          endpoint={proofEndpoint?.(row.id, index)}
-                          label={
-                            row.comprobanteUrls.length > 1
-                              ? t("proofN", { n: index + 1 })
-                              : t("proof")
-                          }
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-[13px] font-semibold tabular-nums text-ok-fg">
-                  +{moneyUsd(row.monto)}
-                </p>
-                <p className="mt-0.5 text-[10px] capitalize text-ink-3">
-                  {formatPeriodoResumen(row.periodoResumen, locale)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="hidden overflow-x-auto md:block">
-          <table className="min-w-[920px] w-full text-left text-[12px]">
-            <thead className="border-b border-line bg-field text-[10px] font-bold uppercase tracking-[0.08em] text-ink-3">
-              <tr>
-                <th className="px-4 py-3 sm:px-5">{t("colDate")}</th>
-                <th className="px-4 py-3">{t("colTime")}</th>
-                <th className="px-4 py-3">{t("colCode")}</th>
-                <th className="px-4 py-3">{t("colPeriod")}</th>
-                <th className="px-4 py-3">{t("colAmount")}</th>
-                <th className="px-4 py-3">{t("colMethod")}</th>
-                {showProofs ? (
-                  <th className="px-4 py-3">{t("colProofs")}</th>
-                ) : null}
-                {hideStaff ? null : (
-                  <th className="px-4 py-3">{t("colRegisteredBy")}</th>
-                )}
-                <th className="px-4 py-3">{t("colCrmIn")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((row) => {
-                const registered = formatRegisteredAt(
-                  row.registeredAt,
-                  row.fecha,
-                  locale,
-                );
-                return (
-                  <tr
-                    key={row.id}
-                    className="border-b border-line last:border-0 transition hover:bg-field"
-                  >
-                    <td className="px-4 py-3.5 font-medium text-[var(--auth-text)] sm:px-5">
+          {/* Celular: lista (v3 «rows»). */}
+          <ul className="border-t border-line px-4 md:hidden">
+            {filtered.map((row) => (
+              <li key={row.id} className="flex items-start justify-between gap-3 border-b border-line py-3 last:border-0">
+                <div className="flex min-w-0 items-start gap-3">
+                  <SquareIcon icon="check" tone="ok" />
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-ink">{row.metodo ?? "—"}</p>
+                    <p className="num text-[11px] text-ink-3">
                       {formatHecomFecha(row.fecha, locale)}
-                    </td>
-                    <td className="px-4 py-3.5 tabular-nums text-[var(--auth-text-muted)]">
-                      {formatHora(row.hora)}
-                    </td>
-                    <td className="px-4 py-3.5 font-mono text-[11px] text-accent-text">
-                      {row.codigo ?? "—"}
-                    </td>
-                    <td className="px-4 py-3.5 font-medium capitalize text-accent-text">
-                      {formatPeriodoResumen(row.periodoResumen, locale)}
-                    </td>
-                    <td className="px-4 py-3.5 font-semibold tabular-nums text-ok-fg">
-                      +{moneyUsd(row.monto)}
-                    </td>
-                    <td className="px-4 py-3.5 text-[var(--auth-text)]">
-                      {row.metodo ?? "—"}
-                    </td>
-                    {showProofs ? (
-                    <td className="px-4 py-3.5">
-                      {row.comprobanteUrls.length > 0 ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {row.comprobanteUrls.map((_, index) => (
-                            <CobroComprobantePreview
-                              key={`${row.id}-${index}`}
-                              cobroId={row.id}
-                              index={index}
-                              endpoint={proofEndpoint?.(row.id, index)}
-                              label={
-                                row.comprobanteUrls.length > 1
-                                  ? t("proofN", { n: index + 1 })
-                                  : t("proof")
-                              }
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-[var(--auth-text-muted)]">
-                          —
-                        </span>
-                      )}
-                    </td>
+                      {row.hora ? ` · ${formatHora(row.hora)}` : ""}
+                    </p>
+                    {row.codigo ? <p className="truncate font-mono text-[11px] text-ink-2">{row.codigo}</p> : null}
+                    {showProofs && row.comprobanteUrls.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {row.comprobanteUrls.map((_, index) => (
+                          <CobroComprobantePreview
+                            key={`${row.id}-m-${index}`}
+                            cobroId={row.id}
+                            index={index}
+                            endpoint={proofEndpoint?.(row.id, index)}
+                            label={row.comprobanteUrls.length > 1 ? t("proofN", { n: index + 1 }) : t("proof")}
+                          />
+                        ))}
+                      </div>
                     ) : null}
-                    {hideStaff ? null : (
-                    <td className="px-4 py-3.5 text-[var(--auth-text-muted)]">
-                      {maskEmail(row.registeredBy)}
-                    </td>
-                    )}
-                    <td
-                      className="px-4 py-3.5 tabular-nums text-[var(--auth-text-muted)]"
-                      title={registered.title || undefined}
-                    >
-                      {registered.label}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="num text-[13px] font-semibold text-ok-fg">+{moneyUsd(row.monto)}</p>
+                  <p className="mt-0.5 text-[11px] capitalize text-ink-3">
+                    {formatPeriodoResumen(row.periodoResumen, locale)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Desde tablet: tabla (v3 «grid»). */}
+          <div className="hidden overflow-x-auto px-2 pb-2 md:block">
+            <table className="w-full min-w-[920px] border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className={cn(TH, "text-left")}>{t("colDate")}</th>
+                  <th className={cn(TH, "text-left")}>{t("colTime")}</th>
+                  <th className={cn(TH, "text-left")}>{t("colCode")}</th>
+                  <th className={cn(TH, "text-left")}>{t("colPeriod")}</th>
+                  <th className={cn(TH, "text-right")}>{t("colAmount")}</th>
+                  <th className={cn(TH, "text-left")}>{t("colMethod")}</th>
+                  {showProofs ? <th className={cn(TH, "text-left")}>{t("colProofs")}</th> : null}
+                  {hideStaff ? null : <th className={cn(TH, "text-left")}>{t("colRegisteredBy")}</th>}
+                  <th className={cn(TH, "text-left")}>{t("colCrmIn")}</th>
+                </tr>
+              </thead>
+              <tbody className="[&>tr:last-child>td]:border-b-0">
+                {filtered.map((row) => {
+                  const registered = formatRegisteredAt(row.registeredAt, row.fecha, locale);
+                  return (
+                    <tr key={row.id} className="hover:bg-field">
+                      <td className={cn(TD, "font-medium text-ink")}>{formatHecomFecha(row.fecha, locale)}</td>
+                      <td className={cn(TD, "num text-ink-2")}>{formatHora(row.hora)}</td>
+                      <td className={cn(TD, "font-mono text-xs text-ink-2")}>{row.codigo ?? "—"}</td>
+                      <td className={cn(TD, "capitalize text-ink")}>
+                        {formatPeriodoResumen(row.periodoResumen, locale)}
+                      </td>
+                      <td className={cn(TD, "num text-right font-semibold text-ok-fg")}>+{moneyUsd(row.monto)}</td>
+                      <td className={cn(TD, "text-ink")}>{row.metodo ?? "—"}</td>
+                      {showProofs ? (
+                        <td className={TD}>
+                          {row.comprobanteUrls.length > 0 ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              {row.comprobanteUrls.map((_, index) => (
+                                <CobroComprobantePreview
+                                  key={`${row.id}-${index}`}
+                                  cobroId={row.id}
+                                  index={index}
+                                  endpoint={proofEndpoint?.(row.id, index)}
+                                  label={row.comprobanteUrls.length > 1 ? t("proofN", { n: index + 1 }) : t("proof")}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-ink-3">—</span>
+                          )}
+                        </td>
+                      ) : null}
+                      {hideStaff ? null : <td className={cn(TD, "text-ink-2")}>{maskEmail(row.registeredBy)}</td>}
+                      <td className={cn(TD, "num text-[13px] text-ink-2")} title={registered.title || undefined}>
+                        {registered.label}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </section>

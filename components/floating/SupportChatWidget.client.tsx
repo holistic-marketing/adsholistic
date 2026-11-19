@@ -365,10 +365,11 @@ export function SupportChatWidget({
       {isOpen ? (
         <div
           className={cn(
-            "w-[min(360px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card bg-surface shadow-2xl shadow-black/25 ring-1 ring-black/10",
+            "w-[min(360px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border border-line bg-surface shadow-pop",
           )}
         >
           <ChatConversation
+            appearance="panel"
             messages={displayMessages}
             inputValue={inputValue}
             sending={sending}
@@ -386,7 +387,7 @@ export function SupportChatWidget({
               <button
                 type="button"
                 onClick={handleClose}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/80 hover:bg-surface/10 hover:text-white"
+                className="panel-icon-btn text-ink-2 hover:text-ink"
                 aria-label={t("floatClose")}
               >
                 <svg

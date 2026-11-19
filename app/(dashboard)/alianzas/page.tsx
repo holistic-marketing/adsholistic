@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { routes } from "@/config/routes";
+import { Note } from "@/components/ui/PanelKit";
+import { AlianzasHeader } from "@/features/partners/components/AlianzasHeader";
 import { AlianzasPanel } from "@/features/partners/components/AlianzasPanel.client";
 import { MiAlianza } from "@/features/partners/components/MiAlianza.client";
 import { requireSession } from "@/lib/auth/guards.server";
@@ -8,6 +10,7 @@ import { getPartnerPanelData } from "@/lib/partners/partner-panel.server";
 import { getSignedPartnerForCliente } from "@/lib/partners/partners.server";
 import { resolvePaymentsFundingCapabilities } from "@/lib/payments/funding-roles.server";
 import { listPartnersWithStats, type PartnerWithStats } from "@/lib/partners/partners-admin.server";
+import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +25,11 @@ export default async function AlianzasPage() {
     const partner = selected ? await getSignedPartnerForCliente(selected.id) : null;
     if (!partner) redirect(routes.overview);
     const panel = await getPartnerPanelData(partner.id).catch(() => null);
-    return <MiAlianza partner={partner} panel={panel} />;
+    return (
+      <div className={dashboardClasses.page}>
+        <MiAlianza partner={partner} panel={panel} />
+      </div>
+    );
   }
 
   let partners: PartnerWithStats[] = [];
@@ -30,21 +37,16 @@ export default async function AlianzasPage() {
   try {
     partners = await listPartnersWithStats();
   } catch {
-    loadError = "No se pudo cargar las alianzas.";
+    loadError = "No se pudieron cargar las alianzas.";
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Gerente</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Alianzas</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
-          Cada aliado tiene su landing en <strong>adsholistic.com/a/&lt;link&gt;</strong>. Los clientes que se registran
-          por ahí quedan a su nombre y el aliado gana un % del fee que les cobramos.
-        </p>
-      </header>
+    <div className={dashboardClasses.page}>
       {loadError ? (
-        <p className="rounded-box bg-field px-4 py-3 text-[13px] text-danger-fg">{loadError}</p>
+        <>
+          <AlianzasHeader />
+          <Note tone="danger">{loadError}</Note>
+        </>
       ) : (
         <AlianzasPanel partners={partners} />
       )}

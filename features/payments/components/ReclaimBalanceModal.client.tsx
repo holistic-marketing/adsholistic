@@ -6,10 +6,19 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Note, PropList, ToneBadge } from "@/components/ui/PanelKit";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import type { PaymentAccountAllocation } from "@/types/payment";
+import {
+  PaymentAmountInput,
+  PaymentDialogBody,
+  PaymentDialogFooter,
+  PaymentDialogFrame,
+  PaymentDialogHeader,
+  PaymentFieldHint,
+  PaymentFieldLabel,
+} from "./PaymentDialog";
 
 interface ReclaimBalanceModalProps {
   account: PaymentAccountAllocation | null;
@@ -113,79 +122,76 @@ function ReclaimBalanceModalBody({
     }
   }
 
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-sm"
-        aria-label={t("reclaimModal.closeAria")}
-        onClick={resetAndClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="reclaim-balance-title"
-        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-card border border-[var(--border-subtle)] bg-surface p-5 shadow-2xl sm:p-6"
-      >
-        <h2
-          id="reclaim-balance-title"
-          className="text-lg font-semibold text-[var(--foreground)]"
-        >
-          {t("reclaimModal.title")}
-        </h2>
-        <p className="mt-1 text-sm text-[var(--admin-text-muted,#64748b)]">
-          {t("reclaimModal.body")}
-        </p>
+  const closeLabel = t("reclaimModal.closeAria");
 
-        <div className="mt-5 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
-          <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-            {t("reclaimModal.account")}
-          </p>
-          <p className="mt-0.5 break-words text-sm font-semibold text-[var(--foreground)]">
-            {account.name}
-          </p>
-          {account.bmLabel ? (
-            <span className="mt-1.5 inline-flex rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
-              {account.bmLabel}
-            </span>
-          ) : null}
-          <p className="mt-1 text-xs tabular-nums text-[var(--admin-text-muted,#64748b)]">
-            {t("reclaimModal.balanceOnAccount")}: {formatMoney(account.balance)}
-          </p>
-          <p className="mt-1 text-xs text-warn-fg">
+  return createPortal(
+    <PaymentDialogFrame
+      onDismiss={resetAndClose}
+      dismissLabel={closeLabel}
+      labelledBy="reclaim-balance-title"
+    >
+      <PaymentDialogHeader
+        titleId="reclaim-balance-title"
+        title={t("reclaimModal.title")}
+        description={t("reclaimModal.body")}
+        onClose={resetAndClose}
+        closeLabel={closeLabel}
+      />
+
+      <PaymentDialogBody className="space-y-4">
+        <div>
+          <PropList
+            items={[
+              {
+                label: t("reclaimModal.account"),
+                value: (
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <span className="break-words">{account.name}</span>
+                    {account.bmLabel ? (
+                      <ToneBadge tone="info">{account.bmLabel}</ToneBadge>
+                    ) : null}
+                  </span>
+                ),
+              },
+              {
+                label: t("reclaimModal.balanceOnAccount"),
+                value: <span className="num">{formatMoney(account.balance)}</span>,
+              },
+            ]}
+          />
+          <p className="mt-2 text-xs text-warn-fg">
             {account.status === "disabled"
               ? t("reclaimModal.statusSuspended")
               : t("reclaimModal.statusPrefix", { status: account.status })}
           </p>
         </div>
 
-        <div className="mt-5">
-          <label
-            htmlFor="reclaim-amount"
-            className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]"
-          >
+        <div>
+          <PaymentFieldLabel htmlFor="reclaim-amount">
             {t("reclaimModal.amountLabel")}
-          </label>
-          <Input
+          </PaymentFieldLabel>
+          <PaymentAmountInput
             id="reclaim-amount"
             type="number"
+            suffix="USD"
             min={0.01}
             max={maxAmount}
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            aria-invalid={error ? true : undefined}
             autoFocus
           />
-          <p className="mt-1.5 text-[12px] text-ink-2">
+          <PaymentFieldHint>
             {t("reclaimModal.maxHint", { amount: formatMoney(maxAmount) })}
-          </p>
+          </PaymentFieldHint>
         </div>
 
         {allowForceLedger ? (
-          <label className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-ink-2">
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-box border border-line bg-field px-3 py-2.5 text-[13px] leading-snug text-ink-2">
             <input
               type="checkbox"
-              className="mt-0.5"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--ui-accent-btn)]"
               checked={forceLedgerOnly}
               onChange={(e) => setForceLedgerOnly(e.target.checked)}
             />
@@ -197,35 +203,30 @@ function ReclaimBalanceModalBody({
         ) : null}
 
         {error ? (
-          <p
-            className="mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] leading-5 text-warn-fg"
-            role="alert"
-          >
-            {error}
-          </p>
+          <div role="alert">
+            <Note tone="warn">{error}</Note>
+          </div>
         ) : null}
         {success ? (
-          <p className="mt-3 text-xs text-ok-fg" role="status">
-            {success}
-          </p>
+          <div role="status">
+            <Note tone="ok" icon="check-circle">
+              {success}
+            </Note>
+          </div>
         ) : null}
+      </PaymentDialogBody>
 
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" className="h-11 w-full sm:h-9 sm:w-auto" onClick={resetAndClose} disabled={loading}>
-            {tCommon("close")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !isValid}
-            className="h-11 w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-deep)] sm:h-9 sm:w-auto"
-          >
-            {loading
-              ? t("reclaimModal.reclaiming")
-              : t("reclaimModal.cta")}
-          </Button>
-        </div>
-      </div>
-    </div>,
+      <PaymentDialogFooter>
+        <Button variant="outline" onClick={resetAndClose} disabled={loading}>
+          {tCommon("close")}
+        </Button>
+        <Button onClick={handleSubmit} disabled={loading || !isValid}>
+          {loading
+            ? t("reclaimModal.reclaiming")
+            : t("reclaimModal.cta")}
+        </Button>
+      </PaymentDialogFooter>
+    </PaymentDialogFrame>,
     document.body,
   );
 }

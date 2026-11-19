@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
-import { ClienteScopedCreatives } from "@/features/clientes/components/ClienteScopedCreatives";
+import { CreativeHub } from "@/features/creative-analyzer/components/CreativeHub";
 import { PickClienteEmpty } from "@/features/clientes/components/PickClienteEmpty";
 import { getHecomClienteDashboard } from "@/lib/hecom/cliente-dashboard.server";
 import { getSelectedHecomCliente } from "@/lib/hecom/selected-cliente.server";
@@ -276,7 +276,7 @@ export default async function CreativeAnalyzerPage() {
 
   return (
     <div className={dashboardClasses.page}>
-      <ClienteScopedCreatives
+      <CreativeHub
         data={data}
         accounts={uploadAccounts}
         assets={assets}

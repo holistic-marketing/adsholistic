@@ -6,10 +6,20 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Note, PropList, ToneBadge } from "@/components/ui/PanelKit";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import type { PaymentAccountAllocation } from "@/types/payment";
+import {
+  PaymentAmountInput,
+  PaymentCalc,
+  PaymentDialogBody,
+  PaymentDialogFooter,
+  PaymentDialogFrame,
+  PaymentDialogHeader,
+  PaymentFieldHint,
+  PaymentFieldLabel,
+} from "./PaymentDialog";
 
 interface AllocateBalanceModalProps {
   account: PaymentAccountAllocation | null;
@@ -198,152 +208,144 @@ function AllocateBalanceModalBody({
     }
   }
 
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-sm"
-        aria-label={t("allocateModal.closeAria")}
-        onClick={resetAndClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="allocate-balance-title"
-        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-card border border-[var(--border-subtle)] bg-surface p-5 shadow-2xl sm:p-6"
-      >
-        <h2
-          id="allocate-balance-title"
-          className="text-lg font-semibold text-[var(--foreground)]"
-        >
-          {agencyBmFunding
-            ? t("allocateModal.titleBm")
-            : t("allocateModal.title")}
-        </h2>
-        <p className="mt-1 text-sm text-[var(--admin-text-muted,#64748b)]">
-          {agencyBmFunding
-            ? t("allocateModal.bodyBm")
-            : t("allocateModal.body")}
-        </p>
-        <p className="mt-2 rounded-lg border border-ok-line bg-ok-bg px-3 py-2 text-[12px] leading-5 text-ok-fg">
-          <span className="font-semibold">{t("allocateModal.oneToOne")}</span>{" "}
-          {t("allocateModal.oneToOneBody", { amount: oneToOneExample })}
-        </p>
-        {agencyBmFunding ? (
-          <p className="mt-2 rounded-lg border border-info-line bg-info-bg px-3 py-2 text-[12px] leading-5 text-info-fg">
-            {t("allocateModal.budgetHint")}
-          </p>
-        ) : null}
+  const closeLabel = t("allocateModal.closeAria");
+  const advertiserId = targetAccount.externalAccountId?.trim();
 
-        <div className="mt-5 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
-          <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-            {t("allocateModal.account")}
-          </p>
-          <p className="mt-0.5 break-words text-sm font-semibold text-[var(--foreground)]">
-            {targetAccount.name}
-          </p>
-          {targetAccount.bmLabel ? (
-            <span className="mt-1.5 inline-flex rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
-              {targetAccount.bmLabel}
-            </span>
-          ) : null}
-          {!agencyBmFunding ? (
-            <div className="mt-3 space-y-1.5 text-xs leading-5">
-              <p className="flex items-baseline justify-between gap-3 text-[var(--admin-text-muted,#64748b)]">
-                <span>{t("allocateModal.walletAvailable")}</span>
-                <span className="font-semibold tabular-nums text-[var(--foreground)]">
-                  {formatMoney(walletAvailable)}
-                </span>
-              </p>
-              <p className="flex items-baseline justify-between gap-3 text-[var(--admin-text-muted,#64748b)]">
-                <span>{t("allocateModal.alreadyOnAccount")}</span>
-                <span className="font-semibold tabular-nums text-[var(--foreground)]">
-                  {formatMoney(alreadyOnAccount)}
-                </span>
-              </p>
-            </div>
-          ) : (
-            <p className="mt-1 text-xs text-[var(--admin-text-muted,#64748b)]">
+  return createPortal(
+    <PaymentDialogFrame
+      onDismiss={resetAndClose}
+      dismissLabel={closeLabel}
+      labelledBy="allocate-balance-title"
+    >
+      <PaymentDialogHeader
+        titleId="allocate-balance-title"
+        title={
+          agencyBmFunding
+            ? t("allocateModal.titleBm")
+            : t("allocateModal.title")
+        }
+        description={
+          agencyBmFunding
+            ? t("allocateModal.bodyBm")
+            : t("allocateModal.body")
+        }
+        onClose={resetAndClose}
+        closeLabel={closeLabel}
+      />
+
+      <PaymentDialogBody className="space-y-4">
+        <div>
+          <PropList
+            items={[
+              {
+                label: t("allocateModal.account"),
+                value: (
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <span className="break-words">{targetAccount.name}</span>
+                    {targetAccount.bmLabel ? (
+                      <ToneBadge tone="info">{targetAccount.bmLabel}</ToneBadge>
+                    ) : null}
+                  </span>
+                ),
+              },
+              {
+                label: t("allocateModal.advertiserLabel").replace(/:\s*$/, ""),
+                value: advertiserId ? (
+                  <span className="font-mono text-xs">{advertiserId}</span>
+                ) : (
+                  <span className="text-danger-fg">
+                    {t("allocateModal.notConfigured")}
+                  </span>
+                ),
+              },
+            ]}
+          />
+          {agencyBmFunding ? (
+            <p className="num mt-2 text-xs text-ink-3">
               {t("allocateModal.ledgerBalance", {
                 amount: formatMoney(targetAccount.balance),
               })}
             </p>
-          )}
-          <p className="mt-2 break-all font-mono text-[11px] text-[var(--admin-text-muted,#64748b)]">
-            {t("allocateModal.advertiserLabel")}{" "}
-            {targetAccount.externalAccountId?.trim() || (
-              <span className="text-danger-fg">
-                {t("allocateModal.notConfigured")}
-              </span>
-            )}
-          </p>
-          {targetAccount.status === "disabled" ? (
-            <p className="mt-2 text-[11px] leading-4 text-warn-fg" role="alert">
-              {t("allocateModal.disabledAlert")}
-            </p>
           ) : null}
         </div>
 
-        <div className="mt-5">
-          <label
-            htmlFor="allocation-amount"
-            className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]"
-          >
+        {targetAccount.status === "disabled" ? (
+          <div role="alert">
+            <Note tone="warn">{t("allocateModal.disabledAlert")}</Note>
+          </div>
+        ) : null}
+
+        <div>
+          <PaymentFieldLabel htmlFor="allocation-amount">
             {t("allocateModal.amountLabel")}
-          </label>
-          <Input
+          </PaymentFieldLabel>
+          <PaymentAmountInput
             id="allocation-amount"
             type="number"
+            suffix="USD"
             min={agencyBmFunding ? 10 : 0.01}
             step="0.01"
             max={!agencyBmFunding ? walletAvailable || undefined : undefined}
             placeholder={agencyBmFunding ? "10.00" : "100.00"}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            aria-invalid={error ? true : undefined}
             autoFocus
           />
-          {agencyBmFunding ? (
-            <p className="mt-1.5 text-[12px] leading-5 text-ink-2">
-              {t("allocateModal.minHint", { amount: tiktokMinLabel })}
-            </p>
-          ) : (
-            <p className="mt-1.5 text-[12px] leading-5 text-ink-2">
-              {t("allocateModal.maxNow", {
-                amount: formatMoney(walletAvailable),
-              })}
-            </p>
-          )}
+          <PaymentFieldHint>
+            {agencyBmFunding
+              ? t("allocateModal.minHint", { amount: tiktokMinLabel })
+              : t("allocateModal.maxNow", {
+                  amount: formatMoney(walletAvailable),
+                })}
+          </PaymentFieldHint>
         </div>
 
-        {error && (
-          <p
-            className="mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] leading-5 text-warn-fg"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
+        {!agencyBmFunding ? (
+          <PaymentCalc
+            rows={[
+              {
+                label: t("allocateModal.walletAvailable"),
+                value: formatMoney(walletAvailable),
+              },
+              {
+                label: t("allocateModal.alreadyOnAccount"),
+                value: formatMoney(alreadyOnAccount),
+              },
+            ]}
+          />
+        ) : null}
 
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" className="h-11 w-full sm:h-9 sm:w-auto" onClick={resetAndClose} disabled={loading}>
-            {tCommon("close")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !isValidAmount}
-            className="h-11 w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-deep)] sm:h-9 sm:w-auto"
-          >
-            {loading
-              ? agencyBmFunding
-                ? t("allocateModal.funding")
-                : t("allocateModal.assigning")
-              : agencyBmFunding
-                ? t("allocateModal.fundCta")
-                : t("allocateModal.assignCta")}
-          </Button>
-        </div>
-      </div>
-    </div>,
+        <Note tone="ok" icon="check-circle">
+          <span className="font-semibold">{t("allocateModal.oneToOne")}</span>{" "}
+          {t("allocateModal.oneToOneBody", { amount: oneToOneExample })}
+        </Note>
+        {agencyBmFunding ? (
+          <Note tone="info">{t("allocateModal.budgetHint")}</Note>
+        ) : null}
+
+        {error ? (
+          <div role="alert">
+            <Note tone="warn">{error}</Note>
+          </div>
+        ) : null}
+      </PaymentDialogBody>
+
+      <PaymentDialogFooter>
+        <Button variant="outline" onClick={resetAndClose} disabled={loading}>
+          {tCommon("close")}
+        </Button>
+        <Button onClick={handleSubmit} disabled={loading || !isValidAmount}>
+          {loading
+            ? agencyBmFunding
+              ? t("allocateModal.funding")
+              : t("allocateModal.assigning")
+            : agencyBmFunding
+              ? t("allocateModal.fundCta")
+              : t("allocateModal.assignCta")}
+        </Button>
+      </PaymentDialogFooter>
+    </PaymentDialogFrame>,
     document.body,
   );
 }

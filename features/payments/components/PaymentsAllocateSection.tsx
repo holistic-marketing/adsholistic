@@ -24,17 +24,12 @@ export function PaymentsAllocateSection({
   const { agencyBmFunding } = usePaymentsFundingMode();
 
   return (
-    <section
-      id="asignar-saldo"
-      className="dashboard-surface-card scroll-mt-20 overflow-hidden rounded-card"
-    >
-      <div className="border-b border-[var(--auth-border)] px-5 py-4 sm:px-6">
-        <PaymentsAllocateSectionCopy
-          walletBalanceLabel={walletBalanceLabel}
-          walletBalance={walletBalance}
-          clienteName={clienteName}
-        />
-      </div>
+    <section id="asignar-saldo" className="scroll-mt-20 pt-1">
+      <PaymentsAllocateSectionCopy
+        walletBalanceLabel={walletBalanceLabel}
+        walletBalance={walletBalance}
+        clienteName={clienteName}
+      />
 
       <PaymentsAssignmentPanel
         accounts={accounts}

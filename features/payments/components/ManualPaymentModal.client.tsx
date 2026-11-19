@@ -13,7 +13,9 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { Note, ToneBadge } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import {
@@ -26,11 +28,20 @@ import { GatewayLogo } from "./GatewayLogo";
 import { VoucherReviewCard } from "./VoucherReviewCard";
 import { PaymentAppIcon, resolvePaymentAppKey } from "./PaymentAppIcon";
 import {
-  CheckCircleIcon,
-  ClockIcon,
-  PaymentModalFooter,
   PaymentModalHeader,
+  PaymentOutcome,
+  PaymentSegmented,
 } from "./PaymentModalChrome";
+import {
+  PaymentAmountInput,
+  PaymentCalc,
+  PaymentDialogBody,
+  PaymentDialogFooter,
+  PaymentDialogFrame,
+  PaymentFieldError,
+  PaymentFieldHint,
+  PaymentFieldLabel,
+} from "./PaymentDialog";
 
 type ChargeCurrency = "USD" | "PEN";
 type Step =
@@ -385,335 +396,308 @@ export function ManualPaymentModal({
 
   if (!open || !mounted) return null;
 
+  // Cabecera común a los pasos: método elegido, pasos y cierre.
+  const isBinance = payMethod === "binance";
+  const methodHeader = {
+    identityIcon: (
+      <GatewayLogo gatewayId={isBinance ? "crypto" : "manual"} size="sm" />
+    ),
+    identityLabel: isBinance ? "Binance Pay" : t("manualModal.title"),
+    identityDescription: t(
+      isBinance ? "manualModal.binanceSubtitle" : "manualModal.subtitle",
+    ),
+    steps: manualSteps,
+    currentStep: modalStepIndex,
+    onClose: resetAndClose,
+  };
+
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-[2px]"
-        aria-label={tCommon("close")}
-        onClick={resetAndClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="manual-payment-title"
-        className="scrollbar-thin relative max-h-[min(92vh,calc(100dvh-1.5rem))] w-full max-w-[36rem] overflow-y-auto rounded-card bg-surface shadow-[0_28px_90px_rgb(15_23_42_/_0.24)]"
-      >
-        {step === "form" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={
-                paysDebt
-                  ? "¿Cuánto de tu deuda vas a pagar?"
-                  : t("manualModal.amountTitle")
-              }
-              description={
-                paysDebt
-                  ? "Este pago baja lo que debes de este mes. No recarga cartera."
-                  : t(payMethod === "binance" ? "manualModal.binanceAmountHint" : "manualModal.amountHint")
-              }
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={
-                paysDebt
-                  ? "Pago de deuda · Lo pagado"
-                  : t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")
-              }
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div className="p-5 sm:p-6">
-              <div>
-                <label
-                  htmlFor={amountFieldId}
-                  className="mb-2 block text-[12px] font-semibold text-ink-2"
-                >
-                  {paysDebt
-                    ? "Deuda que vas a pagar (USD)"
-                    : t("manualModal.receiveLabel")}
-                </label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-lg font-semibold text-ink-3">
-                    $
-                  </span>
-                  <Input
-                    id={amountFieldId}
-                    type="number"
-                    min={minUsd}
-                    max={MAX_USD}
-                    step="0.01"
-                    placeholder="120.00"
-                    value={amount}
-                    onChange={(e) => { setAmount(e.target.value); setServerChargeCents(null); }}
-                    autoFocus
-                    className="h-14 rounded-box pl-9 text-lg font-semibold tabular-nums"
-                  />
-                </div>
-              </div>
+    <PaymentDialogFrame
+      onDismiss={resetAndClose}
+      dismissLabel={tCommon("close")}
+      labelledBy="manual-payment-title"
+    >
+      {step === "form" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={
+              paysDebt
+                ? "¿Cuánto de tu deuda vas a pagar?"
+                : t("manualModal.amountTitle")
+            }
+            description={
+              paysDebt
+                ? "Este pago baja lo que debes de este mes. No recarga cartera."
+                : t(payMethod === "binance" ? "manualModal.binanceAmountHint" : "manualModal.amountHint")
+            }
+            {...methodHeader}
+            identityDescription={
+              paysDebt
+                ? "Pago de deuda · Lo pagado"
+                : methodHeader.identityDescription
+            }
+          />
 
-              {!endpoints && !paysDebt && config?.binance ? (
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  {(["bank", "binance"] as const).map((method) => (
-                    <button key={method} type="button" aria-pressed={payMethod === method}
-                      onClick={() => { setPayMethod(method); setChargeCurrency(method === "binance" ? "USD" : "PEN"); setServerChargeCents(null); }}
-                      className={`h-11 rounded-box border text-sm font-semibold ${payMethod === method ? "border-accent bg-warn-bg" : "border-line"}`}>
-                      {method === "binance" ? "Binance Pay" : "Transferencia BCP"}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-              <div className="mt-5">
-                <p className="mb-2 text-[12px] font-semibold text-ink-2">
-                  {t("manualModal.currency")}
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {(payMethod === "binance" ? ["USD"] as const : ["PEN", "USD"] as const).map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => { setChargeCurrency(c); setServerChargeCents(null); }}
-                      aria-pressed={chargeCurrency === c}
-                      className={`h-11 rounded-xl border text-sm font-semibold transition ${
-                        chargeCurrency === c
-                          ? "border-accent bg-subtle text-accent-text"
-                          : "border-line bg-surface text-ink-2 hover:border-accent/40"
-                      }`}
-                    >
-                      {payMethod === "binance" ? "USDT" : c === "PEN"
-                        ? t("manualModal.pen")
-                        : t("manualModal.usd")}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {quote ? (
-                <div className="mt-5 rounded-card bg-field p-4 text-sm sm:p-5">
-                  <p className="mb-3 text-[13px] font-semibold text-ink">
-                    {t("manualModal.transferSummary")}
-                  </p>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-ink-2">
-                      {paysDebt
-                        ? "Baja tu deuda"
-                        : t("manualModal.receiveWallet")}
-                    </span>
-                    <span className="font-semibold tabular-nums text-ink">
-                      {formatMoney(quote.usd.creditCents / 100)}
-                    </span>
-                  </div>
-                  {paysDebt ? null : (
-                  <div className="mt-2 flex justify-between gap-3">
-                    <span className="text-ink-2">
-                      Fee {formatFeePercentLabel(feePercent)}
-                    </span>
-                    <span className="font-medium tabular-nums text-ink">
-                      {chargeCurrency === "PEN"
-                        ? formatPenAmount(quote.pen.feePenCents)
-                        : formatMoney(quote.usd.feeCents / 100)}
-                    </span>
-                  </div>
-                  )}
-                  <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
-                    <span className="font-semibold text-ink">
-                      {t("manualModal.totalTransfer")}
-                    </span>
-                    <span className="text-xl font-semibold tracking-[-0.02em] tabular-nums text-accent-text">
-                      {chargeLabel}
-                    </span>
-                  </div>
-                  {chargeCurrency === "PEN" ? (
-                    <p className="mt-3 text-[11px] leading-4 text-ink-2">
-                      {t("manualModal.fxFixed", {
-                        label: fxLabel,
-                        rate: rate.toFixed(4),
-                      })}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {error ? (
-                <p className="mt-3 text-xs text-danger-fg" role="alert">
-                  {error}
-                </p>
-              ) : null}
-
-              <PaymentModalFooter>
-                <Button
-                  variant="outline"
-                  onClick={resetAndClose}
-                  className="h-11 w-full rounded-box sm:w-auto"
-                >
-                  {tCommon("cancel")}
-                </Button>
-                <Button
-                  onClick={handleCreateIntent}
-                  disabled={!isValidAmount || loading || (payMethod === "binance" && !config?.binance)}
-                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
-                >
-                  {loading ? t("addBalance.processing") : t("manualModal.seeBanks")}
-                </Button>
-              </PaymentModalFooter>
+          <PaymentDialogBody className="space-y-5">
+            <div>
+              <PaymentFieldLabel htmlFor={amountFieldId}>
+                {paysDebt
+                  ? "Deuda que vas a pagar (USD)"
+                  : t("manualModal.receiveLabel")}
+              </PaymentFieldLabel>
+              <PaymentAmountInput
+                big
+                suffix="USD"
+                id={amountFieldId}
+                type="number"
+                min={minUsd}
+                max={MAX_USD}
+                step="0.01"
+                placeholder="120.00"
+                value={amount}
+                onChange={(e) => { setAmount(e.target.value); setServerChargeCents(null); }}
+                autoFocus
+              />
             </div>
-          </>
-        ) : null}
 
-        {step === "banks" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={t("manualModal.doTransfer")}
-              description={payMethod === "binance" ? t("manualModal.binanceInstructions") : t("manualModal.transferHint", { amount: chargeLabel })}
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")}
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div className="p-5 sm:p-6">
-              <div className="space-y-3">
-                {payMethod === "binance" ? (
-                  <div className="rounded-card border border-line p-5 space-y-3">
-                    <div className="flex items-center gap-3"><PaymentAppIcon app="binance" size="sm" /><strong>Binance Pay · USDT</strong></div>
-                    <p className="text-sm">{t("manualModal.binanceInstructions")}</p>
-                    <p className="break-all font-semibold">{config?.binance?.email ?? tCommon("emDash")}</p>
-                    <Button variant="outline" disabled={!config?.binance?.email}
-                      onClick={() => config?.binance?.email && void copyText(config.binance.email)}>{t("addBalance.copy")}</Button>
-                    <p className="rounded-box bg-warn-bg p-3 text-sm text-warn-fg">{t("manualModal.binanceReview")}</p>
+            {!endpoints && !paysDebt && config?.binance ? (
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-ink">
+                  {t("reloadSection.method")}
+                </p>
+                <PaymentSegmented
+                  label={t("reloadSection.method")}
+                  value={payMethod}
+                  options={[
+                    { value: "bank", label: "Transferencia BCP" },
+                    { value: "binance", label: "Binance Pay" },
+                  ]}
+                  onChange={(method) => { setPayMethod(method); setChargeCurrency(method === "binance" ? "USD" : "PEN"); setServerChargeCents(null); }}
+                />
+              </div>
+            ) : null}
+
+            <div>
+              <p className="mb-1.5 text-sm font-medium text-ink">
+                {t("manualModal.currency")}
+              </p>
+              <PaymentSegmented
+                label={t("manualModal.currency")}
+                value={chargeCurrency}
+                options={(payMethod === "binance" ? ["USD"] as const : ["PEN", "USD"] as const).map((c) => ({
+                  value: c,
+                  label:
+                    payMethod === "binance"
+                      ? "USDT"
+                      : c === "PEN"
+                        ? t("manualModal.pen")
+                        : t("manualModal.usd"),
+                }))}
+                onChange={(c) => { setChargeCurrency(c); setServerChargeCents(null); }}
+              />
+            </div>
+
+            {quote ? (
+              <div>
+                <p className="mb-2 text-sm font-medium text-ink">
+                  {t("manualModal.transferSummary")}
+                </p>
+                <PaymentCalc
+                  live
+                  rows={[
+                    {
+                      label: paysDebt
+                        ? "Baja tu deuda"
+                        : t("manualModal.receiveWallet"),
+                      value: formatMoney(quote.usd.creditCents / 100),
+                    },
+                    !paysDebt && {
+                      label: `Fee ${formatFeePercentLabel(feePercent)}`,
+                      value:
+                        chargeCurrency === "PEN"
+                          ? formatPenAmount(quote.pen.feePenCents)
+                          : formatMoney(quote.usd.feeCents / 100),
+                    },
+                    {
+                      label: t("manualModal.totalTransfer"),
+                      value: chargeLabel,
+                      total: true,
+                    },
+                  ]}
+                />
+                {chargeCurrency === "PEN" ? (
+                  <PaymentFieldHint className="mt-2">
+                    {t("manualModal.fxFixed", {
+                      label: fxLabel,
+                      rate: rate.toFixed(4),
+                    })}
+                  </PaymentFieldHint>
+                ) : null}
+              </div>
+            ) : null}
+
+            {error ? <PaymentFieldError>{error}</PaymentFieldError> : null}
+          </PaymentDialogBody>
+
+          <PaymentDialogFooter>
+            <Button
+              variant="outline"
+              onClick={resetAndClose}
+              className="w-full sm:w-auto"
+            >
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              onClick={handleCreateIntent}
+              disabled={!isValidAmount || loading || (payMethod === "binance" && !config?.binance)}
+              className="w-full sm:w-auto"
+            >
+              {loading ? t("addBalance.processing") : t("manualModal.seeBanks")}
+            </Button>
+          </PaymentDialogFooter>
+        </>
+      ) : null}
+
+      {step === "banks" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={t("manualModal.doTransfer")}
+            description={payMethod === "binance" ? t("manualModal.binanceInstructions") : t("manualModal.transferHint", { amount: chargeLabel })}
+            {...methodHeader}
+          />
+
+          <PaymentDialogBody className="space-y-3">
+            {payMethod === "binance" ? (
+              <>
+                <div className="overflow-hidden rounded-box border border-line bg-surface shadow-ctl">
+                  <div className="flex items-center gap-3 border-b border-line bg-field px-4 py-3">
+                    <PaymentAppIcon app="binance" size="sm" />
+                    <p className="text-sm font-semibold text-ink">Binance Pay · USDT</p>
                   </div>
-                ) : banks.length === 0 ? (
-                  <p className="rounded-box bg-warn-bg px-4 py-3 text-sm leading-5 text-warn-fg">
-                    Las cuentas bancarias estan pendientes de configuracion.
-                    Contacta con soporte.
-                  </p>
-                ) : (
-                  banks.map((bank) => {
-                    const bankApp = resolvePaymentAppKey(bank.bank, bank.label);
-                    const currencyBadge =
-                      chargeCurrency === "USD" ? "USD" : "PEN";
-                    return (
-                      <div
-                        key={bank.id}
-                        className="overflow-hidden rounded-card border border-line bg-surface shadow-[0_1px_0_rgba(28,25,23,0.04)]"
+                  <div className="space-y-3 px-4 py-3">
+                    <p className="text-[13px] leading-5 text-ink-2">
+                      {t("manualModal.binanceInstructions")}
+                    </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="min-w-0 break-all text-sm font-semibold text-ink">
+                        {config?.binance?.email ?? tCommon("emDash")}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!config?.binance?.email}
+                        onClick={() => config?.binance?.email && void copyText(config.binance.email)}
                       >
-                        <div className="flex items-center justify-between gap-3 bg-field px-4 py-3 sm:px-5">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <PaymentAppIcon app={bankApp} size="sm" />
-                            <div className="min-w-0">
-                              <p className="truncate text-[13px] font-semibold text-ink">
-                                {bank.label}
-                              </p>
-                              <p className="mt-0.5 truncate text-[11px] text-ink-2">
-                                {bank.holder}
-                              </p>
-                            </div>
-                          </div>
-                          <span
-                            className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wide ${
-                              currencyBadge === "USD"
-                                ? "bg-field text-ok-fg"
-                                : "bg-field text-accent-text"
-                            }`}
-                          >
-                            {currencyBadge}
-                          </span>
-                        </div>
-                        <div className="space-y-3 px-4 py-4 sm:px-5">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="text-[10px] font-medium uppercase tracking-wide text-ink-3">
-                                {t("manualModal.accountNumber")}
-                              </p>
-                              <p className="mt-1 break-all font-mono text-[14px] font-semibold tracking-tight text-ink sm:truncate">
-                                {bank.accountNumber}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => void copyText(bank.accountNumber)}
-                              className="inline-flex h-10 shrink-0 items-center rounded-lg border border-line-strong bg-field px-3 text-xs font-semibold text-accent-text transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
-                            >
-                              {t("addBalance.copy")}
-                            </button>
-                          </div>
-                          {bank.cci ? (
-                            <div className="flex items-center justify-between gap-3 border-t border-line pt-3">
-                              <div className="min-w-0">
-                                <p className="text-[10px] font-medium uppercase tracking-wide text-ink-3">
-                                  {t("manualModal.cci")}
-                                </p>
-                                <p className="mt-1 truncate font-mono text-[13px] font-medium tracking-tight text-ink">
-                                  {bank.cci}
-                                </p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => void copyText(bank.cci!)}
-                                className="inline-flex h-10 shrink-0 items-center rounded-lg border border-line-strong bg-field px-3 text-xs font-semibold text-accent-text transition-colors hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35"
-                              >
-                                {t("addBalance.copy")}
-                              </button>
-                            </div>
-                          ) : null}
-                          {bank.notes ? (
-                            <p className="text-[11px] leading-4 text-ink-3">
-                              {bank.notes}
-                            </p>
-                          ) : null}
+                        <PanelIcon name="copy" />
+                        {t("addBalance.copy")}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <Note tone="warn">{t("manualModal.binanceReview")}</Note>
+              </>
+            ) : banks.length === 0 ? (
+              <Note tone="warn">
+                Las cuentas bancarias están pendientes de configuración.
+                Contacta con soporte.
+              </Note>
+            ) : (
+              banks.map((bank) => {
+                const bankApp = resolvePaymentAppKey(bank.bank, bank.label);
+                const currencyBadge =
+                  chargeCurrency === "USD" ? "USD" : "PEN";
+                return (
+                  <div
+                    key={bank.id}
+                    className="overflow-hidden rounded-box border border-line bg-surface shadow-ctl"
+                  >
+                    <div className="flex items-center justify-between gap-3 bg-field px-4 py-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <PaymentAppIcon app={bankApp} size="sm" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-ink">
+                            {bank.label}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-ink-2">
+                            {bank.holder}
+                          </p>
                         </div>
                       </div>
-                    );
-                  })
-                )}
-              </div>
+                      <ToneBadge
+                        tone={currencyBadge === "USD" ? "ok" : "accent"}
+                        className="num shrink-0"
+                      >
+                        {currencyBadge}
+                      </ToneBadge>
+                    </div>
+                    <BankDataRow
+                      label={t("manualModal.accountNumber")}
+                      value={bank.accountNumber}
+                      copyLabel={t("addBalance.copy")}
+                      onCopy={() => void copyText(bank.accountNumber)}
+                    />
+                    {bank.cci ? (
+                      <BankDataRow
+                        label={t("manualModal.cci")}
+                        value={bank.cci}
+                        copyLabel={t("addBalance.copy")}
+                        onCopy={() => void copyText(bank.cci!)}
+                      />
+                    ) : null}
+                    {bank.notes ? (
+                      <p className="border-t border-line px-4 py-2.5 text-xs leading-snug text-ink-3">
+                        {bank.notes}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })
+            )}
+          </PaymentDialogBody>
 
-              <PaymentModalFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setStep("form")}
-                  className="h-11 w-full rounded-box sm:w-auto"
-                >
-                  {tCommon("back")}
-                </Button>
-                <Button
-                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
-                  onClick={() => setStep("voucher")}
-                >
-                  {t("manualModal.paidUpload")}
-                </Button>
-              </PaymentModalFooter>
-            </div>
-          </>
-        ) : null}
-
-        {step === "voucher" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={t("manualModal.uploadTitle")}
-              description={t(payMethod === "binance" ? "manualModal.binanceUploadDesc" : "manualModal.uploadDesc")}
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")}
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div
-              ref={pasteZoneRef}
-              tabIndex={0}
-              className="p-5 outline-none sm:p-6"
+          <PaymentDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setStep("form")}
+              className="w-full sm:w-auto"
             >
+              {tCommon("back")}
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => setStep("voucher")}
+            >
+              {t("manualModal.paidUpload")}
+            </Button>
+          </PaymentDialogFooter>
+        </>
+      ) : null}
+
+      {step === "voucher" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={t("manualModal.uploadTitle")}
+            description={t(payMethod === "binance" ? "manualModal.binanceUploadDesc" : "manualModal.uploadDesc")}
+            {...methodHeader}
+          />
+          {/* Zona de pegado: con el foco aquí, Ctrl+V sube la captura. */}
+          <div
+            ref={pasteZoneRef}
+            tabIndex={0}
+            className="flex min-h-0 flex-1 flex-col outline-none"
+          >
+            <PaymentDialogBody>
+              {/* Zona para elegir el archivo (v3 «drop»). */}
               <div
-                className={`flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 transition ${
+                className={cn(
+                  "grid min-h-[140px] cursor-pointer content-center justify-items-center gap-1 rounded-box border border-dashed p-5 text-center transition-colors",
                   proofFile
                     ? "border-ok-solid bg-ok-bg"
-                    : "border-line bg-field hover:border-accent/50"
-                }`}
+                    : "border-line-strong bg-field hover:border-accent focus-visible:border-accent",
+                )}
                 onClick={() => fileInputRef.current?.click()}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") fileInputRef.current?.click();
@@ -726,7 +710,7 @@ export function ManualPaymentModal({
                   <img
                     src={proofPreview}
                     alt={t("manualModal.previewAlt")}
-                    className="max-h-32 max-w-full rounded-lg object-contain"
+                    className="max-h-32 max-w-full rounded-ctl object-contain"
                   />
                 ) : proofFile ? (
                   <p className="max-w-full break-all text-center text-sm font-medium text-ok-fg">
@@ -734,10 +718,11 @@ export function ManualPaymentModal({
                   </p>
                 ) : (
                   <>
+                    <PanelIcon name="upload" className="text-ink-2" />
                     <p className="text-sm font-semibold text-ink">
                       {t("manualModal.uploadHint")}
                     </p>
-                    <p className="mt-1 text-xs text-ink-3">
+                    <p className="text-xs text-ink-3">
                       {t("manualModal.fileTypesHint")}
                     </p>
                   </>
@@ -759,7 +744,6 @@ export function ManualPaymentModal({
                 <Button
                   variant="outline"
                   type="button"
-                  className="h-11"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {t("manualModal.gallery")}
@@ -767,7 +751,6 @@ export function ManualPaymentModal({
                 <Button
                   variant="outline"
                   type="button"
-                  className="h-11"
                   onClick={() => pasteZoneRef.current?.focus()}
                 >
                   {t("manualModal.paste")}
@@ -775,152 +758,152 @@ export function ManualPaymentModal({
               </div>
 
               {error ? (
-                <p className="mt-3 text-xs text-danger-fg" role="alert">
-                  {error}
-                </p>
+                <PaymentFieldError className="mt-3">{error}</PaymentFieldError>
               ) : null}
+            </PaymentDialogBody>
 
-              <PaymentModalFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setStep("banks")}
-                  className="h-11 w-full rounded-box sm:w-auto"
-                >
-                  {tCommon("back")}
-                </Button>
-                <Button
-                  disabled={!proofFile}
-                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
-                  onClick={handleSubmitVoucher}
-                >
-                  {paysDebt ? "Verificar voucher" : t("manualModal.verify")}
-                </Button>
-              </PaymentModalFooter>
-            </div>
-          </>
-        ) : null}
+            <PaymentDialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setStep("banks")}
+                className="w-full sm:w-auto"
+              >
+                {tCommon("back")}
+              </Button>
+              <Button
+                disabled={!proofFile}
+                className="w-full sm:w-auto"
+                onClick={handleSubmitVoucher}
+              >
+                {paysDebt ? "Verificar voucher" : t("manualModal.verify")}
+              </Button>
+            </PaymentDialogFooter>
+          </div>
+        </>
+      ) : null}
 
-        {step === "analyzing" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={t("manualModal.verifying")}
-              description={t("manualModal.verifyingDesc")}
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")}
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div className="flex flex-col items-center px-6 py-12 text-center">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent/20 border-t-[#d47840]" />
+      {step === "analyzing" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={t("manualModal.verifying")}
+            description={t("manualModal.verifyingDesc")}
+            {...methodHeader}
+          />
+          <PaymentDialogBody>
+            <div className="flex flex-col items-center py-8 text-center">
+              <span
+                aria-hidden
+                className="size-10 animate-spin rounded-full border-[3px] border-line border-t-accent motion-reduce:animate-none"
+              />
               <p className="mt-5 text-[13px] font-medium text-ink-2">
                 {t(paysDebt ? "manualModal.reviewWait" : "manualModal.analyzingWait")}
               </p>
             </div>
-          </>
-        ) : null}
+          </PaymentDialogBody>
+        </>
+      ) : null}
 
-        {step === "confirmed" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={t("manualModal.confirmed")}
-              description={
-                paysDebt
-                  ? "Gerencia ya puede revisar el voucher. Al aceptarlo, baja tu deuda. No entra a cartera."
-                  : t("manualModal.confirmedDesc")
-              }
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")}
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div className="p-5 sm:p-6">
-              <div className="flex items-center gap-4 rounded-card bg-ok-bg p-4 text-ok-fg">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ok-bg">
-                  <CheckCircleIcon />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-ok-fg">
-                    {paysDebt
-                      ? "Deuda que pagaste"
-                      : t("manualModal.credited")}
-                  </p>
-                  <p className="mt-0.5 text-2xl font-semibold tracking-[-0.03em] tabular-nums text-ink">
-                    {formatMoney(creditResult ?? parsedAmount)}
-                  </p>
-                  <p className="mt-1 text-[11px] text-ok-fg">
-                    {paysDebt
-                      ? "Gerencia revisa el voucher y baja la deuda. No entra a cartera."
-                      : t("manualModal.canAssign")}
-                  </p>
-                </div>
-              </div>
-              <PaymentModalFooter>
-                <Button
-                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
-                  onClick={resetAndClose}
-                >
-                  {t("manualModal.done")}
-                </Button>
-              </PaymentModalFooter>
-            </div>
-          </>
-        ) : null}
+      {step === "confirmed" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={t("manualModal.confirmed")}
+            description={
+              paysDebt
+                ? "Gerencia ya puede revisar el voucher. Al aceptarlo, baja tu deuda. No entra a cartera."
+                : t("manualModal.confirmedDesc")
+            }
+            {...methodHeader}
+          />
+          <PaymentDialogBody>
+            <PaymentOutcome
+              tone="ok"
+              icon="check-circle"
+              label={paysDebt ? "Deuda que pagaste" : t("manualModal.credited")}
+              value={formatMoney(creditResult ?? parsedAmount)}
+            >
+              {paysDebt
+                ? "Gerencia revisa el voucher y baja la deuda. No entra a cartera."
+                : t("manualModal.canAssign")}
+            </PaymentOutcome>
+          </PaymentDialogBody>
+          <PaymentDialogFooter>
+            <Button className="w-full sm:w-auto" onClick={resetAndClose}>
+              {t("manualModal.done")}
+            </Button>
+          </PaymentDialogFooter>
+        </>
+      ) : null}
 
-        {step === "pending" ? (
-          <>
-            <PaymentModalHeader
-              titleId="manual-payment-title"
-              title={
-                paysDebt
-                  ? "Comprobante en revisión"
-                  : reviewNotice && reviewNotice.kind !== "review"
-                    ? "No pudimos acreditar tu recarga"
-                    : t("manualModal.pendingTitle")
-              }
-              description={
-                paysDebt
-                  ? "Gerencia revisa la transferencia y, al aceptarla, baja la deuda de este mes. No acredita cartera."
-                  : reviewNotice && reviewNotice.kind !== "review"
-                    ? "Tu comprobante pasó a verificación de soporte. No vuelvas a pagar."
-                    : t(payMethod === "binance" ? "manualModal.binanceReview" : "manualModal.pendingDesc")
-              }
-              identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
-              identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
-              identityDescription={t(payMethod === "binance" ? "manualModal.binanceSubtitle" : "manualModal.subtitle")}
-              steps={manualSteps}
-              currentStep={modalStepIndex}
-              onClose={resetAndClose}
-            />
-            <div className="p-5 sm:p-6">
-              {reviewNotice && !paysDebt ? (
-                <VoucherReviewCard notice={reviewNotice} />
-              ) : (
-                <div className="flex items-start gap-4 rounded-card bg-warn-bg p-4 text-warn-fg">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-warn-bg">
-                    <ClockIcon />
-                  </span>
-                  <p className="pt-1 text-[13px] leading-5">{pendingMessage}</p>
-                </div>
-              )}
-              <PaymentModalFooter>
-                <Button
-                  className="h-11 w-full rounded-box bg-accent px-6 hover:bg-accent-btn-hover sm:w-auto"
-                  onClick={resetAndClose}
-                >
-                  {t("manualModal.understood")}
-                </Button>
-              </PaymentModalFooter>
-            </div>
-          </>
-        ) : null}
-      </div>
-    </div>,
+      {step === "pending" ? (
+        <>
+          <PaymentModalHeader
+            titleId="manual-payment-title"
+            title={
+              paysDebt
+                ? "Comprobante en revisión"
+                : reviewNotice && reviewNotice.kind !== "review"
+                  ? "No pudimos acreditar tu recarga"
+                  : t("manualModal.pendingTitle")
+            }
+            description={
+              paysDebt
+                ? "Gerencia revisa la transferencia y, al aceptarla, baja la deuda de este mes. No acredita cartera."
+                : reviewNotice && reviewNotice.kind !== "review"
+                  ? "Tu comprobante pasó a verificación de soporte. No vuelvas a pagar."
+                  : t(payMethod === "binance" ? "manualModal.binanceReview" : "manualModal.pendingDesc")
+            }
+            {...methodHeader}
+          />
+          <PaymentDialogBody>
+            {reviewNotice && !paysDebt ? (
+              <VoucherReviewCard notice={reviewNotice} />
+            ) : (
+              <PaymentOutcome tone="warn" icon="clock">
+                {pendingMessage}
+              </PaymentOutcome>
+            )}
+          </PaymentDialogBody>
+          <PaymentDialogFooter>
+            <Button className="w-full sm:w-auto" onClick={resetAndClose}>
+              {t("manualModal.understood")}
+            </Button>
+          </PaymentDialogFooter>
+        </>
+      ) : null}
+    </PaymentDialogFrame>,
     document.body,
+  );
+}
+
+/** Dato de la cuenta de destino con su botón para copiarlo. */
+function BankDataRow({
+  label,
+  value,
+  copyLabel,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  copyLabel: string;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-ink-2">{label}</p>
+        <p className="num mt-0.5 break-all text-sm font-semibold text-ink">{value}</p>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onCopy}
+        aria-label={`${copyLabel}: ${label}`}
+      >
+        <PanelIcon name="copy" />
+        {copyLabel}
+      </Button>
+    </div>
   );
 }

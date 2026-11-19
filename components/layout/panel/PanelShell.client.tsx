@@ -254,7 +254,7 @@ export function PanelShell({
     go,
   };
 
-  const fullBleed = pathname === routes.linksDeuda;
+  // El asistente ocupa el alto del marco con su propia conversación.
   const flush = pathname === routes.assistant;
 
   return (
@@ -281,13 +281,7 @@ export function PanelShell({
           <main
             id="contenido"
             tabIndex={-1}
-            className={
-              fullBleed
-                ? "app-content flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden p-4"
-                : flush
-                  ? "app-content w-full min-w-0 flex-1"
-                  : "app-content panel-main"
-            }
+            className={flush ? "app-content w-full min-w-0 flex-1" : "app-content panel-main"}
           >
             {error ? (
               <p role="alert" className="mb-4 rounded-box border border-danger-line bg-danger-bg px-3 py-2.5 text-[13px] text-danger-fg">

@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/format-money";
 import type { summarizePaymentAccounts } from "@/lib/sort/payment-accounts";
+import { FlushStat, FlushStats } from "./PaymentsFlushStats";
 
 type Summary = ReturnType<typeof summarizePaymentAccounts>;
 
@@ -13,6 +15,8 @@ interface PaymentsGerenteAccountsSummaryProps {
   liveCupoTotalUsd?: number | null;
   liveMetricsLoading?: boolean;
   lastUpdatedAt?: string | null;
+  /** `band`: franja dentro de una tarjeta (por defecto). `standalone`: suelto sobre la tabla. */
+  variant?: "band" | "standalone";
 }
 
 export function PaymentsGerenteAccountsSummary({
@@ -22,6 +26,7 @@ export function PaymentsGerenteAccountsSummary({
   liveCupoTotalUsd = null,
   liveMetricsLoading = false,
   lastUpdatedAt,
+  variant = "band",
 }: PaymentsGerenteAccountsSummaryProps) {
   const t = useTranslations("payments");
   const creditHint = (() => {
@@ -66,7 +71,6 @@ export function PaymentsGerenteAccountsSummary({
           : liveCashTotalUsd != null
             ? t("gerenteSummary.cash", { amount: formatMoney(liveCashTotalUsd) })
             : t("gerenteSummary.cashCupoShort"),
-      accent: true,
     },
     {
       label: t("gerenteSummary.assigned"),
@@ -91,13 +95,11 @@ export function PaymentsGerenteAccountsSummary({
   ];
 
   return (
-    <div className="border-b border-[var(--auth-border)] bg-field px-3 py-3 sm:px-5">
-      <div className="flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-3">
-          {t("gerenteSummary.pulse")}
-        </p>
+    <div className={cn(variant === "band" ? "border-b border-line px-4 py-3.5 sm:px-5" : "mb-4")}>
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
+        <p className="eyebrow">{t("gerenteSummary.pulse")}</p>
         {lastUpdatedAt ? (
-          <p className="text-[10px] text-ink-3">
+          <p className="text-xs text-ink-3">
             {t("gerenteSummary.updated", {
               time: new Date(lastUpdatedAt).toLocaleTimeString(undefined, {
                 hour: "2-digit",
@@ -107,35 +109,26 @@ export function PaymentsGerenteAccountsSummary({
           </p>
         ) : null}
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-1.5 sm:gap-2 sm:grid-cols-4">
+      <FlushStats
+        label={t("gerenteSummary.pulse")}
+        busy={liveMetricsLoading}
+        className="grid-cols-2 lg:grid-cols-4"
+      >
         {items.map((item) => (
-          <div
+          <FlushStat
             key={item.label}
-            className="min-w-0 rounded-lg border border-[rgb(20_18_16_/_0.06)] bg-surface px-2.5 py-2 sm:px-3"
-          >
-            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-ink-3 sm:text-[10px]">
-              {item.label}
-            </p>
-            <p
-              className={`mt-0.5 truncate text-[14px] font-semibold tabular-nums tracking-[-0.02em] sm:text-[15px] ${
-                item.warn
-                  ? "text-accent-text"
-                  : item.accent
-                    ? "text-ink"
-                    : item.muted
-                      ? "text-ink-2"
-                      : "text-ink"
-              }`}
-            >
-              {item.value}
-            </p>
-            <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-ink-3 sm:line-clamp-none">
-              <span className="sm:hidden">{item.hintMobile}</span>
-              <span className="hidden sm:inline">{item.hint}</span>
-            </p>
-          </div>
+            label={item.label}
+            value={item.value}
+            valueClassName={item.warn ? "text-accent-text" : item.muted ? "text-ink-2" : undefined}
+            sub={
+              <>
+                <span className="sm:hidden">{item.hintMobile}</span>
+                <span className="hidden sm:inline">{item.hint}</span>
+              </>
+            }
+          />
         ))}
-      </div>
+      </FlushStats>
     </div>
   );
 }

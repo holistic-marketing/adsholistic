@@ -1,18 +1,19 @@
 "use client";
+
+import { PageHeader } from "@/components/ui/PageHeader";
+import { ToneBadge } from "@/components/ui/PanelKit";
 import { CreditReview } from "./CreditReview.client";
-import styles from "./Simulator.module.css";
 
 export function BusinessSimulator() {
-  return <div className={styles.shell}>
-    <header className={styles.pageHeader}>
-      <div><h1>Simulador de negocio</h1><p>Evalúa el fee o un crédito de un cliente antes de decidir.</p></div>
-      <span className={styles.simulationLabel}>Solo simulación · no modifica acuerdos</span>
-    </header>
-    <ol className={styles.steps} aria-label="Cómo usar el simulador">
-      <li><span>1</span> Elige un cliente</li>
-      <li><span>2</span> Define la propuesta</li>
-      <li><span>3</span> Revisa el resultado</li>
-    </ol>
-    <CreditReview />
-  </div>;
+  return (
+    <>
+      <PageHeader
+        eyebrow="Decisiones por cliente"
+        title="Simulador de negocio"
+        lede="Evalúa el fee o un crédito de un cliente antes de decidir."
+        aside={<ToneBadge tone="neutral">Solo simulación · no modifica acuerdos</ToneBadge>}
+      />
+      <CreditReview />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import { listRealProfitVoucherReviewsForStaff } from "@/services/payments.service";
 import { ManualVoucherReviewSection } from "@/features/payments/components/ManualVoucherReviewSection.client";
+import { ReviewQueueEmpty } from "./ReviewQueueEmpty";
 
 interface RealProfitVoucherReviewHostProps {
   staffMode: boolean;
@@ -24,20 +25,16 @@ export async function RealProfitVoucherReviewHost({
 
   if (pending.length === 0) {
     return (
-      <section
+      <ReviewQueueEmpty
         id="comprobantes-profit"
-        className="rounded-card border border-dashed border-[var(--auth-divider)] px-4 py-10 text-center"
-        aria-label="Sin boletas Profit"
-      >
-        <p className="text-sm font-medium text-[var(--auth-text)]">
-          {scope === "cliente"
+        label="Sin boletas Profit"
+        title={
+          scope === "cliente"
             ? `Sin pagos Real Profit pendientes de ${clienteName?.trim() || "este cliente"}`
-            : "Sin pagos Real Profit pendientes"}
-        </p>
-        <p className="mt-1 text-sm text-[var(--auth-text-muted)]">
-          Solo aparecen depósitos de $20 COD con voucher por aceptar o rechazar.
-        </p>
-      </section>
+            : "Sin pagos Real Profit pendientes"
+        }
+        description="Solo aparecen depósitos de $20 COD con voucher por aceptar o rechazar."
+      />
     );
   }
 

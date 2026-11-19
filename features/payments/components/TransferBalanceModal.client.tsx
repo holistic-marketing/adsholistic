@@ -6,11 +6,21 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Input";
+import { Note, PropList, ToneBadge } from "@/components/ui/PanelKit";
 import { apiClient, ApiClientError } from "@/lib/api/api-client.client";
 import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import type { AdAccountLiveMetricsClient } from "@/features/ad-accounts/hooks/useAdAccountLiveMetrics";
 import type { PaymentAccountAllocation } from "@/types/payment";
+import {
+  PaymentAmountInput,
+  PaymentDialogBody,
+  PaymentDialogFooter,
+  PaymentDialogFrame,
+  PaymentDialogHeader,
+  PaymentFieldHint,
+  PaymentFieldLabel,
+} from "./PaymentDialog";
 
 interface TransferBalanceModalProps {
   sourceAccount: PaymentAccountAllocation | null;
@@ -187,58 +197,60 @@ function TransferBalanceModalBody({
     }
   }
 
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[var(--ui-scrim)] backdrop-blur-sm"
-        aria-label={t("transferModal.closeAria")}
-        onClick={resetAndClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="transfer-balance-title"
-        className="relative max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-md overflow-y-auto rounded-card border border-[var(--border-subtle)] bg-surface p-5 shadow-2xl sm:p-6"
-      >
-        <h2
-          id="transfer-balance-title"
-          className="text-lg font-semibold text-[var(--foreground)]"
-        >
-          {clientSelfService
-            ? t("transferModal.titleLong")
-            : t("transferModal.title")}
-        </h2>
-        <p className="mt-1 text-sm text-[var(--admin-text-muted,#64748b)]">
-          {clientSelfService
-            ? t("transferModal.bodyClient")
-            : t("transferModal.bodyStaff")}
-        </p>
+  const closeLabel = t("transferModal.closeAria");
 
-        <div className="mt-5 rounded-box border border-[var(--border-subtle)] bg-[var(--surface-soft)] px-4 py-3">
-          <p className="text-xs text-[var(--admin-text-muted,#64748b)]">
-            {t("transferModal.from")}
-          </p>
-          <p className="mt-0.5 break-words text-sm font-semibold text-[var(--foreground)]">
-            {sourceAccount.name}
-          </p>
-          {sourceAccount.bmLabel ? (
-            <span className="mt-1.5 inline-flex rounded-md bg-field px-1.5 py-0.5 text-[10px] font-semibold text-info-fg ring-1 ring-info-line">
-              {sourceAccount.bmLabel}
-            </span>
-          ) : null}
-          <p className="mt-1 text-xs tabular-nums text-[var(--admin-text-muted,#64748b)]">
-            {t("transferModal.transferable")}: {formatMoney(maxAmount)}
-          </p>
+  return createPortal(
+    <PaymentDialogFrame
+      onDismiss={resetAndClose}
+      dismissLabel={closeLabel}
+      labelledBy="transfer-balance-title"
+    >
+      <PaymentDialogHeader
+        titleId="transfer-balance-title"
+        title={
+          clientSelfService
+            ? t("transferModal.titleLong")
+            : t("transferModal.title")
+        }
+        description={
+          clientSelfService
+            ? t("transferModal.bodyClient")
+            : t("transferModal.bodyStaff")
+        }
+        onClose={resetAndClose}
+        closeLabel={closeLabel}
+      />
+
+      <PaymentDialogBody className="space-y-4">
+        <div>
+          <PropList
+            items={[
+              {
+                label: t("transferModal.from"),
+                value: (
+                  <span className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                    <span className="break-words">{sourceAccount.name}</span>
+                    {sourceAccount.bmLabel ? (
+                      <ToneBadge tone="info">{sourceAccount.bmLabel}</ToneBadge>
+                    ) : null}
+                  </span>
+                ),
+              },
+              {
+                label: t("transferModal.transferable"),
+                value: <span className="num">{formatMoney(maxAmount)}</span>,
+              },
+            ]}
+          />
           {sourceLiveUsd != null &&
           Math.abs(sourceLiveUsd - Number(sourceAccount.balance)) > 0.5 ? (
-            <p className="mt-0.5 text-[11px] text-ink-3">
+            <p className="num mt-2 text-xs text-ink-3">
               {t("transferModal.holisticAssigned", {
                 amount: formatMoney(sourceAccount.balance),
               })}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-warn-fg">
+          <p className="mt-2 text-xs text-warn-fg">
             {t("transferModal.statusPrefix", {
               status:
                 sourceAccount.status === "disabled"
@@ -248,21 +260,15 @@ function TransferBalanceModalBody({
           </p>
         </div>
 
-        <div className="mt-5">
-          <label
-            htmlFor="transfer-dest"
-            className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]"
-          >
+        <div>
+          <PaymentFieldLabel htmlFor="transfer-dest">
             {t("transferModal.to")}
-          </label>
+          </PaymentFieldLabel>
           {destinationOptions.length === 0 ? (
-            <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg">
-              {t("transferModal.noTarget")}
-            </p>
+            <Note tone="warn">{t("transferModal.noTarget")}</Note>
           ) : (
-            <select
+            <Select
               id="transfer-dest"
-              className="w-full rounded-lg border border-[var(--border-subtle)] bg-surface px-3 py-2.5 text-sm text-[var(--foreground)]"
               value={toAccountId}
               onChange={(e) => setToAccountId(e.target.value)}
             >
@@ -282,33 +288,32 @@ function TransferBalanceModalBody({
                   </option>
                 );
               })}
-            </select>
+            </Select>
           )}
           {destAccount ? (
-            <p className="mt-1.5 break-all font-mono text-[11px] text-ink-2">
+            <PaymentFieldHint className="break-all font-mono">
               adv {destAccount.externalAccountId?.trim() || "—"}
-            </p>
+            </PaymentFieldHint>
           ) : null}
         </div>
 
-        <div className="mt-5">
-          <label
-            htmlFor="transfer-amount"
-            className="mb-1.5 block text-xs font-medium text-[var(--admin-text-muted,#64748b)]"
-          >
+        <div>
+          <PaymentFieldLabel htmlFor="transfer-amount">
             {t("transferModal.amountLabel")}
-          </label>
-          <Input
+          </PaymentFieldLabel>
+          <PaymentAmountInput
             id="transfer-amount"
             type="number"
+            suffix="USD"
             min={0.01}
             max={maxAmount}
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            aria-invalid={error ? true : undefined}
             autoFocus
           />
-          <p className="mt-1.5 text-[12px] text-ink-2">
+          <PaymentFieldHint>
             {clientSelfService
               ? t("transferModal.maxLiveBalance", {
                   amount: formatMoney(maxAmount),
@@ -316,14 +321,14 @@ function TransferBalanceModalBody({
               : t("transferModal.maxLiveCupo", {
                   amount: formatMoney(maxAmount),
                 })}
-          </p>
+          </PaymentFieldHint>
         </div>
 
         {allowForceLedger ? (
-          <label className="mt-4 flex items-start gap-2 text-[12px] leading-5 text-ink-2">
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-box border border-line bg-field px-3 py-2.5 text-[13px] leading-snug text-ink-2">
             <input
               type="checkbox"
-              className="mt-0.5"
+              className="mt-0.5 size-4 shrink-0 accent-[var(--ui-accent-btn)]"
               checked={forceLedgerOnly}
               onChange={(e) => setForceLedgerOnly(e.target.checked)}
             />
@@ -335,37 +340,33 @@ function TransferBalanceModalBody({
         ) : null}
 
         {error ? (
-          <p
-            className="mt-3 rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[13px] leading-5 text-warn-fg"
-            role="alert"
-          >
-            {error}
-          </p>
+          <div role="alert">
+            <Note tone="warn">{error}</Note>
+          </div>
         ) : null}
         {success ? (
-          <p className="mt-3 text-xs text-ok-fg" role="status">
-            {success}
-          </p>
+          <div role="status">
+            <Note tone="ok" icon="check-circle">
+              {success}
+            </Note>
+          </div>
         ) : null}
+      </PaymentDialogBody>
 
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" className="h-11 w-full sm:h-9 sm:w-auto" onClick={resetAndClose} disabled={loading}>
-            {tCommon("close")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              loading || !isValid || destinationOptions.length === 0
-            }
-            className="h-11 w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-deep)] sm:h-9 sm:w-auto"
-          >
-            {loading
-              ? t("transferModal.transferring")
-              : t("transferModal.cta")}
-          </Button>
-        </div>
-      </div>
-    </div>,
+      <PaymentDialogFooter>
+        <Button variant="outline" onClick={resetAndClose} disabled={loading}>
+          {tCommon("close")}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={loading || !isValid || destinationOptions.length === 0}
+        >
+          {loading
+            ? t("transferModal.transferring")
+            : t("transferModal.cta")}
+        </Button>
+      </PaymentDialogFooter>
+    </PaymentDialogFrame>,
     document.body,
   );
 }

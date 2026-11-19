@@ -1,12 +1,11 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { routes } from "@/config/routes";
 import { getAppFormatter } from "@/lib/i18n/get-app-formatter";
-import {
-  CrmAsideStat,
-  CrmHeroButton,
-  CrmMetricRow,
-  CrmScopeHero,
-} from "@/components/dashboard/crm-ui";
+import { buttonClass } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { ToneBadge } from "@/components/ui/PanelKit";
 import { AdAccountsOpenCreateModalButton } from "./AdAccountsOpenCreateModalButton.client";
 import type { AdAccountsSummary } from "@/types/ad-account";
 
@@ -14,132 +13,81 @@ interface AdAccountsPageHeaderProps {
   summary: AdAccountsSummary;
   hecomScoped?: boolean;
   clienteName?: string;
-  clienteId?: string;
-  avatarUrl?: string | null;
   hideCreate?: boolean;
   enableTikTokCreate?: boolean;
-  /** Pestaña activa: en "meta" cambia el rótulo y oculta crear (mantenimiento). */
+  /** Pestaña activa: en "meta" cambia la bajada y oculta crear (mantenimiento). */
   platform?: "tiktok" | "meta";
 }
 
-function accountStatusHint(
-  summary: AdAccountsSummary,
-  t: Awaited<ReturnType<typeof getTranslations>>,
-  formatNumber: (value: number) => string,
-) {
-  const total = summary.totalAccounts;
-  const active = summary.activeAccounts;
-  const pending = summary.pendingSetup ?? 0;
-
-  if (total === 0) return t("header.noMapped");
-  if (pending === 0 && active === total) {
-    return t("header.allInCampaign");
-  }
-
-  const parts: string[] = [];
-  if (active > 0) {
-    parts.push(
-      t(active === 1 ? "header.activeOne" : "header.activeMany", {
-        count: formatNumber(active),
-      }),
-    );
-  }
-  if (pending > 0) {
-    parts.push(
-      t(pending === 1 ? "header.pendingOne" : "header.pendingMany", {
-        count: formatNumber(pending),
-      }),
-    );
-  }
-  return parts.length > 0 ? parts.join(" · ") : t("header.allInCampaign");
-}
-
+/* Encabezado v3 de «Cuentas publicitarias»: título, bajada, saldo al costado
+   y acciones (crear cuenta como acción principal). */
 export async function AdAccountsPageHeader({
   summary,
   hecomScoped = false,
   clienteName,
-  avatarUrl,
   hideCreate: hideCreateProp = false,
   enableTikTokCreate: enableTikTokCreateProp = false,
   platform = "tiktok",
 }: AdAccountsPageHeaderProps) {
   const isMeta = platform === "meta";
   const enableTikTokCreate = enableTikTokCreateProp && !isMeta;
-  const hideCreate = hideCreateProp || isMeta;
+  const showCreate = !(hideCreateProp || isMeta) || enableTikTokCreate;
   const t = await getTranslations("adAccounts");
   const { formatMoney, formatNumber } = await getAppFormatter();
-  const pending = summary.pendingSetup ?? 0;
-  const statusHint = accountStatusHint(summary, t, formatNumber);
+  const total = isMeta ? 0 : summary.totalAccounts;
+  const pending = isMeta ? 0 : summary.pendingSetup ?? 0;
 
-  const metricItems: Array<{
-    label: string;
-    value: string;
-    hint?: string;
-    emphasis?: "primary" | "default" | "muted";
-  }> = [
-    {
-      label: isMeta ? t("header.metaAccounts") : t("header.tiktokAccounts"),
-      value: formatNumber(isMeta ? 0 : summary.totalAccounts),
-      hint: isMeta ? t("header.metaNoAccounts") : statusHint,
-      emphasis: "primary",
-    },
-  ];
+  const lede = isMeta
+    ? t("header.metaScopedMeta")
+    : hecomScoped && clienteName
+      ? t("header.lede", { name: clienteName })
+      : t("header.metaPick");
 
-  if (pending > 0 && !isMeta) {
-    metricItems.push({
-      label: t("header.pending"),
-      value: formatNumber(pending),
-      hint: t("header.pendingHint"),
-      emphasis: "muted",
-    });
-  }
+  const asideDetail = isMeta
+    ? t("header.metaNoAccounts")
+    : total === 0
+      ? t("header.noMapped")
+      : t("header.activeOfTotal", { active: formatNumber(summary.activeAccounts), total });
 
   return (
-    <div className="space-y-4">
-      <CrmScopeHero
-        module={t("header.module")}
-        title={t("header.pageTitle")}
-        cliente={
-          hecomScoped && clienteName
-            ? { name: clienteName, avatarUrl }
-            : undefined
-        }
-        meta={
-          isMeta
-            ? t("header.metaScopedMeta")
-            : hecomScoped
-            ? enableTikTokCreate
-              ? t("header.metaScopedCreate")
-              : t("header.metaScoped")
-            : t("header.metaPick")
-        }
-        actions={
-          <>
-            <CrmHeroButton href={routes.payments}>
-              {t("header.goPayments")}
-            </CrmHeroButton>
-            <CrmHeroButton href={routes.overview} variant="secondary">
-              {t("header.goOverview")}
-            </CrmHeroButton>
-            {hideCreate && !enableTikTokCreate ? null : (
-              <AdAccountsOpenCreateModalButton className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--auth-border)] bg-surface px-4 text-[13px] font-semibold text-[var(--auth-text)] sm:w-auto">
-                {enableTikTokCreate
-                  ? t("header.createTikTok")
-                  : t("header.create")}
-              </AdAccountsOpenCreateModalButton>
-            )}
-          </>
-        }
-        aside={
-          <CrmAsideStat
-            label={t("header.assignedBalance")}
-            value={formatMoney(isMeta ? 0 : summary.assignedBalance)}
-            detail={isMeta ? t("header.metaNoAccounts") : statusHint}
-          />
-        }
-      />
-
-      <CrmMetricRow items={metricItems} />
-    </div>
+    <PageHeader
+      title={t("header.pageTitle")}
+      lede={lede}
+      aside={
+        <>
+          <span className="text-xs text-ink-2">{t("header.assignedBalance")}</span>
+          <b className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-ink tabular-nums">
+            {formatMoney(isMeta ? 0 : summary.assignedBalance)}
+          </b>
+          <span className="text-xs text-ink-2">{asideDetail}</span>
+          {pending > 0 ? (
+            <span className="mt-1.5" title={t("header.pendingHint")}>
+              <ToneBadge tone="warn" dot>
+                {t(pending === 1 ? "header.pendingOne" : "header.pendingMany", {
+                  count: formatNumber(pending),
+                })}
+              </ToneBadge>
+            </span>
+          ) : null}
+        </>
+      }
+      actions={
+        <>
+          <Link href={routes.overview} className={buttonClass("ghost")}>
+            {t("header.goOverview")}
+          </Link>
+          <Link href={routes.payments} className={buttonClass(showCreate ? "outline" : "primary")}>
+            <PanelIcon name="wallet" />
+            {t("header.goPayments")}
+          </Link>
+          {showCreate ? (
+            <AdAccountsOpenCreateModalButton className={buttonClass("primary")}>
+              <PanelIcon name="plus" />
+              {enableTikTokCreate ? t("header.createTikTok") : t("header.create")}
+            </AdAccountsOpenCreateModalButton>
+          ) : null}
+        </>
+      }
+    />
   );
 }

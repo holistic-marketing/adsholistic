@@ -1,7 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { FilterBar, Note, TabBar, ToneBadge } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 
 type AccountOpt = {
   id: string;
@@ -99,12 +105,12 @@ function CopyButton({
   value,
   label,
   copiedLabel,
-  dark,
+  variant = "outline",
 }: {
   value: string;
   label: string;
   copiedLabel: string;
-  dark?: boolean;
+  variant?: "primary" | "outline" | "ghost";
 }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -116,14 +122,81 @@ function CopyButton({
           setTimeout(() => setCopied(false), 1600);
         })
       }
-      className={
-        dark
-          ? "inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
-          : "inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface px-3 text-[12px] font-semibold text-ink transition hover:border-line-strong"
-      }
+      className={buttonClass(variant, "sm", "shrink-0")}
     >
+      <PanelIcon name="copy" />
       {copied ? copiedLabel : label}
     </button>
+  );
+}
+
+/** Cuenta para marcar (v3 «pick»): casilla con aspecto de botón. */
+function AccountPick({
+  name,
+  checked,
+  onChange,
+}: {
+  name: string;
+  checked: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <label className="relative max-w-full">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="peer absolute inset-0 m-0 cursor-pointer opacity-0"
+      />
+      <span
+        className={cn(
+          "flex h-8 max-w-full items-center gap-1.5 rounded-ctl border px-3 text-[13px] font-medium shadow-ctl peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--ui-focus)]",
+          checked ? "border-accent-line bg-accent-soft text-accent-text" : "border-line bg-field text-ink",
+        )}
+      >
+        {checked ? <PanelIcon name="check" className="size-3.5" /> : null}
+        <span className="truncate">{name}</span>
+      </span>
+    </label>
+  );
+}
+
+/** Bloque dentro de la tarjeta del píxel: título, explicación, acción y contenido. */
+function PixelSection({
+  title,
+  body,
+  action,
+  children,
+}: {
+  title: ReactNode;
+  body?: ReactNode;
+  action?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <section className="grid gap-3 border-t border-line pt-5 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 max-w-[68ch]">
+          <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">{title}</h3>
+          {body ? <p className="mt-1 text-[13px] leading-5 text-ink-2">{body}</p> : null}
+        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** Valor para copiar dentro de un recuadro (v3 «linkbox»). */
+function CopyBox({ label, value, children }: { label?: string; value: string; children: ReactNode }) {
+  return (
+    <div className="flex max-w-2xl items-center gap-2 rounded-ctl border border-line bg-field py-1 pl-3 pr-1">
+      {label ? <span className="shrink-0 text-xs text-ink-3">{label}</span> : null}
+      <code className="num min-w-0 flex-1 truncate text-[13px] font-semibold text-ink" title={value}>
+        {value}
+      </code>
+      {children}
+    </div>
   );
 }
 
@@ -438,126 +511,94 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
       )}`
     : "";
 
+  const snippet = selected ? snippetFor(selected.pixelCode) : "";
+
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-accent-text">
-            {t("module")}
-          </p>
-          <h1 className="mt-1 text-[1.55rem] font-bold tracking-[-0.035em] text-ink sm:text-[1.75rem]">
-            {clienteName || t("title")}
-          </h1>
-          <p className="mt-1 text-[13px] leading-5 text-ink-2">
-            {t("subtitle")}
-          </p>
-        </div>
-        {pixels.length > 0 && !showCreate ? (
-          <button
-            type="button"
-            onClick={() => {
-              setShowCreate(true);
-              setNotice(null);
-            }}
-            className="inline-flex h-10 items-center rounded-box border border-line bg-surface px-4 text-[13px] font-semibold text-ink transition hover:border-line-strong"
-          >
-            {t("newPixel")}
-          </button>
-        ) : null}
-      </header>
+    <div className="space-y-4 lg:space-y-5">
+      <PageHeader
+        eyebrow={clienteName || undefined}
+        title={t("module")}
+        lede={t("subtitle")}
+        actions={
+          pixels.length > 0 && !showCreate ? (
+            <button
+              type="button"
+              onClick={() => {
+                setShowCreate(true);
+                setNotice(null);
+              }}
+              className={buttonClass("outline", "md")}
+            >
+              {t("newPixel")}
+            </button>
+          ) : null
+        }
+      />
 
       {error ? (
-        <div
-          className="rounded-box border border-warn-line/80 bg-warn-bg px-4 py-3 text-[13px] font-medium text-warn-fg"
-          role="alert"
-        >
-          {error}
+        <div role="alert">
+          <Note tone="warn">{error}</Note>
         </div>
       ) : null}
       {notice ? (
-        <div
-          className="rounded-box border border-ok-line/80 bg-ok-bg px-4 py-3 text-[13px] font-medium text-ok-fg"
-          role="status"
-        >
-          {notice}
+        <div role="status">
+          <Note tone="ok" icon="check-circle">
+            {notice}
+          </Note>
         </div>
       ) : null}
 
       {loading && pixels.length === 0 ? (
-        <p className="rounded-card border border-line bg-surface px-5 py-8 text-center text-[13px] text-ink-3">
-          {tCommon("loading")}
-        </p>
+        <PanelCard aria-busy>
+          <p className="py-6 text-center text-[13px] text-ink-3">{tCommon("loading")}</p>
+        </PanelCard>
       ) : null}
 
       {creatorOpen && !loading ? (
-        <section className="rounded-card border border-line bg-surface p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-[1.1rem] font-bold tracking-[-0.02em] text-ink">
-                {pixels.length === 0 ? t("createFirstTitle") : t("createTitle")}
-              </h2>
-              <p className="mt-1 text-[13px] leading-5 text-ink-2">
-                {t("createBody")}
-              </p>
-            </div>
-            {pixels.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setShowCreate(false)}
-                className="text-[12px] font-semibold text-ink-3 hover:text-ink"
-              >
+        <PanelCard
+          title={pixels.length === 0 ? t("createFirstTitle") : t("createTitle")}
+          description={t("createBody")}
+          action={
+            pixels.length > 0 ? (
+              <button type="button" onClick={() => setShowCreate(false)} className={buttonClass("ghost", "sm")}>
                 {tCommon("cancel")}
               </button>
-            ) : null}
-          </div>
-
+            ) : null
+          }
+        >
           {accounts.length === 0 ? (
-            <p className="mt-4 rounded-box border border-dashed border-line bg-field px-4 py-5 text-[13px] text-ink-3">
-              {t("noAccounts")}
-            </p>
+            <Note tone="warn">{t("noAccounts")}</Note>
           ) : (
-            <>
-              <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
-                {t("accountsLabel")}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {accounts.map((a) => {
-                  const on = pickedIds.includes(a.advertiserId);
-                  return (
-                    <button
+            <div className="space-y-4">
+              <fieldset>
+                <legend className="mb-2 text-sm font-medium text-ink">{t("accountsLabel")}</legend>
+                <div className="flex flex-wrap gap-1.5">
+                  {accounts.map((a) => (
+                    <AccountPick
                       key={a.advertiserId}
-                      type="button"
-                      onClick={() => togglePicked(a.advertiserId)}
-                      aria-pressed={on}
-                      className={`max-w-full truncate rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                        on
-                          ? "border-accent bg-field text-ink"
-                          : "border-line bg-surface text-ink-3 hover:border-line-strong"
-                      }`}
-                    >
-                      {on ? "✓ " : ""}
-                      {a.name}
-                    </button>
-                  );
-                })}
-              </div>
+                      name={a.name}
+                      checked={pickedIds.includes(a.advertiserId)}
+                      onChange={() => togglePicked(a.advertiserId)}
+                    />
+                  ))}
+                </div>
+              </fieldset>
 
-              <label className="mt-5 block text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
-                {t("nameOptional")}
-                <input
-                  className="mt-1.5 w-full rounded-box border border-line bg-field px-3.5 py-2.5 text-[13px] font-medium normal-case tracking-normal text-ink outline-none transition focus:border-line-strong focus:bg-surface focus:ring-2 focus:ring-ink/8"
+              <label className="grid max-w-[460px] gap-1.5">
+                <span className="text-sm font-medium text-ink">{t("nameOptional")}</span>
+                <Input
                   value={pixelName}
                   onChange={(e) => setPixelName(e.target.value)}
                   placeholder={`${clienteName} · Pixel`}
                 />
               </label>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={() => void handleCreate()}
                   disabled={creating || syncing || pickedIds.length === 0}
-                  className="inline-flex h-11 items-center justify-center rounded-box bg-accent-btn px-5 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
+                  className={buttonClass("primary", "md")}
                 >
                   {creating ? t("creating") : t("createAction")}
                 </button>
@@ -565,309 +606,219 @@ export function PixelsPageClient({ clienteName }: { clienteName: string }) {
                   type="button"
                   onClick={() => void handleImport()}
                   disabled={creating || syncing || pickedIds.length === 0}
-                  className="text-[13px] font-semibold text-accent-text underline-offset-2 hover:underline disabled:opacity-50"
+                  className="text-[13px] font-medium text-accent-text underline-offset-[3px] hover:underline disabled:opacity-50"
                 >
                   {syncing ? t("importing") : t("importExisting")}
                 </button>
               </div>
-            </>
+            </div>
           )}
-        </section>
+        </PanelCard>
       ) : null}
 
       {pixels.length > 1 && accounts.length > 1 ? (
-        <label className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] font-semibold text-ink">
-          {t("filterLabel")}
-          <select
-            value={accountFilter ?? ""}
-            onChange={(e) => {
-              setAccountFilter(e.target.value || null);
-              setSelectedKey(null);
-              setLinkPickedRaw(null);
-            }}
-            className="h-10 min-w-0 max-w-full rounded-box border border-line bg-surface px-3 text-[13px] font-medium text-ink outline-none transition focus:border-line-strong focus:ring-2 focus:ring-ink/8"
-          >
-            <option value="">{t("filterAll")}</option>
-            {accounts.map((a) => (
-              <option key={a.advertiserId} value={a.advertiserId}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
-
-      {accountFilter && visiblePixels.length === 0 ? (
-        <p className="rounded-card border border-dashed border-line bg-field px-5 py-6 text-[13px] text-ink-2">
-          {t("filterEmpty")}
-        </p>
-      ) : null}
-
-      {visiblePixels.length > 1 ? (
-        <div className="flex flex-wrap gap-2" role="tablist">
-          {visiblePixels.map((p) => {
-            const active = selected?.key === p.key;
-            const fromShopify = /^tiktok pixel for shopify/i.test(p.name);
-            return (
-              <button
-                key={p.key}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => {
-                  setSelectedKey(p.key);
+        <FilterBar>
+          <label className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 text-[13px] font-medium text-ink-2">
+            {t("filterLabel")}
+            <span className="w-64 max-w-full">
+              <Select
+                value={accountFilter ?? ""}
+                onChange={(e) => {
+                  setAccountFilter(e.target.value || null);
+                  setSelectedKey(null);
                   setLinkPickedRaw(null);
                 }}
-                className={`flex max-w-full items-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                  active
-                    ? "border-accent-line bg-accent-soft text-accent-text"
-                    : "border-line bg-surface text-ink hover:border-line-strong"
-                }`}
               >
+                <option value="">{t("filterAll")}</option>
+                {accounts.map((a) => (
+                  <option key={a.advertiserId} value={a.advertiserId}>
+                    {a.name}
+                  </option>
+                ))}
+              </Select>
+            </span>
+          </label>
+        </FilterBar>
+      ) : null}
+
+      {accountFilter && visiblePixels.length === 0 ? <Note>{t("filterEmpty")}</Note> : null}
+
+      {visiblePixels.length > 1 ? (
+        <TabBar
+          label={t("title")}
+          value={selected?.key ?? ""}
+          onChange={(key) => {
+            setSelectedKey(key);
+            setLinkPickedRaw(null);
+          }}
+          tabs={visiblePixels.map((p) => ({
+            value: p.key,
+            label: (
+              <span className="inline-flex items-center gap-2">
                 <span
-                  className={`h-2 w-2 shrink-0 rounded-full ${
-                    p.events.length ? "bg-ok-solid" : "bg-warn-solid"
-                  }`}
+                  aria-hidden
+                  className={cn("size-2 shrink-0 rounded-full bg-[var(--t-solid)]", p.events.length ? "tone-ok" : "tone-warn")}
                 />
-                <span className="min-w-0 truncate">{p.name}</span>
-                <span
-                  className={`shrink-0 text-[11px] font-medium ${
-                    active ? "text-white/70" : "text-ink-3"
-                  }`}
-                >
-                  {fromShopify ? `${t("shopifyBadge")} · ` : ""}
+                <span className="max-w-[240px] truncate">{p.name}</span>
+                <span className="text-xs font-normal text-ink-3">
+                  {/^tiktok pixel for shopify/i.test(p.name) ? `${t("shopifyBadge")} · ` : ""}
                   {t("accountsCount", { count: p.advertiserIds.length })}
                 </span>
-              </button>
-            );
-          })}
-        </div>
+              </span>
+            ),
+          }))}
+        />
       ) : null}
 
       {selected ? (
-        <section className="rounded-card border border-line bg-surface p-5 sm:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="truncate text-[1.25rem] font-bold tracking-[-0.025em] text-ink">
-                {selected.name}
-              </h2>
-              <p className="mt-1 text-[13px] leading-5 text-ink-2">
-                {t("installBody")}
-              </p>
-            </div>
-            <a
-              href={emailHref}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover"
-            >
-              <span aria-hidden>✉</span>
+        <PanelCard
+          ruled
+          title={selected.name}
+          description={t("installBody")}
+          action={
+            <a href={emailHref} className={buttonClass("outline", "sm")}>
+              <PanelIcon name="send" />
               {t("emailInstructions")}
             </a>
-          </div>
-
-          <div className="mt-5 rounded-box bg-subtle px-4 py-4 sm:px-5">
-            <p className="text-[13.5px] font-bold text-ink">
-              {t("gettingStarted")}
-            </p>
-            <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
-              {t("gettingStartedBody")}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <p className="min-w-0 break-all text-[14px] font-bold text-ink">
-                Pixel ID:{" "}
-                <span className="font-mono tracking-wide">{selected.pixelCode}</span>
+          }
+        >
+          <div className="space-y-5">
+            <PixelSection title={t("gettingStarted")} body={t("gettingStartedBody")}>
+              <CopyBox label="Pixel ID" value={selected.pixelCode}>
+                <CopyButton value={selected.pixelCode} label={t("copy")} copiedLabel={t("copied")} variant="ghost" />
+              </CopyBox>
+              <p className="text-xs text-ink-3">
+                {t("linkedTo", { accounts: selected.advertiserIds.map(accountName).join(" · ") })}
               </p>
-              <CopyButton
-                value={selected.pixelCode}
-                label={t("copy")}
-                copiedLabel={t("copied")}
-              />
-            </div>
-            <p className="mt-2 text-[11.5px] text-ink-3">
-              {t("linkedTo", {
-                accounts: selected.advertiserIds.map(accountName).join(" · "),
-              })}
-            </p>
-          </div>
+            </PixelSection>
 
-          {unlinkedAccounts.length > 0 ? (
-            <div className="mt-4 rounded-box border border-accent-line bg-field p-4 sm:p-5">
-              <h3 className="text-[15px] font-bold text-ink">
-                {t("linkMoreTitle")}
-              </h3>
-              <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
-                {t("linkMoreBody")}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {unlinkedAccounts.map((a) => {
-                  const on = linkPicked.includes(a.advertiserId);
-                  return (
-                    <button
-                      key={a.advertiserId}
-                      type="button"
-                      onClick={() => toggleLinkPicked(a.advertiserId)}
-                      aria-pressed={on}
-                      className={`max-w-full truncate rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition ${
-                        on
-                          ? "border-accent bg-surface text-ink"
-                          : "border-line bg-surface text-ink-3 hover:border-line-strong"
-                      }`}
-                    >
-                      {on ? "✓ " : ""}
-                      {a.name}
-                    </button>
-                  );
-                })}
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleLinkMore()}
-                disabled={linking || linkPicked.length === 0}
-                className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
+            {unlinkedAccounts.length > 0 ? (
+              <PixelSection title={t("linkMoreTitle")} body={t("linkMoreBody")}>
+                <fieldset>
+                  <legend className="sr-only">{t("linkMoreTitle")}</legend>
+                  <div className="flex flex-wrap gap-1.5">
+                    {unlinkedAccounts.map((a) => (
+                      <AccountPick
+                        key={a.advertiserId}
+                        name={a.name}
+                        checked={linkPicked.includes(a.advertiserId)}
+                        onChange={() => toggleLinkPicked(a.advertiserId)}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+                <button
+                  type="button"
+                  onClick={() => void handleLinkMore()}
+                  disabled={linking || linkPicked.length === 0}
+                  className={buttonClass("primary", "sm", "justify-self-start")}
+                >
+                  {linking ? t("linkingMore") : t("linkMoreAction")}
+                </button>
+              </PixelSection>
+            ) : null}
+
+            <PixelSection
+              title={t("step1Title")}
+              body={t("step1Body")}
+              action={<CopyButton value={snippet} label={t("copyCode")} copiedLabel={t("copied")} variant="primary" />}
+            >
+              <pre
+                tabIndex={0}
+                aria-label={t("step1Title")}
+                className="max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-box border border-line bg-subtle px-3.5 py-3 font-mono text-xs leading-5 text-ink"
               >
-                {linking ? t("linkingMore") : t("linkMoreAction")}
-              </button>
-            </div>
-          ) : null}
+                {snippet}
+              </pre>
+            </PixelSection>
 
-          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-ink">
+            <PixelSection
+              title={
+                <>
+                  {t("step2Title")}
+                  <ToneBadge tone={selected.events.length ? "ok" : "warn"} dot>
+                    {selected.events.length ? t("eventsOn") : t("eventsOff")}
+                  </ToneBadge>
+                </>
+              }
+              body={t("step2Body")}
+              action={
+                <button
+                  type="button"
+                  onClick={() => void handleActivate()}
+                  disabled={activating}
+                  className={buttonClass(selected.events.length ? "outline" : "primary", "sm")}
+                >
+                  {activating ? t("activating") : selected.events.length ? t("reactivate") : t("activate")}
+                </button>
+              }
+            >
+              {selected.events.length ? (
+                <ul className="flex flex-wrap gap-1.5">
+                  {selected.events.map((ev) => (
+                    <li
+                      key={ev}
+                      className="num inline-flex h-6 items-center rounded-[6px] bg-subtle px-2 text-[11px] font-medium text-ink-2"
+                    >
+                      {ev}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </PixelSection>
+
+            <PixelSection
+              title={
+                <>
                   {t("tokenTitle")}
-                  <span className="rounded-md bg-subtle px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-2">
+                  <span className="inline-flex h-5 items-center rounded-[6px] bg-subtle px-[7px] text-[11px] font-medium text-ink-2">
                     {t("optional")}
                   </span>
-                </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
-                  {t("tokenBody")}
+                </>
+              }
+              body={t("tokenBody")}
+              action={
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateToken()}
+                  disabled={generating}
+                  className={buttonClass("outline", "sm")}
+                >
+                  {generating ? t("tokenGenerating") : activeToken ? t("tokenRegenerate") : t("tokenGenerate")}
+                </button>
+              }
+            >
+              {shownToken ? (
+                <Note tone="warn" title={t("tokenSaveNow")}>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <code className="num min-w-0 flex-1 break-all rounded-ctl border border-line bg-surface px-3 py-2 text-xs text-ink">
+                      {shownToken}
+                    </code>
+                    <CopyButton value={shownToken} label={t("copy")} copiedLabel={t("copied")} />
+                  </div>
+                </Note>
+              ) : activeToken ? (
+                <p className="text-xs text-ink-2">
+                  {t("tokenActive", {
+                    hint: activeToken.hint,
+                    date: new Date(activeToken.createdAt).toLocaleDateString(),
+                    events: activeToken.eventsSent,
+                  })}
                 </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleGenerateToken()}
-                disabled={generating}
-                className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50"
-              >
-                {generating
-                  ? t("tokenGenerating")
-                  : activeToken
-                    ? t("tokenRegenerate")
-                    : t("tokenGenerate")}
-              </button>
-            </div>
+              ) : null}
 
-            {shownToken ? (
-              <div className="mt-4 rounded-lg bg-subtle p-4">
-                <p className="text-[13px] font-bold text-ink">
-                  {t("tokenSaveNow")}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <code className="min-w-0 flex-1 break-all rounded-lg bg-surface px-3 py-2.5 font-mono text-[12.5px] text-ink-2">
-                    {shownToken}
-                  </code>
-                  <CopyButton value={shownToken} label={t("copy")} copiedLabel={t("copied")} />
+              {shownToken || activeToken ? (
+                <div className="grid gap-1.5">
+                  <p className="eyebrow">{t("tokenEndpoint")}</p>
+                  <CopyBox value={EVENTS_ENDPOINT}>
+                    <CopyButton value={EVENTS_ENDPOINT} label={t("copy")} copiedLabel={t("copied")} variant="ghost" />
+                  </CopyBox>
+                  <p className="text-xs leading-5 text-ink-3">{t("tokenEndpointHint")}</p>
                 </div>
-              </div>
-            ) : activeToken ? (
-              <p className="mt-3 text-[12px] text-ink-2">
-                {t("tokenActive", {
-                  hint: activeToken.hint,
-                  date: new Date(activeToken.createdAt).toLocaleDateString(),
-                  events: activeToken.eventsSent,
-                })}
-              </p>
-            ) : null}
-
-            {shownToken || activeToken ? (
-              <div className="mt-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-3">
-                  {t("tokenEndpoint")}
-                </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <code className="min-w-0 flex-1 break-all rounded-lg bg-subtle px-3 py-2.5 font-mono text-[12px] text-ink-2">
-                    {EVENTS_ENDPOINT}
-                  </code>
-                  <CopyButton value={EVENTS_ENDPOINT} label={t("copy")} copiedLabel={t("copied")} />
-                </div>
-                <p className="mt-2 text-[11.5px] leading-5 text-ink-3">
-                  {t("tokenEndpointHint")}
-                </p>
-              </div>
-            ) : null}
+              ) : null}
+            </PixelSection>
           </div>
-          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="text-[15px] font-bold text-ink">
-                  {t("step1Title")}
-                </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
-                  {t("step1Body")}
-                </p>
-              </div>
-              <CopyButton
-                value={snippetFor(selected.pixelCode)}
-                label={t("copyCode")}
-                copiedLabel={t("copied")}
-                dark
-              />
-            </div>
-            <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-subtle p-4 font-mono text-[11.5px] leading-5 text-ink-2">
-              {snippetFor(selected.pixelCode)}
-            </pre>
-          </div>
-
-          <div className="mt-4 rounded-box border border-line p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-ink">
-                  {t("step2Title")}
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                      selected.events.length
-                        ? "bg-ok-bg text-ok-fg"
-                        : "bg-warn-bg text-warn-fg"
-                    }`}
-                  >
-                    {selected.events.length ? t("eventsOn") : t("eventsOff")}
-                  </span>
-                </h3>
-                <p className="mt-1 text-[12.5px] leading-5 text-ink-2">
-                  {t("step2Body")}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void handleActivate()}
-                disabled={activating}
-                className={`inline-flex h-10 shrink-0 items-center justify-center rounded-lg px-4 text-[13px] font-semibold transition disabled:opacity-50 ${
-                  selected.events.length
-                    ? "border border-line bg-surface text-ink hover:border-line-strong"
-                    : "bg-accent-btn text-on-accent hover:bg-accent-btn-hover"
-                }`}
-              >
-                {activating
-                  ? t("activating")
-                  : selected.events.length
-                    ? t("reactivate")
-                    : t("activate")}
-              </button>
-            </div>
-            {selected.events.length ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {selected.events.map((ev) => (
-                  <span
-                    key={ev}
-                    className="rounded-md bg-subtle px-2 py-0.5 text-[11px] font-semibold text-ink-2"
-                  >
-                    {ev}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-        </section>
+        </PanelCard>
       ) : null}
     </div>
   );

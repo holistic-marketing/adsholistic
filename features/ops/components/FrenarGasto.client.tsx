@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import type { MonitorAccount, MonitorCliente } from "@/features/ops/types/prepago-monitor";
 
 type Result = {
@@ -78,111 +81,119 @@ export function FrenarGasto({ cliente, onDone }: { cliente: MonitorCliente; onDo
   }
 
   return (
-    <div className="rounded-card bg-surface p-4 ring-1 ring-danger-line">
+    <section aria-labelledby={`frenar-${cliente.id}`} className="rounded-card border border-danger-line bg-surface p-4 shadow-card sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-danger-fg">Frenar gasto</p>
-          <p className="mt-1 max-w-xl text-[12.5px] leading-5 text-ink-2">
+        <div className="min-w-0 flex-[1_1_240px]">
+          <h3 id={`frenar-${cliente.id}`} className="eyebrow text-danger-fg">
+            Frenar gasto
+          </h3>
+          <p className="mt-1 text-[13px] leading-5 text-ink-2">
             Quita saldo de sus cuentas en TikTok. En BM 10/30 baja el cupo; en BM 200/300 devuelve el cash al BM.
             Lo que pagó sigue a su favor en Hecom.
           </p>
         </div>
-        <p className="shrink-0 text-right text-[11px] text-ink-3">
+        <p className="shrink-0 text-right text-xs text-ink-3">
           Hoy puede gastar
-          <span className="block text-[15px] font-semibold tabular-nums text-ink">
+          <span className="num block text-[15px] font-semibold text-ink">
             {cliente.unlimitedAccounts ? "Sin tope" : usd(total)}
           </span>
         </p>
       </div>
 
-      <label className="mt-3 block">
-        <span className="text-[11.5px] font-medium text-ink-2">Motivo y quién lo ordenó (obligatorio)</span>
-        <input
+      <label className="mt-4 grid gap-1.5">
+        <span className="text-sm font-medium text-ink">Motivo y quién lo ordenó (obligatorio)</span>
+        <Input
           value={motivo}
           onChange={(e) => setMotivo(e.target.value)}
           maxLength={300}
           placeholder="Ej: Debe setiembre, ordenó gerencia"
-          className="mt-1 w-full rounded-box border border-line bg-field px-3 py-2 text-[12.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-accent focus:bg-surface"
         />
       </label>
 
-      <ul className="mt-3 divide-y divide-line rounded-box ring-1 ring-line">
+      <ul className="mt-3 rounded-box border border-line">
         {accounts.map((a) => {
           const banned = a.status === "banned";
           const key = a.advertiserId;
           return (
-            <li key={key} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5">
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 truncate text-[12.5px] font-semibold text-ink">
-                  <span className="rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] tabular-nums text-ink-2">BM{a.bm}</span>
+            <li
+              key={key}
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-3 py-2.5 last:border-b-0"
+            >
+              <div className="min-w-0 flex-[1_1_180px]">
+                <p className="flex min-w-0 items-center gap-1.5 text-[13px] font-semibold text-ink">
+                  <span className="panel-badge tone-neutral num shrink-0">BM{a.bm}</span>
                   <span className="truncate">{a.name}</span>
-                  {banned ? (
-                    <span className="rounded-md bg-subtle px-1.5 py-0.5 text-[10.5px] text-danger-fg">Castigada</span>
-                  ) : null}
+                  {banned ? <span className="panel-badge tone-danger shrink-0">Castigada</span> : null}
                 </p>
-                <p className="mt-0.5 text-[11.5px] text-ink-2">
+                <p className="mt-0.5 text-xs text-ink-2">
                   Puede gastar{" "}
-                  <span className="font-semibold tabular-nums text-ink">{a.unlimited ? "sin tope" : usd(a.spendableUsd)}</span>
+                  <span className="num font-semibold text-ink">{a.unlimited ? "sin tope" : usd(a.spendableUsd)}</span>
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
-                <input
-                  inputMode="decimal"
-                  aria-label={`Monto a bajar de ${a.name}`}
-                  value={amounts[key] ?? ""}
-                  onChange={(e) => setAmounts((prev) => ({ ...prev, [key]: e.target.value.replace(/[^\d.]/g, "") }))}
-                  placeholder="$"
-                  className="w-20 rounded-lg border border-line bg-field px-2 py-1.5 text-right text-[12.5px] tabular-nums outline-none focus:border-accent focus:bg-surface"
-                />
-                <button
-                  type="button"
-                  disabled={busy !== null}
-                  onClick={() => void run("bajar", a)}
-                  className="rounded-lg bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-40"
-                >
+                <span className="w-20">
+                  <Input
+                    inputMode="decimal"
+                    aria-label={`Monto a bajar de ${a.name}`}
+                    value={amounts[key] ?? ""}
+                    onChange={(e) => setAmounts((prev) => ({ ...prev, [key]: e.target.value.replace(/[^\d.]/g, "") }))}
+                    placeholder="$"
+                    className="num h-8! px-2! text-right"
+                  />
+                </span>
+                <Button variant="outline" size="sm" disabled={busy !== null} onClick={() => void run("bajar", a)}>
                   {busy === `bajar:${key}` ? "Bajando…" : "Bajar"}
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={busy !== null}
                   onClick={() => void run("cero", a)}
-                  className="rounded-lg bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-danger-fg ring-1 ring-danger-line hover:bg-hover disabled:opacity-40"
+                  className="text-danger-fg!"
                 >
                   {busy === `cero:${key}` ? "Aplicando…" : "Dejar en $0"}
-                </button>
+                </Button>
               </div>
             </li>
           );
         })}
       </ul>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] leading-4 text-ink-3">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <p className="min-w-0 flex-[1_1_220px] text-xs leading-4 text-ink-3">
           Congelar pausa sus campañas y deja todas sus cuentas en $0. Para habilitarlo otra vez, recárgale como siempre.
         </p>
-        <button
-          type="button"
+        <Button
+          variant="danger"
+          size="sm"
           disabled={busy !== null || cliente.accounts.length === 0}
           onClick={() => void run("congelar")}
-          className="shrink-0 rounded-full bg-danger-btn px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-danger-btn-hover disabled:opacity-40"
         >
           {busy === "congelar" ? "Congelando…" : "Congelar: no puede gastar más"}
-        </button>
+        </Button>
       </div>
 
-      {error ? <p className="mt-2 text-[12px] text-danger-fg">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="mt-2 flex items-start gap-1.5 text-xs text-danger-fg">
+          <PanelIcon name="alert" className="mt-px size-3.5 shrink-0" />
+          {error}
+        </p>
+      ) : null}
       {results ? (
-        <ul className="mt-3 space-y-1 rounded-box bg-field px-3 py-2.5 text-[12px] leading-5">
+        <ul className="mt-3 space-y-1 rounded-box border border-line bg-field px-3 py-2.5 text-xs leading-5">
           {results.map((r) => (
-            <li key={r.advertiserId} className={r.ok ? "text-ok-fg" : "text-danger-fg"}>
-              <span className="font-semibold">{r.ok ? "✓" : "✗"} {nameOf.get(r.advertiserId) ?? r.advertiserId}</span>
-              {r.ok && r.removedUsd > 0 ? ` · quitado ${usd(r.removedUsd)}` : ""}
-              {r.ok && r.leftUsd != null ? ` · queda ${usd(r.leftUsd)}` : ""} · {r.message}
+            <li key={r.advertiserId} className={`flex items-start gap-1.5 ${r.ok ? "text-ok-fg" : "text-danger-fg"}`}>
+              <PanelIcon name={r.ok ? "check" : "x"} className="mt-0.5 size-3.5 shrink-0" />
+              <span className="min-w-0">
+                <span className="font-semibold">{nameOf.get(r.advertiserId) ?? r.advertiserId}</span>
+                {r.ok && r.removedUsd > 0 ? ` · quitado ${usd(r.removedUsd)}` : ""}
+                {r.ok && r.leftUsd != null ? ` · queda ${usd(r.leftUsd)}` : ""} · {r.message}
+              </span>
             </li>
           ))}
         </ul>
       ) : null}
-    </div>
+    </section>
   );
 }
 

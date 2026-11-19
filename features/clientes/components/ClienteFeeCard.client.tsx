@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { Note } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 
 type Scope = "month" | "from_today";
 type Preview =
@@ -37,12 +42,10 @@ function limaMonth(offset = 0): string {
 const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 const pcts = (list: number[]) => (list.length ? list.map((p) => `${p}%`).join(" / ") : "sin %");
 
-const field =
-  "h-10 w-full rounded-box bg-field px-3 text-[14px] ring-1 ring-line focus:outline-none focus:ring-2 focus:ring-accent";
-const primary =
-  "inline-flex h-10 items-center justify-center rounded-box bg-accent-btn px-4 text-[13px] font-semibold text-on-accent transition hover:bg-accent-btn-hover disabled:opacity-50";
-const ghost =
-  "inline-flex h-10 items-center justify-center rounded-box bg-surface px-4 text-[13px] font-semibold text-ink-2 ring-1 ring-line hover:bg-field disabled:opacity-50";
+const SCOPES = [
+  ["month", "Un mes", "Cambia el cobro de ese mes"],
+  ["from_today", "Desde hoy", "Lo de antes no cambia"],
+] as const;
 
 /** Solo gerencia: cambiar el % del cliente para un mes o desde hoy, con vista previa e historial. */
 export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; currentFee: number | null }) {
@@ -123,39 +126,37 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
   }
 
   return (
-    <div className="rounded-card border border-line bg-surface p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-ink">Comisión (%)</h2>
-          <p className="text-[13px] text-ink-2">
-            Hoy se le cobra <strong className="text-ink">{fee != null ? `${fee}%` : "10% (sin % propio)"}</strong> sobre su gasto.
-          </p>
-        </div>
-        {open ? null : (
-          <button
-            type="button"
-            className={primary}
+    <PanelCard
+      title="Comisión (%)"
+      description={
+        <>
+          Hoy se le cobra <strong className="font-semibold text-ink">{fee != null ? `${fee}%` : "10% (sin % propio)"}</strong> sobre su gasto.
+        </>
+      }
+      action={
+        open ? null : (
+          <Button
+            size="sm"
             onClick={() => {
               setOpen(true);
               setDone(null);
             }}
           >
             Cambiar %
-          </button>
-        )}
-      </div>
-
-      {done ? <p className="mt-3 rounded-box bg-ok-bg px-3 py-2 text-[13px] text-ok-fg ring-1 ring-ok-line">{done}</p> : null}
+          </Button>
+        )
+      }
+    >
+      {done ? (
+        <Note tone="ok" icon="check-circle">
+          {done}
+        </Note>
+      ) : null}
 
       {open ? (
-        <div className="mt-4 space-y-3">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Desde cuándo">
-            {(
-              [
-                ["month", "Un mes", "Cambia el cobro de ese mes"],
-                ["from_today", "Desde hoy", "Lo de antes no cambia"],
-              ] as const
-            ).map(([value, title, hint]) => (
+            {SCOPES.map(([value, title, hint]) => (
               <button
                 key={value}
                 type="button"
@@ -165,21 +166,22 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
                   setScope(value);
                   reset();
                 }}
-                className={`rounded-xl px-3 py-2 text-left ring-1 transition ${
-                  scope === value ? "bg-field ring-2 ring-accent" : "bg-surface ring-line hover:ring-accent-line"
-                }`}
+                className={cn(
+                  "rounded-box border px-3.5 py-3 text-left transition-colors",
+                  scope === value ? "border-accent bg-accent-soft ring-1 ring-accent" : "border-line bg-surface hover:border-line-strong",
+                )}
               >
-                <span className="block text-[13px] font-semibold text-ink">{title}</span>
-                <span className="block text-[11px] text-ink-2">{hint}</span>
+                <b className="block text-sm font-semibold text-ink">{title}</b>
+                <small className="mt-0.5 block text-xs leading-snug text-ink-3">{hint}</small>
               </button>
             ))}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {scope === "month" ? (
-              <label className="block">
-                <span className="text-[12px] font-semibold text-ink-2">Mes</span>
-                <input
+              <label className="grid min-w-0 gap-1.5">
+                <span className="text-sm font-medium text-ink">Mes</span>
+                <Input
                   type="month"
                   value={month}
                   max={limaMonth(0)}
@@ -187,45 +189,46 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
                     setMonth(e.target.value);
                     reset();
                   }}
-                  className={`${field} mt-1`}
                 />
               </label>
             ) : null}
-            <label className="block">
-              <span className="text-[12px] font-semibold text-ink-2">Nuevo %</span>
-              <input
+            <label className="grid min-w-0 gap-1.5">
+              <span className="text-sm font-medium text-ink">Nuevo %</span>
+              <Input
                 inputMode="decimal"
                 value={pct}
                 placeholder="ej. 7"
+                className="num"
                 onChange={(e) => {
                   setPct(e.target.value.replace(/[^\d.,]/g, ""));
                   reset();
                 }}
-                className={`${field} mt-1`}
               />
             </label>
           </div>
 
           {preview ? (
-            <div className="space-y-2 rounded-box bg-field px-3 py-3 text-[13px] text-ink ring-1 ring-line">
+            <div className="space-y-2 rounded-box border border-line bg-field px-3.5 py-3 text-[13px] leading-relaxed text-ink">
               {preview.scope === "month" ? (
                 <>
                   <p>
-                    <strong>{monthLabel(preview.month)}</strong>: gasto {usd(preview.spend)} en {preview.rows} filas, hoy a {pcts(preview.currentFees)}.
+                    <strong className="font-semibold">{monthLabel(preview.month)}</strong>: gasto{" "}
+                    <span className="tabular-nums">{usd(preview.spend)}</span> en {preview.rows} filas, hoy a {pcts(preview.currentFees)}.
                   </p>
                   <p>
-                    Comisión del mes: {usd(preview.feeBefore)} → <strong>{usd(preview.feeAfter)}</strong> ({preview.feePercent}%).{" "}
+                    Comisión del mes: <span className="tabular-nums">{usd(preview.feeBefore)}</span> →{" "}
+                    <strong className="font-semibold tabular-nums">{usd(preview.feeAfter)}</strong> ({preview.feePercent}%).{" "}
                     {preview.delta === 0 ? "Sin cambio." : preview.delta > 0 ? `Le suma ${usd(preview.delta)}.` : `Le baja ${usd(-preview.delta)}.`}
                   </p>
                   {preview.rows === 0 ? <p className="text-warn-fg">Ese mes no tiene gasto registrado: no hay nada que cambiar.</p> : null}
                   {preview.pastMonth && preview.delta !== 0 ? (
-                    <p className="rounded-lg bg-warn-bg px-2 py-1.5 text-warn-fg ring-1 ring-warn-line">
+                    <Note tone="warn">
                       Ojo: si este mes ya se le cobró o ya lo pagó, su deuda cambia en {usd(Math.abs(preview.delta))}
                       {preview.delta > 0 ? " (le quedará debiendo eso)" : " (le quedará saldo a favor)"}.
-                    </p>
+                    </Note>
                   ) : null}
                   {preview.currentMonth ? (
-                    <p className="text-[12px] text-ink-2">
+                    <p className="text-xs text-ink-2">
                       Este mes sigue en curso: los días que falten entran con su % actual ({preview.clienteDefaultFee ?? 10}%). Si quieres que siga
                       así, cambia también «Desde hoy».
                     </p>
@@ -233,28 +236,28 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
                 </>
               ) : (
                 <p>
-                  Pasa de {pcts(preview.currentFees)} a <strong>{preview.feePercent}%</strong> en el cliente y sus {preview.accounts} cuenta(s). Lo
-                  gastado hasta ayer no cambia; el gasto de hoy en adelante y sus recargas usan {preview.feePercent}%.
+                  Pasa de {pcts(preview.currentFees)} a <strong className="font-semibold">{preview.feePercent}%</strong> en el cliente y sus{" "}
+                  {preview.accounts} cuenta(s). Lo gastado hasta ayer no cambia; el gasto de hoy en adelante y sus recargas usan{" "}
+                  {preview.feePercent}%.
                 </p>
               )}
             </div>
           ) : null}
 
-          {error ? <p className="rounded-box bg-warn-bg px-3 py-2 text-[13px] text-warn-fg ring-1 ring-warn-line">{error}</p> : null}
+          {error ? <Note tone="warn">{error}</Note> : null}
 
           <div className="flex flex-wrap gap-2">
             {preview && !(preview.scope === "month" && preview.rows === 0) ? (
-              <button type="button" className={primary} disabled={busy} onClick={() => void save()}>
+              <Button disabled={busy} onClick={() => void save()}>
                 {busy ? "Guardando…" : `Confirmar ${preview.feePercent}%`}
-              </button>
+              </Button>
             ) : (
-              <button type="button" className={primary} disabled={busy || !pct} onClick={() => void check()}>
+              <Button disabled={busy || !pct} onClick={() => void check()}>
                 {busy ? "Calculando…" : "Ver cómo queda"}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              className={ghost}
+            <Button
+              variant="outline"
               disabled={busy}
               onClick={() => {
                 setOpen(false);
@@ -263,27 +266,39 @@ export function ClienteFeeCard({ clienteId, currentFee }: { clienteId: string; c
               }}
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
 
       {history && history.length ? (
-        <div className="mt-4 border-t border-line pt-3">
-          <p className="text-[12px] font-semibold text-ink-2">Historial</p>
-          <ul className="mt-1 space-y-1 text-[12px] text-ink-2">
+        <div className={cn((open || done) && "mt-5 border-t border-line pt-4")}>
+          <h3 className="text-sm font-semibold text-ink">Historial</h3>
+          <ul className="mt-1">
             {history.map((h) => (
-              <li key={h.at}>
-                {new Date(h.at).toLocaleString("es-PE", { timeZone: "America/Lima", dateStyle: "short", timeStyle: "short" })} ·{" "}
-                <strong className="text-ink">
-                  {h.scope === "month" && h.month ? monthLabel(h.month) : "Desde hoy"}: {pcts(h.from)} → {h.feePercent}%
-                </strong>
-                {h.delta ? ` (${h.delta > 0 ? "+" : "−"}${usd(Math.abs(h.delta))})` : ""} · {h.by}
+              <li
+                key={h.at}
+                className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-line py-2.5 text-[13px] last:border-0"
+              >
+                <span className="min-w-0">
+                  <b className="font-semibold text-ink">
+                    {h.scope === "month" && h.month ? monthLabel(h.month) : "Desde hoy"}: {pcts(h.from)} → {h.feePercent}%
+                  </b>
+                  {h.delta ? (
+                    <span className="tabular-nums text-ink-2">{` (${h.delta > 0 ? "+" : "−"}${usd(Math.abs(h.delta))})`}</span>
+                  ) : null}
+                  <small className="block text-xs text-ink-3">{h.by}</small>
+                </span>
+                <span className="num shrink-0 text-xs text-ink-3">
+                  {new Date(h.at).toLocaleString("es-PE", { timeZone: "America/Lima", dateStyle: "short", timeStyle: "short" })}
+                </span>
               </li>
             ))}
           </ul>
         </div>
+      ) : history && !open && !done ? (
+        <p className="text-[13px] text-ink-3">Sin cambios de comisión registrados.</p>
       ) : null}
-    </div>
+    </PanelCard>
   );
 }

@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note, Segmented, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelMenu, PanelPopover, usePopover } from "@/components/ui/PanelPopover.client";
 import { cn } from "@/lib/cn";
 import type { ChatMessage } from "@/features/support/types/support.types";
 import { ChatConversation } from "@/features/support/components/ChatConversation";
@@ -516,242 +520,188 @@ export function GerenteSupportInbox() {
   }
 
   const headerActions = hasRealTicket ? (
-    <div className="flex items-center gap-2">
-      <details className="relative">
-        <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full text-lg font-bold text-white/80 hover:bg-surface/10 [&::-webkit-details-marker]:hidden" aria-label="Más acciones">•••</summary>
-        <div className="absolute right-0 top-11 z-30 w-48 overflow-hidden rounded-box border border-black/10 bg-surface p-1.5 text-ink shadow-xl">
-          {hasRealTicket ? (
-            <button type="button" disabled={clearingChat} onClick={() => { if (window.confirm("¿Borrar todos los mensajes de esta conversación?")) void handleClearChat(); }} className="block w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-danger-fg hover:bg-danger-bg">Borrar conversación</button>
-          ) : null}
-        </div>
-      </details>
-    </div>
+    <ChatMoreMenu
+      busy={clearingChat}
+      onClear={() => {
+        if (window.confirm("¿Borrar todos los mensajes de esta conversación?")) void handleClearChat();
+      }}
+    />
   ) : null;
 
+  if (workspace === "meetings") {
+    return (
+      <StaffMeetingsBoard
+        onBackToChats={() => setWorkspace("chats")}
+        onPending={setPendingMeetings}
+      />
+    );
+  }
+
   return (
-    <>
-      {workspace === "meetings" ? (
-        <>
-          <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-top))]" aria-hidden />
-          <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-subtle pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
-            <StaffMeetingsBoard
-              onBackToChats={() => setWorkspace("chats")}
-              onPending={setPendingMeetings}
-            />
-          </div>
-        </>
-      ) : null}
-      {workspace === "chats" ? (
-      <>
-      {/* Reserva altura en el flujo; el panel real va fixed pegado al sidebar. */}
-      <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-top))]" aria-hidden />
-      <div className="fixed inset-x-0 top-[calc(3.5rem+env(safe-area-inset-top))] bottom-0 z-[15] flex flex-col overflow-hidden border-t border-[rgb(15_23_42_/_0.08)] bg-surface pb-[env(safe-area-inset-bottom)] sm:top-[calc(4rem+env(safe-area-inset-top))] lg:left-[248px]">
-        <div className="flex min-h-0 flex-1">
-          {/* Lista de chats — columna izquierda tipo CRM */}
-          <aside
-            className={cn(
-              "flex w-full shrink-0 flex-col border-r border-[rgb(15_23_42_/_0.08)] bg-field lg:w-[22rem] xl:w-[24rem]",
-              mobileShowChat && "hidden lg:flex",
-            )}
-          >
-          <div className="shrink-0 border-b border-[rgb(15_23_42_/_0.08)] bg-surface px-3 py-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-accent-text">
-                  Soporte
-                </p>
-                <h1 className="text-[15px] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
-                  Chats
-                </h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setWorkspace("meetings")}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--brand-primary)] px-3 py-1.5 text-[11px] font-bold text-white"
-                >
-                  Reuniones
-                  {pendingMeetings > 0 ? (
-                    <span className="rounded-full bg-surface/20 px-1.5 py-0.5 tabular-nums">
-                      {pendingMeetings}
-                    </span>
-                  ) : null}
-                </button>
-                <span className="shrink-0 rounded-full bg-[var(--surface-soft)] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[var(--auth-text-muted)]">
-                  {filteredTickets.length}
-                  {unreadIds.size > 0 ? (
-                    <span className="ml-1.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-[var(--brand-primary)] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {unreadIds.size}
-                    </span>
-                  ) : null}
-                </span>
-              </div>
+    <section
+      aria-label="Chats de soporte"
+      className="grid h-[calc(100dvh-144px)] min-h-[460px] grid-rows-[minmax(0,1fr)] overflow-hidden rounded-card border border-line bg-surface shadow-card max-[959px]:h-[calc(100dvh-124px)] lg:grid-cols-[minmax(260px,340px)_minmax(0,1fr)]"
+    >
+      {/* Lista de chats */}
+      <aside
+        className={cn(
+          "flex min-h-0 min-w-0 flex-col lg:border-r lg:border-line",
+          mobileShowChat && "hidden lg:flex",
+        )}
+      >
+        <div className="shrink-0 px-4 pb-3 pt-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="eyebrow">Soporte</p>
+              <h1 tabIndex={-1} className="flex items-baseline gap-2 text-xl font-semibold tracking-[-0.02em] text-ink outline-none">
+                Chats
+                <span className="num text-xs font-normal text-ink-3">{filteredTickets.length}</span>
+              </h1>
             </div>
+            <button
+              type="button"
+              onClick={() => setWorkspace("meetings")}
+              className={buttonClass("primary", "sm")}
+            >
+              Reuniones
+              {pendingMeetings > 0 ? (
+                <span className="num rounded-full bg-on-accent/20 px-1.5 text-[11px] leading-[18px]">
+                  {pendingMeetings}
+                  <span className="sr-only"> por confirmar</span>
+                </span>
+              ) : null}
+            </button>
+          </div>
+          <label className="panel-search mt-3">
+            <span className="sr-only">Buscar chat</span>
+            <PanelIcon name="search" />
             <input
+              type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar chat…"
-              aria-label="Buscar chat"
-              className="mt-3 h-10 w-full rounded-box border border-[var(--auth-input-border)] bg-field px-3.5 text-[13px] text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:border-[var(--auth-accent)]/70 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-[var(--auth-accent)]/15"
+              placeholder="Buscar chat"
+              autoComplete="off"
+              spellCheck={false}
             />
-            <div className="mt-2 flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {FILTERS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setStatusFilter(item.id)}
-                  className={cn(
-                    "shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors",
-                    statusFilter === item.id
-                      ? "bg-[var(--brand-primary)] text-white"
-                      : "bg-[var(--surface-soft)] text-[var(--auth-text-muted)] hover:text-[var(--auth-text)]",
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {error ? (
-            <p className="mx-3 mt-2 rounded-lg border border-danger-line bg-danger-bg px-3 py-2 text-[12px] text-danger-fg">
-              {error}
-            </p>
+          </label>
+          <Segmented
+            label="Qué ver"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={FILTERS.map((item) => ({ value: item.id, label: item.label }))}
+            block
+            className="mt-2.5"
+          />
+          {unreadIds.size > 0 ? (
+            <ToneBadge tone="accent" dot className="mt-2.5">
+              {unreadIds.size} sin leer
+            </ToneBadge>
           ) : null}
+        </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {loading ? (
-              <p className="px-4 py-10 text-center text-[13px] text-[var(--auth-text-muted)]">
-                Cargando clientes…
-              </p>
-            ) : filteredTickets.length === 0 ? (
-              <div className="flex flex-col items-center px-6 py-14 text-center">
-                <span
-                  aria-hidden
-                  className="flex h-14 w-14 items-center justify-center rounded-card bg-surface text-2xl shadow-sm ring-1 ring-black/5"
-                >
-                  {q.trim() ? "🔍" : "💬"}
-                </span>
-                <p className="mt-4 text-[14px] font-bold text-[var(--auth-text)]">
-                  {q.trim()
-                    ? "Sin resultados"
-                    : statusFilter === "chats"
-                      ? "Todavía no hay chats"
-                      : "No hay contactos"}
-                </p>
-                <p className="mt-1.5 max-w-[16rem] text-[12px] leading-relaxed text-[var(--auth-text-muted)]">
-                  {q.trim()
-                    ? "Prueba con otro nombre o con un pedazo del último mensaje."
-                    : statusFilter === "chats"
-                      ? "Cuando un cliente escriba, el chat aparece acá para cualquier gerente."
-                      : "En Contactos puedes abrir un chat nuevo."}
-                </p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-[rgb(15_23_42_/_0.06)]">
-                {filteredTickets.map((ticket) => {
-                  const active = ticket.id === selectedId;
-                  const name = clientLabel(ticket);
-                  const unread = unreadIds.has(ticket.id);
-                  return (
-                    <li key={ticket.id}>
-                      <button
-                        type="button"
-                        onClick={() => void openTicket(ticket.id)}
-                        className={cn(
-                          "relative flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors",
-                          active
-                            ? "bg-[rgb(255_120_31_/_0.1)]"
-                            : unread
-                              ? "bg-[rgb(255_120_31_/_0.06)] hover:bg-[rgb(255_120_31_/_0.1)]"
-                              : "hover:bg-surface",
-                        )}
-                      >
-                        {unread ? (
-                          <span
-                            className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[var(--brand-primary)] shadow-[0_0_0_3px_rgb(255_120_31_/_0.25)]"
-                            aria-label="Nuevo mensaje"
-                          />
-                        ) : null}
-                        <HecomClienteAvatar
-                          name={name}
-                          avatarUrl={ticket.avatarUrl}
-                          size="md"
-                          className="h-12 w-12 text-[13px] shadow-sm ring-2 ring-white"
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-baseline justify-between gap-2">
-                            <span
-                              className={cn(
-                                "truncate text-[14px] text-[var(--auth-text)]",
-                                unread ? "font-extrabold" : "font-bold",
-                              )}
-                            >
-                              {name}
-                            </span>
-                            <span
-                              className={cn(
-                                "shrink-0 text-[10px] tabular-nums",
-                                unread
-                                  ? "font-bold text-[var(--brand-primary)]"
-                                  : "text-[var(--auth-text-soft)]",
-                              )}
-                            >
-                              {formatInboxListTime(
-                                ticket.lastMessageAt ??
-                                  ticket.updatedAt ??
-                                  ticket.createdAt,
-                              )}
-                            </span>
-                          </span>
-                          <span
-                            className={cn(
-                              "mt-0.5 block truncate text-[12px]",
-                              unread
-                                ? "font-semibold text-[var(--auth-text)]"
-                                : "text-[var(--auth-text-muted)]",
-                            )}
-                          >
-                            {ticket.lastMessagePreview?.trim() ||
-                              (ticket.hasHolisticAccount === false
-                                ? "Sin cuenta Holistic"
-                                : "Sin mensajes")}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        </aside>
+        {error ? (
+          <Note tone="danger" className="mx-4 mb-3">
+            {error}
+          </Note>
+        ) : null}
 
-        {/* Panel de conversación */}
-        <section
-          className={cn(
-            "min-w-0 flex-1 bg-subtle",
-            !mobileShowChat && "hidden lg:flex lg:flex-col",
-            mobileShowChat && "flex flex-col",
-          )}
-        >
-          {!selectedId ? (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center bg-subtle px-8 text-center">
-              <p className="text-[17px] font-bold tracking-[-0.02em] text-ink">
-                Chats de soporte
-              </p>
-              <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-2">
-                Elige un chat. Cualquier gerente puede leer y responder. Si ya
-                lo abrieron, queda leído para todos.
-              </p>
-              {unreadIds.size > 0 ? (
-                <p className="mt-4 rounded-full bg-[var(--brand-primary)] px-4 py-1.5 text-[12px] font-bold text-white shadow-sm">
-                  {unreadIds.size} sin leer
-                </p>
-              ) : null}
-            </div>
+        <div className="ui-scroll min-h-0 flex-1 overflow-y-auto border-t border-line">
+          {loading ? (
+            <p role="status" className="px-4 py-10 text-center text-[13px] text-ink-2">
+              Cargando clientes…
+            </p>
+          ) : filteredTickets.length === 0 ? (
+            <EmptyState
+              icon={q.trim() ? "search" : "chat"}
+              title={
+                q.trim()
+                  ? "Sin resultados"
+                  : statusFilter === "chats"
+                    ? "Todavía no hay chats"
+                    : "No hay contactos"
+              }
+              description={
+                q.trim()
+                  ? "Prueba con otro nombre o con un pedazo del último mensaje."
+                  : statusFilter === "chats"
+                    ? "Cuando un cliente escriba, el chat aparece aquí para cualquier gerente."
+                    : "En Contactos puedes abrir un chat nuevo."
+              }
+            />
           ) : (
+            <ul>
+              {filteredTickets.map((ticket) => {
+                const active = ticket.id === selectedId;
+                const name = clientLabel(ticket);
+                const unread = unreadIds.has(ticket.id);
+                return (
+                  <li key={ticket.id}>
+                    <button
+                      type="button"
+                      onClick={() => void openTicket(ticket.id)}
+                      aria-current={active ? "true" : undefined}
+                      className={cn(
+                        "relative flex w-full items-center gap-2.5 border-b border-line px-4 py-2.5 text-left transition-colors",
+                        active
+                          ? "bg-active before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-r-[3px] before:bg-accent"
+                          : "hover:bg-field",
+                      )}
+                    >
+                      <HecomClienteAvatar name={name} avatarUrl={ticket.avatarUrl} size="sm" />
+                      <span className="grid min-w-0 flex-1 leading-snug">
+                        <b className={cn("truncate text-ink", unread ? "font-bold" : "font-semibold")}>{name}</b>
+                        <small className={cn("truncate text-xs", unread ? "font-medium text-ink" : "text-ink-3")}>
+                          {ticket.lastMessagePreview?.trim() ||
+                            (ticket.hasHolisticAccount === false
+                              ? "Sin cuenta Holistic"
+                              : "Sin mensajes")}
+                        </small>
+                      </span>
+                      <span className="grid shrink-0 justify-items-end gap-1">
+                        <small className={cn("num text-[11px]", unread ? "font-semibold text-accent-text" : "text-ink-3")}>
+                          {formatInboxListTime(
+                            ticket.lastMessageAt ??
+                              ticket.updatedAt ??
+                              ticket.createdAt,
+                          )}
+                        </small>
+                        {unread ? (
+                          <span className="size-2 rounded-full bg-accent">
+                            <span className="sr-only">Nuevo mensaje</span>
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </aside>
+
+      {/* Panel de conversación */}
+      <div
+        className={cn(
+          "min-h-0 min-w-0 flex-col bg-field",
+          mobileShowChat ? "flex" : "hidden lg:flex",
+        )}
+      >
+        {!selectedId ? (
+          <EmptyState
+            icon="inbox"
+            title="Chats de soporte"
+            description="Elige un chat. Cualquier gerente puede leer y responder; si alguien ya lo abrió, queda leído para todos."
+            action={
+              unreadIds.size > 0 ? (
+                <ToneBadge tone="accent">{unreadIds.size} sin leer</ToneBadge>
+              ) : null
+            }
+            className="m-auto"
+          />
+        ) : (
           <ChatConversation
+            appearance="panel"
             messages={messages}
             inputValue={inputValue}
             sending={sending}
@@ -774,12 +724,45 @@ export function GerenteSupportInbox() {
             composerDisabledReason="Este cliente aún no tiene cuenta Holistic para recibir el chat."
             emptyHint="Escribe para responder al cliente. Puedes pegar capturas o adjuntar archivos."
           />
-          )}
-        </section>
+        )}
       </div>
-      </div>
-      </>
-      ) : null}
+    </section>
+  );
+}
+
+/** Más acciones del chat abierto (por ahora, borrar la conversación). */
+function ChatMoreMenu({ busy, onClear }: { busy: boolean; onClear: () => void }) {
+  const { anchorRef, open, toggle, close } = usePopover();
+  return (
+    <>
+      <button
+        ref={anchorRef}
+        type="button"
+        onClick={toggle}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Más acciones"
+        className="inline-grid size-8 place-items-center rounded-ctl text-ink hover:bg-hover"
+      >
+        <PanelIcon name="more" />
+      </button>
+      <PanelPopover anchorRef={anchorRef} open={open} onClose={close} label="Más acciones" align="end">
+        <PanelMenu
+          label="Más acciones"
+          items={[
+            {
+              label: "Borrar conversación",
+              icon: "x-circle",
+              tone: "danger",
+              disabled: busy,
+              onSelect: () => {
+                close();
+                onClear();
+              },
+            },
+          ]}
+        />
+      </PanelPopover>
     </>
   );
 }

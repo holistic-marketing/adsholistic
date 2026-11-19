@@ -1,9 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { Note } from "@/components/ui/PanelKit";
 import { routes } from "@/config/routes";
 
 type Pending = { advertiserId: string; bmBucket: string; expected: string; live: string | null };
+
+/** Botón chico (28 px) para acciones dentro de filas y avisos: copiar, abrir, reintentar. */
+export const miniButton =
+  "inline-flex h-7 shrink-0 items-center gap-1 rounded-ctl border border-line bg-field px-2 text-xs font-medium text-ink shadow-ctl hover:border-line-strong hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50";
 
 /** Abre la cuenta en TikTok Ads Manager (ahí: Cuenta → Información de la cuenta → Nombre). */
 export function tiktokAccountUrl(advertiserId: string): string {
@@ -21,9 +28,10 @@ export function CopyNameButton({ text }: { text: string }) {
           setTimeout(() => setDone(false), 1200);
         });
       }}
-      className="rounded-md bg-surface px-2 py-0.5 text-[11px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field"
+      className={miniButton}
     >
-      {done ? "Copiado ✓" : "Copiar nombre"}
+      <PanelIcon name={done ? "check" : "copy"} className="size-3.5" />
+      {done ? "Copiado" : "Copiar nombre"}
     </button>
   );
 }
@@ -67,52 +75,50 @@ export function PendingTikTokNames() {
   }
 
   return (
-    <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="text-[14px] font-semibold text-ink">Nombres pendientes en TikTok (BM 10)</h3>
-          <p className="text-[12px] text-ink-2">
+    <section className="rounded-card border border-line bg-surface shadow-card" aria-labelledby="pending-names-title">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 pt-4 sm:px-6 sm:pt-5">
+        <div className="min-w-0">
+          <h2 id="pending-names-title" className="text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
+            Nombres pendientes en TikTok (BM 10)
+          </h2>
+          <p className="mt-0.5 text-xs text-ink-2">
             TikTok no deja cambiar el nombre de estas cuentas desde Ads Holistic. Cámbialo a mano y se quita solo de la lista.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="rounded-lg bg-surface px-3 py-1.5 text-[12px] font-semibold text-accent-text ring-1 ring-accent-line hover:bg-field disabled:opacity-50"
-        >
+        <button type="button" onClick={load} disabled={loading} className={buttonClass("outline", "sm")}>
+          <PanelIcon name="refresh" />
           {loading ? "Leyendo TikTok…" : "Revisar de nuevo"}
         </button>
       </div>
-      {error ? <p className="mt-2 text-[12px] text-warn-fg">{error}</p> : null}
-      {rows && !rows.length && !loading ? (
-        <p className="mt-3 text-[13px] text-ok-fg">✓ Todas las cuentas BM 10 de clientes ya tienen su nombre en TikTok.</p>
-      ) : null}
-      {rows && rows.length ? (
-        <ul className="mt-3 divide-y divide-[#f1ebe3]">
-          {rows.map((r) => (
-            <li key={r.advertiserId} className="flex flex-wrap items-center justify-between gap-2 py-2 text-[13px]">
-              <div className="min-w-0">
-                <p className="font-semibold text-ink">{r.expected}</p>
-                <p className="text-[12px] text-ink-2">
-                  En TikTok: “{r.live ?? "?"}” · <span className="font-mono">{r.advertiserId}</span>
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <CopyNameButton text={r.expected} />
-                <a
-                  href={tiktokAccountUrl(r.advertiserId)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-md px-2 py-0.5 text-[11px] font-semibold text-accent-text hover:bg-field"
-                >
-                  Abrir en TikTok ↗
-                </a>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      <div className="px-4 pb-4 pt-3 sm:px-6 sm:pb-6">
+        {error ? <Note tone="warn">{error}</Note> : null}
+        {rows && !rows.length && !loading ? (
+          <Note tone="ok" icon="check-circle">
+            Todas las cuentas BM 10 de clientes ya tienen su nombre en TikTok.
+          </Note>
+        ) : null}
+        {rows && rows.length ? (
+          <ul className="divide-y divide-line">
+            {rows.map((r) => (
+              <li key={r.advertiserId} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
+                <div className="min-w-0">
+                  <p className="font-semibold text-ink">{r.expected}</p>
+                  <p className="text-xs text-ink-2">
+                    En TikTok: “{r.live ?? "?"}” · <span className="font-mono">{r.advertiserId}</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CopyNameButton text={r.expected} />
+                  <a href={tiktokAccountUrl(r.advertiserId)} target="_blank" rel="noreferrer" className={miniButton}>
+                    Abrir en TikTok
+                    <PanelIcon name="external" className="size-3.5" />
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
     </section>
   );
 }

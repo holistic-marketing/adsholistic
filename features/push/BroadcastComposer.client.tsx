@@ -1,6 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { buttonClass } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState, Note, Segmented } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 
 type Audience = "clientes" | "todos";
 type Destination = { url: string; label: string };
@@ -48,36 +54,48 @@ const TEMPLATES: Array<{ name: string; title: string; body: string; url: string 
   },
 ];
 
-const field =
-  "w-full rounded-box bg-surface px-3 text-[14px] text-ink ring-1 ring-line placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]";
-const primary =
-  "inline-flex h-10 items-center justify-center rounded-box bg-[var(--brand-primary)] px-4 text-[13px] font-semibold text-white transition hover:bg-[var(--brand-primary-deep)] disabled:opacity-50";
-const ghost =
-  "inline-flex h-10 items-center justify-center rounded-box bg-surface px-4 text-[13px] font-semibold text-ink-2 ring-1 ring-line transition hover:bg-field disabled:opacity-50";
+const AUDIENCES: Array<{ value: Audience; label: string }> = [
+  { value: "clientes", label: "Clientes" },
+  { value: "todos", label: "Todos + equipo" },
+];
 
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-/** Vista previa: así se ve en la pantalla de bloqueo del celular. */
+/** Rótulo de un campo con su contador de letras (v3 «lab-row» + «count-in»). */
+function CountedLabel({ htmlFor, label, length, max }: { htmlFor: string; label: string; length: number; max: number }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <label htmlFor={htmlFor} className="text-sm font-medium text-ink">
+        {label}
+      </label>
+      <span className={cn("num text-xs", length > max ? "text-danger-fg" : "text-ink-3")}>
+        {length}/{max}
+      </span>
+    </div>
+  );
+}
+
+/** Vista previa: así se ve en la pantalla de bloqueo del celular. Tonos invertidos
+    del panel (el equipo se ve oscuro en el tema claro y claro en el oscuro). */
 function PhonePreview({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mx-auto w-full max-w-[300px] rounded-[2.2rem] bg-[#1c1917] p-2.5 shadow-[0_24px_50px_-24px_rgb(28_25_23_/_0.6)]">
-      <div className="relative overflow-hidden rounded-[1.8rem] bg-gradient-to-b from-[#3b2a20] via-accent to-[#2a1f19] px-3 pb-10 pt-3">
-        <div className="mx-auto h-5 w-20 rounded-full bg-black/80" />
-        <p className="mt-6 text-center text-[44px] font-semibold leading-none tracking-tight text-white/90">9:41</p>
-        <div className="mt-6 rounded-card bg-surface/80 p-2.5 backdrop-blur">
-          <div className="flex items-start gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-192.png" alt="" className="h-8 w-8 shrink-0 rounded-lg" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="truncate text-[12.5px] font-semibold text-ink">{title || "Título del aviso"}</p>
-                <span className="shrink-0 text-[10.5px] text-ink-2">ahora</span>
-              </div>
-              <p className="line-clamp-4 text-[12px] leading-snug text-ink">{body || "Aquí va el mensaje."}</p>
-            </div>
+    <div
+      aria-hidden
+      className="mx-auto w-[260px] max-w-full rounded-[32px] border-[6px] border-ink bg-[color-mix(in_srgb,var(--ui-text)_88%,var(--ui-surface))] px-3 pb-5 pt-3.5 text-surface shadow-card"
+    >
+      <div className="mx-auto mb-[26px] h-[22px] w-[84px] rounded-[12px] bg-ink" />
+      <p className="text-center font-mono text-[2.75rem] font-semibold leading-none tracking-[-0.04em]">9:41</p>
+      <div className="mt-[30px] grid min-h-14 grid-cols-[32px_minmax(0,1fr)] gap-2.5 rounded-[14px] bg-surface/95 px-3 py-2.5 text-ink">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icon-192.png" alt="" className="size-8 rounded-[8px]" />
+        <div className="min-w-0">
+          <div className="flex items-baseline justify-between gap-2">
+            <b className="truncate text-[13px] font-semibold leading-tight">{title || "Título del aviso"}</b>
+            <span className="shrink-0 text-[10.5px] text-ink-3">ahora</span>
           </div>
+          <p className="line-clamp-4 text-xs leading-snug text-ink-2 [overflow-wrap:anywhere]">{body || "Aquí va el mensaje."}</p>
         </div>
       </div>
     </div>
@@ -180,11 +198,13 @@ export function BroadcastComposer({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="space-y-4">
-        <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
-          <p className="text-[12px] font-semibold text-ink-2">Plantillas</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+      <div className="grid min-w-0 gap-4">
+        <PanelCard>
+          <p id="avisos-plantillas" className="mb-2 text-sm font-medium text-ink">
+            Plantillas
+          </p>
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="avisos-plantillas">
             {TEMPLATES.map((tpl) => (
               <button
                 key={tpl.name}
@@ -194,166 +214,134 @@ export function BroadcastComposer({
                   setBody(tpl.body);
                   setUrl(tpl.url);
                 }}
-                className="rounded-full bg-field px-3 py-1.5 text-[12.5px] font-semibold text-ink-2 ring-1 ring-line transition hover:bg-hover hover:ring-[var(--brand-primary)]/40"
+                className={buttonClass("outline", "sm")}
               >
                 {tpl.name}
               </button>
             ))}
           </div>
 
-          <div className="mt-4 space-y-3">
-            <label className="block">
-              <span className="flex items-baseline justify-between text-[12px] font-semibold text-ink-2">
-                Título
-                <span className={title.length > titleMax ? "text-danger-fg" : "font-normal text-ink-3"}>
-                  {title.length}/{titleMax}
-                </span>
-              </span>
-              <input
-                value={title}
-                maxLength={titleMax}
-                onChange={(e) => edit(setTitle)(e.target.value)}
-                placeholder="¡Ya es hora de pautar!"
-                className={`${field} mt-1 h-10`}
-              />
-            </label>
-            <label className="block">
-              <span className="flex items-baseline justify-between text-[12px] font-semibold text-ink-2">
-                Mensaje
-                <span className={body.length > bodyMax ? "text-danger-fg" : "font-normal text-ink-3"}>
-                  {body.length}/{bodyMax}
-                </span>
-              </span>
-              <textarea
-                value={body}
-                maxLength={bodyMax}
-                rows={3}
-                onChange={(e) => edit(setBody)(e.target.value)}
-                placeholder="Recarga tu saldo y activa tus campañas hoy."
-                className={`${field} mt-1 resize-none py-2.5 leading-snug`}
-              />
-            </label>
+          <div className="mt-4 grid gap-1.5">
+            <CountedLabel htmlFor="aviso-titulo" label="Título" length={title.length} max={titleMax} />
+            <Input
+              id="aviso-titulo"
+              value={title}
+              maxLength={titleMax}
+              onChange={(e) => edit(setTitle)(e.target.value)}
+              placeholder="¡Ya es hora de pautar!"
+            />
+          </div>
+          <div className="mt-3.5 grid gap-1.5">
+            <CountedLabel htmlFor="aviso-mensaje" label="Mensaje" length={body.length} max={bodyMax} />
+            <Textarea
+              id="aviso-mensaje"
+              value={body}
+              maxLength={bodyMax}
+              rows={3}
+              onChange={(e) => edit(setBody)(e.target.value)}
+              placeholder="Recarga tu saldo y activa tus campañas hoy."
+              className="resize-y"
+            />
+          </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-[12px] font-semibold text-ink-2">Al tocarlo abre</span>
-                <select
-                  value={url}
-                  onChange={(e) => edit(setUrl)(e.target.value)}
-                  className={`${field} mt-1 h-10`}
-                >
-                  {destinations.map((d) => (
-                    <option key={d.url} value={d.url}>
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div>
-                <span className="text-[12px] font-semibold text-ink-2">Para</span>
-                <div className="mt-1 grid grid-cols-2 gap-1 rounded-box bg-subtle p-1" role="radiogroup" aria-label="Para">
-                  {(
-                    [
-                      ["clientes", "Clientes"],
-                      ["todos", "Todos + equipo"],
-                    ] as const
-                  ).map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={audience === value}
-                      onClick={() => edit(setAudience)(value)}
-                      className={`h-8 rounded-lg text-[12.5px] font-semibold transition ${
-                        audience === value ? "bg-surface text-ink shadow-sm" : "text-ink-2 hover:text-ink"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className="mt-3.5 grid gap-x-3 gap-y-4 sm:grid-cols-2">
+            <label className="grid content-start gap-1.5 text-sm font-medium text-ink">
+              Al tocarlo abre
+              <Select value={url} onChange={(e) => edit(setUrl)(e.target.value)}>
+                {destinations.map((d) => (
+                  <option key={d.url} value={d.url}>
+                    {d.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <div className="grid content-start gap-1.5">
+              <span className="text-sm font-medium text-ink">Para</span>
+              <Segmented label="Para" value={audience} onChange={edit(setAudience)} options={AUDIENCES} block />
             </div>
           </div>
 
-          <p className="mt-4 rounded-box bg-field px-3 py-2 text-[12.5px] text-ink-2 ring-1 ring-line">
+          <Note icon="users" className="mt-3.5">
             {count ? (
               <>
-                Queda en la campanita de <strong className="text-ink">{plural(count.recipients, "persona", "personas")}</strong>{" "}
-                y llega al instante a <strong className="text-ink">{plural(count.devices, "celular o PC", "celulares o PCs")}</strong>{" "}
-                con avisos activos.
+                Queda en la campanita de <strong className="num text-ink">{plural(count.recipients, "persona", "personas")}</strong> y
+                llega al instante a <strong className="num text-ink">{plural(count.devices, "celular o PC", "celulares o PCs")}</strong> con
+                avisos activos.
               </>
             ) : (
               "Calculando a cuántos llega…"
             )}
-          </p>
+          </Note>
 
-          {error ? <p className="mt-3 rounded-box bg-warn-bg px-3 py-2 text-[13px] text-warn-fg ring-1 ring-warn-line">{error}</p> : null}
-          {notice ? (
-            <p className="mt-3 rounded-box bg-ok-bg px-3 py-2 text-[13px] text-ok-fg ring-1 ring-ok-line">{notice}</p>
-          ) : null}
+          {error ? <Note tone="warn" className="mt-3">{error}</Note> : null}
+          {notice ? <Note tone="ok" icon="check-circle" className="mt-3">{notice}</Note> : null}
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-3.5 flex flex-wrap items-center gap-2">
             {confirming ? (
               <>
-                <button type="button" className={primary} disabled={busy !== null} onClick={() => void post(audience)}>
+                <button type="button" className={buttonClass("primary")} disabled={busy !== null} onClick={() => void post(audience)}>
+                  <PanelIcon name="send" />
                   {busy === "send" ? "Enviando…" : `Sí, enviar a ${count ? plural(count.recipients, "persona", "personas") : "todos"}`}
                 </button>
-                <button type="button" className={ghost} disabled={busy !== null} onClick={() => setConfirming(false)}>
+                <button type="button" className={buttonClass("outline")} disabled={busy !== null} onClick={() => setConfirming(false)}>
                   Cancelar
                 </button>
-                <span className="text-[12px] text-ink-3">Se manda una sola vez y no se puede deshacer.</span>
+                <span className="text-xs text-ink-3">Se manda una sola vez y no se puede deshacer.</span>
               </>
             ) : (
               <>
-                <button type="button" className={primary} disabled={!ready || busy !== null} onClick={() => setConfirming(true)}>
+                <button type="button" className={buttonClass("primary")} disabled={!ready || busy !== null} onClick={() => setConfirming(true)}>
+                  <PanelIcon name="send" />
                   Enviar aviso
                 </button>
-                <button type="button" className={ghost} disabled={!ready || busy !== null} onClick={() => void post("prueba")}>
+                <button type="button" className={buttonClass("outline")} disabled={!ready || busy !== null} onClick={() => void post("prueba")}>
                   {busy === "test" ? "Enviando prueba…" : "Mandarme una prueba"}
                 </button>
               </>
             )}
           </div>
-        </section>
+        </PanelCard>
 
-        <section className="rounded-card border border-line bg-surface p-4 sm:p-5">
-          <p className="text-[12px] font-semibold text-ink-2">Enviados</p>
+        <PanelCard title="Enviados">
           {history === null ? (
-            <p className="mt-2 text-[13px] text-ink-3">Cargando…</p>
+            <p className="text-[13px] text-ink-3">Cargando…</p>
           ) : history.length === 0 ? (
-            <p className="mt-2 text-[13px] text-ink-3">Todavía no se mandó ningún aviso.</p>
+            <EmptyState icon="megaphone" title="Todavía no se mandó ningún aviso" />
           ) : (
-            <ul className="mt-2 divide-y divide-[#f1ebe3]">
+            <ul className="divide-y divide-line">
               {history.map((h) => (
-                <li key={h.id} className="py-2.5">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <p className="text-[13.5px] font-semibold text-ink">{h.title}</p>
-                    <span className="text-[11.5px] text-ink-3">
+                <li key={h.id} className="flex items-start justify-between gap-3 py-2.5">
+                  <div className="grid min-w-0 leading-snug">
+                    <b className="font-semibold text-ink">{h.title}</b>
+                    <small className="text-[13px] text-ink-2">{h.body}</small>
+                    <small className="mt-0.5 text-xs text-ink-3">
+                      {plural(h.delivered, "dispositivo", "dispositivos")} al instante
+                      {h.sentByEmail ? ` · ${h.sentByEmail}` : ""}
+                    </small>
+                  </div>
+                  <div className="grid shrink-0 justify-items-end gap-1 text-right">
+                    <span className="inline-flex h-5 items-center whitespace-nowrap rounded-[6px] bg-subtle px-[7px] text-[11px] font-medium text-ink-2">
+                      {h.audience === "todos" ? "Todos + equipo" : "Clientes"} · <span className="num ml-1">{h.recipients}</span>
+                    </span>
+                    <small className="text-xs text-ink-3">
                       {new Date(h.createdAt).toLocaleString("es-PE", {
                         timeZone: "America/Lima",
                         dateStyle: "medium",
                         timeStyle: "short",
                       })}
-                    </span>
+                    </small>
                   </div>
-                  <p className="mt-0.5 text-[12.5px] text-ink-2">{h.body}</p>
-                  <p className="mt-1 text-[11.5px] text-ink-3">
-                    {h.audience === "todos" ? "Todos + equipo" : "Clientes"} · {plural(h.recipients, "persona", "personas")} ·{" "}
-                    {plural(h.delivered, "dispositivo", "dispositivos")} al instante
-                    {h.sentByEmail ? ` · ${h.sentByEmail}` : ""}
-                  </p>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </PanelCard>
       </div>
 
-      <aside className="lg:sticky lg:top-20 lg:self-start">
-        <p className="mb-2 text-center text-[12px] font-semibold text-ink-2">Así se ve en el celular</p>
+      <aside className="lg:sticky lg:top-[72px]">
+        <p className="mb-2.5 text-center text-[13px] text-ink-3">Así se ve en el celular</p>
         <PhonePreview title={title.trim()} body={body.trim()} />
-        <p className="mt-2 text-center text-[11.5px] text-ink-3">Al tocarlo abre: {destinationLabel}</p>
+        <p className="mt-2.5 text-center text-[13px] text-ink-3">Al tocarlo abre: {destinationLabel}</p>
       </aside>
     </div>
   );

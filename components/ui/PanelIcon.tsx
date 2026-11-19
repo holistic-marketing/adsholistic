@@ -1,5 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
-import { cn } from "@/lib/cn";
+import { overrideClasses } from "@/lib/ui/override-classes";
 
 /* Íconos del panel (sistema visual v3): trazo de 1.9 px sobre 24 × 24,
    puntas y uniones redondeadas. Se pintan con `currentColor`. */
@@ -349,7 +349,7 @@ export function PanelIcon({
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      className={cn("size-4 shrink-0", className)}
+      className={overrideClasses("size-4 shrink-0", className)}
       {...props}
     >
       {ICONS[name]}

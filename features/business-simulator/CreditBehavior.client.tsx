@@ -1,6 +1,9 @@
 "use client";
 import Link from "next/link";
+import { ToneBadge, type Tone } from "@/components/ui/PanelKit";
 import type { ClienteScore } from "@/lib/realprofit/client-score";
+import { cn } from "@/lib/cn";
+import { Disclosure } from "./ui";
 
 export type Snapshot = {
   cliente: { id: string; name: string }; from: string; to: string;
@@ -12,31 +15,46 @@ export type Snapshot = {
   staffOps?: { score?: ClienteScore | null; walletAvailableUsd: number | null; collections?: { deposits90d: number | null; failedDeposits90d: number | null } };
 };
 const verdicts = { green: "Riesgo bajo", yellow: "Riesgo moderado", orange: "Riesgo alto", red: "Riesgo muy alto", no_base: "Sin base suficiente" };
+const verdictTone: Record<keyof typeof verdicts, Tone> = { green: "ok", yellow: "warn", orange: "warn", red: "danger", no_base: "neutral" };
 const factors = { ads: "Publicidad", credit: "Uso del crédito", collections: "Depósitos", tickets: "Soporte" };
-export function CreditBehavior({ snapshot, busy }: { snapshot: Snapshot | null; busy: boolean }) {
-  const score = snapshot?.staffOps?.score;
+
+/** Score de riesgo de gerencia y datos de cobro del cliente evaluado. */
+export function CreditBehavior({ snapshot }: { snapshot: Snapshot }) {
+  const score = snapshot.staffOps?.score;
+  const verdict = score?.verdict ?? "no_base";
+  const tone = verdictTone[verdict];
   const usd = (value: number | null | undefined) => value == null || !Number.isFinite(value) ? "Sin datos" : new Intl.NumberFormat("es-PE", { style: "currency", currency: "USD" }).format(value);
-  if (busy) return <div role="status" className="rounded-box bg-[var(--auth-surface-muted)] p-6"><p className="font-semibold">Consultando el historial del cliente…</p><p className="mt-2 text-sm text-[var(--auth-text-muted)]">Reuniendo score, depósitos, anuncios y costos disponibles.</p></div>;
-  if (!snapshot) return <div className="border-b border-[var(--auth-border)] px-1 py-8"><h3 className="text-lg font-semibold">Selecciona el cliente para empezar.</h3><p className="mt-2 text-sm text-[var(--auth-text-muted)]">Selecciona un cliente y pulsa Evaluar cliente para cargar su FEE, gasto y score de riesgo.</p></div>;
-  return <section aria-label="Score del cliente" className="rounded-box border border-[var(--auth-border)] bg-[var(--auth-surface)] p-5">
-    <div className="grid gap-6 md:grid-cols-[1fr_1.2fr]">
-      <div><h2 className="text-lg font-semibold">{snapshot.cliente.name}</h2><p className="mt-1 text-sm text-[var(--auth-text-muted)]">Score de riesgo de gerencia</p>
-        <div className="mt-4 flex flex-wrap items-baseline gap-3"><strong className="text-3xl font-semibold tracking-tight tabular-nums">{score?.score ?? "—"}<span className="ml-1 text-lg font-normal text-[var(--auth-text-muted)]">/ 100</span></strong><span className="text-sm font-semibold">{verdicts[score?.verdict ?? "no_base"]}</span></div>
-        <p className="mt-3 text-xs text-[var(--auth-text-muted)]">Menor score = menor riesgo. No equivale a una aprobación de crédito.</p>
-        {score?.score != null && <div className="mt-4"><div className="relative h-2 overflow-hidden rounded-full bg-[var(--auth-border)]"><div style={{ width: `${score.score}%` }} className="h-full bg-[var(--auth-text)]" /></div><div className="mt-2 flex justify-between text-xs text-[var(--auth-text-muted)]"><span>0 · Bajo</span><span>30 · Moderado</span><span>60 · Alto</span><span>80 · Muy alto</span></div></div>}
+  const facts: [string, string | number][] = [
+    ["Depósitos confirmados · 90 días",snapshot.staffOps?.collections?.deposits90d ?? "Sin datos"],
+    ["Cartera disponible", usd(snapshot.staffOps?.walletAvailableUsd)],
+    ["CPA por venta cobrada", snapshot.analysis.hasCodLink ? usd(snapshot.analysis.cpaCollected) : "Sin tienda vinculada"],
+    ["ROAS cobrado", snapshot.analysis.hasCodLink && snapshot.analysis.roasCollected != null ? `${snapshot.analysis.roasCollected.toFixed(2)}×` : "Sin datos"],
+  ];
+  return <section aria-label="Score del cliente" className="grid gap-4">
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-ink tabular-nums">
+          {score?.score ?? "—"}<span className="ml-1 text-base font-normal text-ink-3">/ 100</span>
+        </p>
+        <ToneBadge tone={tone} dot>{verdicts[verdict]}</ToneBadge>
       </div>
-      <dl className="grid grid-cols-2 gap-x-5 gap-y-6 md:border-l md:border-[var(--auth-border)] md:pl-6">{[
-        ["Depósitos confirmados · 90 días", snapshot.staffOps?.collections?.deposits90d ?? "Sin datos"],
-        ["Cartera disponible", usd(snapshot.staffOps?.walletAvailableUsd)],
-        ["CPA por venta cobrada", snapshot.analysis.hasCodLink ? usd(snapshot.analysis.cpaCollected) : "Sin tienda vinculada"],
-        ["ROAS cobrado", snapshot.analysis.hasCodLink && snapshot.analysis.roasCollected != null ? `${snapshot.analysis.roasCollected.toFixed(2)}×` : "Sin datos"],
-      ].map(([label, value]) => <div key={label}><dt className="text-xs leading-5 text-[var(--auth-text-muted)]">{label}</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{value}</dd></div>)}</dl>
+      {score?.score != null ? <div className={cn("mt-3", `tone-${tone}`)}>
+        <div className="h-1.5 overflow-hidden rounded-full bg-subtle" role="img" aria-label={`Score ${score.score} de 100`}>
+          <i className="block h-full rounded-full bg-[var(--t-solid)]" style={{ width: `${score.score}%` }} />
+        </div>
+        <div className="mt-1.5 flex justify-between gap-1 text-[11px] text-ink-3"><span>0 · Bajo</span><span>30 · Moderado</span><span>60 · Alto</span><span>80 · Muy alto</span></div>
+      </div> : null}
+      <p className="mt-2 text-xs text-ink-2">Menor score = menor riesgo. No equivale a una aprobación de crédito.</p>
     </div>
-    <details className="mt-6 border-t border-[var(--auth-border)] pt-4 text-sm"><summary className="cursor-pointer font-medium">Cómo se calcula y qué datos incluye</summary>
-      <p className="mt-3 text-xs leading-6 text-[var(--auth-text-muted)]">Modelo existente: publicidad 45%, uso del crédito 30%, depósitos 15% y soporte 10%. Los factores sin datos se excluyen y se redistribuyen los pesos. No mide una probabilidad de impago.</p>
-      <dl className="mt-3 grid gap-3 sm:grid-cols-4">{score?.factors.map((factor) => <div key={factor.id}><dt className="text-xs text-[var(--auth-text-muted)]">{factors[factor.id]}</dt><dd className="mt-1 font-medium">{factor.points === null ? "Sin datos" : `${factor.points}/100 de salud`}</dd></div>)}</dl>
-      <p className="mt-3 text-xs leading-6 text-[var(--auth-text-muted)]">Score: anuncios de 30 días, crédito y depósitos de 90 días. CPA y ROAS: {snapshot.from} a {snapshot.to}. Gasto actualizado hasta {snapshot.analysis.dataThroughDate ?? "fecha desconocida"}. Depósitos: hasta 200 movimientos del ledger; los intentos fallidos no equivalen a mora. La cartera registrada no prueba capacidad de pago.</p>
-      <div className="mt-3 flex flex-wrap gap-4 text-sm font-medium text-accent-text"><Link href="/profit" className="underline underline-offset-4">Ver anuncios en Profit</Link><Link href="/payments/profit" className="underline underline-offset-4">Ver pagos y comprobantes</Link></div>
-    </details>
+    <dl className="grid grid-cols-2 gap-2">{facts.map(([label, value]) => <div key={label} className="min-w-0 rounded-box border border-line bg-field px-3 py-2.5">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className="num mt-0.5 text-[15px] font-semibold text-ink [overflow-wrap:anywhere]">{value}</dd>
+    </div>)}</dl>
+    <Disclosure summary="Cómo se calcula y qué datos incluye">
+      <p className="text-xs">Modelo existente: publicidad 45%, uso del crédito 30%, depósitos 15% y soporte 10%. Los factores sin datos se excluyen y se redistribuyen los pesos. No mide una probabilidad de impago.</p>
+      {score?.factors.length ? <dl className="grid grid-cols-2 gap-2">{score.factors.map((factor) => <div key={factor.id}><dt className="text-xs text-ink-3">{factors[factor.id]}</dt><dd className="font-medium text-ink">{factor.points === null ? "Sin datos" : `${factor.points}/100 de salud`}</dd></div>)}</dl> : null}
+      <p className="text-xs">Score: anuncios de 30 días, crédito y depósitos de 90 días. CPA y ROAS: {snapshot.from} a {snapshot.to}. Gasto actualizado hasta {snapshot.analysis.dataThroughDate ?? "fecha desconocida"}. Depósitos: hasta 200 movimientos del ledger; los intentos fallidos no equivalen a mora. La cartera registrada no prueba capacidad de pago.</p>
+      <div className="flex flex-wrap gap-4 font-medium text-accent-text"><Link href="/profit" className="underline underline-offset-4">Ver anuncios en Profit</Link><Link href="/payments/profit" className="underline underline-offset-4">Ver pagos y comprobantes</Link></div>
+    </Disclosure>
   </section>;
 }

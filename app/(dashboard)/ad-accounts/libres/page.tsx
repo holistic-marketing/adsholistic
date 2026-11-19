@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { routes } from "@/config/routes";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { FreeTikTokAccountsManager } from "@/features/ad-accounts/components/FreeTikTokAccountsManager.client";
 import { requirePermission } from "@/lib/auth/guards.server";
 import { isStaffUser } from "@/lib/auth/staff.server";
@@ -19,14 +20,12 @@ export default async function CuentasLibresPage() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <header className="shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-text">Gerente</p>
-        <h1 className="mt-0.5 text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Cuentas libres</h1>
-        <p className="mt-1 max-w-2xl text-[13px] leading-5 text-ink-2">
-          Crea cuentas de reserva en tandas y entrégalas a un miembro del equipo o a un cliente. Libre = sin dueño en Hecom.
-        </p>
-      </header>
+    <div className="min-w-0">
+      <PageHeader
+        eyebrow="Gerencia"
+        title="Cuentas libres"
+        lede="Crea cuentas de reserva en tandas y entrégalas a un miembro del equipo o a un cliente. Libre significa sin dueño en Hecom."
+      />
 
       <FreeTikTokAccountsManager />
     </div>

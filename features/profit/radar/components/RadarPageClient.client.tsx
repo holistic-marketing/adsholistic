@@ -14,6 +14,12 @@ import {
   type RadarObjective,
 } from "@/lib/radar/categories";
 import { topPreferences } from "@/lib/radar/taste";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { buttonClass } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { Note } from "@/components/ui/PanelKit";
+import { cn } from "@/lib/cn";
 import { ProfitSectionSwitch } from "./ProfitSectionSwitch";
 import { RadarVideoCard, type CardReaction } from "./RadarVideoCard.client";
 import { RadarRecipeView } from "./RadarRecipeView.client";
@@ -34,14 +40,19 @@ const ORDER: Step[] = ["intro", "products", "appear", "objective", "consent", "r
 const GROUP = 3;
 const MIN_ROUND1 = 6;
 
-const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-line";
-/* Sin altura ni padding: en Tailwind v4 "h-11 … h-10" gana h-11 (orden del CSS), así que cada uso los fija. */
-const primaryBase = `inline-flex items-center justify-center rounded-box bg-accent-btn text-[14px] font-semibold text-on-accent transition-colors hover:bg-accent-btn-hover disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-const secondaryBase = `inline-flex items-center justify-center rounded-box border border-line bg-surface text-[14px] font-semibold text-ink transition-colors hover:border-line-strong disabled:cursor-not-allowed disabled:opacity-40 ${focusRing}`;
-const primaryBtn = `${primaryBase} h-11 px-5`;
-const secondaryBtn = `${secondaryBase} h-11 px-5`;
-const chipBase = `inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-medium transition-colors ${focusRing}`;
+const primaryBtn = buttonClass("primary", "md");
+const secondaryBtn = buttonClass("outline", "md");
+
+/** Opción para elegir (v3 «pick»): marcada, va en naranja suave. */
+function pickClass(selected: boolean, extra?: string) {
+  return cn(
+    "inline-flex h-8 items-center gap-1.5 rounded-ctl border px-3 text-[13px] font-medium shadow-ctl",
+    selected
+      ? "border-accent-line bg-accent-soft text-accent-text"
+      : "border-line bg-field text-ink hover:border-line-strong hover:bg-hover",
+    extra,
+  );
+}
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -98,8 +109,8 @@ function Enter({ children, className = "" }: { children: ReactNode; className?: 
 function ProfitSays({ speaker, children }: { speaker: string; children: ReactNode }) {
   return (
     <Enter className="flex flex-col gap-1.5">
-      <span className="pl-1 text-[12px] font-semibold text-ink-3">{speaker}</span>
-      <div className="rounded-card rounded-tl-[6px] border border-line bg-surface px-4 py-4 text-[15px] leading-[1.6] text-ink shadow-[0_1px_2px_rgb(28_25_23/0.04)] sm:px-5">
+      <span className="pl-1 text-xs font-medium text-ink-3">{speaker}</span>
+      <div className="rounded-card border border-line bg-surface px-4 py-4 text-sm leading-[1.6] text-ink shadow-card sm:px-5">
         {children}
       </div>
     </Enter>
@@ -109,7 +120,7 @@ function ProfitSays({ speaker, children }: { speaker: string; children: ReactNod
 function YouSay({ children }: { children: ReactNode }) {
   return (
     <Enter className="flex justify-end">
-      <p className="max-w-[80%] rounded-card rounded-tr-[6px] bg-accent-btn px-4 py-2.5 text-[14px] leading-[1.5] text-on-accent [overflow-wrap:anywhere]">
+      <p className="max-w-[80%] rounded-box border border-accent-line bg-accent-soft px-3.5 py-2 text-sm leading-[1.5] text-ink [overflow-wrap:anywhere]">
         {children}
       </p>
     </Enter>
@@ -499,14 +510,16 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
         <RadarHeader t={t} clienteName={clienteName} />
         <div className="mx-auto w-full max-w-[760px]">
           {loadError ? (
-            <div role="alert" className="rounded-box border border-line bg-surface px-5 py-4 text-[14px] text-ink">
-              <p>{loadError}</p>
-              <button type="button" onClick={retryLoad} className={`${secondaryBase} mt-3 h-10 px-5`}>
-                {t("errors.retry")}
-              </button>
+            <div role="alert">
+              <Note tone="danger" title={loadError}>
+                <button type="button" onClick={retryLoad} className={buttonClass("outline", "sm", "mt-2")}>
+                  <PanelIcon name="refresh" />
+                  {t("errors.retry")}
+                </button>
+              </Note>
             </div>
           ) : (
-            <div className="h-40 animate-pulse rounded-card bg-subtle motion-reduce:animate-none" aria-busy />
+            <div className="h-40 animate-pulse rounded-card border border-line bg-surface motion-reduce:animate-none" aria-busy />
           )}
         </div>
       </div>
@@ -514,7 +527,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
   }
 
   return (
-    <div className="space-y-5 selection:bg-[#ffd8bf] selection:text-[#1c1917]">
+    <div className="space-y-4 lg:space-y-5">
       <RadarHeader
         t={t}
         clienteName={clienteName}
@@ -524,7 +537,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               type="button"
               onClick={() => void skip()}
               disabled={busy}
-              className={`rounded-lg px-2 py-1 text-[13px] font-semibold text-ink-2 underline-offset-[3px] hover:text-ink hover:underline disabled:opacity-40 ${focusRing}`}
+              className={buttonClass("ghost", "md")}
             >
               {t("skip")}
             </button>
@@ -533,9 +546,9 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
       />
 
       {/* Tu perfil: cada respuesta entra aquí como un chip. */}
-      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top)+0.5rem)] z-10 mx-auto w-full max-w-[760px] sm:top-[calc(4rem+env(safe-area-inset-top)+0.5rem)]">
-        <div className="flex min-h-[52px] flex-wrap items-center gap-2 rounded-box border border-line bg-surface/95 px-4 py-2.5 shadow-[0_8px_24px_-18px_rgb(28_25_23/0.35)] backdrop-blur-sm">
-          <span className="mr-1 text-[12.5px] font-semibold text-ink">{t("profileLine")}</span>
+      <div className="sticky top-14 z-10 mx-auto w-full max-w-[760px]">
+        <div className="flex min-h-12 flex-wrap items-center gap-1.5 rounded-box border border-line bg-surface/95 px-4 py-2.5 shadow-card backdrop-blur-sm">
+          <span className="mr-1 text-[13px] font-semibold text-ink">{t("profileLine")}</span>
           {profileChips.length === 0 ? (
             <span className="text-[13px] text-ink-3">{t("profileEmpty")}</span>
           ) : null}
@@ -548,9 +561,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
-                className={`inline-flex h-7 min-w-0 max-w-full items-center rounded-full px-3 text-[13px] font-medium ${
-                  chip.learned ? "bg-accent-soft text-accent-text" : "bg-subtle text-ink"
-                }`}
+                className={cn("panel-badge min-w-0 max-w-full", chip.learned ? "tone-accent" : "tone-neutral")}
               >
                 <span className="truncate">{chip.label}</span>
               </motion.span>
@@ -587,15 +598,11 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => setCategory(c)}
-                        className={`${chipBase} ${
-                          selected
-                            ? "border-accent-line bg-accent-soft text-accent-text"
-                            : "border-line bg-surface text-ink hover:border-line-strong"
-                        }`}
+                        className={pickClass(selected)}
                       >
                         {categoryLabel(c)}
                         {suggested === c ? (
-                          <span className={`text-[11px] font-semibold ${selected ? "text-white/70" : "text-ink-3"}`}>
+                          <span className="text-[11px] font-medium text-ink-3">
                             · {t("intro.suggested")}
                           </span>
                         ) : null}
@@ -624,17 +631,15 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <ul className="mt-4 flex flex-wrap gap-2">
                     {products.map((name) => (
                       <li key={name} className="min-w-0 max-w-full">
-                        <span className="inline-flex h-9 max-w-full items-center gap-1 rounded-full bg-subtle pl-3.5 pr-1.5 text-[13.5px] font-medium">
+                        <span className="inline-flex h-8 max-w-full items-center gap-1 rounded-full border border-line bg-subtle pl-3 pr-1 text-[13px] font-medium text-ink">
                           <span className="min-w-0 truncate" title={name}>{name}</span>
                           <button
                             type="button"
                             aria-label={t("products.remove", { name })}
                             onClick={() => setProducts((prev) => prev.filter((p) => p !== name))}
-                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-3 hover:bg-hover hover:text-ink ${focusRing}`}
+                            className="flex size-6 shrink-0 items-center justify-center rounded-full text-ink-3 hover:bg-hover hover:text-ink"
                           >
-                            <svg viewBox="0 0 24 24" aria-hidden className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
-                              <path d="M6 6l12 12M18 6 6 18" />
-                            </svg>
+                            <PanelIcon name="x" className="size-3.5" />
                           </button>
                         </span>
                       </li>
@@ -651,15 +656,15 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <label htmlFor="radar-product" className="sr-only">
                     {t("products.placeholder")}
                   </label>
-                  <input
+                  <Input
                     id="radar-product"
                     value={productDraft}
                     onChange={(e) => setProductDraft(e.target.value)}
                     placeholder={t("products.placeholder")}
                     maxLength={80}
-                    className="h-10 min-w-0 flex-1 rounded-box border border-line bg-surface px-3 text-[14px] text-ink caret-[#ff781f] placeholder:text-ink-3 hover:border-line-strong focus:border-ink focus:outline-none"
+                    className="min-w-0 flex-1"
                   />
-                  <button type="submit" className={`${secondaryBase} h-10 shrink-0 px-4`} disabled={!productDraft.trim()}>
+                  <button type="submit" className={buttonClass("outline", "md", "shrink-0")} disabled={!productDraft.trim()}>
                     {t("products.add")}
                   </button>
                 </form>
@@ -693,11 +698,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                         onClick={() =>
                           setAppear((prev) => (on ? prev.filter((x) => x !== a) : [...prev, a]))
                         }
-                        className={`${chipBase} ${
-                          on
-                            ? "border-accent-line bg-accent-soft text-accent-text"
-                            : "border-line bg-surface text-ink hover:border-line-strong"
-                        }`}
+                        className={pickClass(on)}
                       >
                         {appearLabel(a)}
                       </button>
@@ -729,11 +730,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                       setObjective(o);
                       go("consent");
                     }}
-                    className={`${chipBase} ${
-                      objective === o && seed?.objective === o
-                        ? "border-ink bg-surface text-ink"
-                        : "border-line bg-surface text-ink hover:border-line-strong"
-                    }`}
+                    className={pickClass(objective === o && seed?.objective === o)}
                   >
                     {objectiveLabel(o)}
                   </button>
@@ -770,7 +767,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
             {round1Loading || !round1 ? (
               <ProfitSays speaker={t("speaker.profit")}>
                 <p>{category ? t("round1.intro", { category: categoryLabel(category) }) : null}</p>
-                <p aria-live="polite" className="mt-2 text-[13.5px] text-ink-2">{t("searching")}</p>
+                <p aria-live="polite" className="mt-2 text-[13px] text-ink-2">{t("searching")}</p>
                 <SkeletonGrid />
               </ProfitSays>
             ) : round1.videos.length === 0 ? (
@@ -783,7 +780,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   {index === 0 ? (
                     <>
                       <p className="max-w-[62ch]">{t("round1.intro", { category: category ? categoryLabel(category) : "" })}</p>
-                      {round1.regionFallback ? <p className="mt-2 text-[13.5px] text-ink-2">{t("region")}</p> : null}
+                      {round1.regionFallback ? <p className="mt-2 text-[13px] text-ink-2">{t("region")}</p> : null}
                     </>
                   ) : (
                     <p>{t("round1.more")}</p>
@@ -831,7 +828,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <p>{t("learned.intro")}</p>
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {learned.map((p) => (
-                      <li key={p.dimension} className="inline-flex h-8 items-center rounded-full bg-accent-soft px-3 text-[13.5px] font-medium text-accent-text">
+                      <li key={p.dimension} className="panel-badge tone-accent">
                         {tagLabel(p.dimension, p.value)}
                       </li>
                     ))}
@@ -850,11 +847,11 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
             <p className="max-w-[62ch]">{t("round2.intro")}</p>
             {round2Loading || !round2 ? (
               <>
-                <p aria-live="polite" className="mt-2 text-[13.5px] text-ink-2">{t("searching")}</p>
+                <p aria-live="polite" className="mt-2 text-[13px] text-ink-2">{t("searching")}</p>
                 <SkeletonGrid />
               </>
             ) : round2.videos.length === 0 ? (
-              <p className="mt-3 text-[14px] text-ink-2">{t("emptyPool")}</p>
+              <p className="mt-3 text-sm text-ink-2">{t("emptyPool")}</p>
             ) : (
               <>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -880,7 +877,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   <button type="button" className={primaryBtn} disabled={busy || picks.size === 0} onClick={() => void finishRound2()}>
                     {t("round2.submit")}
                   </button>
-                  <span className="text-[13.5px] tabular-nums text-ink-2" aria-live="polite">
+                  <span className="num text-[13px] text-ink-2" aria-live="polite">
                     {t("round2.count", { count: picks.size })}
                   </span>
                 </Actions>
@@ -897,7 +894,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               <p className="max-w-[62ch]">{t("done.message")}</p>
               {products.length > 1 ? (
                 <>
-                  <p className="mt-3 text-[14px] text-ink-2">{t("recipe.ask")}</p>
+                  <p className="mt-3 text-sm text-ink-2">{t("recipe.ask")}</p>
                   <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("recipe.ask")}>
                     {products.map((name) => {
                       const selected = (recipeProduct ?? products[0]) === name;
@@ -908,11 +905,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                           role="radio"
                           aria-checked={selected}
                           onClick={() => setRecipeProduct(name)}
-                          className={`${chipBase} max-w-full ${
-                            selected
-                              ? "border-accent-line bg-accent-soft text-accent-text"
-                              : "border-line bg-surface text-ink hover:border-line-strong"
-                          }`}
+                          className={pickClass(selected, "max-w-full")}
                         >
                           <span className="truncate">{name}</span>
                         </button>
@@ -921,7 +914,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                   </div>
                 </>
               ) : null}
-              <p className="mt-4 text-[14px] text-ink-2">{t("recipe.lengthAsk")}</p>
+              <p className="mt-4 text-sm text-ink-2">{t("recipe.lengthAsk")}</p>
               <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={t("recipe.lengthAsk")}>
                 {(["short", "medium", "long"] as const).map((value) => {
                   const selected = recipeLength === value;
@@ -932,11 +925,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                       role="radio"
                       aria-checked={selected}
                       onClick={() => setRecipeLength(value)}
-                      className={`${chipBase} ${
-                        selected
-                          ? "border-accent-line bg-accent-soft text-accent-text"
-                          : "border-line bg-surface text-ink hover:border-line-strong"
-                      }`}
+                      className={pickClass(selected)}
                     >
                       {t(`recipe.length.${value}`)}
                     </button>
@@ -944,13 +933,13 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
                 })}
               </div>
               <label className="mt-4 block max-w-[62ch]">
-                <span className="text-[14px] text-ink-2">{t("recipe.detailsLabel")}</span>
+                <span className="text-sm text-ink-2">{t("recipe.detailsLabel")}</span>
                 <textarea
                   value={recipeDetails}
                   onChange={(e) => setRecipeDetails(e.target.value.slice(0, 600))}
                   rows={3}
                   placeholder={t("recipe.detailsPlaceholder")}
-                  className="mt-2 block w-full resize-y rounded-box border border-line bg-surface px-3.5 py-2.5 text-[14px] leading-[1.5] text-ink placeholder:text-ink-3 focus-visible:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  className="mt-2 block w-full resize-y rounded-ctl border border-line bg-field px-3 py-2 text-sm leading-[1.5] text-ink shadow-ctl outline-none placeholder:text-ink-3 hover:border-line-strong focus-visible:border-accent focus-visible:ring-[3px] focus-visible:ring-[var(--ui-ring)]"
                 />
               </label>
               <Actions>
@@ -977,7 +966,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
               </ProfitSays>
             ) : latestRecipe ? (
               <Enter className="flex flex-col gap-1.5">
-                <span className="pl-1 text-[12px] font-semibold text-ink-3">{t("speaker.profit")}</span>
+                <span className="pl-1 text-xs font-medium text-ink-3">{t("speaker.profit")}</span>
                 <RadarRecipeView stored={latestRecipe} />
               </Enter>
             ) : null}
@@ -985,9 +974,7 @@ export function RadarPageClient({ clienteName }: { clienteName: string }) {
         ) : null}
 
         {actionError ? (
-          <div role="alert" className="rounded-box border border-danger-line bg-field px-4 py-3 text-[14px] text-danger-fg">
-            {actionError}
-          </div>
+          <Note tone="danger">{actionError}</Note>
         ) : null}
         <div ref={endRef} />
       </div>
@@ -1001,19 +988,17 @@ type RadarT = ReturnType<typeof useTranslations<"profit.radar">>;
 
 function RadarHeader({ t, clienteName, trailing }: { t: RadarT; clienteName: string; trailing?: ReactNode }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4 px-1 pt-1">
-      <div className="min-w-0">
-        <h1 className="text-[1.6rem] font-bold leading-tight tracking-[-0.03em] text-ink sm:text-[1.75rem]">
-          {t("title")}
-          <span className="font-semibold text-ink-3"> · {clienteName}</span>
-        </h1>
-        <p className="mt-1.5 max-w-xl text-[14px] leading-[1.55] text-ink-2">{t("subtitle")}</p>
-      </div>
-      <div className="flex items-center gap-3">
-        {trailing}
-        <ProfitSectionSwitch active="radar" />
-      </div>
-    </header>
+    <PageHeader
+      eyebrow={clienteName}
+      title={t("title")}
+      lede={t("subtitle")}
+      actions={
+        <>
+          {trailing}
+          <ProfitSectionSwitch active="radar" />
+        </>
+      }
+    />
   );
 }
 
@@ -1040,26 +1025,26 @@ function Round1Footer({
   return (
     <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line pt-4">
       <div className="flex min-w-[180px] flex-1 items-center gap-3">
-        <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-subtle" aria-hidden>
+        <div className="h-1.5 w-28 shrink-0 overflow-hidden rounded-full bg-accent-soft" aria-hidden>
           <div
             className="h-full rounded-full bg-accent transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{ width: `${total > 0 ? Math.min(100, (done / total) * 100) : 0}%` }}
           />
         </div>
-        <span className="text-[13px] tabular-nums text-ink-2" aria-live="polite">
+        <span className="num text-[13px] text-ink-2" aria-live="polite">
           {t("round1.progress", { done, total })}
         </span>
       </div>
       {canShowMore ? (
-        <button type="button" className={`${secondaryBase} h-10 px-5`} onClick={onShowMore}>
+        <button type="button" className={secondaryBtn} onClick={onShowMore}>
           {t("round1.showMore")}
         </button>
       ) : null}
-      <button type="button" className={`${primaryBase} h-10 px-5`} disabled={!ready || busy} onClick={onFinish}>
+      <button type="button" className={primaryBtn} disabled={!ready || busy} onClick={onFinish}>
         {t("round1.finish")}
       </button>
       {!ready && total > 0 ? (
-        <span className="w-full text-[12.5px] text-ink-3">{t("round1.needMore", { min })}</span>
+        <span className="w-full text-xs text-ink-3">{t("round1.needMore", { min })}</span>
       ) : null}
     </div>
   );

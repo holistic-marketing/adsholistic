@@ -2,38 +2,26 @@
 
 import { useTranslations } from "next-intl";
 import type { CreativeAssetListItem } from "@/lib/creatives/types";
-import { CrmPanel } from "@/components/dashboard/crm-ui";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { EmptyState, Meter, ToneBadge, type Tone } from "@/components/ui/PanelKit";
 import { CreativeMediaTile } from "@/features/creative-analyzer/components/CreativeMediaTile";
-import { cn } from "@/lib/cn";
 
-function ScoreRing({
-  score,
-  scoreLabel,
-}: {
-  score: number;
-  scoreLabel: string;
-}) {
+/** Puntaje en anillo: pista gris y avance naranja. */
+function ScoreRing({ score, scoreLabel }: { score: number; scoreLabel: string }) {
   const r = 22;
   const c = 2 * Math.PI * r;
   const pct = Math.min(100, Math.max(0, score)) / 100;
   const offset = c * (1 - pct);
   return (
-    <div className="relative h-[64px] w-[64px] shrink-0">
-      <svg viewBox="0 0 56 56" className="h-full w-full -rotate-90">
+    <div className="relative size-16 shrink-0">
+      <svg viewBox="0 0 56 56" className="h-full w-full -rotate-90" aria-hidden>
+        <circle cx="28" cy="28" r={r} fill="none" stroke="var(--ui-muted)" strokeWidth="5" />
         <circle
           cx="28"
           cy="28"
           r={r}
           fill="none"
-          stroke="rgb(20 18 16 / 0.08)"
-          strokeWidth="5"
-        />
-        <circle
-          cx="28"
-          cy="28"
-          r={r}
-          fill="none"
-          stroke="var(--auth-accent)"
+          stroke="var(--ui-accent)"
           strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={c}
@@ -41,39 +29,14 @@ function ScoreRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[15px] font-bold tabular-nums leading-none text-[var(--auth-text)]">
-          {score}
-        </span>
-        <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-          {scoreLabel}
-        </span>
+        <span className="num text-[15px] font-semibold leading-none text-ink">{score}</span>
+        <span className="text-[9px] font-medium uppercase tracking-[0.06em] text-ink-3">{scoreLabel}</span>
       </div>
     </div>
   );
 }
 
-function MetricBar({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--auth-text-soft)]">
-        <span>{label}</span>
-        <span className="tabular-nums text-[var(--auth-text-muted)]">{value}</span>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-[rgb(20_18_16_/_0.06)]">
-        <div
-          className="h-full rounded-full bg-accent-btn transition-[width]"
-          style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-export function CreativeAssetsPanel({
-  assets,
-}: {
-  assets: CreativeAssetListItem[];
-}) {
+export function CreativeAssetsPanel({ assets }: { assets: CreativeAssetListItem[] }) {
   const t = useTranslations("creatives.assets");
 
   function jobLabel(status: string | null) {
@@ -85,146 +48,90 @@ export function CreativeAssetsPanel({
     return status;
   }
 
-  function verdictFromScore(score: number, policyRisks: string[]) {
-    if (policyRisks.length > 0 && score < 70) {
-      return { label: t("verdictPolicy"), tone: "warn" as const };
-    }
-    if (score >= 80) return { label: t("verdictReady"), tone: "good" as const };
-    if (score >= 60) return { label: t("verdictImprove"), tone: "mid" as const };
-    return { label: t("verdictRedo"), tone: "bad" as const };
+  function verdictFromScore(score: number, policyRisks: string[]): { label: string; tone: Tone } {
+    if (policyRisks.length > 0 && score < 70) return { label: t("verdictPolicy"), tone: "warn" };
+    if (score >= 80) return { label: t("verdictReady"), tone: "ok" };
+    if (score >= 60) return { label: t("verdictImprove"), tone: "accent" };
+    return { label: t("verdictRedo"), tone: "danger" };
   }
 
   return (
-    <CrmPanel title={t("title")} subtitle={t("subtitle")}>
+    <PanelCard title={t("title")} description={t("subtitle")} ruled>
       {assets.length === 0 ? (
-        <div className="px-4 py-10 text-center sm:px-5">
-          <p className="text-[14px] font-semibold text-[var(--auth-text)]">
-            {t("emptyTitle")}
-          </p>
-          <p className="mt-1.5 text-[13px] text-[var(--auth-text-muted)]">
-            {t("emptyBody")}
-          </p>
-        </div>
+        <EmptyState icon="video" title={t("emptyTitle")} description={t("emptyBody")} />
       ) : (
-        <ul className="max-h-[32rem] space-y-3 overflow-y-auto p-3 sm:p-4">
+        <ul className="max-h-[32rem] divide-y divide-line overflow-y-auto">
           {assets.map((asset) => {
             const insight = asset.insight;
-            const verdict = insight
-              ? verdictFromScore(insight.overallScore, insight.policyRisks)
-              : null;
+            const verdict = insight ? verdictFromScore(insight.overallScore, insight.policyRisks) : null;
             return (
-              <li
-                key={asset.id}
-                className="rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] bg-surface p-3.5 shadow-[0_8px_20px_rgb(20_18_16_/_0.03)] sm:p-4"
-              >
-                <div className="flex gap-3.5">
-                  {asset.previewUrl || asset.posterUrl ? (
-                    <CreativeMediaTile
-                      previewUrl={asset.previewUrl}
-                      posterUrl={asset.posterUrl}
-                      mediaKind={asset.mediaKind}
-                      label={asset.name}
-                      playLabel={t("playVideo")}
-                    />
-                  ) : null}
-                  {insight ? (
-                    <ScoreRing score={insight.overallScore} scoreLabel={t("score")} />
-                  ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[rgb(255_248_243_/_0.9)] text-[11px] font-semibold text-[var(--auth-text-muted)]">
-                      …
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-[14px] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
-                          {asset.name}
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-[var(--auth-text-muted)]">
-                          {[
-                            asset.assetType,
-                            asset.accountName,
-                            jobLabel(asset.jobStatus),
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                      </div>
-                      {verdict ? (
-                        <span
-                          className={cn(
-                            "shrink-0 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-[0.06em]",
-                            verdict.tone === "good" &&
-                              "bg-subtle text-ok-fg",
-                            verdict.tone === "mid" &&
-                              "bg-[rgb(255_120_31_/_0.12)] text-accent-text",
-                            verdict.tone === "warn" &&
-                              "bg-warn-bg text-warn-fg",
-                            verdict.tone === "bad" &&
-                              "bg-field text-danger-fg",
-                          )}
-                        >
-                          {verdict.label}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {insight ? (
-                      <>
-                        <p className="mt-2.5 text-[13px] leading-5 text-[var(--auth-text)]">
-                          {insight.summary}
-                        </p>
-                        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                          <MetricBar label={t("clarity")} value={insight.clarityScore} />
-                          <MetricBar label={t("brand")} value={insight.brandScore} />
-                          <MetricBar
-                            label={t("policy")}
-                            value={insight.complianceScore}
-                          />
-                        </div>
-                        {insight.hooks.length > 0 ? (
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {insight.hooks.slice(0, 4).map((hook) => (
-                              <span
-                                key={hook}
-                                className="rounded-md bg-[rgb(20_18_16_/_0.04)] px-2 py-1 text-[11px] font-medium text-[var(--auth-text-muted)]"
-                              >
-                                {hook}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                        {insight.whyItMayPerform ? (
-                          <p className="mt-2.5 text-[12px] leading-5 text-[var(--auth-text-muted)]">
-                            <span className="font-semibold text-[var(--auth-text)]">
-                              {t("whyItMayPerform")}
-                            </span>
-                            {insight.whyItMayPerform}
-                          </p>
-                        ) : null}
-                        {insight.policyRisks.length > 0 ? (
-                          <p className="mt-2 text-[12px] leading-5 text-warn-fg">
-                            <span className="font-semibold">{t("policyRisk")}</span>
-                            {insight.policyRisks.join(" · ")}
-                          </p>
-                        ) : null}
-                      </>
-                    ) : asset.jobStatus === "failed" ? (
-                      <p className="mt-2 text-[12px] text-danger-fg">
-                        {t("analysisFailed")}
-                      </p>
-                    ) : (
-                      <p className="mt-2 text-[12px] text-[var(--auth-text-muted)]">
-                        {t("analyzing")}
-                      </p>
-                    )}
+              <li key={asset.id} className="flex gap-3.5 py-4 first:pt-1 last:pb-1">
+                {asset.previewUrl || asset.posterUrl ? (
+                  <CreativeMediaTile
+                    previewUrl={asset.previewUrl}
+                    posterUrl={asset.posterUrl}
+                    mediaKind={asset.mediaKind}
+                    label={asset.name}
+                    playLabel={t("playVideo")}
+                  />
+                ) : null}
+                {insight ? (
+                  <ScoreRing score={insight.overallScore} scoreLabel={t("score")} />
+                ) : (
+                  <div aria-hidden className="grid size-16 shrink-0 place-items-center rounded-full bg-subtle text-xs font-semibold text-ink-3">
+                    …
                   </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-ink">{asset.name}</p>
+                      <p className="mt-0.5 text-xs text-ink-3">
+                        {[asset.assetType, asset.accountName, jobLabel(asset.jobStatus)].filter(Boolean).join(" · ")}
+                      </p>
+                    </div>
+                    {verdict ? <ToneBadge tone={verdict.tone}>{verdict.label}</ToneBadge> : null}
+                  </div>
+
+                  {insight ? (
+                    <>
+                      <p className="mt-2.5 text-[13px] leading-5 text-ink">{insight.summary}</p>
+                      <div className="grid gap-x-4 sm:grid-cols-3">
+                        <Meter label={t("clarity")} value={insight.clarityScore / 100} display={insight.clarityScore} />
+                        <Meter label={t("brand")} value={insight.brandScore / 100} display={insight.brandScore} />
+                        <Meter label={t("policy")} value={insight.complianceScore / 100} display={insight.complianceScore} />
+                      </div>
+                      {insight.hooks.length > 0 ? (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {insight.hooks.slice(0, 4).map((hook) => (
+                            <ToneBadge key={hook}>{hook}</ToneBadge>
+                          ))}
+                        </div>
+                      ) : null}
+                      {insight.whyItMayPerform ? (
+                        <p className="mt-2.5 text-xs leading-5 text-ink-2">
+                          <span className="font-semibold text-ink">{t("whyItMayPerform")}</span>
+                          {insight.whyItMayPerform}
+                        </p>
+                      ) : null}
+                      {insight.policyRisks.length > 0 ? (
+                        <p className="mt-2 text-xs leading-5 text-warn-fg">
+                          <span className="font-semibold">{t("policyRisk")}</span>
+                          {insight.policyRisks.join(" · ")}
+                        </p>
+                      ) : null}
+                    </>
+                  ) : asset.jobStatus === "failed" ? (
+                    <p className="mt-2 text-xs text-danger-fg">{t("analysisFailed")}</p>
+                  ) : (
+                    <p className="mt-2 text-xs text-ink-3">{t("analyzing")}</p>
+                  )}
                 </div>
               </li>
             );
           })}
         </ul>
       )}
-    </CrmPanel>
+    </PanelCard>
   );
 }

@@ -15,6 +15,9 @@ import { useTranslations } from "next-intl";
 import type { ChatMessage } from "../types/support.types";
 import { formatSupportChatTimestamp } from "@/lib/support/chat-time";
 import { buildChatTimeline } from "@/features/support/lib/chat-message-timeline";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
+import { EmptyState } from "@/components/ui/PanelKit";
 import { cn } from "@/lib/cn";
 import { HecomClienteAvatar } from "@/features/clientes/components/HecomClienteAvatar.client";
 
@@ -23,6 +26,10 @@ interface PendingFile {
   file: File;
   previewUrl: string | null;
 }
+
+/** `panel`: sistema visual v3 (páginas de soporte del panel).
+    `widget`: el chat flotante, con su cabecera oscura (sus botones de cabecera son claros). */
+type ChatAppearance = "panel" | "widget";
 
 interface ChatConversationProps {
   messages: ChatMessage[];
@@ -47,9 +54,63 @@ interface ChatConversationProps {
   composerDisabledReason?: string;
   /** Texto cuando no hay mensajes (además del estado de carga). */
   emptyHint?: string;
+  appearance?: ChatAppearance;
 }
 
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif,application/pdf";
+
+/* Clases por apariencia. La del widget es la de siempre: el componente flotante
+   (components/floating) le pasa botones pensados para una cabecera oscura. */
+const LOOK = {
+  panel: {
+    root: "bg-field text-ink",
+    head: "flex min-h-[60px] items-center gap-3 border-b border-line bg-surface px-4 py-2.5 sm:px-5",
+    back: "inline-grid size-8 shrink-0 place-items-center rounded-ctl text-ink hover:bg-hover lg:hidden",
+    avatar: "",
+    title: "truncate font-semibold text-ink",
+    subtitle: "mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-ink-3",
+    clear: buttonClass("outline", "sm"),
+    log: "relative min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain p-4 sm:p-5",
+    drop: "pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-card border-2 border-dashed border-accent bg-surface/90 text-sm font-semibold text-accent-text",
+    loading: "rounded-box border border-line bg-surface px-4 py-3 text-sm text-ink-2",
+    day: "rounded-full border border-line bg-surface px-3 py-0.5 text-[11px] font-medium text-ink-3",
+    error: "rounded-box border border-danger-line bg-danger-bg px-3 py-2 text-[13px] text-danger-fg",
+    form: "border-t border-line bg-surface px-4 py-3 sm:px-5",
+    disabled: "mb-3 rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[13px] text-warn-fg",
+    pending: "relative overflow-hidden rounded-box border border-line bg-subtle",
+    pendingName: "text-ink-2",
+    remove: "absolute right-1 top-1 grid size-5 place-items-center rounded-[5px] bg-ink/70 text-[10px] text-surface",
+    box: "rounded-box border border-line bg-field shadow-ctl transition focus-within:border-accent focus-within:bg-surface focus-within:ring-[3px] focus-within:ring-[var(--ui-ring)]",
+    textarea: "max-h-40 min-h-[44px] w-full resize-none bg-transparent px-3 py-2 text-sm leading-5 text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60",
+    attach: "inline-grid size-8 shrink-0 place-items-center rounded-ctl text-ink-2 transition-colors hover:bg-hover hover:text-ink disabled:opacity-50",
+    hint: "hidden text-[11px] text-ink-3 sm:inline",
+    send: buttonClass("primary", "sm"),
+  },
+  widget: {
+    root: "bg-surface text-[var(--auth-text)]",
+    head: "flex min-h-[68px] items-center gap-3 border-b border-white/10 bg-[linear-gradient(135deg,#21150f_0%,#382117_70%,#612b18_140%)] px-3.5 py-3 shadow-sm sm:px-5",
+    back: "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-surface/10 hover:text-white lg:hidden",
+    avatar: "h-11 w-11 text-[12px] shadow-md ring-2 ring-white/20",
+    title: "truncate text-[15px] font-bold tracking-[-0.01em] text-white",
+    subtitle: "mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-white/70",
+    clear: "rounded-md border border-white/20 bg-surface/10 px-2.5 py-1 text-[11px] font-semibold text-white/90 hover:bg-surface/15 disabled:opacity-50",
+    log: "relative min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-subtle p-3 sm:p-5",
+    drop: "pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-card border-2 border-dashed border-[var(--brand-primary)] bg-surface/90 text-sm font-semibold text-[var(--brand-primary-deep)]",
+    loading: "rounded-card bg-surface px-4 py-3 text-sm text-ink-2 shadow-sm ring-1 ring-[var(--border-subtle)]",
+    day: "rounded-full bg-surface/90 px-3 py-1 text-[11px] font-semibold text-ink-2 shadow-sm ring-1 ring-black/5",
+    error: "rounded-card border border-danger-line bg-danger-bg px-3 py-2 text-xs text-danger-fg",
+    form: "border-t border-[var(--auth-divider)] bg-surface p-3 shadow-[0_-8px_24px_rgb(15_23_42_/_0.04)] sm:px-5 sm:py-4",
+    disabled: "mb-3 rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[12px] font-medium text-warn-fg",
+    pending: "relative overflow-hidden rounded-box border border-[var(--auth-input-border)] bg-[var(--surface-soft)]",
+    pendingName: "text-[var(--auth-text-muted)]",
+    remove: "absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] text-white",
+    box: "rounded-card border border-[var(--auth-input-border)] bg-field p-2 shadow-sm transition focus-within:border-[var(--auth-accent)]/70 focus-within:bg-surface focus-within:ring-4 focus-within:ring-[var(--auth-accent)]/10",
+    textarea: "max-h-40 min-h-[48px] w-full resize-none bg-transparent px-3 py-2 text-[14px] leading-5 text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:outline-none disabled:opacity-60",
+    attach: "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--auth-text-muted)] transition-colors hover:bg-surface hover:text-[var(--auth-text)] disabled:opacity-50",
+    hint: "hidden text-[11px] text-[var(--auth-text-soft)] sm:inline",
+    send: "inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[var(--brand-primary)] px-4 text-[13px] font-bold text-white shadow-md shadow-orange-500/20 hover:bg-[var(--brand-primary-deep)] disabled:opacity-50",
+  },
+} satisfies Record<ChatAppearance, Record<string, string>>;
 
 function isAllowedFile(file: File) {
   return (
@@ -80,8 +141,11 @@ export function ChatConversation({
   composerDisabled = false,
   composerDisabledReason,
   emptyHint,
+  appearance = "widget",
 }: ChatConversationProps) {
   const t = useTranslations("support");
+  const look = LOOK[appearance];
+  const panel = appearance === "panel";
   const resolvedTitle = title ?? t("writeUs");
   const resolvedSubtitle = subtitle ?? t("ticketSaved");
   const resolvedEmptyHint = emptyHint ?? t("emptyHint");
@@ -197,10 +261,7 @@ export function ChatConversation({
 
   return (
     <div
-      className={cn(
-        "flex flex-col bg-surface text-[var(--auth-text)]",
-        className,
-      )}
+      className={cn("flex flex-col", look.root, className)}
       onDragOver={(e) => {
         e.preventDefault();
         setDragOver(true);
@@ -208,28 +269,27 @@ export function ChatConversation({
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
-      <div className="flex min-h-[68px] items-center gap-3 border-b border-white/10 bg-[linear-gradient(135deg,#21150f_0%,#382117_70%,#612b18_140%)] px-3.5 py-3 shadow-sm sm:px-5">
+      <div className={look.head}>
         {showBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/80 hover:bg-surface/10 hover:text-white lg:hidden"
-            aria-label={t("back")}
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
+          <button type="button" onClick={onBack} className={look.back} aria-label={t("back")}>
+            {panel ? (
+              <PanelIcon name="chevron-left" />
+            ) : (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            )}
           </button>
         ) : null}
         <HecomClienteAvatar
           name={resolvedTitle}
           avatarUrl={avatarUrl}
           size="sm"
-          className="h-11 w-11 text-[12px] shadow-md ring-2 ring-white/20"
+          className={look.avatar || undefined}
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-bold tracking-[-0.01em] text-white">{resolvedTitle}</p>
-          <p className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] text-white/70"><span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-ok-solid" /><span className="truncate">{resolvedSubtitle}</span></p>
+          <p className={look.title}>{resolvedTitle}</p>
+          <p className={look.subtitle}><span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-ok-solid" /><span className="truncate">{resolvedSubtitle}</span></p>
         </div>
         {onClearChat || headerActions ? (
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
@@ -243,7 +303,7 @@ export function ChatConversation({
                   }
                   onClearChat();
                 }}
-                className="rounded-md border border-white/20 bg-surface/10 px-2.5 py-1 text-[11px] font-semibold text-white/90 hover:bg-surface/15 disabled:opacity-50"
+                className={look.clear}
               >
                 {clearingChat ? t("clearingChat") : t("clearChat")}
               </button>
@@ -255,86 +315,66 @@ export function ChatConversation({
 
       <div
         ref={messagesScrollRef}
-        className="relative min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-subtle p-3 sm:p-5"
+        className={look.log}
+        role={panel ? "log" : undefined}
+        aria-label={panel ? resolvedTitle : undefined}
       >
-        {dragOver ? (
-          <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-card border-2 border-dashed border-[var(--brand-primary)] bg-surface/90 text-sm font-semibold text-[var(--brand-primary-deep)]">
-            {t("dropFiles")}
-          </div>
-        ) : null}
+        {dragOver ? <div className={look.drop}>{t("dropFiles")}</div> : null}
 
         {loading ? (
-          <p className="rounded-card bg-surface px-4 py-3 text-sm text-ink-2 shadow-sm ring-1 ring-[var(--border-subtle)]">
-            {t("loading")}
-          </p>
+          <p className={look.loading}>{t("loading")}</p>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center rounded-card bg-surface px-6 py-10 text-center shadow-sm ring-1 ring-[var(--border-subtle)]">
-            <span
-              aria-hidden
-              className="flex h-12 w-12 items-center justify-center rounded-card bg-subtle text-xl"
-            >
-              💬
-            </span>
-            <p className="mt-3 text-sm font-semibold text-ink">
-              {t("noMessages")}
-            </p>
-            <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-ink-2">
-              {resolvedEmptyHint}
-            </p>
-          </div>
+          panel ? (
+            <EmptyState icon="chat" title={t("noMessages")} description={resolvedEmptyHint} />
+          ) : (
+            <div className="flex flex-col items-center rounded-card bg-surface px-6 py-10 text-center shadow-sm ring-1 ring-[var(--border-subtle)]">
+              <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-card bg-subtle text-xl">
+                💬
+              </span>
+              <p className="mt-3 text-sm font-semibold text-ink">{t("noMessages")}</p>
+              <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-ink-2">{resolvedEmptyHint}</p>
+            </div>
+          )
         ) : (
           timeline.map((item) => {
             if (item.kind === "day") {
               return (
                 <div key={item.key} className="flex justify-center py-1">
-                  <span className="rounded-full bg-surface/90 px-3 py-1 text-[11px] font-semibold text-ink-2 shadow-sm ring-1 ring-black/5">
-                    {item.label}
-                  </span>
+                  <span className={look.day}>{item.label}</span>
                 </div>
               );
             }
-            return (
-              <ChatMessageBubble key={item.message.id} message={item.message} />
+            return panel ? (
+              <PanelBubble key={item.message.id} message={item.message} />
+            ) : (
+              <WidgetBubble key={item.message.id} message={item.message} />
             );
           })
         )}
         <div ref={messagesEndRef} className="h-px w-full shrink-0" aria-hidden />
-        {error ? (
-          <p className="rounded-card border border-danger-line bg-danger-bg px-3 py-2 text-xs text-danger-fg">
-            {error}
-          </p>
-        ) : null}
+        {error ? <p className={look.error}>{error}</p> : null}
       </div>
 
-      <div className="border-t border-[var(--auth-divider)] bg-surface p-3 shadow-[0_-8px_24px_rgb(15_23_42_/_0.04)] sm:px-5 sm:py-4">
+      <div className={look.form}>
         {composerDisabled ? (
-          <p className="mb-3 rounded-box border border-warn-line bg-warn-bg px-3 py-2 text-[12px] font-medium text-warn-fg">
-            {composerDisabledReason ?? t("composerDisabled")}
-          </p>
+          <p className={look.disabled}>{composerDisabledReason ?? t("composerDisabled")}</p>
         ) : null}
         {pending.length > 0 ? (
           <div className="mb-3 flex flex-wrap gap-2">
             {pending.map((item) => (
-              <div
-                key={item.id}
-                className="relative overflow-hidden rounded-box border border-[var(--auth-input-border)] bg-[var(--surface-soft)]"
-              >
+              <div key={item.id} className={look.pending}>
                 {item.previewUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.previewUrl}
-                    alt={item.file.name}
-                    className="h-16 w-16 object-cover"
-                  />
+                  <img src={item.previewUrl} alt={item.file.name} className="h-16 w-16 object-cover" />
                 ) : (
-                  <div className="flex h-16 w-28 items-center overflow-hidden break-all px-2 pr-6 text-[11px] font-medium leading-tight text-[var(--auth-text-muted)]">
+                  <div className={cn("flex h-16 w-28 items-center overflow-hidden break-all px-2 pr-6 text-[11px] font-medium leading-tight", look.pendingName)}>
                     <span className="line-clamp-3">{item.file.name}</span>
                   </div>
                 )}
                 <button
                   type="button"
                   onClick={() => removePending(item.id)}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] text-white"
+                  className={look.remove}
                   aria-label={t("removeFile")}
                 >
                   ×
@@ -344,7 +384,7 @@ export function ChatConversation({
           </div>
         ) : null}
 
-        <div className="rounded-card border border-[var(--auth-input-border)] bg-field p-2 shadow-sm transition focus-within:border-[var(--auth-accent)]/70 focus-within:bg-surface focus-within:ring-4 focus-within:ring-[var(--auth-accent)]/10">
+        <div className={look.box}>
           <textarea
             ref={textareaRef}
             value={inputValue}
@@ -355,9 +395,9 @@ export function ChatConversation({
             disabled={composerDisabled}
             placeholder={t("placeholder")}
             aria-label={t("writeUs")}
-            className="max-h-40 min-h-[48px] w-full resize-none bg-transparent px-3 py-2 text-[14px] leading-5 text-[var(--auth-text)] placeholder:text-[var(--auth-text-soft)] focus:outline-none disabled:opacity-60"
+            className={look.textarea}
           />
-          <div className="flex items-center justify-between gap-2 px-1 pb-1">
+          <div className={cn("flex items-center justify-between gap-2", panel ? "px-1.5 pb-1.5" : "px-1 pb-1")}>
             <div className="flex items-center gap-1">
               <input
                 ref={fileInputRef}
@@ -371,7 +411,7 @@ export function ChatConversation({
                 type="button"
                 disabled={sending || composerDisabled}
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--auth-text-muted)] transition-colors hover:bg-surface hover:text-[var(--auth-text)] disabled:opacity-50"
+                className={look.attach}
                 aria-label={t("attachFile")}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
@@ -379,9 +419,7 @@ export function ChatConversation({
                 </svg>
                 <span className="sr-only">{t("attach")}</span>
               </button>
-              <span className="hidden text-[11px] text-[var(--auth-text-soft)] sm:inline">
-                {t("enterHint")}
-              </span>
+              <span className={look.hint}>{t("enterHint")}</span>
             </div>
             <button
               type="button"
@@ -391,10 +429,11 @@ export function ChatConversation({
                 sending ||
                 (!inputValue.trim() && pendingFiles.length === 0)
               }
-              className="inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[var(--brand-primary)] px-4 text-[13px] font-bold text-white shadow-md shadow-orange-500/20 hover:bg-[var(--brand-primary-deep)] disabled:opacity-50"
+              className={look.send}
             >
+              {panel && !sending ? <PanelIcon name="send" /> : null}
               {sending ? t("sending") : t("send")}
-              {!sending ? (
+              {!panel && !sending ? (
                 <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                 </svg>
@@ -407,7 +446,67 @@ export function ChatConversation({
   );
 }
 
-function ChatMessageBubble({ message }: { message: ChatMessage }) {
+function MessageAttachments({ message, linkClass }: { message: ChatMessage; linkClass: string }) {
+  if (!message.attachments || message.attachments.length === 0) return null;
+  return (
+    <div className="mt-2 space-y-2">
+      {message.attachments.map((attachment) => {
+        const isImage = attachment.mimeType.startsWith("image/");
+        if (isImage && attachment.url) {
+          return (
+            <a
+              key={`${message.id}-${attachment.path}`}
+              href={attachment.url}
+              target="_blank"
+              rel="noreferrer"
+              className="block overflow-hidden rounded-box"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={attachment.url} alt={attachment.name} className="max-h-56 w-full object-cover" />
+            </a>
+          );
+        }
+        return (
+          <a
+            key={`${message.id}-${attachment.path}`}
+            href={attachment.url ?? undefined}
+            target="_blank"
+            rel="noreferrer"
+            className={cn("inline-flex max-w-full items-center gap-2 break-all rounded-lg px-2.5 py-1.5 text-xs font-semibold", linkClass)}
+          >
+            📎 {attachment.name}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Mensaje v3 (`.msg`): los tuyos a la derecha, en naranja suave. */
+function PanelBubble({ message }: { message: ChatMessage }) {
+  const mine = message.role === "user";
+  return (
+    <div className={cn("flex", mine ? "justify-end" : "justify-start")}>
+      <div
+        className={cn(
+          "min-w-0 max-w-[min(72%,32.5rem)] rounded-box border px-3 py-2 text-sm text-ink",
+          mine ? "border-accent-line bg-accent-soft" : "border-line bg-surface",
+        )}
+      >
+        {message.text ? <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{message.text}</p> : null}
+        <MessageAttachments message={message} linkClass="bg-subtle text-ink" />
+        {message.senderName ? (
+          <p className={cn("mt-1 text-[11px] font-semibold", mine ? "text-ink-2" : "text-accent-text")}>{message.senderName}</p>
+        ) : null}
+        <p className="mt-0.5 font-mono text-[11px] text-ink-3">
+          {message.createdAt ? formatSupportChatTimestamp(message.createdAt) : message.timestamp}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function WidgetBubble({ message }: { message: ChatMessage }) {
   return (
     <div
       className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
@@ -420,46 +519,10 @@ function ChatMessageBubble({ message }: { message: ChatMessage }) {
         }`}
       >
         {message.text ? <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{message.text}</p> : null}
-        {message.attachments && message.attachments.length > 0 ? (
-          <div className="mt-2 space-y-2">
-            {message.attachments.map((attachment) => {
-              const isImage = attachment.mimeType.startsWith("image/");
-              if (isImage && attachment.url) {
-                return (
-                  <a
-                    key={`${message.id}-${attachment.path}`}
-                    href={attachment.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block overflow-hidden rounded-box"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={attachment.url}
-                      alt={attachment.name}
-                      className="max-h-56 w-full object-cover"
-                    />
-                  </a>
-                );
-              }
-              return (
-                <a
-                  key={`${message.id}-${attachment.path}`}
-                  href={attachment.url ?? undefined}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`inline-flex max-w-full items-center gap-2 break-all rounded-lg px-2.5 py-1.5 text-xs font-semibold ${
-                    message.role === "user"
-                      ? "bg-surface/15 text-white"
-                      : "bg-[var(--surface-soft)] text-[var(--auth-text)]"
-                  }`}
-                >
-                  📎 {attachment.name}
-                </a>
-              );
-            })}
-          </div>
-        ) : null}
+        <MessageAttachments
+          message={message}
+          linkClass={message.role === "user" ? "bg-surface/15 text-white" : "bg-[var(--surface-soft)] text-[var(--auth-text)]"}
+        />
         {message.senderName ? (
           <p
             className={`mt-1.5 text-[10px] font-semibold ${

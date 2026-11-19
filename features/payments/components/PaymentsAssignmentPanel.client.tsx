@@ -19,6 +19,9 @@ import { TransferBalanceModal } from "./TransferBalanceModal.client";
 import { PaymentsGerenteAccountsSummary } from "./PaymentsGerenteAccountsSummary.client";
 import { PaymentsTable } from "./PaymentsTable";
 import { AppealAccountModal } from "./AppealAccountModal.client";
+import { FlushStat, FlushStats } from "./PaymentsFlushStats";
+import { Button } from "@/components/ui/Button";
+import { SquareIcon } from "@/components/ui/PanelKit";
 import type { AppealStatus } from "@/lib/appeals/account-appeals.shared";
 import type { PaymentAccountAllocation } from "@/types/payment";
 
@@ -152,42 +155,25 @@ export function PaymentsAssignmentPanel({
           role="status"
           aria-live="polite"
         >
-          <div className="overflow-hidden rounded-card border border-ok-line bg-surface shadow-[0_18px_50px_-24px_rgb(16_185_129_/_0.55)]">
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-ok-bg text-ok-fg ring-1 ring-ok-line">
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              </span>
+          <div className="overflow-hidden rounded-box border border-line bg-surface shadow-pop">
+            <div className="flex items-start gap-3 px-4 py-3">
+              <SquareIcon icon="check-circle" tone="ok" />
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold tracking-[-0.01em] text-ok-fg">
+                <p className="text-sm font-semibold text-ink">
                   {allocateToast.agencyBmFunding
                     ? t("toast.reloadReady")
                     : t("toast.assignedOk")}
                 </p>
-                <p className="mt-0.5 break-words text-[12.5px] leading-5 tabular-nums text-[#3f6212]">
-                  {formatMoney(allocateToast.amount)} →{" "}
-                  <span className="font-semibold">
+                <p className="mt-0.5 break-words text-[13px] text-ink-2">
+                  <span className="num">{formatMoney(allocateToast.amount)}</span> →{" "}
+                  <span className="font-medium text-ink">
                     {allocateToast.accountName}
                   </span>
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setAllocateToast(null)}
-                className="min-h-10 rounded-lg px-3 py-1 text-[11px] font-semibold text-ink-2 hover:bg-field sm:min-h-0"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setAllocateToast(null)}>
                 {tCommon("close")}
-              </button>
+              </Button>
             </div>
             <div className="h-1 bg-ok-bg">
               <div className="h-full w-full origin-left animate-[allocateToast_5.6s_linear_forwards] bg-ok-solid" />
@@ -204,6 +190,7 @@ export function PaymentsAssignmentPanel({
           liveCupoTotalUsd={liveTikTokSummary.cupo}
           liveMetricsLoading={loading}
           lastUpdatedAt={lastUpdatedAt}
+          variant="standalone"
         />
       ) : (
         <ClientBalanceComparison
@@ -219,28 +206,30 @@ export function PaymentsAssignmentPanel({
         />
       )}
 
-      <PaymentToolbar
-        search={search}
-        status={status}
-        onSearchChange={setSearch}
-        onStatusChange={setStatus}
-        sort={sort}
-        onSortChange={setSort}
-        agencyBmFunding={agencyBmFunding}
-      />
-      <PaymentsTable
-        accounts={filteredAccounts}
-        onAllocate={setSelectedAccount}
-        onReclaim={setReclaimAccount}
-        onTransfer={setTransferAccount}
-        onEditTikTokIds={setEditAccount}
-        agencyBmFunding={agencyBmFunding}
-        clientSelfService={!agencyBmFunding}
-        liveMetricsByAdvertiser={metricsByAdvertiser}
-        liveMetricsLoading={loading}
-        appealStatusByAdvertiser={appealStatus}
-        onAppeal={setAppealAccount}
-      />
+      <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
+        <PaymentToolbar
+          search={search}
+          status={status}
+          onSearchChange={setSearch}
+          onStatusChange={setStatus}
+          sort={sort}
+          onSortChange={setSort}
+          agencyBmFunding={agencyBmFunding}
+        />
+        <PaymentsTable
+          accounts={filteredAccounts}
+          onAllocate={setSelectedAccount}
+          onReclaim={setReclaimAccount}
+          onTransfer={setTransferAccount}
+          onEditTikTokIds={setEditAccount}
+          agencyBmFunding={agencyBmFunding}
+          clientSelfService={!agencyBmFunding}
+          liveMetricsByAdvertiser={metricsByAdvertiser}
+          liveMetricsLoading={loading}
+          appealStatusByAdvertiser={appealStatus}
+          onAppeal={setAppealAccount}
+        />
+      </div>
       {appealAccount ? (
         <AppealAccountModal
           key={appealAccount.id}
@@ -363,54 +352,23 @@ function ClientBalanceComparison({
   })();
 
   return (
-    <div
-      className="border-b border-[var(--auth-border)] bg-field px-4 py-3 sm:px-5"
-      aria-label={t("balanceCompare.aria")}
-      aria-busy={loading}
+    <FlushStats
+      label={t("balanceCompare.aria")}
+      busy={loading}
+      className="mb-4 grid-cols-2"
     >
-      <div className="grid grid-cols-2 divide-x divide-[var(--auth-divider)] overflow-hidden rounded-box border border-[var(--auth-divider)] bg-surface">
-        <BalanceValue
-          label={t("balanceCompare.holistic")}
-          value={formatMoney(walletBalance)}
-          hint={t("balanceCompare.holisticHint")}
-        />
-        <BalanceValue
-          label={t("balanceCompare.tiktok")}
-          value={tiktokValue}
-          hint={tiktokHint}
-          live
-        />
-      </div>
-    </div>
-  );
-}
-
-function BalanceValue({
-  label,
-  value,
-  hint,
-  live = false,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  live?: boolean;
-}) {
-  return (
-    <div className="min-w-0 px-3 py-3 sm:px-4">
-      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-        {label}
-      </p>
-      <p
-        className="mt-0.5 truncate text-[16px] font-semibold tabular-nums tracking-[-0.025em] text-[var(--auth-text)] sm:text-[17px]"
-        aria-live={live ? "polite" : undefined}
-      >
-        {value}
-      </p>
-      <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-ink-3 sm:line-clamp-none">
-        {hint}
-      </p>
-    </div>
+      <FlushStat
+        label={t("balanceCompare.holistic")}
+        value={formatMoney(walletBalance)}
+        sub={t("balanceCompare.holisticHint")}
+      />
+      <FlushStat
+        label={t("balanceCompare.tiktok")}
+        value={tiktokValue}
+        sub={tiktokHint}
+        live
+      />
+    </FlushStats>
   );
 }
 

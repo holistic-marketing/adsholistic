@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIsClient } from "@/hooks/useIsClient";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { cn } from "@/lib/cn";
 import {
   isLikelyImageUrl,
@@ -80,12 +82,12 @@ export function CreativeMediaTile({
     <>
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden rounded-box bg-[rgb(20_18_16_/_0.06)]",
+          "relative shrink-0 overflow-hidden border border-line bg-subtle",
           size === "poster"
-            ? "h-44 w-28"
+            ? "h-44 w-28 rounded-box"
             : size === "card"
-              ? "h-[7.25rem] w-[4.6rem]"
-              : "h-14 w-14 rounded-lg",
+              ? "h-[7.25rem] w-[4.6rem] rounded-box"
+              : "size-14 rounded-ctl",
         )}
       >
         {still || playable ? (
@@ -106,28 +108,24 @@ export function CreativeMediaTile({
                 onError={() => setImageFailed(true)}
               />
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-black/10 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-                Video
+              <span className="flex h-full w-full items-center justify-center text-ink-3">
+                <PanelIcon name="video" />
               </span>
             )}
             {canPlay ? (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/35">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface/95 text-[11px] font-bold text-[var(--auth-text)] shadow-sm">
-                  ▶
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="grid size-8 place-items-center rounded-full bg-surface/95 text-ink shadow-card transition-transform group-hover:scale-110">
+                  <svg aria-hidden viewBox="0 0 24 24" className="ml-0.5 size-3.5" fill="currentColor">
+                    <path d="M8 5.5v13l10.5-6.5L8 5.5z" />
+                  </svg>
                 </span>
               </span>
             ) : null}
           </button>
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--auth-text-soft)]">
-              {mediaKind === "video" || size === "poster" ? "Video" : "—"}
-            </span>
-            {emptyLabel ? (
-              <span className="text-[9px] leading-3 text-[var(--auth-text-muted)]">
-                {emptyLabel}
-              </span>
-            ) : null}
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2 text-center text-ink-3">
+            {mediaKind === "video" || size === "poster" ? <PanelIcon name="video" /> : <span aria-hidden>—</span>}
+            {emptyLabel ? <span className="text-[10px] leading-3">{emptyLabel}</span> : null}
           </div>
         )}
       </div>
@@ -136,23 +134,22 @@ export function CreativeMediaTile({
         zoomOpen &&
         createPortal(
           <div
-            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-4 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-[var(--ui-scrim)] p-4"
             role="dialog"
             aria-modal="true"
             aria-label={label}
             onClick={() => setZoomOpen(false)}
           >
             <div
-              className="relative w-full max-w-md overflow-hidden rounded-card bg-black shadow-2xl"
+              className="relative w-full max-w-md overflow-hidden rounded-card border border-line bg-surface shadow-dlg"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
-                // Portal en <body>, fuera de .dashboard-canvas: ahí --auth-text es el claro de :root
-                // y el texto quedaba blanco sobre blanco. Tinta fija.
-                className="absolute right-3 top-3 z-10 inline-flex min-h-9 items-center rounded-full bg-surface/90 px-3 py-1 text-[12px] font-bold text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                className={buttonClass("outline", "sm", "absolute right-3 top-3 z-10")}
                 onClick={() => setZoomOpen(false)}
               >
+                <PanelIcon name="x" />
                 {closeLabel}
               </button>
               {playable ? (
@@ -160,7 +157,7 @@ export function CreativeMediaTile({
                   key={playable}
                   src={playable}
                   poster={still ?? undefined}
-                  className="max-h-[80vh] w-full bg-black object-contain"
+                  className="max-h-[80vh] w-full bg-subtle object-contain"
                   controls
                   autoPlay
                   playsInline
@@ -172,7 +169,7 @@ export function CreativeMediaTile({
                 <img
                   src={still}
                   alt={label}
-                  className="max-h-[80vh] w-full object-contain"
+                  className="max-h-[80vh] w-full bg-subtle object-contain"
                 />
               ) : null}
             </div>

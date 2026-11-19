@@ -1,3 +1,4 @@
+import type { Tone } from "@/components/ui/PanelKit";
 import type { ClienteModalidad, MonitorCliente } from "@/features/ops/types/prepago-monitor";
 
 /**
@@ -19,55 +20,13 @@ export type Verdict = {
 
 export const VERDICT_ORDER: VerdictKey[] = ["quitar_saldo", "preguntar", "cobrar", "acuerdo", "ok"];
 
-export const VERDICT_META: Record<
-  VerdictKey,
-  { label: string; short: string; dot: string; chip: string; ring: string; text: string; soft: string }
-> = {
-  quitar_saldo: {
-    label: "Error: quitar saldo",
-    short: "Quitar saldo",
-    dot: "bg-accent",
-    chip: "bg-subtle text-danger-fg",
-    ring: "ring-danger-line",
-    text: "text-danger-fg",
-    soft: "bg-field",
-  },
-  preguntar: {
-    label: "Preguntar al gerente",
-    short: "Preguntar",
-    dot: "bg-accent",
-    chip: "bg-accent-soft text-accent-text",
-    ring: "ring-accent-line",
-    text: "text-accent-text",
-    soft: "bg-field",
-  },
-  cobrar: {
-    label: "Cobrar deuda",
-    short: "Cobrar",
-    dot: "bg-warn-solid",
-    chip: "bg-warn-bg text-warn-fg",
-    ring: "ring-warn-line",
-    text: "text-warn-fg",
-    soft: "bg-field",
-  },
-  acuerdo: {
-    label: "Tiene acuerdo: solo vigilar",
-    short: "Con acuerdo",
-    dot: "bg-info-solid",
-    chip: "bg-subtle text-info-fg",
-    ring: "ring-info-line",
-    text: "text-info-fg",
-    soft: "bg-field",
-  },
-  ok: {
-    label: "Todo bien",
-    short: "Todo bien",
-    dot: "bg-ok-solid",
-    chip: "bg-subtle text-ok-fg",
-    ring: "ring-ok-line",
-    text: "text-ok-fg",
-    soft: "bg-field",
-  },
+/** Etiquetas y tono (insignias, puntos y avisos del panel) de cada veredicto. */
+export const VERDICT_META: Record<VerdictKey, { label: string; short: string; tone: Tone }> = {
+  quitar_saldo: { label: "Error: quitar saldo", short: "Quitar saldo", tone: "danger" },
+  preguntar: { label: "Preguntar al gerente", short: "Preguntar", tone: "accent" },
+  cobrar: { label: "Cobrar deuda", short: "Cobrar", tone: "warn" },
+  acuerdo: { label: "Tiene acuerdo: solo vigilar", short: "Con acuerdo", tone: "info" },
+  ok: { label: "Todo bien", short: "Todo bien", tone: "ok" },
 };
 
 const money = (v: number) =>
