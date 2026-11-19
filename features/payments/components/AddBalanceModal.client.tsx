@@ -44,7 +44,7 @@ import {
   PaymentFieldError,
   PaymentFieldLabel,
 } from "./PaymentDialog";
-import { HowToSteps } from "./PaymentsGuide";
+import { HowToSteps } from "@/components/ui/HelpGuide";
 
 interface AddBalanceModalProps {
   open: boolean;

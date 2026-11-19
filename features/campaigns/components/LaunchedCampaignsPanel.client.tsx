@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { buttonClass } from "@/components/ui/Button";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { EmptyState, Note, SquareIcon, ToneBadge, type Tone } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { cn } from "@/lib/cn";
 import type { LaunchSummary } from "@/lib/campaigns/launch-actions.server";
 import type { LaunchAction } from "@/lib/campaigns/launch-optimizer";
@@ -9,12 +13,15 @@ import { AddVideosPicker } from "@/features/campaigns/components/AddVideosPicker
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
-const KIND_TONE: Record<LaunchAction["kind"], string> = {
-  pause_video: "bg-field text-danger-fg",
-  raise_budget: "bg-subtle text-ok-fg",
-  new_video: "bg-warn-bg text-warn-fg",
-  all_losing: "bg-field text-danger-fg",
+const KIND_TONE: Record<LaunchAction["kind"], Tone> = {
+  pause_video: "danger",
+  raise_budget: "ok",
+  new_video: "warn",
+  all_losing: "danger",
 };
+
+/** Tono de lo ya decidido en el historial de cada campaña. */
+const STATUS_TONE: Record<string, Tone> = { applied: "ok", failed: "danger", dismissed: "neutral" };
 
 type Action = LaunchSummary["actions"][number];
 
@@ -172,216 +179,248 @@ export function LaunchedCampaignsPanel() {
   }
 
   return (
-    <section
+    <PanelCard
       id="launched-campaigns"
-      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="scroll-mt-4"
+      ruled
+      title={
+        <>
+          <span className="eyebrow mb-1 block leading-4">{t("kicker")}</span>
+          {t("title")}
+        </>
+      }
+      description={t("subtitle")}
     >
-      <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
-        <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">{t("title")}</h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
-      </div>
-
-      <div className="px-5 py-4 sm:px-6 sm:py-5">
-        {error ? (
-          <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{error}</p>
-        ) : launches === null ? (
-          <p className="text-[13px] text-[var(--auth-text-muted)]">{t("loading")}</p>
-        ) : launches.length === 0 ? (
-          <p className="text-[13px] text-[var(--auth-text-muted)]">{t("empty")}</p>
-        ) : (
-          <ul className="space-y-4">
-            {launches.map((launch) => {
-              const pending = launch.actions.filter((a) => a.status === "suggested");
-              const history = launch.actions.filter((a) => a.status !== "suggested").slice(0, 3);
-              return (
-                <li key={launch.id} className="rounded-[1.1rem] border border-[rgb(20_18_16_/_0.08)] p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+      {error ? (
+        <Note tone="danger">{error}</Note>
+      ) : launches === null ? (
+        <p role="status" className="text-[13px] text-ink-2">
+          {t("loading")}
+        </p>
+      ) : launches.length === 0 ? (
+        <EmptyState icon="megaphone" title={t("empty")} className="py-8" />
+      ) : (
+        <ul className="grid gap-4">
+          {launches.map((launch) => {
+            const pending = launch.actions.filter((a) => a.status === "suggested");
+            const history = launch.actions.filter((a) => a.status !== "suggested").slice(0, 3);
+            return (
+              <li key={launch.id} className="grid min-w-0 gap-3 rounded-box border border-line p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-[1_1_240px] items-start gap-2.5">
+                    <SquareIcon icon="megaphone" tone="accent" />
                     <div className="min-w-0">
-                      <p className="truncate text-[14px] font-semibold text-[var(--auth-text)]" title={launch.campaignName}>
-                        {launch.campaignName}
-                      </p>
-                      <p className="mt-0.5 text-[12px] text-[var(--auth-text-muted)]">
-                        {t("meta", {
-                          budget: usd.format(launch.dailyBudget),
-                          date: new Date(launch.createdAt).toLocaleDateString("es-PE", { day: "2-digit", month: "short" }),
-                        })}
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <h3 className="min-w-0 max-w-full truncate text-sm font-semibold text-ink" title={launch.campaignName}>
+                          {launch.campaignName}
+                        </h3>
+                        {launch.running !== null ? (
+                          <ToneBadge tone={launch.running ? "ok" : "neutral"} dot>
+                            {t(launch.running ? "running.badgeOn" : "running.badgeOff")}
+                          </ToneBadge>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 text-xs text-ink-2">
+                        <span className="tabular-nums">
+                          {t("meta", {
+                            budget: usd.format(launch.dailyBudget),
+                            date: new Date(launch.createdAt).toLocaleDateString("es-PE", { day: "2-digit", month: "short" }),
+                          })}
+                        </span>
                         {" · "}
                         {t(`mode.${launch.optimizeMode}`)}
                       </p>
-                      {launch.running !== null ? (
-                        <span
-                          className={cn(
-                            "mt-1.5 inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]",
-                            launch.running ? "bg-subtle text-ok-fg" : "bg-[rgb(20_18_16_/_0.06)] text-[var(--auth-text-muted)]",
-                          )}
-                        >
-                          {t(launch.running ? "running.badgeOn" : "running.badgeOff")}
-                        </span>
-                      ) : null}
                     </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-3">
-                      {launch.running !== null ? (
-                        <button
-                          type="button"
-                          disabled={busy !== null}
-                          onClick={() => void setRunning(launch, !launch.running)}
-                          className={cn(
-                            "h-8 rounded-lg px-3 text-[12px] font-bold disabled:opacity-60",
-                            launch.running
-                              ? "border border-[rgb(20_18_16_/_0.12)] text-[var(--auth-text)]"
-                              : "bg-accent-btn text-on-accent",
-                          )}
-                        >
-                          {busy === launch.id ? t("applying") : t(launch.running ? "running.pause" : "running.start")}
-                        </button>
-                      ) : null}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {launch.running !== null ? (
                       <button
                         type="button"
                         disabled={busy !== null}
-                        onClick={() => setPicker({ launchId: launch.id, actionId: null })}
-                        className="text-[12px] font-semibold text-accent-text underline-offset-2 hover:underline"
+                        onClick={() => void setRunning(launch, !launch.running)}
+                        className={buttonClass(launch.running ? "outline" : "primary", "sm")}
                       >
-                        {t("addVideos.open")}
+                        <PanelIcon name={launch.running ? "pause-circle" : "bolt"} />
+                        {busy === launch.id ? t("applying") : t(launch.running ? "running.pause" : "running.start")}
                       </button>
-                      <a
-                        href={`https://ads.tiktok.com/i18n/perf/campaign?aadvid=${launch.advertiserId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[12px] font-semibold text-[var(--auth-text)] underline-offset-2 hover:underline"
-                      >
-                        {t("openAdsManager")}
-                      </a>
-                    </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => setPicker({ launchId: launch.id, actionId: null })}
+                      className={buttonClass("outline", "sm")}
+                    >
+                      {t("addVideos.open")}
+                    </button>
+                    <a
+                      href={`https://ads.tiktok.com/i18n/perf/campaign?aadvid=${launch.advertiserId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonClass("ghost", "sm")}
+                    >
+                      {t("openAdsManager")}
+                      <PanelIcon name="external" />
+                    </a>
                   </div>
+                </div>
 
-                  <label className="mt-2.5 flex cursor-pointer items-start gap-2 rounded-lg bg-[rgb(20_18_16_/_0.03)] px-2.5 py-2">
-                    <input
-                      type="checkbox"
-                      className="mt-0.5 h-4 w-4 accent-[var(--auth-accent)]"
-                      checked={launch.optimizeMode === "auto"}
-                      disabled={busy !== null || launch.optimizeMode === "off"}
-                      onChange={(e) => void changeMode(launch, e.target.checked ? "auto" : "suggest")}
-                    />
-                    <span className="text-[12px] leading-4 text-[var(--auth-text)]">
-                      <span className="font-semibold">{t("autoMode.label")}</span>
-                      <span className="block text-[11px] text-[var(--auth-text-muted)]">{t("autoMode.hint")}</span>
-                    </span>
-                  </label>
+                <AutoModeSwitch
+                  checked={launch.optimizeMode === "auto"}
+                  disabled={busy !== null || launch.optimizeMode === "off"}
+                  label={t("autoMode.label")}
+                  hint={t("autoMode.hint")}
+                  onChange={(on) => void changeMode(launch, on ? "auto" : "suggest")}
+                />
 
-                  {notice?.id === launch.id ? (
-                    <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-subtle text-ok-fg" : "bg-field text-danger-fg")}>
-                      {notice.text}
-                    </p>
-                  ) : null}
-                  {picker?.launchId === launch.id && picker.actionId === null ? (
-                    <AddVideosPicker
-                      launchId={launch.id}
-                      onSubmit={(videoIds) => addVideos(launch.id, videoIds)}
-                      onCancel={() => setPicker(null)}
-                    />
-                  ) : null}
+                {notice?.id === launch.id ? <Note tone={notice.ok ? "ok" : "danger"}>{notice.text}</Note> : null}
+                {picker?.launchId === launch.id && picker.actionId === null ? (
+                  <AddVideosPicker
+                    launchId={launch.id}
+                    onSubmit={(videoIds) => addVideos(launch.id, videoIds)}
+                    onCancel={() => setPicker(null)}
+                  />
+                ) : null}
 
-                  {pending.length === 0 ? (
-                    <p className="mt-3 text-[12px] text-[var(--auth-text-muted)]">{t("noPending")}</p>
-                  ) : (
-                    <ul className="mt-3 space-y-2.5">
-                      {pending.map((action) => (
-                        <li key={action.id} className="rounded-box bg-[rgb(255_248_243_/_0.7)] p-3">
-                          <span className={cn("inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em]", KIND_TONE[action.kind])}>
-                            {t(`kind.${action.kind}`)}
-                          </span>
-                          <p className="mt-1.5 text-[13px] leading-5 text-[var(--auth-text)]">{describe(action.payload)}</p>
-                          {action.error ? <p className="mt-1 text-[11px] text-danger-fg">{action.error}</p> : null}
-                          {notice?.id === action.id ? (
-                            <p className={cn("mt-2 rounded-lg px-2.5 py-1.5 text-[12px]", notice.ok ? "bg-subtle text-ok-fg" : "bg-field text-danger-fg")}>
-                              {notice.text}
-                            </p>
-                          ) : null}
-                          <div className="mt-2.5 flex flex-wrap gap-2">
-                            {confirming === action.id ? (
-                              <>
+                {pending.length === 0 ? (
+                  <p className="text-xs text-ink-2">{t("noPending")}</p>
+                ) : (
+                  <ul className="grid gap-2.5">
+                    {pending.map((action) => (
+                      <li key={action.id} className="rounded-box border border-line bg-field p-3">
+                        <ToneBadge tone={KIND_TONE[action.kind]}>{t(`kind.${action.kind}`)}</ToneBadge>
+                        <p className="mt-2 text-[13px] leading-5 text-ink">{describe(action.payload)}</p>
+                        {action.error ? <p className="mt-1 text-xs text-danger-fg">{action.error}</p> : null}
+                        {notice?.id === action.id ? (
+                          <Note tone={notice.ok ? "ok" : "danger"} className="mt-2">
+                            {notice.text}
+                          </Note>
+                        ) : null}
+                        <div className="mt-2.5 flex flex-wrap gap-2">
+                          {confirming === action.id ? (
+                            <>
+                              <button
+                                type="button"
+                                disabled={busy !== null}
+                                onClick={() => void decide(action, "apply")}
+                                className={buttonClass("primary", "sm")}
+                              >
+                                {busy === action.id ? t("applying") : t(`confirm.${action.kind}`)}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={busy !== null}
+                                onClick={() => setConfirming(null)}
+                                className={buttonClass("outline", "sm")}
+                              >
+                                {t("cancel")}
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {NEEDS_VIDEOS.has(action.kind) ? (
                                 <button
                                   type="button"
                                   disabled={busy !== null}
-                                  onClick={() => void decide(action, "apply")}
-                                  className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-60"
+                                  onClick={() => setPicker({ launchId: launch.id, actionId: action.id })}
+                                  className={buttonClass("primary", "sm")}
                                 >
-                                  {busy === action.id ? t("applying") : t(`confirm.${action.kind}`)}
+                                  {t("addVideos.fromSuggestion")}
                                 </button>
-                                <button
-                                  type="button"
-                                  disabled={busy !== null}
-                                  onClick={() => setConfirming(null)}
-                                  className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
-                                >
-                                  {t("cancel")}
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                {NEEDS_VIDEOS.has(action.kind) ? (
-                                  <button
-                                    type="button"
-                                    disabled={busy !== null}
-                                    onClick={() => setPicker({ launchId: launch.id, actionId: action.id })}
-                                    className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-60"
-                                  >
-                                    {t("addVideos.fromSuggestion")}
-                                  </button>
-                                ) : null}
-                                <button
-                                  type="button"
-                                  disabled={busy !== null}
-                                  onClick={() => setConfirming(action.id)}
-                                  className="h-9 rounded-box bg-[var(--auth-text)] px-3.5 text-[12px] font-bold text-white disabled:opacity-60"
-                                >
-                                  {t(`apply.${action.kind}`)}
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={busy !== null}
-                                  onClick={() => void decide(action, "dismiss")}
-                                  className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text-muted)]"
-                                >
-                                  {t("dismiss")}
-                                </button>
-                              </>
-                            )}
-                          </div>
-                          {picker?.actionId === action.id ? (
-                            <AddVideosPicker
-                              launchId={launch.id}
-                              onSubmit={(videoIds) => decide(action, "apply", videoIds)}
-                              onCancel={() => setPicker(null)}
-                            />
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                              ) : null}
+                              <button
+                                type="button"
+                                disabled={busy !== null}
+                                onClick={() => setConfirming(action.id)}
+                                className={buttonClass(NEEDS_VIDEOS.has(action.kind) ? "outline" : "primary", "sm")}
+                              >
+                                {t(`apply.${action.kind}`)}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={busy !== null}
+                                onClick={() => void decide(action, "dismiss")}
+                                className={buttonClass("ghost", "sm")}
+                              >
+                                {t("dismiss")}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        {picker?.actionId === action.id ? (
+                          <AddVideosPicker
+                            launchId={launch.id}
+                            onSubmit={(videoIds) => decide(action, "apply", videoIds)}
+                            onCancel={() => setPicker(null)}
+                          />
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-                  {history.length > 0 ? (
-                    <ul className="mt-3 space-y-1 border-t border-[var(--auth-divider)] pt-2.5">
-                      {history.map((action) => (
-                        <li key={action.id} className="text-[11px] text-[var(--auth-text-muted)]">
-                          <span className={cn("font-semibold", action.status === "failed" ? "text-danger-fg" : "text-ok-fg")}>
-                            {t(`status.${action.status as "applied" | "failed" | "dismissed"}`)}
-                          </span>
-                          {" · "}
-                          {t(`kind.${action.kind}`)}
-                          {action.auto ? ` · ${t("autoMode.badge")}` : ""}
-                          {action.error ? ` · ${action.error}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    </section>
+                {history.length > 0 ? (
+                  <ul className="border-t border-line">
+                    {history.map((action) => (
+                      <li
+                        key={action.id}
+                        className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line py-2 text-xs text-ink-2 last:border-b-0 last:pb-0"
+                      >
+                        <ToneBadge tone={STATUS_TONE[action.status] ?? "neutral"}>
+                          {t(`status.${action.status as "applied" | "failed" | "dismissed"}`)}
+                        </ToneBadge>
+                        <span className="font-medium text-ink">{t(`kind.${action.kind}`)}</span>
+                        {action.auto ? <span>· {t("autoMode.badge")}</span> : null}
+                        {action.error ? <span className="min-w-0 [overflow-wrap:anywhere]">· {action.error}</span> : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </PanelCard>
+  );
+}
+
+/** Interruptor v3 del modo automático: casilla nativa con pista y bolita. */
+function AutoModeSwitch({
+  checked,
+  disabled,
+  label,
+  hint,
+  onChange,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  label: string;
+  hint: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label
+      className={cn(
+        "relative flex items-start gap-3 rounded-box bg-field px-3 py-2.5",
+        disabled ? "cursor-not-allowed" : "cursor-pointer",
+      )}
+    >
+      <input
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer absolute left-3 top-3 m-0 h-5 w-[34px] cursor-pointer opacity-0 disabled:cursor-not-allowed"
+      />
+      <span
+        aria-hidden
+        className="relative mt-0.5 h-5 w-[34px] shrink-0 rounded-full bg-line-strong transition-colors after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-on-accent after:shadow-ctl after:transition-transform peer-checked:bg-accent-btn peer-checked:after:translate-x-3.5 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus peer-disabled:opacity-50 motion-reduce:transition-none motion-reduce:after:transition-none"
+      />
+      <span className="min-w-0 text-[13px] leading-snug text-ink">
+        <span className="font-medium">{label}</span>
+        <span className="mt-0.5 block text-xs text-ink-2">{hint}</span>
+      </span>
+    </label>
   );
 }

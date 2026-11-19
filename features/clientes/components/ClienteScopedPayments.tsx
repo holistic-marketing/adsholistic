@@ -1,10 +1,8 @@
 ﻿import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import {
-  CrmMetricCell,
-  CrmMetricsStrip,
-  CrmPanel,
-} from "@/components/dashboard/crm-ui";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { EmptyState, StatCard, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { formatHecomFecha } from "@/lib/hecom/gasto-label";
 import {
   moneyUsd,
@@ -12,7 +10,10 @@ import {
   type HecomCobroRow,
 } from "@/lib/hecom/cliente-dashboard.server";
 import { routes } from "@/config/routes";
+import { cn } from "@/lib/cn";
 
+/* Historial Hecom dentro de Pagos (sistema visual v3): fee, cobros y gastos
+   en una fila de datos y los últimos pagos registrados en una tarjeta. */
 export async function ClienteScopedPayments({
   data,
   staffMode = false,
@@ -25,164 +26,103 @@ export async function ClienteScopedPayments({
   const { cliente, summary, cobros } = data;
   const recentCobros = cobros.slice(0, 5);
 
-  const debtLabel = t("clienteScoped.debt");
-  const estimatedLabel = t("clienteScoped.estimated");
-  const feeLabel = t("clienteScoped.feeLabel");
-
-  const kpis = [
-    {
-      label: feeLabel,
-      value: `${summary.depositFeePercent}%`,
-      hint: t("clienteScoped.feeHint"),
-      emphasis: "muted" as const,
-    },
-    {
-      label: t("clienteScoped.totalCobros"),
-      value: moneyUsd(summary.cobroTotal),
-      emphasis: "default" as const,
-    },
-    {
-      label: t("clienteScoped.totalGastos"),
-      value: moneyUsd(summary.gastoTotal),
-      hint: t("clienteScoped.gastosHint"),
-      emphasis: "default" as const,
-    },
+  const stats = [
+    { label: t("clienteScoped.feeLabel"), value: `${summary.depositFeePercent}%`, sub: t("clienteScoped.feeHint") },
+    { label: t("clienteScoped.totalCobros"), value: moneyUsd(summary.cobroTotal) },
+    { label: t("clienteScoped.totalGastos"), value: moneyUsd(summary.gastoTotal), sub: t("clienteScoped.gastosHint") },
     ...(staffMode
       ? [
           {
-            label: summary.saldoEstimado < 0 ? debtLabel : estimatedLabel,
+            label: summary.saldoEstimado < 0 ? t("clienteScoped.debt") : t("clienteScoped.estimated"),
             value: moneyUsd(summary.saldoEstimado),
-            accent: summary.saldoEstimado < 0,
-            emphasis: "primary" as const,
+            sub: undefined,
           },
         ]
       : []),
   ];
 
+  const footerLink =
+    cobros.length > recentCobros.length
+      ? t("clienteScoped.viewAll")
+      : cobros.length > 0
+        ? t("clienteScoped.openProofs")
+        : null;
+
   return (
-    <div className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--auth-divider)] pb-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--auth-text-soft)]">
-            {t("clienteScoped.eyebrow")}
-          </p>
-          <h2 className="mt-1 text-[1.125rem] font-bold tracking-[-0.02em] text-[var(--auth-text)]">
+    <section aria-labelledby="hecom-history" className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="eyebrow">{t("clienteScoped.eyebrow")}</p>
+          <h2 id="hecom-history" className="mt-1 text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
             {t("clienteScoped.title", { name: cliente.name })}
           </h2>
-          <p className="mt-1 text-[12px] text-[var(--auth-text-muted)]">
-            {t("clienteScoped.subtitle", {
-              percent: summary.depositFeePercent,
-            })}
+          <p className="mt-0.5 text-xs text-ink-2">
+            {t("clienteScoped.subtitle", { percent: summary.depositFeePercent })}
             {staffMode ? t("clienteScoped.subtitleStaff") : ""}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 text-[12px] font-semibold">
-          <Link
-            href={routes.cobros}
-            className="text-accent-text hover:underline"
-          >
+        <div className="flex flex-wrap gap-4 text-[13px] font-medium">
+          <Link href={routes.cobros} className="inline-flex items-center gap-1 text-accent-text hover:underline">
             {t("clienteScoped.linkCobros")}
+            <PanelIcon name="arrow-right" className="size-3.5" />
           </Link>
-          <Link
-            href={routes.profit}
-            className="text-accent-text hover:underline"
-          >
+          <Link href={routes.profit} className="inline-flex items-center gap-1 text-accent-text hover:underline">
             {t("clienteScoped.linkProfit")}
+            <PanelIcon name="arrow-right" className="size-3.5" />
           </Link>
         </div>
-      </header>
+      </div>
 
-      <CrmMetricsStrip>
-        <div
-          className={`grid grid-cols-2 gap-px bg-[var(--auth-divider)] ${
-            staffMode ? "sm:grid-cols-4" : "sm:grid-cols-3"
-          }`}
-        >
-          {kpis.map((kpi) => (
-            <div key={kpi.label} className="bg-surface">
-              <CrmMetricCell
-                label={kpi.label}
-                value={kpi.value}
-                hint={"hint" in kpi ? kpi.hint : undefined}
-                emphasis={kpi.emphasis}
-              />
-            </div>
-          ))}
-        </div>
-      </CrmMetricsStrip>
+      <div className={cn("grid grid-cols-1 gap-2 sm:grid-cols-2", staffMode ? "xl:grid-cols-4" : "xl:grid-cols-3")}>
+        {stats.map((stat) => (
+          <StatCard key={stat.label} flat label={stat.label} value={stat.value} sub={stat.sub} />
+        ))}
+      </div>
 
-      <CrmPanel
+      <PanelCard
         title={t("clienteScoped.recentTitle")}
-        subtitle={
+        description={
           cobros.length === 1
             ? t("clienteScoped.recordsOne", { count: cobros.length })
             : t("clienteScoped.recordsMany", { count: cobros.length })
         }
-        className="overflow-hidden"
+        bodyClassName="px-4 pb-2 pt-1 sm:px-6"
       >
         {recentCobros.length === 0 ? (
-          <p className="px-4 py-8 text-[13px] font-medium text-[var(--auth-text-muted)] sm:px-5">
-            {t("clienteScoped.empty")}
-          </p>
+          <EmptyState icon="ledger" title={t("clienteScoped.empty")} className="py-8" />
         ) : (
-          <ul className="divide-y divide-[var(--auth-divider)]">
+          <ul>
             {recentCobros.map((row: HecomCobroRow) => {
               const fecha = formatHecomFecha(row.fecha);
               return (
-                <li
-                  key={row.id}
-                  className="flex items-start justify-between gap-3 px-5 py-3.5 hover:bg-[var(--auth-bg)]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-[var(--auth-text)]">
-                      {row.metodo ?? t("clienteScoped.defaultMethod")}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1.5">
-                      {fecha ? (
-                        <span className="rounded bg-[var(--auth-bg)] px-1.5 py-0.5 text-[10px] tabular-nums text-[var(--auth-text-muted)]">
-                          {fecha}
-                        </span>
-                      ) : null}
-                      {row.codigo ? (
-                        <span className="rounded bg-[var(--auth-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--auth-text-muted)]">
-                          {row.codigo}
-                        </span>
-                      ) : null}
+                <li key={row.id} className="flex items-center justify-between gap-3 border-b border-line py-2.5 last:border-b-0">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-ink">{row.metodo ?? t("clienteScoped.defaultMethod")}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
+                      {fecha ? <span className="num">{fecha}</span> : null}
+                      {row.codigo ? <span className="num rounded-[6px] bg-subtle px-1.5 py-px text-ink-2">{row.codigo}</span> : null}
                       {row.comprobanteUrls.length > 0 ? (
-                        <span className="rounded bg-ok-bg px-1.5 py-0.5 text-[10px] font-medium text-ok-fg">
+                        <ToneBadge tone="ok" icon="check">
                           {t("clienteScoped.withProof")}
-                        </span>
+                        </ToneBadge>
                       ) : null}
                     </div>
                   </div>
-                  <p className="shrink-0 text-[13px] font-semibold tabular-nums text-ok-fg">
-                    {moneyUsd(row.monto)}
-                  </p>
+                  <p className="num shrink-0 font-semibold text-ok-fg">{moneyUsd(row.monto)}</p>
                 </li>
               );
             })}
           </ul>
         )}
-        {cobros.length > recentCobros.length ? (
-          <div className="border-t border-[var(--auth-divider)] px-5 py-3">
-            <Link
-              href={routes.cobros}
-              className="text-[12px] font-semibold text-accent-text hover:underline"
-            >
-              {t("clienteScoped.viewAll")}
-            </Link>
-          </div>
-        ) : cobros.length > 0 ? (
-          <div className="border-t border-[var(--auth-divider)] px-5 py-3">
-            <Link
-              href={routes.cobros}
-              className="text-[12px] font-semibold text-accent-text hover:underline"
-            >
-              {t("clienteScoped.openProofs")}
+        {footerLink ? (
+          <div className="mt-1 border-t border-line py-3">
+            <Link href={routes.cobros} className="inline-flex items-center gap-1 text-[13px] font-medium text-accent-text hover:underline">
+              {footerLink}
+              <PanelIcon name="arrow-right" className="size-3.5" />
             </Link>
           </div>
         ) : null}
-      </CrmPanel>
-    </div>
+      </PanelCard>
+    </section>
   );
 }

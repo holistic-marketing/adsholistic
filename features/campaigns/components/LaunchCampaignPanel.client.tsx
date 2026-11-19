@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { buttonClass } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { Note, PropList, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { cn } from "@/lib/cn";
 import type { CreativeAccountOption } from "@/lib/creatives/types";
 import type { LaunchOptions } from "@/lib/campaigns/launch-options.server";
 import { COUNTRY_LOCATION_IDS, MIN_DAILY_BUDGET, type CampaignCountry } from "@/lib/campaigns/smart-plus-plan";
 import type { CampaignBriefEvent } from "@/features/campaigns/components/CampaignBriefPanel.client";
+import { VideoPickGrid } from "@/features/campaigns/components/VideoPickGrid";
 
 type CreateResponse =
   | { ok: true; campaignId: string; adgroupId: string; adId: string; advertiserId: string }
@@ -19,11 +23,6 @@ const COUNTRIES = Object.keys(COUNTRY_LOCATION_IDS) as CampaignCountry[];
 const NEW_IDENTITY = "NEW";
 /** Smart+ prueba varios videos y se queda con el que vende; más de 10 no ayuda. */
 const MAX_PICK = 10;
-
-const labelClass = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]";
-const fieldClass = "h-10 border-[rgb(20_18_16_/_0.1)] text-[13px]";
-const selectClass =
-  "h-10 w-full rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)]";
 
 function todayLabel(): string {
   return new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" });
@@ -41,6 +40,7 @@ export function LaunchCampaignPanel({
   accounts?: CreativeAccountOption[];
 }) {
   const t = useTranslations("creatives.launch");
+  const fieldId = useId();
   const approved = accounts.filter((a) => a.status === "active");
   const [adAccountId, setAdAccountId] = useState(approved[0]?.id ?? "");
   const [options, setOptions] = useState<LaunchOptions | null>(null);
@@ -164,234 +164,250 @@ export function LaunchCampaignPanel({
       : null;
 
   return (
-    <section
+    <PanelCard
       id="launch-campaign"
-      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
-    >
-      <div className="border-b border-[rgb(20_18_16_/_0.06)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
-        <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">
+      className="scroll-mt-4 overflow-hidden"
+      ruled
+      title={
+        <>
+          <span className="eyebrow mb-1 block leading-4">{t("kicker")}</span>
           {t("title")}
-        </h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
+        </>
+      }
+      description={t("subtitle")}
+      bodyClassName="p-0 sm:p-0 grid lg:grid-cols-[minmax(0,1.3fr)_minmax(260px,0.7fr)]"
+    >
+      <div className="grid min-w-0 content-start gap-4 px-4 py-4 sm:px-6 sm:py-5">
         {fromBrief ? (
-          <p className="mt-2.5 rounded-lg bg-[rgb(255_248_243_/_0.9)] px-3 py-2 text-[12px] font-medium text-[var(--auth-text)]">
+          <Note tone="accent" icon="sparkle">
             {t("fromBrief")}
+          </Note>
+        ) : null}
+
+        <Field label={t("account")} htmlFor={approved.length === 0 ? undefined : `${fieldId}-account`}>
+          {approved.length === 0 ? (
+            <Note tone="warn">{t("errors.noAccount")}</Note>
+          ) : (
+            <Select
+              id={`${fieldId}-account`}
+              value={adAccountId}
+              disabled={creating}
+              onChange={(e) => changeAccount(e.target.value)}
+            >
+              {approved.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                  {account.bmLabel ? ` · ${account.bmLabel}` : ""}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
+
+        {loadingOptions ? (
+          <p role="status" className="text-[13px] text-ink-2">
+            {t("loading")}
           </p>
+        ) : optionsError ? (
+          <Note tone="danger">{optionsError}</Note>
+        ) : options ? (
+          <>
+            <Field label={t("videos", { count: videoIds.length, max: MAX_PICK })} labelId={`${fieldId}-videos`} hint={t("videosHint")}>
+              {options.videos.length === 0 ? (
+                <Note tone="warn">{t("errors.noVideosInLibrary")}</Note>
+              ) : (
+                <VideoPickGrid
+                  videos={options.videos}
+                  picked={videoIds}
+                  disabled={creating}
+                  onToggle={toggleVideo}
+                  labelledBy={`${fieldId}-videos`}
+                />
+              )}
+            </Field>
+
+            <div className="grid gap-x-3 gap-y-4 sm:grid-cols-2">
+              <Field label={t("name")} htmlFor={`${fieldId}-name`} className="sm:col-span-2">
+                <Input
+                  id={`${fieldId}-name`}
+                  value={campaignName}
+                  maxLength={100}
+                  disabled={creating}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                />
+              </Field>
+              <Field label={t("budget")} htmlFor={`${fieldId}-budget`}>
+                <Input
+                  id={`${fieldId}-budget`}
+                  value={dailyBudget}
+                  inputMode="decimal"
+                  disabled={creating}
+                  onChange={(e) => setDailyBudget(e.target.value)}
+                  className="tabular-nums"
+                />
+              </Field>
+              <Field label={t("country")} htmlFor={`${fieldId}-country`}>
+                <Select
+                  id={`${fieldId}-country`}
+                  value={country}
+                  disabled={creating}
+                  onChange={(e) => setCountry(e.target.value as CampaignCountry)}
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {t(`countries.${c}`)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label={t("pixel")} htmlFor={options.pixels.length === 0 ? undefined : `${fieldId}-pixel`}>
+                {options.pixels.length === 0 ? (
+                  <Note tone="warn">{t("errors.noPixel")}</Note>
+                ) : (
+                  <Select id={`${fieldId}-pixel`} value={pixelId} disabled={creating} onChange={(e) => setPixelId(e.target.value)}>
+                    {options.pixels.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+              <Field label={t("identity")} htmlFor={`${fieldId}-identity`} hint={t("identityHint")}>
+                <Select
+                  id={`${fieldId}-identity`}
+                  value={identityKey}
+                  disabled={creating}
+                  onChange={(e) => setIdentityKey(e.target.value)}
+                >
+                  {options.identities.map((i) => (
+                    <option key={`${i.type}:${i.id}`} value={`${i.type}:${i.id}`}>
+                      {i.name}
+                    </option>
+                  ))}
+                  <option value={NEW_IDENTITY}>{t("newIdentity", { name: clienteName ?? t("defaultName") })}</option>
+                </Select>
+              </Field>
+              {texts.map((text, i) => (
+                <Field key={i} label={t("text", { n: i + 1 })} htmlFor={`${fieldId}-text-${i}`} className="sm:col-span-2">
+                  <Input
+                    id={`${fieldId}-text-${i}`}
+                    value={text}
+                    maxLength={100}
+                    disabled={creating}
+                    placeholder={t(i === 0 ? "textPlaceholder1" : "textPlaceholder2")}
+                    onChange={(e) => setTexts((prev) => prev.map((v, k) => (k === i ? e.target.value : v)))}
+                  />
+                </Field>
+              ))}
+              <Field label={t("landing")} htmlFor={`${fieldId}-landing`} className="sm:col-span-2">
+                <Input
+                  id={`${fieldId}-landing`}
+                  value={landingPageUrl}
+                  inputMode="url"
+                  disabled={creating}
+                  placeholder="https://tutienda.com/products/…"
+                  onChange={(e) => setLandingPageUrl(e.target.value)}
+                />
+              </Field>
+            </div>
+
+            {resultError ? <Note tone="danger">{resultError}</Note> : null}
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCreate}
+                disabled={creating || videoIds.length === 0}
+                className={buttonClass("primary")}
+              >
+                <PanelIcon name="send" />
+                {creating ? t("creating") : t("create")}
+              </button>
+              <span className="text-xs text-ink-2">{t("pausedNote")}</span>
+            </div>
+          </>
         ) : null}
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(260px,0.7fr)]">
-        <div className="grid gap-4 px-5 py-4 sm:px-6 sm:py-5">
-          <div>
-            <label className={labelClass}>{t("account")}</label>
-            {approved.length === 0 ? (
-              <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
-                {t("errors.noAccount")}
-              </p>
-            ) : (
-              <select value={adAccountId} disabled={creating} onChange={(e) => changeAccount(e.target.value)} className={selectClass}>
-                {approved.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name}
-                    {account.bmLabel ? ` · ${account.bmLabel}` : ""}
-                  </option>
-                ))}
-              </select>
-            )}
+      <aside className="border-t border-line bg-field px-4 py-4 sm:px-6 sm:py-5 lg:border-l lg:border-t-0">
+        {result?.ok ? (
+          <div role="status">
+            <ToneBadge tone="ok" icon="check-circle">
+              {t("done.kicker")}
+            </ToneBadge>
+            <h3 className="mt-2 text-base font-semibold text-ink">{t("done.title")}</h3>
+            <PropList
+              className="mt-3"
+              items={(
+                [
+                  ["campaign", result.campaignId],
+                  ["adgroup", result.adgroupId],
+                  ["ad", result.adId],
+                ] as const
+              ).map(([k, v]) => ({ label: t(`done.${k}`), value: <span className="num">{v}</span> }))}
+            />
+            <a
+              href={`https://ads.tiktok.com/i18n/perf/campaign?aadvid=${result.advertiserId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClass("outline", "md", "mt-4")}
+            >
+              {t("done.open")}
+              <PanelIcon name="external" />
+            </a>
+            <p className="mt-3 text-xs leading-snug text-ink-2">{t("done.next")}</p>
           </div>
+        ) : (
+          <>
+            <h3 className="text-sm font-semibold text-ink">{t("recipeTitle")}</h3>
+            <ul className="mt-3 grid gap-2.5">
+              {(["recipe1", "recipe2", "recipe3", "recipe4", "recipe5"] as const).map((key) => (
+                <li key={key} className="flex items-start gap-2.5 text-[13px] leading-snug text-ink-2">
+                  <span aria-hidden className="mt-[7px] size-1.5 shrink-0 rounded-full bg-accent" />
+                  {t(key)}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </aside>
+    </PanelCard>
+  );
+}
 
-          {loadingOptions ? (
-            <p className="text-[13px] text-[var(--auth-text-muted)]">{t("loading")}</p>
-          ) : optionsError ? (
-            <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{optionsError}</p>
-          ) : options ? (
-            <>
-              <div>
-                <label className={labelClass}>{t("videos", { count: videoIds.length, max: MAX_PICK })}</label>
-                {options.videos.length === 0 ? (
-                  <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">
-                    {t("errors.noVideosInLibrary")}
-                  </p>
-                ) : (
-                  <div className="flex max-h-[15rem] flex-wrap gap-2 overflow-y-auto">
-                    {options.videos.map((video) => {
-                      const on = videoIds.includes(video.videoId);
-                      return (
-                        <button
-                          key={video.videoId}
-                          type="button"
-                          disabled={creating}
-                          onClick={() => toggleVideo(video.videoId)}
-                          title={video.name}
-                          className={cn(
-                            "relative h-28 w-[4.1rem] overflow-hidden rounded-lg bg-black/80 ring-2 transition",
-                            on ? "ring-[var(--auth-accent)]" : "ring-transparent opacity-70 hover:opacity-100",
-                          )}
-                        >
-                          {video.coverUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={video.coverUrl} alt="" className="h-full w-full object-cover" />
-                          ) : null}
-                          {on ? (
-                            <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-accent-btn text-[11px] font-bold text-on-accent">
-                              ✓
-                            </span>
-                          ) : null}
-                          {video.durationSec ? (
-                            <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] font-semibold text-white">
-                              {video.durationSec}s
-                            </span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("videosHint")}</p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className={labelClass}>{t("name")}</label>
-                  <Input value={campaignName} maxLength={100} disabled={creating} onChange={(e) => setCampaignName(e.target.value)} className={fieldClass} />
-                </div>
-                <div>
-                  <label className={labelClass}>{t("budget")}</label>
-                  <Input
-                    value={dailyBudget}
-                    inputMode="decimal"
-                    disabled={creating}
-                    onChange={(e) => setDailyBudget(e.target.value)}
-                    className={fieldClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>{t("country")}</label>
-                  <select value={country} disabled={creating} onChange={(e) => setCountry(e.target.value as CampaignCountry)} className={selectClass}>
-                    {COUNTRIES.map((c) => (
-                      <option key={c} value={c}>
-                        {t(`countries.${c}`)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>{t("pixel")}</label>
-                  {options.pixels.length === 0 ? (
-                    <p className="rounded-lg border border-warn-line bg-warn-bg px-3 py-2 text-[12px] text-warn-fg">{t("errors.noPixel")}</p>
-                  ) : (
-                    <select value={pixelId} disabled={creating} onChange={(e) => setPixelId(e.target.value)} className={selectClass}>
-                      {options.pixels.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                <div>
-                  <label className={labelClass}>{t("identity")}</label>
-                  <select value={identityKey} disabled={creating} onChange={(e) => setIdentityKey(e.target.value)} className={selectClass}>
-                    {options.identities.map((i) => (
-                      <option key={`${i.type}:${i.id}`} value={`${i.type}:${i.id}`}>
-                        {i.name}
-                      </option>
-                    ))}
-                    <option value={NEW_IDENTITY}>{t("newIdentity", { name: clienteName ?? t("defaultName") })}</option>
-                  </select>
-                  <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("identityHint")}</p>
-                </div>
-                {texts.map((text, i) => (
-                  <div key={i} className="sm:col-span-2">
-                    <label className={labelClass}>{t("text", { n: i + 1 })}</label>
-                    <Input
-                      value={text}
-                      maxLength={100}
-                      disabled={creating}
-                      placeholder={t(i === 0 ? "textPlaceholder1" : "textPlaceholder2")}
-                      onChange={(e) => setTexts((prev) => prev.map((v, k) => (k === i ? e.target.value : v)))}
-                      className={fieldClass}
-                    />
-                  </div>
-                ))}
-                <div className="sm:col-span-2">
-                  <label className={labelClass}>{t("landing")}</label>
-                  <Input
-                    value={landingPageUrl}
-                    inputMode="url"
-                    disabled={creating}
-                    placeholder="https://tutienda.com/products/…"
-                    onChange={(e) => setLandingPageUrl(e.target.value)}
-                    className={fieldClass}
-                  />
-                </div>
-              </div>
-
-              {resultError ? (
-                <p className="rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg" role="alert">
-                  {resultError}
-                </p>
-              ) : null}
-
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  onClick={handleCreate}
-                  disabled={creating || videoIds.length === 0}
-                  className="h-11 rounded-box bg-accent-btn px-5 text-[14px] font-bold text-on-accent shadow-[0_10px_24px_rgb(255_120_31_/_0.28)] hover:brightness-[1.05]"
-                >
-                  {creating ? t("creating") : t("create")}
-                </Button>
-                <span className="text-[12px] text-[var(--auth-text-muted)]">{t("pausedNote")}</span>
-              </div>
-            </>
-          ) : null}
-        </div>
-
-        <aside className="border-t border-[rgb(20_18_16_/_0.06)] bg-[rgb(255_248_243_/_0.65)] px-5 py-5 sm:px-6 lg:border-l lg:border-t-0">
-          {result?.ok ? (
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-ok-fg">{t("done.kicker")}</p>
-              <p className="mt-1.5 text-[16px] font-semibold text-[var(--auth-text)]">{t("done.title")}</p>
-              <dl className="mt-3 space-y-1.5 text-[12px]">
-                {(
-                  [
-                    ["campaign", result.campaignId],
-                    ["adgroup", result.adgroupId],
-                    ["ad", result.adId],
-                  ] as const
-                ).map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-3">
-                    <dt className="text-[var(--auth-text-muted)]">{t(`done.${k}`)}</dt>
-                    <dd className="font-mono text-[var(--auth-text)]">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-              <a
-                href={`https://ads.tiktok.com/i18n/perf/campaign?aadvid=${result.advertiserId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex h-10 items-center rounded-box bg-[var(--auth-text)] px-4 text-[13px] font-semibold text-white"
-              >
-                {t("done.open")}
-              </a>
-              <p className="mt-3 text-[12px] leading-5 text-[var(--auth-text-muted)]">{t("done.next")}</p>
-            </div>
-          ) : (
-            <>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--auth-text-soft)]">{t("recipeTitle")}</p>
-              <ul className="mt-3 space-y-2.5">
-                {(["recipe1", "recipe2", "recipe3", "recipe4", "recipe5"] as const).map((key) => (
-                  <li key={key} className="flex items-start gap-2 text-[12px] font-medium leading-4 text-[var(--auth-text-muted)]">
-                    <span aria-hidden className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-btn" />
-                    {t(key)}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </aside>
-      </div>
-    </section>
+/** Campo v3: rótulo de 14 px, el control y una ayuda opcional en gris. */
+function Field({
+  label,
+  htmlFor,
+  labelId,
+  hint,
+  className,
+  children,
+}: {
+  label: string;
+  /** Id del control que nombra el rótulo. */
+  htmlFor?: string;
+  /** Id del rótulo cuando nombra a un grupo (no a un solo control). */
+  labelId?: string;
+  hint?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const labelClass = "text-sm font-medium text-ink";
+  return (
+    <div className={cn("grid min-w-0 content-start gap-1.5", className)}>
+      {htmlFor ? (
+        <label htmlFor={htmlFor} className={labelClass}>
+          {label}
+        </label>
+      ) : (
+        <p id={labelId} className={labelClass}>
+          {label}
+        </p>
+      )}
+      {children}
+      {hint ? <p className="text-xs leading-snug text-ink-3">{hint}</p> : null}
+    </div>
   );
 }

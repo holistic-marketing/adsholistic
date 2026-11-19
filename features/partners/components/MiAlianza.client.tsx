@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
 import {
   saveMyPartnerAction,
@@ -22,16 +23,17 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
 import { PanelIcon } from "@/components/ui/PanelIcon";
 import { Note, StatCard } from "@/components/ui/PanelKit";
+import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import { PartnerInvites } from "./PartnerInvites.client";
 
 const SITE = "https://www.adsholistic.com";
+// La landing pública (/a/<slug>) solo existe en español: estos textos por defecto y los de
+// la vista previa se quedan en español para mostrar lo que de verdad verá la gente.
 const DEFAULT_HEADLINE = "Lanza y escala tus campañas de TikTok";
 const DEFAULT_SUB = "Cuentas de agencia, recarga desde cualquier país y saldo al instante. Todo en una sola app.";
 
-const usd = (cents: number) =>
-  `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const fecha = (iso: string) =>
-  new Date(iso).toLocaleDateString("es-PE", { day: "2-digit", month: "long", year: "numeric", timeZone: "America/Lima" });
+const fecha = (iso: string, bcp47: string) =>
+  new Date(iso).toLocaleDateString(bcp47, { day: "2-digit", month: "long", year: "numeric", timeZone: "America/Lima" });
 
 type Props = {
   partner: Partner & { contractSignedAt: string };
@@ -39,6 +41,9 @@ type Props = {
 };
 
 export function MiAlianza({ partner, panel }: Props) {
+  const t = useTranslations("partners.alliance");
+  const tNav = useTranslations("nav");
+  const { bcp47, formatMoney, formatNumber } = useAppFormatter();
   const [form, setForm] = useState<MyPartnerInput>({
     name: partner.name,
     companyName: partner.companyName ?? "",
@@ -80,7 +85,7 @@ export function MiAlianza({ partner, panel }: Props) {
       const r = await saveMyPartnerAction(form);
       if (!r.ok) return setError(r.error);
       setSaved(form);
-      setNotice("Listo. Tu landing ya muestra los cambios.");
+      setNotice(t("notices.saved"));
     });
   };
 
@@ -95,7 +100,7 @@ export function MiAlianza({ partner, panel }: Props) {
     setUploading(null);
     if (!r.ok) return setError(r.error);
     setImages((prev) => ({ ...prev, [kind]: r.url ?? null }));
-    setNotice(file ? "Imagen actualizada." : "Imagen quitada.");
+    setNotice(file ? t("notices.imageUpdated") : t("notices.imageRemoved"));
   };
 
   const copy = async () => {
@@ -104,7 +109,7 @@ export function MiAlianza({ partner, panel }: Props) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      window.prompt("Copia tu link:", link);
+      window.prompt(t("link.copyPrompt"), link);
     }
   };
 
@@ -118,47 +123,43 @@ export function MiAlianza({ partner, panel }: Props) {
     onPick: (f: File) => upload(kind, f),
     onRemove: () => upload(kind, null),
   });
+  const bold = (chunks: React.ReactNode) => <strong className="font-semibold text-ink">{chunks}</strong>;
 
   return (
     <div>
       <PageHeader
-        eyebrow="Tu alianza"
-        title="Alianzas"
+        eyebrow={t("eyebrow")}
+        title={tNav("alliances")}
         lede={
           <>
-            Comparte tu link o un código de invitación. Cuando alguien se registra, confirmas si es de tu gente y recién
-            ahí queda a tu nombre
-            {earns ? (
-              <>
-                {" "}y ganas el <strong className="font-semibold text-ink">{Math.round(partner.commissionRate * 100)}% del fee</strong> que le
-                cobramos durante {partner.commissionDays} días desde que se registra
-              </>
-            ) : null}
-            .
+            {earns
+              ? t.rich("lede.shareEarns", {
+                  rate: Math.round(partner.commissionRate * 100),
+                  days: partner.commissionDays,
+                  b: bold,
+                })
+              : t("lede.share")}
             {partner.clientFeePercent != null ? (
-              <>
-                {" "}Tú y tus clientes pagan <strong className="font-semibold text-ink">{partner.clientFeePercent}% de fee</strong> en cada
-                recarga.
-              </>
+              <> {t.rich("lede.clientFee", { fee: partner.clientFeePercent, b: bold })}</>
             ) : null}{" "}
-            Contrato firmado el {fecha(partner.contractSignedAt)}.
+            {t("lede.contract", { date: fecha(partner.contractSignedAt, bcp47) })}
           </>
         }
       />
 
       <div className="grid gap-4">
-        <PanelCard title="Tu link para compartir">
+        <PanelCard title={t("link.title")}>
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="flex min-w-0 flex-[1_1_260px] items-center gap-2 rounded-ctl border border-line bg-field py-1 pl-3 pr-1">
               <span className="min-w-0 flex-1 truncate font-mono text-xs text-ink">{link.replace("https://", "")}</span>
               <Button size="sm" onClick={copy}>
                 <PanelIcon name={copied ? "check" : "copy"} />
-                {copied ? "Copiado ✓" : "Copiar link"}
+                {copied ? t("link.copied") : t("link.copy")}
               </Button>
             </div>
             <a href={link} target="_blank" rel="noreferrer" className={buttonClass("outline", "sm")}>
               <PanelIcon name="external" />
-              Ver mi landing
+              {t("link.view")}
             </a>
           </div>
         </PanelCard>
@@ -167,18 +168,22 @@ export function MiAlianza({ partner, panel }: Props) {
 
         {/* Números */}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4">
-          <StatCard label="Visitas, últimos 30 días" value={panel?.visits30d ?? 0} sub={`${panel?.uniqueVisitors30d ?? 0} personas`} />
-          <StatCard label="Registros" value={signups} sub="a tu nombre" />
           <StatCard
-            label="Clientes que pagan"
-            value={paying}
-            sub={signups ? `${Math.round((paying / signups) * 100)}% de registros` : "—"}
+            label={t("stats.visits")}
+            value={formatNumber(panel?.visits30d ?? 0)}
+            sub={t("stats.people", { count: panel?.uniqueVisitors30d ?? 0 })}
+          />
+          <StatCard label={t("stats.signups")} value={formatNumber(signups)} sub={t("stats.signupsSub")} />
+          <StatCard
+            label={t("stats.paying")}
+            value={formatNumber(paying)}
+            sub={signups ? t("stats.payingSub", { percent: Math.round((paying / signups) * 100) }) : "—"}
           />
           {earns ? (
             <StatCard
-              label="Comisión por cobrar"
-              value={usd(panel?.commissionPendingCents ?? 0)}
-              sub={`Cobrado ${usd(panel?.commissionPaidCents ?? 0)}`}
+              label={t("stats.commission")}
+              value={formatMoney((panel?.commissionPendingCents ?? 0) / 100)}
+              sub={t("stats.commissionPaid", { amount: formatMoney((panel?.commissionPaidCents ?? 0) / 100) })}
             />
           ) : null}
         </div>
@@ -188,15 +193,15 @@ export function MiAlianza({ partner, panel }: Props) {
           <section aria-labelledby="mi-alianza-editor" className="flex min-w-0 flex-col rounded-card border border-line bg-surface shadow-card">
             <div className="border-b border-line px-4 pb-4 pt-4 sm:px-6 sm:pt-5">
               <h2 id="mi-alianza-editor" className="text-base font-semibold leading-6 tracking-[-0.01em] text-ink">
-                Diseña tu landing
+                {t("editor.title")}
               </h2>
-              <p className="mt-0.5 text-xs text-ink-2">Los cambios se ven al lado. Guarda para publicarlos.</p>
+              <p className="mt-0.5 text-xs text-ink-2">{t("editor.hint")}</p>
             </div>
 
             <div className="flex flex-col gap-5 px-4 py-4 sm:px-6 sm:py-5">
-              <Group title="Marca">
-                <ImageField label="Logo de tu empresa" hint="PNG con fondo transparente se ve mejor. Máx. 2 MB." {...imageField("logo")} />
-                <Field label="Tamaño del logo" counter={`${form.logoSize} px`}>
+              <Group title={t("editor.brand")}>
+                <ImageField label={t("fields.logo")} hint={t("fields.logoHint")} {...imageField("logo")} />
+                <Field label={t("fields.logoSize")} counter={`${form.logoSize} px`}>
                   <input
                     type="range"
                     min={PARTNER_LOGO_SIZE.min}
@@ -208,70 +213,65 @@ export function MiAlianza({ partner, panel }: Props) {
                   />
                 </Field>
                 <ImageField
-                  label="Favicon"
-                  hint="El iconito de la pestaña del navegador. Cuadrado (64 × 64), PNG o ICO, máx. 512 KB."
+                  label={t("fields.favicon")}
+                  hint={t("fields.faviconHint")}
                   small
                   {...imageField("favicon")}
                 />
-                <Field label="Nombre de tu empresa">
+                <Field label={t("fields.companyName")}>
                   <Input
                     value={form.companyName}
                     maxLength={80}
-                    placeholder="Ej. Autoecompro"
+                    placeholder={t("fields.companyNamePlaceholder")}
                     onChange={(e) => set("companyName", e.target.value)}
                   />
                 </Field>
-                <Field label="Tu nombre">
+                <Field label={t("fields.name")}>
                   <Input value={form.name} maxLength={80} onChange={(e) => set("name", e.target.value)} />
                 </Field>
-                <ImageField
-                  label="Tu foto (opcional)"
-                  hint="Aparece como «Recomendado por». Cuadrada, máx. 2 MB."
-                  round
-                  {...imageField("photo")}
-                />
+                <ImageField label={t("fields.photo")} hint={t("fields.photoHint")} round {...imageField("photo")} />
               </Group>
 
-              <Group title="Colores">
+              <Group title={t("editor.colors")}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <ColorField
-                    label="Color principal"
-                    hint="Botones de «Crear mi cuenta»."
+                    label={t("fields.accent")}
+                    hint={t("fields.accentHint")}
                     value={form.accentColor}
                     onChange={(v) => set("accentColor", v)}
                   />
                   <ColorField
-                    label="Color secundario"
-                    hint="Detalles, pasos y franja final."
+                    label={t("fields.secondary")}
+                    hint={t("fields.secondaryHint")}
                     value={form.secondaryColor}
                     onChange={(v) => set("secondaryColor", v)}
                   />
                   <ColorField
-                    label="Color de fondo"
-                    hint="Fondo de toda la página."
+                    label={t("fields.background")}
+                    hint={t("fields.backgroundHint")}
                     value={form.backgroundColor}
                     onChange={(v) => set("backgroundColor", v)}
                   />
                   <ColorField
-                    label="Color del texto"
-                    hint="Títulos y textos."
+                    label={t("fields.text")}
+                    hint={t("fields.textHint")}
                     value={form.textColor}
                     onChange={(v) => set("textColor", v)}
                   />
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="mr-1 text-xs text-ink-3">Empezar desde:</span>
-                  {(["light", "dark"] as const).map((t) => (
+                  <span className="mr-1 text-xs text-ink-3">{t("editor.startFrom")}</span>
+                  {(["light", "dark"] as const).map((theme) => (
                     <button
-                      key={t}
+                      key={theme}
                       type="button"
                       onClick={() => {
                         setNotice(null);
                         setForm((f) => ({
                           ...f,
-                          theme: t,
-                          backgroundColor: PARTNER_THEME_COLORS[t].background,
-                          textColor: PARTNER_THEME_COLORS[t].text,
+                          theme,
+                          backgroundColor: PARTNER_THEME_COLORS[theme].background,
+                          textColor: PARTNER_THEME_COLORS[theme].text,
                         }));
                       }}
                       className="inline-flex h-8 items-center gap-2 rounded-ctl border border-line bg-field px-3 text-[13px] font-medium text-ink shadow-ctl hover:bg-hover"
@@ -280,21 +280,19 @@ export function MiAlianza({ partner, panel }: Props) {
                       <span
                         aria-hidden
                         className="size-3.5 shrink-0 rounded-full border border-line-strong"
-                        style={{ background: PARTNER_THEME_COLORS[t].background }}
+                        style={{ background: PARTNER_THEME_COLORS[theme].background }}
                       />
-                      {t === "light" ? "Fondo claro" : "Fondo oscuro"}
+                      {theme === "light" ? t("editor.themeLight") : t("editor.themeDark")}
                     </button>
                   ))}
                 </div>
               </Group>
 
-              <Group title="Banners">
-                <p className="-mt-1 text-xs text-ink-3">
-                  Van debajo del inicio de tu landing. En celular se ve el de celular; si subes uno solo, se usa en los dos.
-                </p>
-                <BannerField label="Banner para computadora" size="1224 × 270" {...imageField("banner")} />
-                <BannerField label="Banner para celular" size="800 × 270" {...imageField("banner_mobile")} />
-                <Field label="Link del banner (opcional)">
+              <Group title={t("editor.banners")}>
+                <p className="-mt-1 text-xs text-ink-3">{t("editor.bannersHint")}</p>
+                <BannerField label={t("fields.bannerDesktop")} size="1224 × 270" {...imageField("banner")} />
+                <BannerField label={t("fields.bannerMobile")} size="800 × 270" {...imageField("banner_mobile")} />
+                <Field label={t("fields.bannerLink")}>
                   <Input
                     value={form.bannerLink}
                     maxLength={300}
@@ -305,8 +303,8 @@ export function MiAlianza({ partner, panel }: Props) {
                 </Field>
               </Group>
 
-              <Group title="Textos">
-                <Field label="Título" counter={`${form.headline.length}/120`}>
+              <Group title={t("editor.texts")}>
+                <Field label={t("fields.headline")} counter={`${form.headline.length}/120`}>
                   <Input
                     value={form.headline}
                     maxLength={120}
@@ -314,7 +312,7 @@ export function MiAlianza({ partner, panel }: Props) {
                     onChange={(e) => set("headline", e.target.value)}
                   />
                 </Field>
-                <Field label="Subtítulo" counter={`${form.subheadline.length}/240`}>
+                <Field label={t("fields.subheadline")} counter={`${form.subheadline.length}/240`}>
                   <Textarea
                     value={form.subheadline}
                     maxLength={240}
@@ -324,7 +322,7 @@ export function MiAlianza({ partner, panel }: Props) {
                     className="min-h-0 resize-none"
                   />
                 </Field>
-                <Field label="Tu WhatsApp (con código de país)">
+                <Field label={t("fields.whatsapp")}>
                   <Input
                     value={form.whatsapp}
                     inputMode="tel"
@@ -343,7 +341,7 @@ export function MiAlianza({ partner, panel }: Props) {
             </div>
 
             <div className="sticky bottom-0 mt-auto flex flex-wrap items-center justify-end gap-2 rounded-b-card border-t border-line bg-surface px-4 py-3 sm:px-6">
-              {dirty ? <span className="mr-auto text-xs font-medium text-accent-text">Tienes cambios sin guardar</span> : null}
+              {dirty ? <span className="mr-auto text-xs font-medium text-accent-text">{t("editor.unsaved")}</span> : null}
               <Button
                 variant="ghost"
                 disabled={!dirty || pending}
@@ -352,16 +350,16 @@ export function MiAlianza({ partner, panel }: Props) {
                   setError(null);
                 }}
               >
-                Deshacer
+                {t("editor.undo")}
               </Button>
               <Button disabled={!dirty || pending} onClick={save}>
-                {pending ? "Guardando…" : "Guardar y publicar"}
+                {pending ? t("editor.saving") : t("editor.save")}
               </Button>
             </div>
           </section>
 
           <div className="min-w-0 lg:sticky lg:top-4 lg:self-start">
-            <h2 className="mb-2 text-sm font-semibold text-ink">Vista previa</h2>
+            <h2 className="mb-2 text-sm font-semibold text-ink">{t("editor.preview")}</h2>
             <LandingPreview form={form} images={images} link={link} />
           </div>
         </div>
@@ -404,6 +402,7 @@ function ImageField(props: {
   onPick: (file: File) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("partners.alliance.image");
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="flex items-center gap-3">
@@ -416,7 +415,7 @@ function ImageField(props: {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={props.url} alt="" className={`h-full w-full ${props.round ? "object-cover" : "object-contain p-1.5"}`} />
         ) : (
-          <span className="px-1 text-center text-[11px] leading-tight text-ink-3">Sin imagen</span>
+          <span className="px-1 text-center text-[11px] leading-tight text-ink-3">{t("empty")}</span>
         )}
       </div>
       <div className="min-w-0 flex-1">
@@ -429,11 +428,11 @@ function ImageField(props: {
             onClick={() => input.current?.click()}
             className={`${smallBtn} border border-line bg-field text-ink shadow-ctl hover:bg-hover`}
           >
-            {props.busy ? "Subiendo…" : props.url ? "Cambiar" : "Subir"}
+            {props.busy ? t("uploading") : props.url ? t("change") : t("upload")}
           </button>
           {props.url && !props.busy ? (
             <button type="button" onClick={props.onRemove} className={`${smallBtn} text-danger-fg hover:bg-danger-bg`}>
-              Quitar
+              {t("remove")}
             </button>
           ) : null}
         </div>
@@ -455,6 +454,7 @@ function ImageField(props: {
 
 /** Muestra del color + su código, como en el panel de Ecomdy. */
 function ColorField(props: { label: string; hint: string; value: string; onChange: (hex: string) => void }) {
+  const t = useTranslations("partners.alliance.color");
   const valid = PARTNER_ACCENT_RE.test(props.value);
   return (
     <div className="grid gap-1.5">
@@ -463,11 +463,11 @@ function ColorField(props: { label: string; hint: string; value: string; onChang
         <label
           className={`relative h-9 w-12 shrink-0 cursor-pointer overflow-hidden rounded-ctl border border-line shadow-ctl ${valid ? "" : "bg-field"}`}
           style={valid ? { background: props.value } : undefined}
-          title="Elegir color"
+          title={t("pick")}
         >
           <input
             type="color"
-            aria-label={`${props.label} (elegir)`}
+            aria-label={t("pickAria", { label: props.label })}
             value={valid ? props.value.toLowerCase() : "#ffffff"}
             onChange={(e) => props.onChange(e.target.value)}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -477,7 +477,7 @@ function ColorField(props: { label: string; hint: string; value: string; onChang
           value={props.value.toUpperCase()}
           maxLength={7}
           spellCheck={false}
-          aria-label={`${props.label} (código)`}
+          aria-label={t("codeAria", { label: props.label })}
           aria-invalid={!valid}
           onChange={(e) => {
             const raw = e.target.value.replace(/[^#0-9a-fA-F]/g, "").replace(/(?!^)#/g, "");
@@ -487,7 +487,7 @@ function ColorField(props: { label: string; hint: string; value: string; onChang
         />
       </div>
       <span className={`text-xs ${valid ? "text-ink-3" : "text-danger-fg"}`}>
-        {valid ? props.hint : "Usa un código de 6 dígitos, ej. #FF5A2A."}
+        {valid ? props.hint : t("invalid")}
       </span>
     </div>
   );
@@ -502,6 +502,7 @@ function BannerField(props: {
   onPick: (file: File) => void;
   onRemove: () => void;
 }) {
+  const t = useTranslations("partners.alliance.image");
   const input = useRef<HTMLInputElement>(null);
   return (
     <div className="grid gap-1.5">
@@ -516,24 +517,24 @@ function BannerField(props: {
         className="flex aspect-[1224/270] w-full items-center justify-center overflow-hidden rounded-box border border-dashed border-line-strong bg-field px-3 text-center text-xs font-medium text-ink-3 transition-colors hover:border-accent-line hover:bg-accent-soft disabled:opacity-60"
       >
         {props.busy ? (
-          "Subiendo…"
+          t("uploading")
         ) : props.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={props.url} alt="" className="h-full w-full object-cover" />
         ) : (
           <span className="inline-flex items-center gap-1.5">
             <PanelIcon name="upload" className="size-3.5" />
-            Subir banner · PNG, JPG o WEBP, máx. 4 MB
+            {t("uploadBanner")}
           </span>
         )}
       </button>
       {props.url && !props.busy ? (
         <div className="flex gap-1">
           <button type="button" onClick={() => input.current?.click()} className={`${smallBtn} text-ink hover:bg-hover`}>
-            Cambiar
+            {t("change")}
           </button>
           <button type="button" onClick={props.onRemove} className={`${smallBtn} text-danger-fg hover:bg-danger-bg`}>
-            Quitar
+            {t("remove")}
           </button>
         </div>
       ) : null}
@@ -552,7 +553,10 @@ function BannerField(props: {
   );
 }
 
-/** Mini versión de /a/<link> con los cambios en vivo. Los colores de adentro son los del aliado. */
+/**
+ * Mini versión de /a/<link> con los cambios en vivo. Los colores de adentro son los del aliado
+ * y los textos, los de la landing pública (solo en español).
+ */
 function LandingPreview({
   form,
   images,
@@ -562,8 +566,10 @@ function LandingPreview({
   images: Record<MyPartnerImageKind, string | null>;
   link: string;
 }) {
+  const t = useTranslations("partners.alliance.fields");
   const pal = partnerPalette(form);
-  const person = form.name.trim() || "Tu nombre";
+  // Relleno mientras el aliado no escribe su nombre (la landing real siempre lo tiene).
+  const person = form.name.trim() || t("name");
   const name = form.companyName.trim() || person;
   // La vista previa va a ~60 % del tamaño real.
   const logoH = Math.round(partnerLogoSize(form.logoSize) * 0.6);
@@ -637,10 +643,10 @@ function LandingPreview({
           </div>
         ) : null}
         <div className="grid grid-cols-2 gap-2 border-t px-5 py-4" style={{ borderColor: pal.border, background: pal.band }}>
-          {["Cuentas de agencia", "Recarga como prefieras"].map((t) => (
-            <div key={t} className="rounded-box border p-3" style={{ borderColor: pal.border, background: pal.card }}>
+          {["Cuentas de agencia", "Recarga como prefieras"].map((benefit) => (
+            <div key={benefit} className="rounded-box border p-3" style={{ borderColor: pal.border, background: pal.card }}>
               <span className="block h-1 w-6 rounded-full" style={{ background: pal.secondary }} />
-              <p className="mt-2 text-[11.5px] font-bold">{t}</p>
+              <p className="mt-2 text-[11.5px] font-bold">{benefit}</p>
             </div>
           ))}
         </div>

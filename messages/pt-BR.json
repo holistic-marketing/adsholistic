@@ -3453,5 +3453,125 @@
       "team": "Equipe (gerentes)",
       "clients": "Clientes"
     }
+  },
+  "partners": {
+    "alliance": {
+      "eyebrow": "Sua aliança",
+      "lede": {
+        "share": "Compartilhe seu link ou um código de convite. Quando alguém se cadastra, você confirma se é do seu pessoal, e só então a pessoa fica vinculada a você.",
+        "shareEarns": "Compartilhe seu link ou um código de convite. Quando alguém se cadastra, você confirma se é do seu pessoal, e só então a pessoa fica vinculada a você e você ganha <b>{rate}% da taxa</b> que cobramos dela durante {days, plural, one {# dia} other {# dias}} a partir do cadastro.",
+        "clientFee": "Você e seus clientes pagam <b>{fee, number}% de taxa</b> em cada recarga.",
+        "contract": "Contrato assinado em {date}."
+      },
+      "link": {
+        "title": "Seu link para compartilhar",
+        "copy": "Copiar link",
+        "copied": "Copiado ✓",
+        "copyPrompt": "Copie seu link:",
+        "view": "Ver minha landing page"
+      },
+      "stats": {
+        "visits": "Visitas, últimos 30 dias",
+        "people": "{count, plural, one {# pessoa} other {# pessoas}}",
+        "signups": "Cadastros",
+        "signupsSub": "vinculados a você",
+        "paying": "Clientes pagantes",
+        "payingSub": "{percent}% dos cadastros",
+        "commission": "Comissão a receber",
+        "commissionPaid": "Recebido {amount}"
+      },
+      "editor": {
+        "title": "Monte sua landing page",
+        "hint": "As mudanças aparecem ao lado. Salve para publicá-las.",
+        "brand": "Marca",
+        "colors": "Cores",
+        "banners": "Banners",
+        "bannersHint": "Ficam abaixo do topo da sua landing page. No celular aparece o de celular; se você enviar só um, ele é usado nos dois.",
+        "texts": "Textos",
+        "startFrom": "Começar com:",
+        "themeLight": "Fundo claro",
+        "themeDark": "Fundo escuro",
+        "unsaved": "Você tem alterações não salvas",
+        "undo": "Desfazer",
+        "saving": "Salvando…",
+        "save": "Salvar e publicar",
+        "preview": "Pré-visualização"
+      },
+      "fields": {
+        "logo": "Logo da sua empresa",
+        "logoHint": "PNG com fundo transparente fica melhor. Máx. 2 MB.",
+        "logoSize": "Tamanho do logo",
+        "favicon": "Favicon",
+        "faviconHint": "O iconezinho da aba do navegador. Quadrado (64 × 64), PNG ou ICO, máx. 512 KB.",
+        "companyName": "Nome da sua empresa",
+        "companyNamePlaceholder": "Ex. Autoecompro",
+        "name": "Seu nome",
+        "photo": "Sua foto (opcional)",
+        "photoHint": "Aparece ao lado do seu nome, como quem recomenda. Quadrada, máx. 2 MB.",
+        "accent": "Cor principal",
+        "accentHint": "Botões de criar conta.",
+        "secondary": "Cor secundária",
+        "secondaryHint": "Detalhes, passos e faixa final.",
+        "background": "Cor de fundo",
+        "backgroundHint": "Fundo da página inteira.",
+        "text": "Cor do texto",
+        "textHint": "Títulos e textos.",
+        "bannerDesktop": "Banner para computador",
+        "bannerMobile": "Banner para celular",
+        "bannerLink": "Link do banner (opcional)",
+        "headline": "Título",
+        "subheadline": "Subtítulo",
+        "whatsapp": "Seu WhatsApp (com código do país)"
+      },
+      "notices": {
+        "saved": "Pronto. Sua landing page já mostra as mudanças.",
+        "imageUpdated": "Imagem atualizada.",
+        "imageRemoved": "Imagem removida."
+      },
+      "image": {
+        "empty": "Sem imagem",
+        "uploading": "Enviando…",
+        "upload": "Enviar",
+        "change": "Trocar",
+        "remove": "Remover",
+        "uploadBanner": "Enviar banner · PNG, JPG ou WEBP, máx. 4 MB"
+      },
+      "color": {
+        "pick": "Escolher cor",
+        "pickAria": "{label} (escolher)",
+        "codeAria": "{label} (código)",
+        "invalid": "Use um código de 6 dígitos, ex. #FF5A2A."
+      }
+    },
+    "invites": {
+      "pending": {
+        "title": "A confirmar",
+        "hint": "Eles se cadastraram com seu link ou código. Confirme só se forem do seu pessoal: só então ficam vinculados a você e com a sua taxa.",
+        "viaCode": "código {code}",
+        "viaLink": "pelo link",
+        "saving": "Salvando…",
+        "confirm": "Sim, é meu",
+        "reject": "Não conheço"
+      },
+      "codes": {
+        "title": "Códigos de convite",
+        "hint": "Crie um código para cada pessoa. Ela o informa ao se cadastrar e ele vale <b>uma única vez</b>: se alguém compartilhar, deixa de funcionar.",
+        "notePlaceholder": "Para quem? (opcional, ex. Brian loja 12)",
+        "noteAria": "Para quem é o código?",
+        "creating": "Criando…",
+        "create": "Criar código",
+        "created": "Código criado: <mono>{code}</mono>",
+        "copy": "Copiar",
+        "copied": "Copiado ✓",
+        "copyPrompt": "Copie o código:",
+        "noNote": "Sem nota",
+        "revoke": "Anular",
+        "showClosed": "Ver usados e anulados ({count})",
+        "hideClosed": "Ocultar usados e anulados ({count})",
+        "usedBy": "Usado por {name}",
+        "usedByClient": "Usado por um cliente",
+        "revoked": "Anulado"
+      }
+    }
   }
 }

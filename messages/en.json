@@ -3453,5 +3453,125 @@
       "team": "Team (managers)",
       "clients": "Clients"
     }
+  },
+  "partners": {
+    "alliance": {
+      "eyebrow": "Your partnership",
+      "lede": {
+        "share": "Share your link or an invite code. When someone signs up, you confirm whether they are one of your people, and only then are they credited to you.",
+        "shareEarns": "Share your link or an invite code. When someone signs up, you confirm whether they are one of your people. Only then are they credited to you, and you earn <b>{rate}% of the fee</b> we charge them for {days, plural, one {# day} other {# days}} after they sign up.",
+        "clientFee": "You and your clients pay a <b>{fee, number}% fee</b> on every top-up.",
+        "contract": "Contract signed on {date}."
+      },
+      "link": {
+        "title": "Your link to share",
+        "copy": "Copy link",
+        "copied": "Copied ✓",
+        "copyPrompt": "Copy your link:",
+        "view": "View my landing page"
+      },
+      "stats": {
+        "visits": "Visits, last 30 days",
+        "people": "{count, plural, one {# person} other {# people}}",
+        "signups": "Sign-ups",
+        "signupsSub": "credited to you",
+        "paying": "Paying clients",
+        "payingSub": "{percent}% of sign-ups",
+        "commission": "Commission to collect",
+        "commissionPaid": "Collected {amount}"
+      },
+      "editor": {
+        "title": "Design your landing page",
+        "hint": "Changes show up alongside. Save to publish them.",
+        "brand": "Brand",
+        "colors": "Colors",
+        "banners": "Banners",
+        "bannersHint": "They go below the top of your landing page. Phones show the mobile one; if you upload just one, it is used on both.",
+        "texts": "Text",
+        "startFrom": "Start from:",
+        "themeLight": "Light background",
+        "themeDark": "Dark background",
+        "unsaved": "You have unsaved changes",
+        "undo": "Undo",
+        "saving": "Saving…",
+        "save": "Save and publish",
+        "preview": "Preview"
+      },
+      "fields": {
+        "logo": "Your company logo",
+        "logoHint": "A PNG with a transparent background looks best. Max 2 MB.",
+        "logoSize": "Logo size",
+        "favicon": "Favicon",
+        "faviconHint": "The little icon on the browser tab. Square (64 × 64), PNG or ICO, max 512 KB.",
+        "companyName": "Your company name",
+        "companyNamePlaceholder": "E.g. Autoecompro",
+        "name": "Your name",
+        "photo": "Your photo (optional)",
+        "photoHint": "Shown next to your name as the person recommending. Square, max 2 MB.",
+        "accent": "Main color",
+        "accentHint": "Sign-up buttons.",
+        "secondary": "Secondary color",
+        "secondaryHint": "Details, steps and the closing band.",
+        "background": "Background color",
+        "backgroundHint": "Background of the whole page.",
+        "text": "Text color",
+        "textHint": "Headings and body text.",
+        "bannerDesktop": "Desktop banner",
+        "bannerMobile": "Mobile banner",
+        "bannerLink": "Banner link (optional)",
+        "headline": "Headline",
+        "subheadline": "Subheadline",
+        "whatsapp": "Your WhatsApp (with country code)"
+      },
+      "notices": {
+        "saved": "Done. Your landing page now shows the changes.",
+        "imageUpdated": "Image updated.",
+        "imageRemoved": "Image removed."
+      },
+      "image": {
+        "empty": "No image",
+        "uploading": "Uploading…",
+        "upload": "Upload",
+        "change": "Change",
+        "remove": "Remove",
+        "uploadBanner": "Upload banner · PNG, JPG or WEBP, max 4 MB"
+      },
+      "color": {
+        "pick": "Pick a color",
+        "pickAria": "{label} (picker)",
+        "codeAria": "{label} (hex code)",
+        "invalid": "Use a 6-digit code, e.g. #FF5A2A."
+      }
+    },
+    "invites": {
+      "pending": {
+        "title": "To confirm",
+        "hint": "They signed up with your link or code. Confirm them only if they are your people: only then are they credited to you, with your fee.",
+        "viaCode": "code {code}",
+        "viaLink": "via link",
+        "saving": "Saving…",
+        "confirm": "Yes, they are mine",
+        "reject": "I don't know them"
+      },
+      "codes": {
+        "title": "Invite codes",
+        "hint": "Create one code per person. They enter it when signing up and it works <b>only once</b>: if someone shares it, it stops working.",
+        "notePlaceholder": "Who is it for? (optional, e.g. Brian store 12)",
+        "noteAria": "Who is the code for?",
+        "creating": "Creating…",
+        "create": "Create code",
+        "created": "Code created: <mono>{code}</mono>",
+        "copy": "Copy",
+        "copied": "Copied ✓",
+        "copyPrompt": "Copy the code:",
+        "noNote": "No note",
+        "revoke": "Revoke",
+        "showClosed": "Show used and revoked ({count})",
+        "hideClosed": "Hide used and revoked ({count})",
+        "usedBy": "Used by {name}",
+        "usedByClient": "Used by a client",
+        "revoked": "Revoked"
+      }
+    }
   }
 }

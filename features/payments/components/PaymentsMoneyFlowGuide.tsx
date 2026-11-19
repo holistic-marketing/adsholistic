@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";
-import { GuideAccordion, GuideFaq, HowToSteps } from "./PaymentsGuide";
+import { GuideAccordion, GuideFaq, HowToSteps } from "@/components/ui/HelpGuide";
 import type { PaymentGatewayId } from "@/types/payment";
 
 /**

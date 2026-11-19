@@ -1,16 +1,18 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PanelCard } from "@/components/ui/PageHeader";
 import { PanelIcon } from "@/components/ui/PanelIcon";
 import { Note, ToneBadge } from "@/components/ui/PanelKit";
+import { useAppFormatter } from "@/lib/i18n/use-app-formatter";
 import { createMyInviteAction, reviewMyClientAction, revokeMyInviteAction } from "../my-partner-actions";
 import type { PartnerPanelInvite, PartnerPanelPending } from "@/lib/partners/partner-panel.server";
 
-const fechaCorta = (iso: string) =>
-  new Date(iso).toLocaleDateString("es-PE", { day: "2-digit", month: "short", timeZone: "America/Lima" });
+const fechaCorta = (iso: string, bcp47: string) =>
+  new Date(iso).toLocaleDateString(bcp47, { day: "2-digit", month: "short", timeZone: "America/Lima" });
 
 const linkish = "shrink-0 text-[13px] font-medium underline-offset-[3px] hover:underline disabled:opacity-50";
 
@@ -19,6 +21,8 @@ const linkish = "shrink-0 text-[13px] font-medium underline-offset-[3px] hover:u
  * llegaron por su link o código, y crea códigos de un solo uso por persona.
  */
 export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPending[]; invites: PartnerPanelInvite[] }) {
+  const t = useTranslations("partners.invites");
+  const { bcp47 } = useAppFormatter();
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [fresh, setFresh] = useState<string | null>(null);
@@ -53,7 +57,7 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
       setCopied(code);
       setTimeout(() => setCopied((c) => (c === code ? null : c)), 1600);
     } catch {
-      window.prompt("Copia el código:", code);
+      window.prompt(t("codes.copyPrompt"), code);
     }
   };
 
@@ -67,13 +71,13 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
           ruled
           title={
             <span className="inline-flex items-center gap-2">
-              Por confirmar
+              {t("pending.title")}
               <ToneBadge tone="accent" className="num">
                 {pending.length}
               </ToneBadge>
             </span>
           }
-          description="Se registraron con tu link o código. Confírmalos solo si son de tu gente: recién ahí quedan a tu nombre y con tu fee."
+          description={t("pending.hint")}
         >
           <ul className="divide-y divide-line">
             {pending.map((p) => (
@@ -81,8 +85,8 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                 <div className="grid min-w-0 flex-1 leading-snug">
                   <b className="truncate font-semibold text-ink">{p.name}</b>
                   <small className="truncate text-xs text-ink-3">
-                    {p.emailMasked} · {fechaCorta(p.registeredAt)}
-                    {p.inviteCode ? ` · código ${p.inviteCode}` : " · por link"}
+                    {p.emailMasked} · {fechaCorta(p.registeredAt, bcp47)} ·{" "}
+                    {p.inviteCode ? t("pending.viaCode", { code: p.inviteCode }) : t("pending.viaLink")}
                   </small>
                 </div>
                 <div className="flex gap-2">
@@ -93,7 +97,7 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                     onClick={() => run(`ok:${p.hecomClienteId}`, () => reviewMyClientAction(p.hecomClienteId, true))}
                   >
                     <PanelIcon name="check" />
-                    {busy === `ok:${p.hecomClienteId}` ? "Guardando…" : "Sí es mío"}
+                    {busy === `ok:${p.hecomClienteId}` ? t("pending.saving") : t("pending.confirm")}
                   </Button>
                   <Button
                     size="sm"
@@ -102,7 +106,7 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                     disabled={busy !== null}
                     onClick={() => run(`no:${p.hecomClienteId}`, () => reviewMyClientAction(p.hecomClienteId, false))}
                   >
-                    No lo conozco
+                    {t("pending.reject")}
                   </Button>
                 </div>
               </li>
@@ -112,26 +116,23 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
       )}
 
       <PanelCard
-        title="Códigos de invitación"
-        description={
-          <>
-            Crea un código para cada persona. Lo pone al registrarse y sirve <strong className="font-semibold text-ink">una sola vez</strong>: si
-            alguien lo comparte, ya no funciona.
-          </>
-        }
+        title={t("codes.title")}
+        description={t.rich("codes.hint", {
+          b: (chunks) => <strong className="font-semibold text-ink">{chunks}</strong>,
+        })}
       >
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             value={note}
             maxLength={80}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="¿Para quién? (opcional, ej. Brian tienda 12)"
-            aria-label="¿Para quién es el código?"
+            placeholder={t("codes.notePlaceholder")}
+            aria-label={t("codes.noteAria")}
             className="min-w-0 flex-1"
           />
           <Button disabled={busy !== null} onClick={create}>
             <PanelIcon name="plus" />
-            {busy === "create" ? "Creando…" : "Crear código"}
+            {busy === "create" ? t("codes.creating") : t("codes.create")}
           </Button>
         </div>
 
@@ -139,10 +140,13 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
           <Note tone="ok" icon="check-circle" className="mt-3">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
-                Código creado: <strong className="font-mono font-semibold tracking-wide">{fresh}</strong>
+                {t.rich("codes.created", {
+                  code: fresh,
+                  mono: (chunks) => <strong className="font-mono font-semibold tracking-wide">{chunks}</strong>,
+                })}
               </span>
               <button type="button" onClick={() => copy(fresh)} className={linkish}>
-                {copied === fresh ? "Copiado ✓" : "Copiar"}
+                {copied === fresh ? t("codes.copied") : t("codes.copy")}
               </button>
             </div>
           </Note>
@@ -160,9 +164,9 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                 <code className="shrink-0 rounded-ctl border border-accent-line bg-accent-soft px-2 py-0.5 font-mono text-[13px] font-semibold tracking-wide text-accent-text">
                   {i.code}
                 </code>
-                <span className="min-w-0 flex-1 truncate text-[13px] text-ink-2">{i.note || "Sin nota"}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px] text-ink-2">{i.note || t("codes.noNote")}</span>
                 <button type="button" onClick={() => copy(i.code)} className={`${linkish} text-accent-text`}>
-                  {copied === i.code ? "Copiado ✓" : "Copiar"}
+                  {copied === i.code ? t("codes.copied") : t("codes.copy")}
                   <span className="sr-only"> {i.code}</span>
                 </button>
                 <button
@@ -171,7 +175,8 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                   onClick={() => run(`rv:${i.id}`, () => revokeMyInviteAction(i.id))}
                   className={`${linkish} text-danger-fg`}
                 >
-                  Anular<span className="sr-only"> {i.code}</span>
+                  {t("codes.revoke")}
+                  <span className="sr-only"> {i.code}</span>
                 </button>
               </li>
             ))}
@@ -186,7 +191,7 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
               onClick={() => setShowUsed((v) => !v)}
               className={`${linkish} inline-flex items-center gap-1 text-ink-2`}
             >
-              {showUsed ? "Ocultar" : "Ver"} usados y anulados ({closed.length})
+              {showUsed ? t("codes.hideClosed", { count: closed.length }) : t("codes.showClosed", { count: closed.length })}
               <PanelIcon name="chevron-down" className={`size-3.5 transition-transform ${showUsed ? "rotate-180" : ""}`} />
             </button>
             {showUsed && (
@@ -196,8 +201,10 @@ export function PartnerInvites({ pending, invites }: { pending: PartnerPanelPend
                     <code className="shrink-0 font-mono font-semibold tracking-wide line-through decoration-ink-3">{i.code}</code>
                     <span className="min-w-0 flex-1 truncate">
                       {i.status === "used"
-                        ? `Usado por ${i.usedBy ?? "un cliente"}${i.usedAt ? ` · ${fechaCorta(i.usedAt)}` : ""}`
-                        : "Anulado"}
+                        ? `${i.usedBy ? t("codes.usedBy", { name: i.usedBy }) : t("codes.usedByClient")}${
+                            i.usedAt ? ` · ${fechaCorta(i.usedAt, bcp47)}` : ""
+                          }`
+                        : t("codes.revoked")}
                       {i.note ? ` · ${i.note}` : ""}
                     </span>
                   </li>

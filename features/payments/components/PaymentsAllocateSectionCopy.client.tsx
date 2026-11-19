@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { GuideAccordion, GuideFaq, HowToSteps } from "./PaymentsGuide";
+import { GuideAccordion, GuideFaq, HowToSteps } from "@/components/ui/HelpGuide";
 import { usePaymentsFundingMode } from "./PaymentsFundingModeContext.client";
 
 /** Título de «Asignar saldo» (v3 «sec-h»), su bajada y la guía plegable. */

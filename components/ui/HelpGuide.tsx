@@ -78,3 +78,41 @@ export function GuideFaq({
     </div>
   );
 }
+
+/** Guía completa de una sección: introducción, pasos, tiempo, consejo y preguntas. */
+export function HelpGuide({
+  summary,
+  intro,
+  steps,
+  time,
+  tip,
+  faqTitle,
+  faq = [],
+  className,
+}: {
+  summary: ReactNode;
+  intro?: ReactNode;
+  steps: ReactNode[];
+  time?: ReactNode;
+  tip?: ReactNode;
+  faqTitle?: ReactNode;
+  faq?: Array<{ q: ReactNode; a: ReactNode }>;
+  className?: string;
+}) {
+  return (
+    <GuideAccordion summary={summary} className={cn("mt-3", className)}>
+      {intro ? <p className="mb-3 text-[13px] text-ink-2">{intro}</p> : null}
+      <HowToSteps steps={steps} />
+      {time ? (
+        <p className="mt-3">
+          <span className="panel-badge tone-ok">
+            <PanelIcon name="clock" className="size-3" />
+            {time}
+          </span>
+        </p>
+      ) : null}
+      {tip ? <p className="mt-2 text-xs text-ink-3">{tip}</p> : null}
+      <GuideFaq title={faqTitle} items={faq} />
+    </GuideAccordion>
+  );
+}

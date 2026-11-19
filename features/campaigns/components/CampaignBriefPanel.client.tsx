@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/Input";
+import { buttonClass } from "@/components/ui/Button";
+import { Input, Select } from "@/components/ui/Input";
+import { PanelCard } from "@/components/ui/PageHeader";
+import { Note, StatCard, ToneBadge } from "@/components/ui/PanelKit";
+import { PanelIcon } from "@/components/ui/PanelIcon";
 import { cn } from "@/lib/cn";
 import type { BriefResult } from "@/lib/campaigns/campaign-brief.server";
 import { COUNTRY_LOCATION_IDS, type CampaignCountry } from "@/lib/campaigns/smart-plus-plan";
@@ -42,6 +46,7 @@ const money = (amount: number, currency: string | null) => {
  */
 export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudio?: boolean }) {
   const t = useTranslations("creatives.brief");
+  const textsLabelId = useId();
   const [url, setUrl] = useState("");
   const [country, setCountry] = useState<CampaignCountry>("PE");
   const [loading, setLoading] = useState(false);
@@ -118,183 +123,173 @@ export function CampaignBriefPanel({ showVideoStudio = false }: { showVideoStudi
     : "";
 
   return (
-    <section
+    <PanelCard
       id="campaign-brief"
-      className="overflow-hidden rounded-card border border-[rgb(20_18_16_/_0.08)] bg-surface shadow-[0_12px_32px_rgb(20_18_16_/_0.045)]"
+      className="scroll-mt-4"
+      ruled
+      title={
+        <>
+          <span className="eyebrow mb-1 block leading-4">{t("kicker")}</span>
+          {t("title")}
+        </>
+      }
+      description={t("subtitle")}
     >
-      <div className="border-b border-[rgb(20_18_16_/_0.06)] bg-[linear-gradient(135deg,#fff7f0_0%,#ffffff_60%)] px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-text">{t("kicker")}</p>
-        <h2 className="font-display mt-1.5 text-[1.2rem] font-semibold tracking-[-0.02em] text-[var(--auth-text)]">{t("title")}</h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-5 text-[var(--auth-text-muted)]">{t("subtitle")}</p>
-      </div>
-
-      <div className="px-5 py-4 sm:px-6 sm:py-5">
-        <form
-          className="flex flex-col gap-2.5 sm:flex-row"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (url.trim() && !loading) void generate();
-          }}
+      <form
+        className="flex flex-col gap-2 sm:flex-row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (url.trim() && !loading) void generate();
+        }}
+      >
+        <Input
+          value={url}
+          inputMode="url"
+          disabled={loading}
+          placeholder={t("urlPlaceholder")}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1"
+        />
+        <Select
+          value={country}
+          disabled={loading}
+          onChange={(e) => setCountry(e.target.value as CampaignCountry)}
+          aria-label={t("country")}
+          className="sm:w-40"
         >
-          <Input
-            value={url}
-            inputMode="url"
-            disabled={loading}
-            placeholder={t("urlPlaceholder")}
-            onChange={(e) => setUrl(e.target.value)}
-            className="h-11 flex-1 border-[rgb(20_18_16_/_0.1)] text-[13px]"
+          {COUNTRIES.map((c) => (
+            <option key={c} value={c}>
+              {t(`countries.${c}`)}
+            </option>
+          ))}
+        </Select>
+        <button type="submit" disabled={loading || !url.trim()} className={buttonClass("primary")}>
+          <PanelIcon name="sparkle" />
+          {loading ? t("generating") : result ? t("again") : t("generate")}
+        </button>
+      </form>
+
+      {loading ? (
+        <div role="status" className="mt-4 flex items-center gap-3 rounded-box border border-line bg-field px-3 py-2.5">
+          <span
+            aria-hidden
+            className="size-4 shrink-0 animate-spin rounded-full border-2 border-accent border-t-transparent motion-reduce:animate-none"
           />
-          <select
-            value={country}
-            disabled={loading}
-            onChange={(e) => setCountry(e.target.value as CampaignCountry)}
-            aria-label={t("country")}
-            className="h-11 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface px-3 text-[13px] text-[var(--auth-text)] sm:w-36"
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c} value={c}>
-                {t(`countries.${c}`)}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            disabled={loading || !url.trim()}
-            className="h-11 rounded-box bg-accent-btn px-5 text-[13px] font-bold text-on-accent transition disabled:opacity-50"
-          >
-            {loading ? t("generating") : result ? t("again") : t("generate")}
-          </button>
-        </form>
+          <p className="text-[13px] font-medium text-ink">{t(`steps.${STEPS[step]}`)}</p>
+        </div>
+      ) : null}
+      {error ? (
+        <Note tone="danger" className="mt-4">
+          {error}
+        </Note>
+      ) : null}
 
-        {loading ? (
-          <div className="mt-4 flex items-center gap-3 rounded-box bg-[rgb(255_248_243_/_0.8)] px-4 py-3">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--auth-accent)] border-t-transparent" />
-            <p className="text-[13px] font-medium text-[var(--auth-text)]">{t(`steps.${STEPS[step]}`)}</p>
-          </div>
-        ) : null}
-        {error ? <p className="mt-4 rounded-lg bg-field px-3 py-2 text-[13px] text-danger-fg">{error}</p> : null}
-
-        {result && product ? (
-          <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-            <div className="space-y-4">
-              <div className="flex gap-3.5 rounded-card border border-[rgb(20_18_16_/_0.08)] p-3">
-                {product.images[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={productImageSrc(product.images[0])}
-                    alt=""
-                    className="h-24 w-24 shrink-0 rounded-box bg-subtle object-cover"
-                  />
-                ) : null}
-                <div className="min-w-0">
-                  <p className="line-clamp-2 text-[14px] font-semibold text-[var(--auth-text)]">{product.title}</p>
-                  {product.price !== null ? (
-                    <p className="mt-1 text-[15px] font-bold text-accent-text">
-                      {money(product.price, product.currency)}
-                      {product.oldPrice !== null ? (
-                        <span className="ml-2 text-[12px] font-medium text-[var(--auth-text-muted)] line-through">
-                          {money(product.oldPrice, product.currency)}
-                        </span>
-                      ) : null}
-                    </p>
-                  ) : null}
-                  <p className="mt-1 text-[11px] text-[var(--auth-text-muted)]">
-                    {t("photos", { count: product.images.length })}
+      {result && product ? (
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+          <div className="grid content-start gap-3">
+            <div className="flex gap-3.5 rounded-box border border-line p-3">
+              {product.images[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={productImageSrc(product.images[0])}
+                  alt=""
+                  className="size-24 shrink-0 rounded-ctl bg-subtle object-cover"
+                />
+              ) : null}
+              <div className="min-w-0">
+                <p className="line-clamp-2 text-sm font-semibold text-ink">{product.title}</p>
+                {product.price !== null ? (
+                  <p className="mt-1 text-[15px] font-semibold text-ink tabular-nums">
+                    {money(product.price, product.currency)}
+                    {product.oldPrice !== null ? (
+                      <span className="ml-2 text-xs font-normal text-ink-3 line-through">
+                        {money(product.oldPrice, product.currency)}
+                      </span>
+                    ) : null}
                   </p>
-                </div>
-              </div>
-
-              <div className="rounded-card bg-subtle p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ok-fg">{t("budget.title")}</p>
-                <p className="font-display mt-1 text-[1.5rem] font-semibold text-ok-fg">
-                  {t("budget.amount", { amount: money(result.budget.amount, "USD") })}
-                </p>
-                <p className="mt-1 text-[12px] leading-5 text-ok-fg">{budgetReason}</p>
-              </div>
-
-              <div className="rounded-card border border-[rgb(20_18_16_/_0.08)] p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">{t("script.title")}</p>
-                <p className="mt-2 text-[14px] font-semibold text-[var(--auth-text)]">{result.brief.studio.hook}</p>
-                <ul className="mt-2 space-y-1">
-                  {result.brief.studio.benefits.filter(Boolean).map((b) => (
-                    <li key={b} className="flex gap-2 text-[13px] text-[var(--auth-text)]">
-                      <span className="text-accent-text">✓</span>
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-[12px] font-semibold text-accent-text">{result.brief.studio.cta}</p>
-                {showVideoStudio ? (
-                  <button
-                    type="button"
-                    onClick={sendToStudio}
-                    className="mt-3 h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
-                  >
-                    {t("toStudio")}
-                  </button>
                 ) : null}
+                <p className="mt-1 text-xs text-ink-3">{t("photos", { count: product.images.length })}</p>
               </div>
             </div>
 
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--auth-text-soft)]">
-                {t("texts.title", { count: picked.length, max: MAX_LAUNCH_TEXTS })}
-              </p>
-              <ul className="mt-2 space-y-2">
-                {result.brief.texts.map((item, i) => {
-                  const on = picked.includes(i);
-                  return (
-                    <li key={item.text}>
-                      <button
-                        type="button"
-                        onClick={() => toggle(i)}
-                        className={cn(
-                          "flex w-full items-start gap-3 rounded-box border px-3.5 py-3 text-left transition",
-                          on ? "border-[var(--auth-accent)] bg-[rgb(255_248_243_/_0.8)]" : "border-[rgb(20_18_16_/_0.08)] bg-surface",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 text-[11px] font-bold text-white",
-                            on ? "border-[var(--auth-accent)] bg-accent-btn" : "border-[rgb(20_18_16_/_0.2)]",
-                          )}
-                        >
-                          {on ? "✓" : ""}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="text-[13px] leading-5 text-[var(--auth-text)]">{item.text}</span>
-                          <span className="mt-1 flex flex-wrap gap-1.5">
-                            <span className="rounded-md bg-[rgb(20_18_16_/_0.05)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--auth-text-muted)]">
-                              {item.angle}
-                            </span>
-                            {item.risky ? (
-                              <span className="rounded-md bg-warn-bg px-1.5 py-0.5 text-[10px] font-bold text-warn-fg">
-                                {t("texts.risky", { reason: item.risky })}
-                              </span>
-                            ) : null}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
+            <StatCard
+              flat
+              label={t("budget.title")}
+              value={t("budget.amount", { amount: money(result.budget.amount, "USD") })}
+              sub={budgetReason}
+            />
+
+            <div className="rounded-box border border-line p-4">
+              <p className="eyebrow">{t("script.title")}</p>
+              <p className="mt-2 text-sm font-semibold text-ink">{result.brief.studio.hook}</p>
+              <ul className="mt-2 grid gap-1">
+                {result.brief.studio.benefits.filter(Boolean).map((b) => (
+                  <li key={b} className="flex gap-2 text-[13px] text-ink">
+                    <PanelIcon name="check" className="mt-0.5 size-3.5 text-ok-fg" />
+                    {b}
+                  </li>
+                ))}
               </ul>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  disabled={picked.length === 0}
-                  onClick={sendToLaunch}
-                  className="h-11 rounded-box bg-[var(--auth-text)] px-5 text-[13px] font-bold text-white disabled:opacity-50"
-                >
-                  {t("toLaunch")}
+              <p className="mt-2 text-xs font-semibold text-accent-text">{result.brief.studio.cta}</p>
+              {showVideoStudio ? (
+                <button type="button" onClick={sendToStudio} className={buttonClass("outline", "sm", "mt-3")}>
+                  <PanelIcon name="video" />
+                  {t("toStudio")}
                 </button>
-                {sent ? <p className="text-[12px] font-semibold text-ok-fg">{t(sent === "launch" ? "sentLaunch" : "sentStudio")}</p> : null}
-              </div>
-              <p className="mt-2 text-[11px] text-[var(--auth-text-muted)]">{t("reviewHint")}</p>
+              ) : null}
             </div>
           </div>
-        ) : null}
-      </div>
-    </section>
+
+          <div className="min-w-0">
+            <p id={textsLabelId} className="text-sm font-medium text-ink">
+              {t("texts.title", { count: picked.length, max: MAX_LAUNCH_TEXTS })}
+            </p>
+            <ul aria-labelledby={textsLabelId} className="mt-2 grid gap-2">
+              {result.brief.texts.map((item, i) => {
+                const on = picked.includes(i);
+                return (
+                  <li key={item.text}>
+                    <label
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-box border px-3.5 py-3 transition-colors motion-reduce:transition-none",
+                        on ? "border-accent bg-accent-soft ring-1 ring-accent" : "border-line bg-surface hover:border-line-strong",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggle(i)}
+                        className="mt-0.5 size-4 shrink-0 cursor-pointer accent-accent-btn"
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-[13px] leading-5 text-ink">{item.text}</span>
+                        <span className="mt-1.5 flex flex-wrap gap-1.5">
+                          <ToneBadge tone="neutral">{item.angle}</ToneBadge>
+                          {item.risky ? (
+                            <ToneBadge tone="warn" icon="alert" className="h-auto min-h-[22px] whitespace-normal py-0.5">
+                              {t("texts.risky", { reason: item.risky })}
+                            </ToneBadge>
+                          ) : null}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" disabled={picked.length === 0} onClick={sendToLaunch} className={buttonClass("primary")}>
+                <PanelIcon name="send" />
+                {t("toLaunch")}
+              </button>
+              <p role="status" className="text-xs font-medium text-ok-fg">
+                {sent ? t(sent === "launch" ? "sentLaunch" : "sentStudio") : null}
+              </p>
+            </div>
+            <p className="mt-2 text-xs text-ink-3">{t("reviewHint")}</p>
+          </div>
+        </div>
+      ) : null}
+    </PanelCard>
   );
 }

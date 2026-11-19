@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/cn";
+import { buttonClass } from "@/components/ui/Button";
+import { Note } from "@/components/ui/PanelKit";
 import type { LaunchOptions } from "@/lib/campaigns/launch-options.server";
+import { VideoPickGrid } from "@/features/campaigns/components/VideoPickGrid";
 
 /** Pocos a la vez: Smart+ necesita días para aprender con cada video nuevo. */
 const MAX_PICK = 5;
@@ -22,6 +24,7 @@ export function AddVideosPicker({
   onCancel: () => void;
 }) {
   const t = useTranslations("creatives.launched.addVideos");
+  const titleId = useId();
   const [videos, setVideos] = useState<LaunchOptions["videos"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
@@ -57,65 +60,32 @@ export function AddVideosPicker({
   }
 
   return (
-    <div className="mt-3 rounded-box border border-[rgb(20_18_16_/_0.1)] bg-surface p-3">
-      <p className="text-[12px] font-semibold text-[var(--auth-text)]">{t("title", { count: picked.length, max: MAX_PICK })}</p>
+    <div className="mt-3 grid gap-2.5 rounded-box border border-line bg-surface p-3 shadow-ctl">
+      <p id={titleId} className="text-[13px] font-medium text-ink">
+        {t("title", { count: picked.length, max: MAX_PICK })}
+      </p>
       {error ? (
-        <p className="mt-2 rounded-lg bg-field px-2.5 py-1.5 text-[12px] text-danger-fg">{error}</p>
+        <Note tone="danger">{error}</Note>
       ) : videos === null ? (
-        <p className="mt-2 text-[12px] text-[var(--auth-text-muted)]">{t("loading")}</p>
+        <p role="status" className="text-xs text-ink-2">
+          {t("loading")}
+        </p>
       ) : videos.length === 0 ? (
-        <p className="mt-2 rounded-lg border border-warn-line bg-warn-bg px-2.5 py-1.5 text-[12px] text-warn-fg">{t("empty")}</p>
+        <Note tone="warn">{t("empty")}</Note>
       ) : (
-        <div className="mt-2 flex max-h-[15rem] flex-wrap gap-2 overflow-y-auto">
-          {videos.map((video) => {
-            const on = picked.includes(video.videoId);
-            return (
-              <button
-                key={video.videoId}
-                type="button"
-                disabled={saving}
-                onClick={() => toggle(video.videoId)}
-                title={video.name}
-                className={cn(
-                  "relative h-28 w-[4.1rem] overflow-hidden rounded-lg bg-black/80 ring-2 transition",
-                  on ? "ring-[var(--auth-accent)]" : "ring-transparent opacity-70 hover:opacity-100",
-                )}
-              >
-                {video.coverUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={video.coverUrl} alt="" className="h-full w-full object-cover" />
-                ) : null}
-                {on ? (
-                  <span className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full bg-accent-btn text-[11px] font-bold text-on-accent">
-                    ✓
-                  </span>
-                ) : null}
-                {video.durationSec ? (
-                  <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 text-[10px] font-semibold text-white">
-                    {video.durationSec}s
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+        <VideoPickGrid videos={videos} picked={picked} disabled={saving} onToggle={toggle} labelledBy={titleId} />
       )}
-      <p className="mt-1.5 text-[11px] text-[var(--auth-text-muted)]">{t("hint")}</p>
-      <div className="mt-2.5 flex flex-wrap gap-2">
+      <p className="text-xs leading-snug text-ink-3">{t("hint")}</p>
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           disabled={saving || picked.length === 0}
           onClick={() => void submit()}
-          className="h-9 rounded-box bg-accent-btn px-3.5 text-[12px] font-bold text-on-accent disabled:opacity-50"
+          className={buttonClass("primary", "sm")}
         >
           {saving ? t("saving") : t("submit", { count: picked.length })}
         </button>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={onCancel}
-          className="h-9 rounded-box border border-[rgb(20_18_16_/_0.12)] px-3.5 text-[12px] font-semibold text-[var(--auth-text)]"
-        >
+        <button type="button" disabled={saving} onClick={onCancel} className={buttonClass("outline", "sm")}>
           {t("cancel")}
         </button>
       </div>

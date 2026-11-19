@@ -3453,5 +3453,125 @@
       "team": "Equipo (gerentes)",
       "clients": "Clientes"
     }
+  },
+  "partners": {
+    "alliance": {
+      "eyebrow": "Tu alianza",
+      "lede": {
+        "share": "Comparte tu link o un código de invitación. Cuando alguien se registra, confirmas si es de tu gente y recién ahí queda a tu nombre.",
+        "shareEarns": "Comparte tu link o un código de invitación. Cuando alguien se registra, confirmas si es de tu gente y recién ahí queda a tu nombre y ganas el <b>{rate}% del fee</b> que le cobramos durante {days, plural, one {# día} other {# días}} desde que se registra.",
+        "clientFee": "Tú y tus clientes pagan <b>{fee, number}% de fee</b> en cada recarga.",
+        "contract": "Contrato firmado el {date}."
+      },
+      "link": {
+        "title": "Tu link para compartir",
+        "copy": "Copiar link",
+        "copied": "Copiado ✓",
+        "copyPrompt": "Copia tu link:",
+        "view": "Ver mi landing"
+      },
+      "stats": {
+        "visits": "Visitas, últimos 30 días",
+        "people": "{count, plural, one {# persona} other {# personas}}",
+        "signups": "Registros",
+        "signupsSub": "a tu nombre",
+        "paying": "Clientes que pagan",
+        "payingSub": "{percent}% de registros",
+        "commission": "Comisión por cobrar",
+        "commissionPaid": "Cobrado {amount}"
+      },
+      "editor": {
+        "title": "Diseña tu landing",
+        "hint": "Los cambios se ven al lado. Guarda para publicarlos.",
+        "brand": "Marca",
+        "colors": "Colores",
+        "banners": "Banners",
+        "bannersHint": "Van debajo del inicio de tu landing. En celular se ve el de celular; si subes uno solo, se usa en los dos.",
+        "texts": "Textos",
+        "startFrom": "Empezar desde:",
+        "themeLight": "Fondo claro",
+        "themeDark": "Fondo oscuro",
+        "unsaved": "Tienes cambios sin guardar",
+        "undo": "Deshacer",
+        "saving": "Guardando…",
+        "save": "Guardar y publicar",
+        "preview": "Vista previa"
+      },
+      "fields": {
+        "logo": "Logo de tu empresa",
+        "logoHint": "PNG con fondo transparente se ve mejor. Máx. 2 MB.",
+        "logoSize": "Tamaño del logo",
+        "favicon": "Favicon",
+        "faviconHint": "El iconito de la pestaña del navegador. Cuadrado (64 × 64), PNG o ICO, máx. 512 KB.",
+        "companyName": "Nombre de tu empresa",
+        "companyNamePlaceholder": "Ej. Autoecompro",
+        "name": "Tu nombre",
+        "photo": "Tu foto (opcional)",
+        "photoHint": "Aparece como «Recomendado por». Cuadrada, máx. 2 MB.",
+        "accent": "Color principal",
+        "accentHint": "Botones de «Crear mi cuenta».",
+        "secondary": "Color secundario",
+        "secondaryHint": "Detalles, pasos y franja final.",
+        "background": "Color de fondo",
+        "backgroundHint": "Fondo de toda la página.",
+        "text": "Color del texto",
+        "textHint": "Títulos y textos.",
+        "bannerDesktop": "Banner para computadora",
+        "bannerMobile": "Banner para celular",
+        "bannerLink": "Link del banner (opcional)",
+        "headline": "Título",
+        "subheadline": "Subtítulo",
+        "whatsapp": "Tu WhatsApp (con código de país)"
+      },
+      "notices": {
+        "saved": "Listo. Tu landing ya muestra los cambios.",
+        "imageUpdated": "Imagen actualizada.",
+        "imageRemoved": "Imagen quitada."
+      },
+      "image": {
+        "empty": "Sin imagen",
+        "uploading": "Subiendo…",
+        "upload": "Subir",
+        "change": "Cambiar",
+        "remove": "Quitar",
+        "uploadBanner": "Subir banner · PNG, JPG o WEBP, máx. 4 MB"
+      },
+      "color": {
+        "pick": "Elegir color",
+        "pickAria": "{label} (elegir)",
+        "codeAria": "{label} (código)",
+        "invalid": "Usa un código de 6 dígitos, ej. #FF5A2A."
+      }
+    },
+    "invites": {
+      "pending": {
+        "title": "Por confirmar",
+        "hint": "Se registraron con tu link o código. Confírmalos solo si son de tu gente: recién ahí quedan a tu nombre y con tu fee.",
+        "viaCode": "código {code}",
+        "viaLink": "por link",
+        "saving": "Guardando…",
+        "confirm": "Sí es mío",
+        "reject": "No lo conozco"
+      },
+      "codes": {
+        "title": "Códigos de invitación",
+        "hint": "Crea un código para cada persona. Lo pone al registrarse y sirve <b>una sola vez</b>: si alguien lo comparte, ya no funciona.",
+        "notePlaceholder": "¿Para quién? (opcional, ej. Brian tienda 12)",
+        "noteAria": "¿Para quién es el código?",
+        "creating": "Creando…",
+        "create": "Crear código",
+        "created": "Código creado: <mono>{code}</mono>",
+        "copy": "Copiar",
+        "copied": "Copiado ✓",
+        "copyPrompt": "Copia el código:",
+        "noNote": "Sin nota",
+        "revoke": "Anular",
+        "showClosed": "Ver usados y anulados ({count})",
+        "hideClosed": "Ocultar usados y anulados ({count})",
+        "usedBy": "Usado por {name}",
+        "usedByClient": "Usado por un cliente",
+        "revoked": "Anulado"
+      }
+    }
   }
 }

@@ -3,7 +3,7 @@ import { Suspense, type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { routes } from "@/config/routes";
 import { buttonClass } from "@/components/ui/Button";
-import { HelpGuide } from "@/components/ui/HelpGuide.client";
+import { HelpGuide } from "@/components/ui/HelpGuide";
 import { PageHeader, PanelCard } from "@/components/ui/PageHeader";
 import { EmptyState, ToneBadge } from "@/components/ui/PanelKit";
 import { PanelIcon } from "@/components/ui/PanelIcon";
