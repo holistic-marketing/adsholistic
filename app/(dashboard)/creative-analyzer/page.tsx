@@ -1,4 +1,4 @@
-import { timedPage } from "@/lib/perf/perf-log.server";
+import { logPerf, timedPage } from "@/lib/perf/perf-log.server";
 import { after } from "next/server";
 import { dashboardClasses } from "@/lib/ui/dashboard-classes";
 import { CreativeHub } from "@/features/creative-analyzer/components/CreativeHub";
@@ -147,6 +147,13 @@ async function CreativeAnalyzerPage() {
   const listsMs = readTimestamp() - tLists;
   const totalMs = readTimestamp() - t0;
 
+  logPerf({
+    kind: "server_page",
+    path: "/creative-analyzer",
+    label: "breakdown",
+    ms: totalMs,
+    meta: { dashboardMs, accountsMs, listsMs, rejected: rejectedDrafts.length },
+  });
   console.info("[creative-analyzer] entry_timing", {
     clienteId: selected.id,
     dashboardMs,

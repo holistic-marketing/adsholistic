@@ -35,6 +35,26 @@ function useIsMac() {
   );
 }
 
+/**
+ * Enlace del menú que precarga la sección completa solo cuando el usuario
+ * muestra intención (pasa el mouse, enfoca o toca). Antes se precargaban
+ * TODAS las secciones al entrar: ~20 páginas armándose a la vez en el servidor
+ * (algunas llaman a TikTok) y la entrada al panel se ponía lenta.
+ */
+function IntentLink(props: React.ComponentProps<typeof Link>) {
+  const [active, setActive] = useState(false);
+  const arm = () => setActive(true);
+  return (
+    <Link
+      {...props}
+      prefetch={active ? true : false}
+      onMouseEnter={arm}
+      onFocus={arm}
+      onTouchStart={arm}
+    />
+  );
+}
+
 /** Menú lateral: marca, vista, secciones, buscador y cuenta. */
 export function PanelRail({ id }: { id: string }) {
   const t = useTranslations("nav");
@@ -72,9 +92,8 @@ export function PanelRail({ id }: { id: string }) {
     const label = labelOf(entry);
     return (
       <li key={entry.href}>
-        <Link
+        <IntentLink
           href={entry.href}
-          prefetch
           title={label}
           aria-current={current ? "page" : undefined}
           className={cn("panel-navlink", sub && "panel-navlink--sub")}
@@ -83,7 +102,7 @@ export function PanelRail({ id }: { id: string }) {
           <span data-rail-label className="min-w-0 flex-1 truncate">
             {label}
           </span>
-        </Link>
+        </IntentLink>
       </li>
     );
   }
