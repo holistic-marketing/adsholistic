@@ -21,7 +21,9 @@ import {
   formatFeePercentLabel,
 } from "@/lib/payments/deposit-fee";
 import { formatPenAmount } from "@/lib/payments/manual-deposit.shared";
+import type { VoucherReviewNotice } from "@/lib/payments/voucher-review-notice";
 import { GatewayLogo } from "./GatewayLogo";
+import { VoucherReviewCard } from "./VoucherReviewCard";
 import { PaymentAppIcon, resolvePaymentAppKey } from "./PaymentAppIcon";
 import {
   CheckCircleIcon,
@@ -96,6 +98,7 @@ interface ProofResponse {
     autoApproved: boolean;
     creditUsdCents?: number;
     analysis?: { reason?: string; confirmed?: boolean };
+    review?: VoucherReviewNotice | null;
   };
 }
 
@@ -160,6 +163,7 @@ export function ManualPaymentModal({
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [creditResult, setCreditResult] = useState<number | null>(null);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [reviewNotice, setReviewNotice] = useState<VoucherReviewNotice | null>(null);
   const [serverChargeCents, setServerChargeCents] = useState<number | null>(resume?.chargeCents ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pasteZoneRef = useRef<HTMLDivElement>(null);
@@ -243,6 +247,7 @@ export function ManualPaymentModal({
     setProofPreview(null);
     setCreditResult(null);
     setPendingMessage(null);
+    setReviewNotice(null);
     setServerChargeCents(null);
     onClose();
   }
@@ -357,6 +362,7 @@ export function ManualPaymentModal({
           data.paymentIntent.analysis?.reason ??
             t("manualModal.pendingToast"),
         );
+        setReviewNotice(data.paymentIntent.review ?? null);
         setStep("pending");
       }
     } catch (err) {
@@ -873,12 +879,16 @@ export function ManualPaymentModal({
               title={
                 paysDebt
                   ? "Comprobante en revisión"
-                  : t("manualModal.pendingTitle")
+                  : reviewNotice && reviewNotice.kind !== "review"
+                    ? "No pudimos acreditar tu recarga"
+                    : t("manualModal.pendingTitle")
               }
               description={
                 paysDebt
                   ? "Gerencia revisa la transferencia y, al aceptarla, baja la deuda de este mes. No acredita cartera."
-                  : t(payMethod === "binance" ? "manualModal.binanceReview" : "manualModal.pendingDesc")
+                  : reviewNotice && reviewNotice.kind !== "review"
+                    ? "Tu comprobante pasó a verificación de soporte. No vuelvas a pagar."
+                    : t(payMethod === "binance" ? "manualModal.binanceReview" : "manualModal.pendingDesc")
               }
               identityIcon={<GatewayLogo gatewayId={payMethod === "binance" ? "crypto" : "manual"} size="sm" />}
               identityLabel={payMethod === "binance" ? "Binance Pay" : t("manualModal.title")}
@@ -888,12 +898,16 @@ export function ManualPaymentModal({
               onClose={resetAndClose}
             />
             <div className="p-5 sm:p-6">
-              <div className="flex items-start gap-4 rounded-2xl bg-amber-50 p-4 text-amber-900">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100">
-                  <ClockIcon />
-                </span>
-                <p className="pt-1 text-[13px] leading-5">{pendingMessage}</p>
-              </div>
+              {reviewNotice && !paysDebt ? (
+                <VoucherReviewCard notice={reviewNotice} />
+              ) : (
+                <div className="flex items-start gap-4 rounded-2xl bg-amber-50 p-4 text-amber-900">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                    <ClockIcon />
+                  </span>
+                  <p className="pt-1 text-[13px] leading-5">{pendingMessage}</p>
+                </div>
+              )}
               <PaymentModalFooter>
                 <Button
                   className="h-11 w-full rounded-xl bg-[#d47840] px-6 hover:bg-[#c96a35] sm:w-auto"

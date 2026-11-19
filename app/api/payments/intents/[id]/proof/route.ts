@@ -317,6 +317,7 @@ export async function POST(request: Request, context: RouteContext) {
       analysis: processResult.analysis,
       creditUsdCents: processResult.creditUsdCents,
       security: processResult.security,
+      review: processResult.autoApproved ? null : processResult.review ?? null,
     },
   });
 }

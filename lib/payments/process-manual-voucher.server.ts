@@ -23,6 +23,10 @@ import { isGatewayInMaintenance } from "@/lib/payments/gateway-config";
 import { completeManualVoucherConfirmedDeposit } from "@/lib/payments/manual-bank-match/confirm-deposit.server";
 import { MANUAL_DASHBOARD_SOURCE } from "@/lib/payments/manual-bank-match/source";
 import { isMissingCobroPurpose, isLoPagadoDebtPurpose } from "@/lib/payments/missing-cobro.shared";
+import {
+  buildVoucherReviewNotice,
+  type VoucherReviewNotice,
+} from "@/lib/payments/voucher-review-notice";
 
 export type ProcessManualVoucherResult = {
   analysis: VoucherAnalysisResult;
@@ -32,6 +36,8 @@ export type ProcessManualVoucherResult = {
   security: VoucherSecurityFlags;
   rateLimited?: boolean;
   rateLimitReason?: string | null;
+  /** Solo si no se acreditó: qué no cuadró, listo para mostrar al cliente. */
+  review?: VoucherReviewNotice | null;
 };
 
 function readChargeCurrency(
@@ -150,7 +156,9 @@ export async function processManualVoucherUpload(input: {
     destinationAccounts,
   });
 
-  if (metadata.manual_pay_method === "binance" || analysis.paymentChannel === "binance") {
+  const isBinance =
+    metadata.manual_pay_method === "binance" || analysis.paymentChannel === "binance";
+  if (isBinance) {
     analysis.confirmed = false;
     analysis.needsReview = true;
     analysis.reason = "Comprobante de Binance recibido. Gerencia verificará el pago y aprobará la recarga desde Pagos manuales.";
@@ -261,16 +269,45 @@ export async function processManualVoucherUpload(input: {
     };
   }
 
-  const clientReviewReason = analysis.confirmed
-    ? completionDeclinedReason ?? "Comprobante recibido. La acreditación requiere revisión."
-    : analysis.reason || "Un gerente revisará tu comprobante.";
+  // Qué no cuadró (monto, cuenta/titular, no es comprobante...), en lenguaje
+  // del cliente. Binance, límites y fallos de verificación van como revisión.
+  const genericReview =
+    analysis.confirmed || isBinance || duplicateCheckFailed || !rateLimits.autoApproveAllowed;
+  const reviewNotice: VoucherReviewNotice = genericReview
+    ? {
+        kind: "review",
+        title: "Tu comprobante está en revisión",
+        message: analysis.confirmed
+          ? `${completionDeclinedReason ?? "Comprobante recibido. La acreditación requiere revisión."} Te avisaremos apenas se acredite; no vuelvas a pagar.`
+          : `${analysis.reason || "Un gerente revisará tu comprobante."} Te avisaremos apenas se acredite; no vuelvas a pagar.`,
+        tip: null,
+        enteredAmount: null,
+        voucherAmount: null,
+        currency: null,
+      }
+    : buildVoucherReviewNotice({
+        analysis,
+        expectedAmount: expected.amount,
+        expectedCurrency: expected.currency,
+        duplicate: duplicateHash || duplicateOperationCode,
+      });
+
+  const clientReviewReason =
+    isMissingCobro || isDebtPayment
+      ? analysis.confirmed
+        ? completionDeclinedReason ?? "Comprobante recibido. La acreditación requiere revisión."
+        : analysis.reason || "Un gerente revisará tu comprobante."
+      : reviewNotice.message;
 
   await createNotificationBestEffort({
     organizationId: intent.organizationId,
     userId: intent.createdBy,
-    title: analysis.confirmed
-      ? "Comprobante recibido"
-      : "Comprobante en revisión",
+    title:
+      isMissingCobro || isDebtPayment
+        ? analysis.confirmed
+          ? "Comprobante recibido"
+          : "Comprobante en revisión"
+        : reviewNotice.title,
     body: isMissingCobro || isDebtPayment
       ? analysis.confirmed
         ? isDebtPayment
@@ -342,5 +379,6 @@ export async function processManualVoucherUpload(input: {
     security,
     rateLimited: !rateLimits.uploadAllowed,
     rateLimitReason: rateLimits.reason,
+    review: isMissingCobro || isDebtPayment ? null : reviewNotice,
   };
 }
