@@ -44,6 +44,12 @@ function normEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/** Como TikTok muestra a un miembro ya aceptado: primera y última letra del usuario. */
+function maskEmail(email: string): string {
+  const [user = "", domain = ""] = email.split("@");
+  return `${user.slice(0, 1)}***${user.slice(-1)}@${domain}`;
+}
+
 /** Manda la invitación a TikTok (Estándar, sin finanzas, con acceso ADMIN solo a esas cuentas). */
 async function sendInvite(bcId: string, email: string, advertiserIds: string[], token: string) {
   const body: Record<string, unknown> = { bc_id: bcId, emails: [email], user_role: "STANDARD" };
@@ -54,18 +60,43 @@ async function sendInvite(bcId: string, email: string, advertiserIds: string[], 
   return { ok: j.code === 0, message: j.code === 0 ? "OK" : String(j.message ?? "TikTok no envió la invitación") };
 }
 
-/** Estado del miembro en el BM: null si no figura. */
+type BcMember = { email: string; status: string; userId: string | null };
+const memberCache = new Map<string, { at: number; list: BcMember[] }>();
+
+/** Todos los miembros del BM (el filtro por correo de TikTok no encuentra a los ya aceptados). */
+async function listMembers(bcId: string, token: string): Promise<BcMember[]> {
+  const cached = memberCache.get(bcId);
+  if (cached && Date.now() - cached.at < 60_000) return cached.list;
+  const list: BcMember[] = [];
+  for (let page = 1; page <= 100; page++) {
+    const j = await tiktok(`/bc/member/get/?bc_id=${bcId}&page=${page}&page_size=20`, token);
+    if (j.code !== 0) throw new Error(`TikTok no devolvió los miembros: ${String(j.message ?? "")}`);
+    const rows = (j.data?.list ?? []) as Array<Record<string, unknown>>;
+    for (const m of rows) {
+      list.push({
+        email: normEmail(String(m.user_email ?? "")),
+        status: String(m.relation_status ?? ""),
+        userId: m.user_id ? String(m.user_id) : null,
+      });
+    }
+    if (rows.length < 20) break;
+  }
+  memberCache.set(bcId, { at: Date.now(), list });
+  return list;
+}
+
+/**
+ * Estado del miembro en el BM: null si no figura.
+ * Pendiente: TikTok muestra el correo completo. Aceptado (BOUND): lo enmascara ("p***4@gmail.com"),
+ * así que solo se toma el enmascarado si ya no hay pendiente y es el único que coincide.
+ */
 async function findMember(bcId: string, email: string, token: string) {
-  const filtering = encodeURIComponent(JSON.stringify({ keyword: email }));
-  const j = await tiktok(`/bc/member/get/?bc_id=${bcId}&filtering=${filtering}&page=1&page_size=10`, token);
-  if (j.code !== 0) throw new Error(`TikTok no devolvió los miembros: ${String(j.message ?? "")}`);
-  const list = (j.data?.list ?? []) as Array<Record<string, unknown>>;
-  const row = list.find((m) => normEmail(String(m.user_email ?? "")) === email);
-  if (!row) return null;
-  return {
-    status: String(row.relation_status ?? ""),
-    userId: row.user_id ? String(row.user_id) : null,
-  };
+  const list = await listMembers(bcId, token);
+  const exact = list.find((m) => m.email === email);
+  if (exact) return { status: exact.status, userId: exact.userId };
+  const masked = list.filter((m) => m.email === maskEmail(email) && m.userId);
+  if (masked.length === 1) return { status: masked[0]!.status, userId: masked[0]!.userId };
+  return null;
 }
 
 async function assignAdvertiser(bcId: string, advertiserId: string, userId: string, token: string) {
