@@ -12,6 +12,8 @@ import {
   type TikTokCreateBmBucket,
 } from "@/lib/integrations/tiktok/bc-create-profiles";
 import { ensureAdvertisersInOrganizationForAllocation } from "@/services/payments.service";
+import { inviteClienteToBc } from "@/lib/integrations/tiktok/bc-invites.server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Gerencia crea cuentas TikTok para un cliente en cualquier BM, sin el límite
@@ -242,6 +244,48 @@ export async function listFreeTikTokAccounts(bmBucket: string): Promise<FreeAcco
   return found.filter((f) => !taken.has(f.advertiserId)).sort((a, b) => serial(a.name) - serial(b.name));
 }
 
+export type BcInviteResult = { email: string; ok: boolean; message: string };
+
+/** Correos con los que el cliente entra a AdsHolistic (dueños/miembros de su organización). */
+async function organizationLoginEmails(organizationId: string): Promise<string[]> {
+  const admin = createAdminClient();
+  const { data } = await admin.from("organization_memberships").select("user_id").eq("organization_id", organizationId).limit(5);
+  const emails: string[] = [];
+  for (const m of data ?? []) {
+    const { data: u } = await admin.auth.admin.getUserById(String(m.user_id));
+    if (u?.user?.email) emails.push(u.user.email);
+  }
+  return [...new Set(emails.map((e) => e.trim().toLowerCase()))];
+}
+
+/**
+ * Invita al BM el correo del cliente con sus cuentas nuevas. Si ya es miembro, se le asignan
+ * al toque; si no, queda pendiente y el cron le asigna al aceptar (y reinvita cada 6 h).
+ */
+async function inviteClienteLogins(input: {
+  organizationId: string | null;
+  clienteId: string;
+  bcId: string;
+  advertiserIds: string[];
+  actorUserId: string | null;
+}): Promise<BcInviteResult[]> {
+  if (!input.organizationId || input.advertiserIds.length === 0) return [];
+  const emails = await organizationLoginEmails(input.organizationId).catch(() => []);
+  const out: BcInviteResult[] = [];
+  for (const email of emails) {
+    const r = await inviteClienteToBc({
+      bcId: input.bcId,
+      email,
+      advertiserIds: input.advertiserIds,
+      hecomClienteId: input.clienteId,
+      organizationId: input.organizationId,
+      createdBy: input.actorUserId,
+    }).catch((e) => ({ ok: false, message: e instanceof Error ? e.message : "error" }));
+    out.push({ email, ok: r.ok, message: r.message });
+  }
+  return out;
+}
+
 /**
  * Gerencia le da a un cliente cuentas libres que ya existen (en vez de crear nuevas).
  * Quedan sin cupo (BM10/30), a nombre del cliente en Hecom y en su panel, con acceso ADMIN
@@ -255,7 +299,7 @@ export async function staffGiveFreeTikTokAccounts(input: {
   actorUserId: string | null;
   /** Cuentas libres elegidas a mano (sección Cuentas libres); si no, las de menor número. */
   advertiserIds?: string[];
-}): Promise<{ created: StaffCreatedAccount[]; error: string | null }> {
+}): Promise<{ created: StaffCreatedAccount[]; error: string | null; invites?: BcInviteResult[] }> {
   const cliente = await getHecomCliente(input.hecomClienteId);
   if (!cliente) throw new Error("Cliente no encontrado.");
   const profile = getTikTokBcCreateProfile(input.bmBucket);
@@ -349,7 +393,14 @@ export async function staffGiveFreeTikTokAccounts(input: {
       console.warn("[staff-give-free] panel_sync_partial", { error: error instanceof Error ? error.message : error });
     }
   }
-  return { created: given, error: null };
+  const invites = await inviteClienteLogins({
+    organizationId,
+    clienteId: cliente.id,
+    bcId,
+    advertiserIds: given.map((g) => g.advertiserId),
+    actorUserId: input.actorUserId,
+  });
+  return { created: given, error: null, invites };
 }
 
 export async function staffCreateTikTokAccounts(input: {
@@ -358,7 +409,7 @@ export async function staffCreateTikTokAccounts(input: {
   count: number;
   accessUserIds: string[];
   actorUserId: string | null;
-}): Promise<{ created: StaffCreatedAccount[]; error: string | null }> {
+}): Promise<{ created: StaffCreatedAccount[]; error: string | null; invites?: BcInviteResult[] }> {
   const cliente = await getHecomCliente(input.hecomClienteId);
   if (!cliente) throw new Error("Cliente no encontrado.");
   const profile = getTikTokBcCreateProfile(input.bmBucket);
@@ -439,7 +490,14 @@ export async function staffCreateTikTokAccounts(input: {
       console.warn("[staff-create] panel_sync_partial", { error: error instanceof Error ? error.message : error });
     }
   }
-  return { created, error: null };
+  const invites = await inviteClienteLogins({
+    organizationId,
+    clienteId: cliente.id,
+    bcId: profile.bcId,
+    advertiserIds: created.map((c) => c.advertiserId),
+    actorUserId: input.actorUserId,
+  });
+  return { created, error: null, invites };
 }
 
 function sameAdvertiserName(a: string, b: string): boolean {

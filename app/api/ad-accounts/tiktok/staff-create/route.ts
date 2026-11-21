@@ -77,6 +77,7 @@ export async function POST(request: Request) {
           hecom_cliente_name: auth.selected.name,
           bm: String(body.bmBucket ?? ""),
           created: result.created,
+          invites: result.invites ?? [],
           error: result.error,
         },
       })

@@ -43,6 +43,10 @@
       "schedule": "*/10 * * * *"
     },
     {
+      "path": "/api/jobs/tiktok/bc-invites",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/jobs/tiktok/map-accounts",
       "schedule": "40 * * * *"
     },
