@@ -111,6 +111,29 @@ async function assignAdvertiser(bcId: string, advertiserId: string, userId: stri
 }
 
 /**
+ * Mientras el cliente no aceptaba, su cuenta del BM 200 se le compartió vía el BM 10
+ * (socio). Al aceptar ya la tiene directo, así que se quita esa copia para que el BM 10
+ * no muestre cuentas del BM 200.
+ */
+const TEMP_PARTNER_SHARES: Record<string, string[]> = {
+  "7575005779271614480": ["7652451146933698576"], // BM 200 → BM 10
+};
+
+async function removeTempPartnerShares(bcId: string, advertiserIds: string[], token: string) {
+  for (const partnerId of TEMP_PARTNER_SHARES[bcId] ?? []) {
+    const j = await tiktok("/bc/partner/asset/delete/", token, {
+      bc_id: bcId,
+      partner_id: partnerId,
+      asset_type: "ADVERTISER",
+      asset_ids: advertiserIds,
+    });
+    if (j.code !== 0) {
+      console.warn("[bc-invites] unshare_failed", { bcId, partnerId, message: j.message });
+    }
+  }
+}
+
+/**
  * Invita a un cliente a un BM con sus cuentas y lo deja en seguimiento.
  * Si ya hay una invitación pendiente al mismo correo en ese BM, le suma las cuentas.
  */
@@ -218,7 +241,10 @@ export async function processPendingBcInvites(): Promise<{
             updated_at: now.toISOString(),
           })
           .eq("id", row.id);
-        if (!failed.length) summary.accepted += 1;
+        if (!failed.length) {
+          summary.accepted += 1;
+          await removeTempPartnerShares(row.bc_id, row.advertiser_ids, token).catch(() => undefined);
+        }
         continue;
       }
 
