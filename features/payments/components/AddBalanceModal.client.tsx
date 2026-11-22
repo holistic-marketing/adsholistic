@@ -34,6 +34,7 @@ import {
 } from "./PaymentAppIcon";
 import { cn } from "@/lib/cn";
 import { GatewayLogo } from "./GatewayLogo";
+import { YapePayQr } from "./YapePayQr.client";
 import { PaymentModalHeader, PaymentOutcome } from "./PaymentModalChrome";
 import {
   PaymentAmountInput,
@@ -484,7 +485,8 @@ export function AddBalanceModal({
   const otherLinks = cobranaDeeplinks.filter(
     (d) => d.key.toLowerCase() !== "yape",
   );
-  const orderedLinks = [...(yapeLink ? [yapeLink] : []), ...otherLinks];
+  // Yape ya sale arriba como QR / botón grande: abajo quedan los bancos.
+  const orderedLinks = otherLinks;
   const modalStepIndex = step === "form" ? 0 : step === "confirm" ? 1 : 2;
   const gatewayIdentityDescription = isCobrana
     ? t("addBalance.gatewayLocal")
@@ -829,6 +831,19 @@ export function AddBalanceModal({
           />
 
           <PaymentDialogBody className="space-y-4">
+            {yapeLink ? (
+              <>
+                <YapePayQr
+                  url={yapeLink.url}
+                  amountLabel={
+                    penPreview ? formatPenAmount(penPreview.grossPenCents) : null
+                  }
+                />
+                <p className="text-xs font-medium text-ink-2">
+                  {t("addBalance.yapeManualFallback")}
+                </p>
+              </>
+            ) : null}
             {/* Código de pago (v3 «paycode»). */}
             <div className="grid justify-items-center gap-1.5 rounded-box border border-dashed border-line-strong bg-subtle p-5 text-center">
               <span className="eyebrow">{t("addBalance.paymentCode")}</span>
