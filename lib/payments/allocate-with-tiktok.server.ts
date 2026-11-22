@@ -260,6 +260,14 @@ export async function allocateWithOptionalTikTokFunding(
   const canFund = fundingOn && isTikTok && Boolean(advertiserId) && Boolean(bcId);
   const agencyBmFunding = Boolean(input.agencyBmFunding);
 
+  // Sin fondeo TikTok activo, el saldo subiría solo en el panel y no en TikTok
+  // (panel y TikTok quedan descuadrados). Mejor no mover nada.
+  if (!fundingOn && isTikTok) {
+    throw new Error(
+      "El fondeo de TikTok está desactivado (TIKTOK_BC_FUNDING_ENABLED). No se movió saldo.",
+    );
+  }
+
   let tiktokRequestId: string | null = null;
   let transferRequestId: string | null = null;
   let bridgeJournalId: string | null = null;

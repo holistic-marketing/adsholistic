@@ -230,6 +230,14 @@ export async function reclaimFromAdAccountWithTikTok(
   const canTalkTikTok = fundingOn && isTikTok && Boolean(advertiserId) && Boolean(bcId);
   const shared = isSharedCreditBmBucket(bmBucket) || bmBucket === "10" || bmBucket === "30";
 
+  // Sin fondeo TikTok activo, se bajaría solo el panel y la plata seguiría en
+  // TikTok (descuadre). Solo staff con forceLedgerOnly puede hacerlo a propósito.
+  if (!fundingOn && isTikTok && !input.forceLedgerOnly) {
+    throw new Error(
+      "El fondeo de TikTok está desactivado (TIKTOK_BC_FUNDING_ENABLED). No se movió saldo.",
+    );
+  }
+
   const idempotencyKey =
     input.idempotencyKey ??
     `reclaim:${input.organizationId}:${account.id}:${requested}:${randomUUID()}`;
