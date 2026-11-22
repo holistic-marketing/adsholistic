@@ -96,6 +96,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/comprar", destination: "/", permanent: false },
       { source: "/carrito", destination: "/", permanent: false },
+      // Profit vive en su propia web: el menú y los links viejos llevan allá.
+      { source: "/profit", destination: "https://realprofitcod.com", permanent: false },
+      { source: "/profit/:path*", destination: "https://realprofitcod.com", permanent: false },
     ];
   },
 };
