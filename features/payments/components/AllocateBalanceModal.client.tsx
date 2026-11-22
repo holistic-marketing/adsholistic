@@ -50,6 +50,7 @@ function friendlyAllocateError(
   agencyBmFunding: boolean,
   messages: {
     errMin10: string;
+    errBmNoFunds: string;
     errWallet: string;
     errBmMapped: string;
     errAssignMapped: string;
@@ -62,6 +63,11 @@ function friendlyAllocateError(
   const text = raw.trim();
   if (/amountToTransfer|mínimo|minimo|menor al mínimo|al menos \$10/i.test(text)) {
     return messages.errMin10;
+  }
+  // BM de la agencia sin fondos: es problema nuestro, no del cliente. No se
+  // muestran montos del BM; un asesor lo resuelve.
+  if (/^Este BM\b|Este Business Center no tiene/i.test(text)) {
+    return messages.errBmNoFunds;
   }
   if (
     /no aparece en el BM|rechazó el presupuesto|falta permiso de presupuesto|línea de crédito|crédito compartido|portfolio de crédito|no tiene saldo en efectivo|no tiene cupo disponible|limitó los cambios de presupuesto|FrequencyControl/i.test(
@@ -79,7 +85,9 @@ function friendlyAllocateError(
       ? messages.errBmTikTok
       : messages.errAssignTikTok;
   }
-  if (/Insufficient wallet balance|saldo.*cartera/i.test(text)) {
+  // Solo el rechazo real de cartera: varios errores de TikTok terminan en
+  // «Tu saldo sigue en la cartera» y no son falta de saldo.
+  if (/Insufficient wallet balance/i.test(text)) {
     return messages.errWallet;
   }
   if (text.length <= 220 && !/\| bc=/.test(text)) return text;
@@ -194,6 +202,7 @@ function AllocateBalanceModalBody({
       setError(
         friendlyAllocateError(raw, agencyBmFunding, {
           errMin10: t("allocateModal.errMin10", { amount: tiktokMinLabel }),
+          errBmNoFunds: t("allocateModal.errBmNoFunds"),
           errWallet: t("allocateModal.errWallet"),
           errBmMapped: t("allocateModal.errBmMapped"),
           errAssignMapped: t("allocateModal.errAssignMapped"),

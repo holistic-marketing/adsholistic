@@ -613,6 +613,7 @@
       "successFund": "Listo: se recargaron {amount} a {name}.",
       "errInvalid": "Ingresa un monto válido mayor que cero.",
       "errMin10": "TikTok solicita al menos {amount} en esta cuenta. Prueba con {amount} o más.",
+      "errBmNoFunds": "No pudimos completar la asignación en este momento. Un asesor lo revisará lo más pronto posible. Tu dinero sigue en tu cartera.",
       "errWallet": "No hay suficiente saldo en la cartera Holistic. Lo que ya está en la cuenta TikTok no se vuelve a asignar: hay que recargar la cartera.",
       "errGeneric": "No se pudo asignar el saldo.",
       "notConfigured": "no configurado",

@@ -36,6 +36,10 @@ import {
   updatePaymentIntentRecord,
 } from "@/lib/payments/payment-intents.server";
 import { isStaffBlockedAdAccount } from "@/lib/payments/staff-block.server";
+import {
+  alertBmNoFundsBestEffort,
+  isBmNoFundsError,
+} from "@/lib/payments/bm-no-funds-alert.server";
 import { isRecord } from "@/lib/records";
 
 export interface AllocateWithTikTokInput {
@@ -166,11 +170,12 @@ export async function allocateWithOptionalTikTokFunding(
   const admin = createAdminClient();
   const { data: account, error } = await admin
     .from("ad_accounts")
-    .select("id, organization_id, platform, external_account_id, external_business_id, currency, status, metadata")
+    .select("id, organization_id, name, platform, external_account_id, external_business_id, currency, status, metadata")
     .eq("id", input.adAccountId)
     .maybeSingle<{
       id: string;
       organization_id: string;
+      name: string | null;
       platform: string | null;
       external_account_id: string | null;
       external_business_id: string | null;
@@ -527,6 +532,18 @@ export async function allocateWithOptionalTikTokFunding(
         requestedBy: input.requestedBy,
         cause: tiktokError,
       });
+      const tiktokMessage =
+        tiktokError instanceof Error ? tiktokError.message : String(tiktokError);
+      if (isBmNoFundsError(tiktokMessage)) {
+        await alertBmNoFundsBestEffort({
+          bcId,
+          bmBucket,
+          advertiserId,
+          accountName: account.name,
+          amountCents: input.amountCents,
+          tiktokMessage,
+        });
+      }
       throw tiktokError;
     }
 

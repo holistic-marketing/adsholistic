@@ -613,6 +613,7 @@
       "successFund": "Pronto: recarregados {amount} em {name}.",
       "errInvalid": "Informe um valor válido maior que zero.",
       "errMin10": "O TikTok exige pelo menos {amount} nesta conta. Tente {amount} ou mais.",
+      "errBmNoFunds": "Não conseguimos concluir a atribuição agora. Um assessor vai revisar o mais rápido possível. Seu dinheiro continua na sua carteira.",
       "errWallet": "Saldo insuficiente na carteira Holistic. O que já está na conta TikTok não é reatribuído — recarregue a carteira.",
       "errGeneric": "Não foi possível atribuir o saldo.",
       "notConfigured": "não configurado",

@@ -613,6 +613,7 @@
       "successFund": "Done: topped up {amount} to {name}.",
       "errInvalid": "Enter a valid amount greater than zero.",
       "errMin10": "TikTok requires at least {amount} on this account. Try {amount} or more.",
+      "errBmNoFunds": "We couldn't complete the assignment right now. An advisor will review it as soon as possible. Your money is still in your wallet.",
       "errWallet": "Not enough Holistic wallet balance. What is already on the TikTok account is not reassigned — top up the wallet.",
       "errGeneric": "Could not assign balance.",
       "notConfigured": "not configured",
