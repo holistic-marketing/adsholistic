@@ -1,6 +1,9 @@
 import "server-only";
 import { resolveTikTokFinanceAccessToken } from "@/lib/integrations/tiktok/bc-finance.server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendTransactionalEmail } from "@/lib/email/email.server";
+import { resolveManualPaymentManagerEmails } from "@/lib/email/manual-payment-notify.server";
+import { escapeHtml, wrapInternalEmail } from "@/lib/email/templates/layout";
 
 /**
  * Invitaciones de clientes a un BM de TikTok.
@@ -119,18 +122,170 @@ const TEMP_PARTNER_SHARES: Record<string, string[]> = {
   "7575005779271614480": ["7652451146933698576"], // BM 200 → BM 10
 };
 
-async function removeTempPartnerShares(bcId: string, advertiserIds: string[], token: string) {
+type AdvertiserPixel = { pixelId: string; code: string; name: string };
+
+async function listAdvertiserPixels(advertiserId: string, token: string): Promise<AdvertiserPixel[]> {
+  const j = await tiktok(`/pixel/list/?advertiser_id=${advertiserId}&page=1&page_size=50`, token);
+  if (j.code !== 0) throw new Error(`No se pudieron leer los píxeles de ${advertiserId}: ${String(j.message ?? "")}`);
+  const pixels = (j.data?.pixels ?? []) as Array<Record<string, unknown>>;
+  return pixels.map((p) => ({
+    pixelId: String(p.pixel_id ?? ""),
+    code: String(p.pixel_code ?? ""),
+    name: String(p.pixel_name ?? ""),
+  }));
+}
+
+/**
+ * Píxeles que ve un BM: código → nombre del BM dueño ("" si el dueño es una
+ * cuenta publicitaria; TikTok lo devuelve vacío en ese caso).
+ */
+async function listBcPixels(bcId: string, token: string): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  for (let page = 1; page <= 40; page++) {
+    const j = await tiktok(`/bc/pixel/get/?bc_id=${bcId}&page=${page}&page_size=50`, token);
+    if (j.code !== 0) throw new Error(`No se pudieron leer los píxeles del BM ${bcId}: ${String(j.message ?? "")}`);
+    const rows = (j.data?.list ?? []) as Array<Record<string, unknown>>;
+    for (const r of rows) out.set(String(r.pixel_code ?? ""), String(r.owner_bc_name ?? ""));
+    if (rows.length < 50) break;
+  }
+  return out;
+}
+
+async function bcName(bcId: string, token: string): Promise<string> {
+  const j = await tiktok(`/bc/get/?bc_id=${bcId}`, token);
+  const list = (j.data?.list ?? []) as Array<{ bc_info?: { name?: string } }>;
+  return String(list[0]?.bc_info?.name ?? "");
+}
+
+/**
+ * Los píxeles que la cuenta usaba vía el BM socio (BM 10) dejan de verse al quitar lo
+ * compartido (Robinson, 23/11: su cuenta 200 quedó sin píxel). Antes de quitarlo:
+ * - si el píxel es de una cuenta publicitaria del socio, se transfiere al socio;
+ * - el socio lo comparte al BM de la cuenta (solo publicar anuncios);
+ * - se vincula a la cuenta desde ese BM.
+ * Devuelve los problemas; si hay alguno, no se quita lo compartido.
+ */
+async function carryPartnerPixels(
+  bcId: string,
+  partnerId: string,
+  advertiserId: string,
+  token: string,
+): Promise<string[]> {
+  const problems: string[] = [];
+  const pixels = (await listAdvertiserPixels(advertiserId, token)).filter((p) => p.code && p.pixelId);
+  if (!pixels.length) return problems;
+  const [ownPixels, partnerPixels, partnerName] = await Promise.all([
+    listBcPixels(bcId, token),
+    listBcPixels(partnerId, token),
+    bcName(partnerId, token),
+  ]);
+
+  for (const px of pixels) {
+    // El BM de la cuenta todavía no lo ve: hay que traerlo desde el socio.
+    if (!ownPixels.has(px.code)) {
+      const owner = partnerPixels.get(px.code);
+      if (owner === undefined || (owner && owner !== partnerName)) {
+        problems.push(`Píxel "${px.name}" (${px.code}): es de otro BM${owner ? ` (${owner})` : ""}; su dueño debe compartirlo directo al BM ${bcId}.`);
+        continue;
+      }
+      if (owner === "") {
+        // Dueño = una cuenta publicitaria del socio: se pasa al socio (conserva historial y vínculos).
+        const t = await tiktok("/bc/pixel/transfer/", token, {
+          bc_id: partnerId,
+          pixel_code: px.code,
+          sync_bc_permission: false,
+        });
+        if (t.code !== 0) {
+          problems.push(`Píxel "${px.name}" (${px.code}): no se pudo pasar al BM socio (${String(t.message ?? "error")}).`);
+          continue;
+        }
+      }
+      const share = await tiktok("/bc/partner/add/", token, {
+        bc_id: partnerId,
+        partner_id: bcId,
+        asset_type: "PIXEL",
+        asset_ids: [px.pixelId],
+        pixel_roles: ["PIXEL_AD_DELIVERY"],
+      });
+      if (share.code !== 0) {
+        problems.push(`Píxel "${px.name}" (${px.code}): no se pudo compartir al BM ${bcId} (${String(share.message ?? "error")}).`);
+        continue;
+      }
+    }
+
+    // Vincular desde el BM de la cuenta (si ya estaba vinculado, TikTok lo deja igual).
+    const link = await tiktok("/bc/pixel/link/update/", token, {
+      bc_id: bcId,
+      pixel_code: px.code,
+      advertiser_ids: [advertiserId],
+      relation_status: "LINK",
+    });
+    if (link.code !== 0) {
+      problems.push(`Píxel "${px.name}" (${px.code}): no se pudo vincular a la cuenta ${advertiserId} (${String(link.message ?? "error")}).`);
+    }
+  }
+  return problems;
+}
+
+/**
+ * Quita lo compartido al BM socio, cuenta por cuenta, después de llevarse sus píxeles.
+ * Si un píxel no se pudo llevar, esa cuenta queda compartida (no pierde el píxel) y
+ * se devuelve el problema para avisar a gerencia.
+ */
+async function removeTempPartnerShares(bcId: string, advertiserIds: string[], token: string): Promise<string[]> {
+  const problems: string[] = [];
   for (const partnerId of TEMP_PARTNER_SHARES[bcId] ?? []) {
+    const ready: string[] = [];
+    for (const advertiserId of advertiserIds) {
+      const issues = await carryPartnerPixels(bcId, partnerId, advertiserId, token).catch((err: unknown) => [
+        err instanceof Error ? err.message : `No se pudieron revisar los píxeles de ${advertiserId}.`,
+      ]);
+      if (issues.length) problems.push(`Cuenta ${advertiserId}: ${issues.join(" ")}`);
+      else ready.push(advertiserId);
+    }
+    if (!ready.length) continue;
     const j = await tiktok("/bc/partner/asset/delete/", token, {
       bc_id: bcId,
       partner_id: partnerId,
       asset_type: "ADVERTISER",
-      asset_ids: advertiserIds,
+      asset_ids: ready,
     });
     if (j.code !== 0) {
       console.warn("[bc-invites] unshare_failed", { bcId, partnerId, message: j.message });
     }
   }
+  return problems;
+}
+
+/** Correo a gerencia cuando una cuenta no pudo dejar el BM socio por sus píxeles. */
+async function alertPixelCarryProblems(email: string, problems: string[]) {
+  const managers = await resolveManualPaymentManagerEmails();
+  if (!managers.length) return;
+  const subject = `[Revisar] Píxel sin pasar al BM 200 (${email})`;
+  const bodyHtml = `
+      <p style="margin:0;font-size:22px;line-height:1.25;font-weight:700;color:#1a1917;">Un píxel no se pudo pasar al BM 200</p>
+      <p style="margin:10px 0 18px;font-size:15px;line-height:1.5;color:#57524b;">El cliente ${escapeHtml(email)} aceptó la invitación al BM 200. Su cuenta sigue compartida desde el BM 10 para que no pierda el píxel. Hay que compartir el píxel al BM 200 a mano (o pedírselo a su dueño) y luego quitar lo compartido.</p>
+      ${problems.map((p) => `<p style="margin:0 0 8px;font-size:14px;color:#8f1d12;">${escapeHtml(p)}</p>`).join("")}`;
+  const html = wrapInternalEmail({
+    label: "Píxeles TikTok",
+    preview: subject,
+    bodyHtml,
+    footerNote: "Holistic Marketing · aviso interno para gerencia",
+  });
+  const day = new Date().toISOString().slice(0, 10);
+  await Promise.allSettled(
+    managers.map((to) =>
+      sendTransactionalEmail({
+        to,
+        subject,
+        html,
+        text: [subject, ...problems].join("\n"),
+        templateKey: "ops.tiktok_pixel_carry.alert",
+        idempotencyKey: `email:tiktok_pixel_carry:${email}:${day}:${to}`,
+        metadata: { email, problems },
+      }),
+    ),
+  );
 }
 
 /**
@@ -243,7 +398,16 @@ export async function processPendingBcInvites(): Promise<{
           .eq("id", row.id);
         if (!failed.length) {
           summary.accepted += 1;
-          await removeTempPartnerShares(row.bc_id, row.advertiser_ids, token).catch(() => undefined);
+          const problems = await removeTempPartnerShares(row.bc_id, row.advertiser_ids, token).catch((err: unknown) => [
+            err instanceof Error ? err.message : "No se pudo quitar lo compartido.",
+          ]);
+          if (problems.length) {
+            await admin
+              .from("tiktok_bc_invites")
+              .update({ last_error: problems.join(" | ").slice(0, 1000), updated_at: new Date().toISOString() })
+              .eq("id", row.id);
+            await alertPixelCarryProblems(row.email, problems).catch(() => undefined);
+          }
         }
         continue;
       }
