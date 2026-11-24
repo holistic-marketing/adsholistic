@@ -652,7 +652,10 @@
       "statusSuspendedTransfer": "Suspensa (você pode transferir o saldo recuperável)",
       "statusPrefix": "Status: {status}",
       "maxLiveBalance": "Máximo = saldo TikTok ao vivo da origem (não só Holistic): {amount}.",
-      "maxLiveCupo": "Máximo = cota TikTok ao vivo da origem (não só Holistic): {amount}."
+      "maxLiveCupo": "Máximo = cota TikTok ao vivo da origem (não só Holistic): {amount}.",
+      "tiktokLiveGap": "Saldo TikTok: {amount} (inclui gasto que o TikTok ainda não descontou)",
+      "maxHolistic": "Máximo = valor atribuído na Holistic ainda não gasto: {amount}.",
+      "errAmountOverHolistic": "Você pode transferir até {max}. O saldo do TikTok aparece maior porque ainda não descontou o gasto recente."
     },
     "reclaimModal": {
       "title": "Recuperar saldo para a carteira",

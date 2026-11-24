@@ -34,6 +34,12 @@ interface TransferBalanceModalProps {
   /** Refresca saldo TikTok en vivo (sin F5). */
   onFundingChanged?: () => void | Promise<void>;
   liveMetricsByAdvertiser?: Record<string, AdAccountLiveMetricsClient>;
+  /**
+   * El servidor solo deja mover lo asignado en Holistic (sin super admin).
+   * El saldo TikTok en vivo puede ser mayor porque TikTok descuenta el gasto
+   * con retraso: ese extra no es transferible.
+   */
+  capToHolistic?: boolean;
 }
 
 interface TransferResponse {
@@ -79,6 +85,7 @@ function TransferBalanceModalBody({
   clientSelfService = false,
   onFundingChanged,
   liveMetricsByAdvertiser,
+  capToHolistic = false,
 }: Omit<TransferBalanceModalProps, "open" | "sourceAccount"> & {
   sourceAccount: PaymentAccountAllocation;
 }) {
@@ -102,12 +109,14 @@ function TransferBalanceModalBody({
   const sourceLiveUsd =
     liveMetricsByAdvertiser?.[sourceAccount.externalAccountId?.trim() ?? ""]
       ?.balanceUsd;
+  const holisticUsd = Number(sourceAccount.balance) || 0;
+  const hasLive = sourceLiveUsd != null && Number.isFinite(sourceLiveUsd);
+  const liveUsd = hasLive ? Number(sourceLiveUsd) : holisticUsd;
   const maxAmount = Math.max(
     0,
-    sourceLiveUsd != null && Number.isFinite(sourceLiveUsd)
-      ? sourceLiveUsd
-      : Number(sourceAccount.balance) || 0,
+    capToHolistic ? Math.min(holisticUsd, liveUsd) : liveUsd,
   );
+  const showLiveGap = hasLive && Math.abs(liveUsd - holisticUsd) > 0.5;
 
   // Valores iniciales: solo al abrir (misma fórmula que el efecto anterior).
   const [toAccountId, setToAccountId] = useState(() => destinationOptions[0]?.id ?? "");
@@ -145,9 +154,13 @@ function TransferBalanceModalBody({
       setError(
         maxAmount <= 0
           ? t("transferModal.errNoTransferable")
-          : t("transferModal.errAmountRange", {
-              max: formatMoney(maxAmount),
-            }),
+          : capToHolistic && showLiveGap && liveUsd > maxAmount
+            ? t("transferModal.errAmountOverHolistic", {
+                max: formatMoney(maxAmount),
+              })
+            : t("transferModal.errAmountRange", {
+                max: formatMoney(maxAmount),
+              }),
       );
       return;
     }
@@ -242,12 +255,15 @@ function TransferBalanceModalBody({
               },
             ]}
           />
-          {sourceLiveUsd != null &&
-          Math.abs(sourceLiveUsd - Number(sourceAccount.balance)) > 0.5 ? (
+          {showLiveGap ? (
             <p className="num mt-2 text-xs text-ink-3">
-              {t("transferModal.holisticAssigned", {
-                amount: formatMoney(sourceAccount.balance),
-              })}
+              {capToHolistic
+                ? t("transferModal.tiktokLiveGap", {
+                    amount: formatMoney(liveUsd),
+                  })
+                : t("transferModal.holisticAssigned", {
+                    amount: formatMoney(holisticUsd),
+                  })}
             </p>
           ) : null}
           <p className="mt-2 text-xs text-warn-fg">
@@ -314,7 +330,11 @@ function TransferBalanceModalBody({
             autoFocus
           />
           <PaymentFieldHint>
-            {clientSelfService
+            {capToHolistic
+              ? t("transferModal.maxHolistic", {
+                  amount: formatMoney(maxAmount),
+                })
+              : clientSelfService
               ? t("transferModal.maxLiveBalance", {
                   amount: formatMoney(maxAmount),
                 })

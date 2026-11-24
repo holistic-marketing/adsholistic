@@ -652,7 +652,10 @@
       "statusSuspendedTransfer": "Suspended (you can transfer reclaimable balance)",
       "statusPrefix": "Status: {status}",
       "maxLiveBalance": "Max = live TikTok balance on source (not only Holistic): {amount}.",
-      "maxLiveCupo": "Max = live TikTok quota on source (not only Holistic): {amount}."
+      "maxLiveCupo": "Max = live TikTok quota on source (not only Holistic): {amount}.",
+      "tiktokLiveGap": "TikTok balance: {amount} (includes spend TikTok hasn't deducted yet)",
+      "maxHolistic": "Max = unspent amount assigned in Holistic: {amount}.",
+      "errAmountOverHolistic": "You can transfer up to {max}. The TikTok balance looks higher because it hasn't deducted recent spend yet."
     },
     "reclaimModal": {
       "title": "Reclaim balance to wallet",

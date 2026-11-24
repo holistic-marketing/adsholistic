@@ -270,6 +270,9 @@ export function PaymentsAssignmentPanel({
         clientSelfService={!agencyBmFunding}
         onFundingChanged={refreshAfterFundingChange}
         liveMetricsByAdvertiser={metricsByAdvertiser}
+        // allowForceLedger llega true solo para super admin, el único que puede
+        // mover cupo TikTok por encima de lo asignado en Holistic.
+        capToHolistic={!allowForceLedger}
       />
       <EditTikTokIdsModal
         account={editAccount}
