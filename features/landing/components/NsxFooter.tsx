@@ -22,6 +22,7 @@ export function NsxFooter({ copy }: { copy: LandingCopy["footer"] }) {
         <p className="nsx-footer-copy">
           © {new Date().getFullYear()} {siteConfig.name}
         </p>
+        <p className="nsx-footer-copy">{copy.operator}</p>
       </div>
     </footer>
   );

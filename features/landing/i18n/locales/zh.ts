@@ -265,7 +265,8 @@ export const zh: LandingCopy = {
     login: "登录",
   },
   footer: {
-    tagline: "钱包、TikTok Ads 与 Hecom Club 运营",
+    tagline: "钱包、充值与广告账户",
+    operator: "Holistic Marketing 品牌由义乌灏励提文化传媒有限公司（中国浙江义乌）运营。",
     ariaNav: "页脚",
     solutions: "解决方案",
     terms: "条款与条件",

@@ -126,6 +126,8 @@ export type LandingCopy = {
   };
   footer: {
     tagline: string;
+    /** Entidad legal que opera la marca. */
+    operator: string;
     ariaNav: string;
     solutions: string;
     terms: string;

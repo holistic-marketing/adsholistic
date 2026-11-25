@@ -265,7 +265,8 @@ export const pt: LandingCopy = {
     login: "Entrar",
   },
   footer: {
-    tagline: "Carteira, TikTok Ads e operação Hecom Club",
+    tagline: "Carteira, recargas e contas de anúncios",
+    operator: "Holistic Marketing é uma marca operada por 义乌灏励提文化传媒有限公司 (Yiwu, Zhejiang, China).",
     ariaNav: "Rodapé",
     solutions: "Soluções",
     terms: "Termos e condições",

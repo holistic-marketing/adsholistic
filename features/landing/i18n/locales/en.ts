@@ -265,7 +265,8 @@ export const en: LandingCopy = {
     login: "Log in",
   },
   footer: {
-    tagline: "Wallet, TikTok Ads and Hecom Club operations",
+    tagline: "Wallet, top-ups and ad accounts",
+    operator: "Holistic Marketing is a brand operated by 义乌灏励提文化传媒有限公司 (Yiwu, Zhejiang, China).",
     ariaNav: "Footer",
     solutions: "Solutions",
     terms: "Terms and conditions",
