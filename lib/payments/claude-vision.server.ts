@@ -22,6 +22,9 @@ export async function claudeVisionJson(input: {
   mimeType: string;
   timeoutMs?: number;
   tag: string;
+  /** Por defecto ANTHROPIC_VISION_MODEL; los comprobantes usan VOUCHER_CLAUDE_MODEL. */
+  model?: string;
+  effort?: "low" | "medium" | "high" | "xhigh" | "max";
 }): Promise<string | null> {
   const apiKey = serverEnv.anthropicApiKey.trim();
   if (!apiKey) return null;
@@ -41,9 +44,9 @@ export async function claudeVisionJson(input: {
   try {
     const response = await client.messages.create(
       {
-        model: serverEnv.anthropicVisionModel,
-        max_tokens: 8000,
-        output_config: { effort: "low" },
+        model: input.model ?? serverEnv.anthropicVisionModel,
+        max_tokens: 16000,
+        output_config: { effort: input.effort ?? "low" },
         messages: [
           {
             role: "user",

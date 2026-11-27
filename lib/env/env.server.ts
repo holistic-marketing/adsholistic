@@ -220,6 +220,8 @@ export const serverEnv = {
   /** Respaldo de OpenAI para leer comprobantes (Claude). Vacío = sin respaldo. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
   anthropicVisionModel: process.env.ANTHROPIC_VISION_MODEL?.trim() || "claude-sonnet-5-5",
+  /** Lector principal de comprobantes manuales (OpenAI queda de respaldo). */
+  voucherClaudeModel: process.env.VOUCHER_CLAUDE_MODEL?.trim() || "claude-opus-5-5",
   /** Sin IA: auto-acredita al subir voucher (solo staging / demo; nunca en producción). */
   manualVoucherTrustUpload:
     isProduction ? false : parseBoolean(process.env.MANUAL_VOUCHER_TRUST_UPLOAD),

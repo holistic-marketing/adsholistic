@@ -171,10 +171,19 @@ Devuelve SOLO JSON válido con estas claves:
 ${input.destinationAccounts !== undefined ? "Extrae únicamente los datos visibles. Si falta un dato o está ilegible, devuelve null; no lo inventes." : `Monto esperado: ${input.expectedAmount} ${input.expectedCurrency}. Beneficiarios válidos (parcial): ${input.holderNames.join(", ")}.`}`;
 
   const manual = input.destinationAccounts !== undefined;
-  const fromOpenAi = await openAiVoucherJson(prompt, { buffer: input.buffer, mimeType: input.mimeType, manual });
-  const content = fromOpenAi ?? await claudeVisionJson({ prompt, buffer: input.buffer, mimeType: input.mimeType, tag: "voucher-analysis" });
+  // Opus primero (detecta mejor montos y edición); OpenAI solo si Claude falla.
+  const fromClaude = await claudeVisionJson({
+    prompt,
+    buffer: input.buffer,
+    mimeType: input.mimeType,
+    tag: "voucher-analysis",
+    model: serverEnv.voucherClaudeModel,
+    effort: "high",
+    timeoutMs: 90_000,
+  });
+  const content = fromClaude ?? await openAiVoucherJson(prompt, { buffer: input.buffer, mimeType: input.mimeType, manual });
   if (!content) return null;
-  const analysisMode = fromOpenAi ? "openai_vision" as const : "claude_vision" as const;
+  const analysisMode = fromClaude ? "claude_vision" as const : "openai_vision" as const;
 
   try {
     const parsed = JSON.parse(content) as {

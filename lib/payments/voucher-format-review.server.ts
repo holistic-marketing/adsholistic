@@ -36,8 +36,11 @@ export function evaluateVoucherFormat(value: unknown): VoucherFormatReview {
 }
 
 export async function reviewVoucherFormat(input: { buffer: Buffer; mimeType: string }): Promise<VoucherFormatReview> {
-  const fromOpenAi = await openAiFormatJson(input);
-  const content = fromOpenAi ?? await claudeVisionJson({ prompt: FORMAT_PROMPT, ...input, timeoutMs: 40_000, tag: "voucher-format" });
+  const fromClaude = await claudeVisionJson({
+    prompt: FORMAT_PROMPT, ...input, timeoutMs: 90_000, tag: "voucher-format",
+    model: serverEnv.voucherClaudeModel, effort: "high",
+  });
+  const content = fromClaude ?? await openAiFormatJson(input);
   if (!content) return evaluateVoucherFormat(null);
   try {
     return evaluateVoucherFormat(JSON.parse(content));
