@@ -399,6 +399,15 @@ function VoucherCard({
                     <PaymentCalc
                       live
                       rows={[
+                        // TC congelado al crear el pago (SBS venta del día).
+                        ...(chargeCurrency === "PEN"
+                          ? [
+                              {
+                                label: "Tipo de cambio",
+                                value: `S/ ${fxRate.toFixed(3)} por USD`,
+                              },
+                            ]
+                          : []),
                         {
                           label: `Fee ${feePercent}%`,
                           value: quote
